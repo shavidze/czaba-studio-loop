@@ -1,0 +1,45 @@
+
+ RUN  v4.0.16 /tmp/b427/m
+
+ ❯ app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx (9 tests | 1 failed) 1925ms
+     ✓ HP1 held Enter on the Snap toggle switches it once  436ms
+     ✓ HP2 held Enter on the envelope toggle switches it once 254ms
+     ✓ HP3 held Enter on a library collection fold folds it once 242ms
+     ✓ HP4 held Enter on the library tree nodes selects once and the repeats are prevented  323ms
+     ✓ HP5 the library notice dismiss ignores a repeated Enter; a fresh Enter dismisses once and focuses the search field 205ms
+     ✓ HP6 held Enter on the detail panel toggle collapses it once; Space still toggles once per press 130ms
+     ✓ HP7 held Enter on the video expand button floats the video once 136ms
+     × HP8 held Enter on the floating video close button docks it once 61ms
+     ✓ HP9 the video placeholder return button ignores a repeated Enter and docks once on a fresh Enter 135ms
+ ✓ app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx (18 tests) 2841ms
+     ✓ HM1 held Enter on a track Mute mutes once  436ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx > SYS-2 stage 2b-i: a held Enter acts once on the footer toggles, library tree, detail toggle and video dock buttons (D-29z1494) > HP8 held Enter on the floating video close button docks it once
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx:284:39
+    282|       const close = mounted.view.getByTestId('arrangement-video-close'…
+    283|       act(() => close.focus());
+    284|       expect(pressEnter(close, true)).toBe(false);
+       |                                       ^
+    285|       expect(mounted.view.queryByTestId('arrangement-video-close')).no…
+    286|       holdEnter(close, mounted.snapshot);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 26 passed (27)
+   Start at  08:22:02
+   Duration  4.38s (transform 1.55s, setup 0ms, import 2.31s, tests 4.77s, environment 608ms)
+
+
+::error file=/tmp/b427/m/app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx,title=app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx > SYS-2 stage 2b-i%3A a held Enter acts once on the footer toggles%2C library tree%2C detail toggle and video dock buttons (D-29z1494) > HP8 held Enter on the floating video close button docks it once,line=284,column=39::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx:284:39%0A%0A

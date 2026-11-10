@@ -1,0 +1,597 @@
+diff --git a/app/components/arrangement/ArrangementDetailPanel.tsx b/app/components/arrangement/ArrangementDetailPanel.tsx
+index ec40169..2029fe3 100644
+--- a/app/components/arrangement/ArrangementDetailPanel.tsx
++++ b/app/components/arrangement/ArrangementDetailPanel.tsx
+@@ -56,6 +56,7 @@ import type { Arrangement, ArrangementClip, TimeRange } from '~/types/arrangemen
+ import { ArrangementPeakPath } from './ArrangementClip';
+ import { STUDIO_LEVEL_FADER_CLASS, studioLevelFaderFillStyle } from './studio-fader';
+ import { STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
++import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ import { STUDIO_SCROLLBAR_CLASS } from './studio-scrollbar';
+ 
+ const DETAIL_PANEL_TITLE = studioDetailStrings.panelTitle;
+@@ -468,11 +469,7 @@ const ArrangementDetailClipGainInner = forwardRef<HTMLInputElement, ArrangementD
+             type="button"
+             onMouseDown={(event) => event.preventDefault()}
+             onClick={onResetClick}
+-            onKeyDown={(event) => {
+-              if (event.key === 'Enter' && event.repeat) {
+-                event.preventDefault();
+-              }
+-            }}
++            onKeyDown={preventRepeatedEnterKeyDown}
+             disabled={
+               reason !== null || (isGroup ? minDb === 0 && maxDb === 0 : singleGainDb === undefined)
+             }
+@@ -1096,11 +1093,7 @@ function ArrangementDetailContentInner({
+         <button
+           type="button"
+           onClick={applyDetailRange}
+-          onKeyDown={(event) => {
+-            if (event.key === 'Enter' && event.repeat) {
+-              event.preventDefault();
+-            }
+-          }}
++          onKeyDown={preventRepeatedEnterKeyDown}
+           disabled={!clip}
+           title={inputsReason ?? undefined}
+           className="h-6 w-fit rounded-md border border-transparent bg-foreground/5 px-2 text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 hover:text-foreground disabled:text-dim"
+@@ -1239,6 +1232,9 @@ export function ArrangementDetailPanel({
+   };
+ 
+   const handleToggleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
++    if (preventRepeatedEnterKeyDown(event)) {
++      return;
++    }
+     if (event.key !== ' ') {
+       return;
+     }
+diff --git a/app/components/arrangement/ArrangementLibrary.tsx b/app/components/arrangement/ArrangementLibrary.tsx
+index 60ff7ce..e0939da 100644
+--- a/app/components/arrangement/ArrangementLibrary.tsx
++++ b/app/components/arrangement/ArrangementLibrary.tsx
+@@ -47,6 +47,7 @@ import {
+   sameLibraryLeafProps,
+ } from './ArrangementLibraryPreview';
+ import { STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
++import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ import { STUDIO_SCROLLBAR_CLASS } from './studio-scrollbar';
+ 
+ export const LIBRARY_MIN_WIDTH_PX = 288;
+@@ -364,12 +365,6 @@ function ArrangementLibraryViewInner({
+     }
+   };
+ 
+-  const preventRepeatedLibraryEnter = (event: KeyboardEvent<HTMLButtonElement>) => {
+-    if (event.key === 'Enter' && event.repeat) {
+-      event.preventDefault();
+-    }
+-  };
+-
+   useEffect(() => {
+     if (
+       libraryPreviewSourceId !== null &&
+@@ -658,7 +653,7 @@ function ArrangementLibraryViewInner({
+             ref={libraryExpandButtonRef}
+             type="button"
+             onClick={(event) => changeLibraryCollapsedFromToggle(event, false)}
+-            onKeyDown={preventRepeatedLibraryEnter}
++            onKeyDown={preventRepeatedEnterKeyDown}
+             aria-label={studioLibraryPanelStrings.expand}
+             title={studioLibraryPanelStrings.expand}
+             className="flex items-center justify-center h-8 w-8 rounded-md text-muted hover:bg-elevated hover:text-foreground"
+@@ -677,7 +672,7 @@ function ArrangementLibraryViewInner({
+               ref={libraryCollapseButtonRef}
+               type="button"
+               onClick={(event) => changeLibraryCollapsedFromToggle(event, true)}
+-              onKeyDown={preventRepeatedLibraryEnter}
++              onKeyDown={preventRepeatedEnterKeyDown}
+               aria-label={studioLibraryPanelStrings.collapse}
+               title={studioLibraryPanelStrings.collapse}
+               className="flex items-center justify-center h-7 w-7 rounded-md text-muted hover:bg-elevated hover:text-foreground"
+@@ -703,7 +698,7 @@ function ArrangementLibraryViewInner({
+                 <button
+                   type="button"
+                   onClick={clearLibrarySearch}
+-                  onKeyDown={preventRepeatedLibraryEnter}
++                  onKeyDown={preventRepeatedEnterKeyDown}
+                   aria-label={studioLibraryPanelStrings.clearSearch}
+                   className="flex items-center justify-center absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2 rounded-md text-muted hover:text-foreground"
+                   data-testid="arrangement-library-search-clear"
+@@ -732,6 +727,7 @@ function ArrangementLibraryViewInner({
+                     dismissLibraryNotice(collection.id);
+                     librarySearchInputRef.current?.focus();
+                   }}
++                  onKeyDown={preventRepeatedEnterKeyDown}
+                   aria-label={studioLibraryPanelStrings.dismissNotice}
+                   title={studioLibraryPanelStrings.dismissNotice}
+                   className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted hover:text-foreground"
+@@ -755,6 +751,7 @@ function ArrangementLibraryViewInner({
+               <button
+                 type="button"
+                 onClick={() => setNodeId(LIBRARY_ALL_NODE_ID)}
++                onKeyDown={preventRepeatedEnterKeyDown}
+                 aria-current={nodeId === LIBRARY_ALL_NODE_ID ? 'true' : undefined}
+                 className={cn(
+                   treeNodeClass,
+@@ -773,6 +770,7 @@ function ArrangementLibraryViewInner({
+                       <button
+                         type="button"
+                         onClick={() => toggleCollection(entry.id)}
++                        onKeyDown={preventRepeatedEnterKeyDown}
+                         aria-expanded={isExpanded}
+                         aria-label={`${entry.label} — ${isExpanded ? studioLibraryPanelStrings.fold : studioLibraryPanelStrings.unfold}`}
+                         className={`flex items-center justify-center w-4 shrink-0 text-muted hover:text-foreground ${STUDIO_FOCUS_RING_INSET_CLASS}`}
+@@ -794,6 +792,7 @@ function ArrangementLibraryViewInner({
+                       <button
+                         type="button"
+                         onClick={() => setNodeId(entry.id)}
++                        onKeyDown={preventRepeatedEnterKeyDown}
+                         aria-current={nodeId === entry.id ? 'true' : undefined}
+                         title={entry.label}
+                         className={cn(treeNodeClass, treeNodeStateClass(nodeId === entry.id))}
+@@ -807,6 +806,7 @@ function ArrangementLibraryViewInner({
+                             key={folder.id}
+                             type="button"
+                             onClick={() => setNodeId(folder.id)}
++                            onKeyDown={preventRepeatedEnterKeyDown}
+                             aria-current={nodeId === folder.id ? 'true' : undefined}
+                             className={cn(
+                               treeNodeClass,
+diff --git a/app/components/arrangement/ArrangementLibraryPreview.tsx b/app/components/arrangement/ArrangementLibraryPreview.tsx
+index eaddc39..5fda00d 100644
+--- a/app/components/arrangement/ArrangementLibraryPreview.tsx
++++ b/app/components/arrangement/ArrangementLibraryPreview.tsx
+@@ -20,6 +20,7 @@ import { normalizePeakColumns } from '~/lib/arrangement/peaks';
+ import { studioLibraryPanelStrings } from '~/lib/arrangement/strings';
+ import { cn } from '~/lib/utils';
+ import type { ArrangementTrackKind } from '~/types/arrangement';
++import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ import { guardSoftDisabledClick, softDisabledButtonProps } from './studio-soft-disabled';
+ 
+ const PREVIEW_WAVE_COLUMNS = 96;
+@@ -419,11 +420,7 @@ function ArrangementLibraryPreviewViewInner({
+               startLibraryPreview(source.id, 0);
+             }
+           })}
+-          onKeyDown={(event) => {
+-            if (event.key === 'Enter' && event.repeat) {
+-              event.preventDefault();
+-            }
+-          }}
++          onKeyDown={preventRepeatedEnterKeyDown}
+           {...softDisabledButtonProps(!isReady)}
+           title={previewUnavailableTitle ?? undefined}
+           className={cn(
+@@ -450,11 +447,7 @@ function ArrangementLibraryPreviewViewInner({
+               addSourceToActiveTrack(source.id);
+             }
+           })}
+-          onKeyDown={(event) => {
+-            if (event.key === 'Enter' && event.repeat) {
+-              event.preventDefault();
+-            }
+-          }}
++          onKeyDown={preventRepeatedEnterKeyDown}
+           {...softDisabledButtonProps(!canAdd)}
+           title={addTitle}
+           className="flex flex-1 items-center justify-center gap-0.75 rounded-md border border-outline-strong bg-foreground/5 px-2 py-1.5 text-sm font-medium text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-40"
+diff --git a/app/components/arrangement/ArrangementVideoDock.tsx b/app/components/arrangement/ArrangementVideoDock.tsx
+index 2dff201..fc832ee 100644
+--- a/app/components/arrangement/ArrangementVideoDock.tsx
++++ b/app/components/arrangement/ArrangementVideoDock.tsx
+@@ -53,6 +53,7 @@ import {
+ import { seekSfxVideo } from '~/lib/sfx-video.client';
+ import { cn } from '~/lib/utils';
+ import type { Arrangement, ArrangementClip, WorkspaceVideoSource } from '~/types/arrangement';
++import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ 
+ const VIDEO_END_GUARD_SECONDS = 1 / 30;
+ const VIDEO_POSITIONED_SECONDS = 0.04;
+@@ -544,6 +545,7 @@ function ArrangementVideoDockViewInner({
+           <button
+             type="button"
+             onClick={() => onVideoExpandedChange(false)}
++            onKeyDown={preventRepeatedEnterKeyDown}
+             aria-label={VIDEO_RETURN_LABEL}
+             className="rounded-md px-2 py-0.5 text-foreground hover:bg-elevated"
+             data-testid="arrangement-video-placeholder-return"
+@@ -616,6 +618,7 @@ function ArrangementVideoDockViewInner({
+           <button
+             type="button"
+             onClick={() => onVideoExpandedChange(!isVideoExpanded)}
++            onKeyDown={preventRepeatedEnterKeyDown}
+             aria-label={isVideoExpanded ? VIDEO_RETURN_LABEL : studioVideoDockStrings.expandLabel}
+             title={isVideoExpanded ? VIDEO_RETURN_LABEL : studioVideoDockStrings.expandLabel}
+             className={cn(VIDEO_FLOAT_BUTTON_CLASS, 'cursor-pointer')}
+@@ -629,6 +632,7 @@ function ArrangementVideoDockViewInner({
+             <button
+               type="button"
+               onClick={() => onVideoExpandedChange(false)}
++              onKeyDown={preventRepeatedEnterKeyDown}
+               aria-label={studioVideoDockStrings.closeLabel}
+               title={studioVideoDockStrings.closeTitle}
+               className={cn(VIDEO_FLOAT_BUTTON_CLASS, 'cursor-pointer')}
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 56cdbe1..01e292f 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -215,6 +215,7 @@ import { ArrangementTimeText } from './ArrangementTimeText';
+ import { ArrangementTransportView, useArrangementTransportActions } from './ArrangementTransport';
+ import { ArrangementVideoDock } from './ArrangementVideoDock';
+ import { STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
++import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ import { STUDIO_SCROLLBAR_CLASS } from './studio-scrollbar';
+ 
+ const TIMELINE_TAIL_SECONDS = 30;
+@@ -3362,6 +3363,7 @@ export function StudioWorkspace() {
+                     <button
+                       type="button"
+                       onClick={toggleSnap}
++                      onKeyDown={preventRepeatedEnterKeyDown}
+                       aria-pressed={snapEnabled}
+                       aria-keyshortcuts="G 4"
+                       title={
+@@ -3452,6 +3454,7 @@ export function StudioWorkspace() {
+                     <button
+                       type="button"
+                       onClick={toggleEnvelopeMode}
++                      onKeyDown={preventRepeatedEnterKeyDown}
+                       aria-pressed={envelopeMode}
+                       aria-keyshortcuts="A"
+                       title={
+diff --git a/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx b/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx
+index 92898f6..c1ffa55 100644
+--- a/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx
+@@ -7,7 +7,7 @@ import {
+   type SoftDisabledButtonProps,
+   softDisabledButtonProps,
+ } from '~/components/arrangement/studio-soft-disabled';
+-import { ArrangementProvider } from '~/contexts/ArrangementContext';
++import { ArrangementProvider, GESTURE_EDIT_BLOCKED_MESSAGE } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { studioLaneStrings, studioMasterStrings } from '../strings';
+@@ -258,6 +258,40 @@ describe(
+       expect(sfx?.pan ?? 0).toBe(0);
+     });
+ 
++    it('HM5b during a pointer gesture the workspace refuses a fresh Enter on Pan reset before it can click: pan unchanged, focus stays on the reset, refusal status written', async () => {
++      const mounted = await mountMixerWorkspace();
++      act(() => {
++        live(mounted.api).setTrackPan('sfx', 0.5);
++      });
++      const clip = mounted.view.container.querySelector('[data-clip-id="h1"]');
++      const header = clip?.firstElementChild;
++      if (!(header instanceof HTMLElement)) {
++        throw new Error('clip header missing');
++      }
++      fireEvent.pointerDown(header, { button: 0, buttons: 1, pointerId: 9, clientX: 100 });
++      expect(live(mounted.api).isPointerGestureActive()).toBe(true);
++      const reset = mounted.view.getByRole('button', {
++        name: studioLaneStrings.panResetLabel('SFX'),
++      });
++      act(() => reset.focus());
++      const before = mounted.snapshot();
++      expect(pressEnter(reset, false)).toBe(false);
++      const afterFirst = mounted.snapshot();
++      expect(afterFirst.statusSequence).toBeGreaterThan(before.statusSequence);
++      expect(live(mounted.api).status).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++      expect(document.activeElement).toBe(reset);
++      expect(afterFirst.arrangement).toBe(before.arrangement);
++      for (let held = 0; held < 3; held++) {
++        expect(pressEnter(reset, true)).toBe(false);
++      }
++      expect(mounted.snapshot().arrangement).toBe(before.arrangement);
++      expect(document.activeElement).toBe(reset);
++      const sfx = live(mounted.api)
++        .getArrangement()
++        .tracks.find((t) => t.id === 'sfx');
++      expect(sfx?.pan).toBe(0.5);
++    });
++
+     it('HM6 held Enter on the video import button opens the file chooser once', async () => {
+       const mounted = await mountMixerWorkspace();
+       const after = holdEnter(
+diff --git a/app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx b/app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx
+new file mode 100644
+index 0000000..241bbfa
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx
+@@ -0,0 +1,295 @@
++import { act, fireEvent, render, within } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
++import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
++import { createArrangement } from '../model';
++import { studioLibraryPanelStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
++import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';
++
++vi.mock('@remix-run/react', () => ({
++  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
++    <a href={to} className={className}>
++      {children}
++    </a>
++  ),
++}));
++
++const {
++  fakeClock,
++  FakeAudioContext,
++  FakeOfflineAudioContext,
++  FakeAudioBuffer,
++  FakeResizeObserver,
++} = createWorkspaceTestEnvironment();
++
++const panelCollection: WorkspaceCollection = {
++  id: 'panel-held-enter',
++  label: 'panel-held-enter',
++  origin: 'demo',
++  notice: 'Synthetic demo stems.',
++  sources: [{ id: 'hit', title: 'Hit', collectionLabel: 'mh', kind: 'sfx', origin: 'demo' }],
++  loadSource: async () => new AudioBuffer({ length: 1600, numberOfChannels: 1, sampleRate: 100 }),
++};
++
++const MIXER_CLIPS: ArrangementClip[] = [
++  { id: 'h1', trackId: 'sfx', sourceId: 'hit', start: 0, sourceOffset: 0, duration: 16 },
++];
++
++function panelArrangement(): Arrangement {
++  const base = createArrangement([
++    { id: 'video', kind: 'video', name: 'Video' },
++    { id: 'music', kind: 'audio', name: 'Music' },
++    { id: 'sfx', kind: 'audio', name: 'SFX' },
++  ]);
++  return {
++    ...base,
++    tracks: base.tracks.map((track) =>
++      track.id === 'music' || track.id === 'sfx' ? { ...track, groupId: 'stems' } : track,
++    ),
++    groups: [{ id: 'stems', name: 'Stems', parentId: null }],
++    clips: MIXER_CLIPS,
++  };
++}
++
++interface PanelApiRef {
++  current: WorkspaceProbeValue | null;
++}
++
++function PanelProbe({ api }: { api: PanelApiRef }) {
++  api.current = useWorkspaceProbe();
++  return null;
++}
++
++function live(api: PanelApiRef): WorkspaceProbeValue {
++  if (!api.current) {
++    throw new Error('provider not mounted');
++  }
++  return api.current;
++}
++
++let inputClicks = 0;
++
++beforeEach(() => {
++  fakeClock.base = Date.now() / 1000;
++  inputClicks = 0;
++  vi.stubGlobal('AudioContext', FakeAudioContext);
++  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
++  vi.stubGlobal('requestAnimationFrame', () => 1);
++  vi.stubGlobal('cancelAnimationFrame', () => undefined);
++  vi.stubGlobal('innerWidth', 1440);
++  vi.stubGlobal('innerHeight', 900);
++  localStorage.clear();
++  vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {
++    inputClicks += 1;
++  });
++  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
++  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
++});
++
++afterEach(() => {
++  vi.unstubAllGlobals();
++  vi.restoreAllMocks();
++});
++
++interface EnterModifiers {
++  ctrlKey?: boolean;
++}
++
++function pressEnter(button: Element, repeat: boolean, modifiers: EnterModifiers = {}): boolean {
++  const notPrevented = fireEvent.keyDown(button, {
++    key: 'Enter',
++    code: 'Enter',
++    repeat,
++    ...modifiers,
++  });
++  if (notPrevented && button instanceof HTMLButtonElement && !button.disabled) {
++    fireEvent.click(button, modifiers);
++  }
++  return notPrevented;
++}
++
++async function mountPanelWorkspace() {
++  const api: PanelApiRef = { current: null };
++  const view = render(
++    <ArrangementProvider collection={panelCollection} initialArrangement={panelArrangement()}>
++      <StudioWorkspace />
++      <PanelProbe api={api} />
++    </ArrangementProvider>,
++  );
++  await act(async () => {
++    await Promise.resolve();
++    await Promise.resolve();
++  });
++  const attributes = (selector: string, name: string) =>
++    Array.from(view.container.querySelectorAll(selector))
++      .map((element) => element.getAttribute(name))
++      .join(',');
++  const snapshot = () => ({
++    arrangement: JSON.stringify(live(api).getArrangement()),
++    undo: view.getByRole('button', { name: /^Undo/ }).getAttribute('title'),
++    statusSequence: live(api).statusSequence,
++    activeTrackId: live(api).activeTrackId,
++    folded: attributes('[data-track-folded]', 'data-track-folded'),
++    trackSelected: attributes('[data-track-id]', 'data-track-selected'),
++    groupSelected: attributes('[data-group-id]', 'data-group-selected'),
++    groupCollapsed: attributes('[data-group-id]', 'data-group-collapsed'),
++    pressed: attributes('button[aria-pressed]', 'aria-pressed'),
++    nameInput: view.queryByTestId('arrangement-group-name-input') !== null,
++    inputClicks,
++  });
++  const trackHeader = (trackId: string) => {
++    const row = view.container.querySelector(`[data-track-id="${trackId}"]`);
++    if (!(row instanceof HTMLElement)) {
++      throw new Error(`track ${trackId} missing`);
++    }
++    return within(row);
++  };
++  return { api, view, snapshot, trackHeader };
++}
++
++type Snapshot = ReturnType<Awaited<ReturnType<typeof mountPanelWorkspace>>['snapshot']>;
++
++function holdEnter(
++  button: HTMLElement,
++  snapshot: () => Snapshot,
++  modifiers: EnterModifiers = {},
++): Snapshot {
++  act(() => button.focus());
++  expect(pressEnter(button, false, modifiers)).toBe(true);
++  const afterFirst = snapshot();
++  const heldTarget = document.activeElement ?? button;
++  for (let held = 0; held < 3; held++) {
++    expect(pressEnter(heldTarget, true, modifiers)).toBe(false);
++  }
++  expect(snapshot()).toEqual(afterFirst);
++  return afterFirst;
++}
++
++describe(
++  'SYS-2 stage 2b-i: a held Enter acts once on the footer toggles, library tree, detail toggle and video dock buttons (D-29z1494)',
++  {
++    timeout: 15_000,
++  },
++  () => {
++    it('HP1 held Enter on the Snap toggle switches it once', async () => {
++      const mounted = await mountPanelWorkspace();
++      const snap = mounted.view.getByTestId('arrangement-snap-toggle');
++      const before = snap.getAttribute('aria-pressed');
++      holdEnter(snap, mounted.snapshot);
++      expect(snap.getAttribute('aria-pressed')).not.toBe(before);
++    });
++
++    it('HP2 held Enter on the envelope toggle switches it once', async () => {
++      const mounted = await mountPanelWorkspace();
++      const envelope = mounted.view.getByTestId('arrangement-envelope-toggle');
++      expect(envelope.getAttribute('aria-pressed')).toBe('false');
++      holdEnter(envelope, mounted.snapshot);
++      expect(envelope.getAttribute('aria-pressed')).toBe('true');
++    });
++
++    it('HP3 held Enter on a library collection fold folds it once', async () => {
++      const mounted = await mountPanelWorkspace();
++      const fold = mounted.view.getByRole('button', {
++        name: `mh — ${studioLibraryPanelStrings.fold}`,
++      });
++      expect(fold.getAttribute('aria-expanded')).toBe('true');
++      holdEnter(fold, mounted.snapshot);
++      const after = mounted.view.getByRole('button', {
++        name: `mh — ${studioLibraryPanelStrings.unfold}`,
++      });
++      expect(after).toBe(fold);
++      expect(fold.getAttribute('aria-expanded')).toBe('false');
++      expect(document.activeElement).toBe(fold);
++    });
++
++    it('HP4 held Enter on the library tree nodes selects once and the repeats are prevented', async () => {
++      const mounted = await mountPanelWorkspace();
++      const tree = within(mounted.view.getByTestId('arrangement-library-tree'));
++      const folder = tree.getAllByTestId('arrangement-library-folder')[0];
++      const collectionNode = tree.getByRole('button', { name: 'mh' });
++      const all = tree.getByRole('button', {
++        name: new RegExp(`^${studioLibraryPanelStrings.all}`),
++      });
++      for (const node of [folder, collectionNode, all]) {
++        holdEnter(node, mounted.snapshot);
++        expect(node.getAttribute('aria-current')).toBe('true');
++      }
++    });
++
++    it('HP5 the library notice dismiss ignores a repeated Enter; a fresh Enter dismisses once and focuses the search field', async () => {
++      const mounted = await mountPanelWorkspace();
++      const dismiss = mounted.view.getByRole('button', {
++        name: studioLibraryPanelStrings.dismissNotice,
++      });
++      act(() => dismiss.focus());
++      expect(pressEnter(dismiss, true)).toBe(false);
++      expect(mounted.view.queryByTestId('arrangement-library-notice')).not.toBeNull();
++      expect(pressEnter(dismiss, false)).toBe(true);
++      expect(mounted.view.queryByTestId('arrangement-library-notice')).toBeNull();
++      const search = document.activeElement;
++      expect(search).toBeInstanceOf(HTMLInputElement);
++      expect(search?.getAttribute('type')).toBe('search');
++      const afterFirst = mounted.snapshot();
++      for (let held = 0; held < 3; held++) {
++        if (search) {
++          pressEnter(search, true);
++        }
++      }
++      expect(mounted.snapshot()).toEqual(afterFirst);
++      expect(document.activeElement).toBe(search);
++    });
++
++    it('HP6 held Enter on the detail panel toggle collapses it once; Space still toggles once per press', async () => {
++      const mounted = await mountPanelWorkspace();
++      const toggle = mounted.view.getByTestId('arrangement-detail-toggle');
++      const before = toggle.getAttribute('aria-expanded');
++      holdEnter(toggle, mounted.snapshot);
++      const afterEnter = toggle.getAttribute('aria-expanded');
++      expect(afterEnter).not.toBe(before);
++      fireEvent.keyDown(toggle, { key: ' ', code: 'Space' });
++      fireEvent.keyDown(toggle, { key: ' ', code: 'Space', repeat: true });
++      fireEvent.keyUp(toggle, { key: ' ', code: 'Space' });
++      expect(toggle.getAttribute('aria-expanded')).toBe(before);
++    });
++
++    it('HP7 held Enter on the video expand button floats the video once', async () => {
++      const mounted = await mountPanelWorkspace();
++      const expand = mounted.view.getByTestId('arrangement-video-expand');
++      const label = expand.getAttribute('aria-label');
++      holdEnter(expand, mounted.snapshot);
++      expect(
++        mounted.view.getByTestId('arrangement-video-expand').getAttribute('aria-label'),
++      ).not.toBe(label);
++      expect(mounted.view.queryByTestId('arrangement-video-close')).not.toBeNull();
++    });
++
++    it('HP8 held Enter on the floating video close button docks it once', async () => {
++      const mounted = await mountPanelWorkspace();
++      fireEvent.click(mounted.view.getByTestId('arrangement-video-expand'));
++      const close = mounted.view.getByTestId('arrangement-video-close');
++      act(() => close.focus());
++      expect(pressEnter(close, true)).toBe(false);
++      expect(mounted.view.queryByTestId('arrangement-video-close')).not.toBeNull();
++      holdEnter(close, mounted.snapshot);
++      expect(mounted.view.queryByTestId('arrangement-video-close')).toBeNull();
++      expect(document.activeElement).toBe(mounted.view.getByTestId('arrangement-video-expand'));
++    });
++
++    it('HP9 the video placeholder return button ignores a repeated Enter and docks once on a fresh Enter', async () => {
++      const mounted = await mountPanelWorkspace();
++      fireEvent.click(mounted.view.getByTestId('arrangement-video-expand'));
++      const back = mounted.view.getByTestId('arrangement-video-placeholder-return');
++      act(() => back.focus());
++      expect(pressEnter(back, true)).toBe(false);
++      expect(mounted.view.queryByTestId('arrangement-video-placeholder-return')).not.toBeNull();
++      holdEnter(back, mounted.snapshot);
++      expect(mounted.view.queryByTestId('arrangement-video-placeholder-return')).toBeNull();
++    });
++  },
++);

@@ -1,10 +1,10 @@
 {
-  "version": 402,
-  "updated": "2026-11-10 (B round 425 -> 426 planning: round 425 C PASS; REGRESSION-2026-11-10 closed, regression-last 2026-11-10/425; round 426 = SYS-2 stage 2a on f6c76f4)",
+  "version": 405,
+  "updated": "2026-11-10 (B round 426 -> 427 planning: round 426 C PASS + gate 426 published 052c76c; SYS-2 stage 2a done; round 427 = SYS-2 stage 2b-i on 052c76c)",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 426: SYS-2 stage 2a - a held Enter acts once on the lane, group, master and tempo-row buttons; shared preventRepeatedEnterKeyDown module; SoftDisabledButtonProps cannot carry onKeyDown (current-task.md; sketch b-round-425/sketch-426.patch.txt)",
-  "advisor_used_by_B": "round 425 -> 426 planning: advisor available and consulted after orientation and before close",
+  "current_task": "Round 427: SYS-2 stage 2b-i - a held Enter acts once on the footer Snap/Envelope toggles, the library tree, fold and notice dismiss, the detail panel toggle and the video dock expand/close/return; library, preview and detail inline Enter-repeat copies folded onto preventRepeatedEnterKeyDown (current-task.md; sketch b-round-426/sketch-427.patch.txt)",
+  "advisor_used_by_B": "round 426 -> 427 planning: advisor available and consulted after orientation and before close",
   "baseline": {
     "tsc_errors": 0,
     "vitest_files": 32,
@@ -12207,8 +12207,16 @@
       "task": "current-task.md",
       "decision": "D-29z1489",
       "type": "SYS-2 stage 2a (lane, group, master, tempo-row held Enter)",
-      "status": "dispatched",
+      "status": "c_pass_published (D-29z1492): C PASS c-round-426.json, browserVerified true, 0 bugs; gate 426 published 052c76c",
       "note": "baseline f6c76f4 clean; sketch b-round-425/sketch-426.patch.txt; claims b-round-425/claims-426.sh"
+    },
+    {
+      "round": 427,
+      "task": "current-task.md",
+      "decision": "D-29z1494",
+      "type": "SYS-2 stage 2b-i (footer toggles, library, detail toggle, video dock held Enter)",
+      "status": "dispatched",
+      "note": "baseline 052c76c clean; sketch b-round-426/sketch-427.patch.txt; claims b-round-426/claims-427.sh"
     }
   ],
   "post_current_stage_queue": [
@@ -27840,6 +27848,15 @@
       "title": "R340-CROSS-LANE dev-fiber rendered counts 44/67 vs 40/63 after round 424 (inner lane subscriber component)",
       "evidence": "c-round-425.md Lookups; c-round-424.md row 4",
       "added": "2026-11-10 B round 425 -> 426 planning"
+    },
+    {
+      "id": "INFO-TL-R426-MOVING-DRAG-REPEAT",
+      "severity": "info",
+      "origin": "B pre-check review (tech-lead)",
+      "status": "open (D-29z1496): hypothesis only, unmeasured; record",
+      "title": "during a drag that also writes preview status text, a held key repeat may adopt the pending preview and bump the status sequence (re-announce) while the pointer moves",
+      "evidence": "b-round-426/sketch-review.md TL-R426 item 3",
+      "added": "2026-11-10 B round 426 -> 427 planning"
     }
   ],
   "tech_lead_notes": [
@@ -30968,6 +30985,14 @@
       "source": "gates/round-424/review.md Architecture note signal 3; a-round-424.md For B",
       "signal": "the ArrangementLane shell/inner boundary was reshaped twice (409, 424) and each change needed the browser name probe and test:perf, neither in the gate; proposal: a unit-level render-count guard that fails if a lane shell subscribes to a per-gesture store, or the perf move-components rows on any component-boundary change in components/arrangement/",
       "status": "signal only; merged with RC-R423-PERF-SPEC-ON-STRUCTURE and GATE304-M1-PERF-LIB-NOT-IN-GATE for RETRO 435; not scheduled"
+    },
+    {
+      "id": "SIG-R426-STUDIO-BUTTON-REPEAT-DEFAULT",
+      "added": "2026-11-10 B round 426 -> 427 planning",
+      "decision": "D-29z1495",
+      "source": "gates/round-426/review.md Architecture note signal 3 and suggestions 1-2",
+      "signal": "onKeyDown={preventRepeatedEnterKeyDown} is hand-added per button (about 25 sites in 5 files after 2a, more in 2b); proposal: a StudioButton wrapper that applies the guard by default, or a scanner/lint row in verify that fails for a <button onClick> without the guard; plus a KeyboardEventHandler-typed wrapper so the boolean return is used consistently. Suggestion 1 (comment on the defensive group-name input guard) is confirmedBy on TL-R425-04 (b-round-425/sketch-review.md)",
+      "status": "signal only; frontend-architect checkpoint request at the SYS-2 boundary (after 2b-ii C PASS); not scheduled"
     }
   ],
   "vitest_floor_round64": 1574,
@@ -32334,7 +32359,7 @@
     {
       "id": "A-R107-SWEEP-HELD-ENTER-TOOLBAR",
       "severity": "low",
-      "status": "in_progress (D-29z1489): lane/group/master/tempo part in round 426 (HM1-HM15); rest in SYS-2 stage 2b | in_progress (D-29z1475, D-29z1478): transport part done in round 422 (HE1-HE5); rest in SYS-2 stage 2a/2b | in_progress (D-29z1473): transport part in round 422 (HE1-HE5); rest in SYS-2 stage 2 | open - one held-Enter sweep round after the ARCH-R107-SHARED-ENTER-GUARD checkpoint; strongest: transport Loop (same toggle+history bug as Ctrl+L); Undo/Redo/Delete/Zoom back/Fit are taken in round 108",
+      "status": "in_progress (D-29z1494): lane/group/master/tempo done (round 426); panels part in round 427 (HP1-HP9); transient surfaces in 2b-ii | in_progress (D-29z1489): lane/group/master/tempo part in round 426 (HM1-HM15); rest in SYS-2 stage 2b | in_progress (D-29z1475, D-29z1478): transport part done in round 422 (HE1-HE5); rest in SYS-2 stage 2a/2b | in_progress (D-29z1473): transport part in round 422 (HE1-HE5); rest in SYS-2 stage 2 | open - one held-Enter sweep round after the ARCH-R107-SHARED-ENTER-GUARD checkpoint; strongest: transport Loop (same toggle+history bug as Ctrl+L); Undo/Redo/Delete/Zoom back/Fit are taken in round 108",
       "to": "held-Enter sweep",
       "title": "held Enter repeats on toolbar buttons without a guard: Loop, Play, Split, Follow, Zoom to range, Snap, Env, Metronome, video expand/return, track/group Mute/Solo, master mute, folds, detail toggle; Low: Home and marker flags restart the graph during playback; group name editor settles on a repeated Enter; held Escape on the marker editor",
       "evidence": "a-round-107.md Sweep 1 and Sweep 2",
@@ -39465,7 +39490,7 @@
       "id": "A-R422-REVIEW-L1-ONKEYDOWN-SPREAD-ORDER",
       "severity": "low",
       "origin": "B spec",
-      "status": "in_progress (D-29z1489): round 426 adds onKeyDown?: never to SoftDisabledButtonProps + HM15 runtime/type asserts (mutant MU-SPREAD-TYPE) | deferred_low_polish (D-29z1478: rides SYS-2 stage 2a)",
+      "status": "closed (D-29z1492): C round 426 PASS (HM15, MU-SPREAD-TYPE tsc rc 2), gate 426 published 052c76c | in_progress (D-29z1489): round 426 adds onKeyDown?: never to SoftDisabledButtonProps + HM15 runtime/type asserts (mutant MU-SPREAD-TYPE) | deferred_low_polish (D-29z1478: rides SYS-2 stage 2a)",
       "title": "on Split, Loop and Zoom to range the onKeyDown guard precedes {...softDisabledButtonProps(...)}; safe today (the spread has only aria-disabled and onMouseDown) but a future onKeyDown in SoftDisabledButtonProps would silently override the guard",
       "evidence": "a-round-422.md Reviewer findings (A6); gate 422 review Checks: Event ordering",
       "repro": "read ArrangementTransport.tsx Split/Loop/Zoom to range JSX and studio-soft-disabled.ts SoftDisabledButtonProps",
@@ -39578,11 +39603,12 @@
       "id": "TL-R425-09-HM5-GESTURE-ROW",
       "severity": "low",
       "origin": "B spec",
-      "status": "deferred_low_polish (D-29z1491)",
+      "status": "in_progress (D-29z1493): premise corrected (window handler refuses Enter during a gesture before the click); HM5b characterization row in round 427 (full snapshot incl. statusSequence); closes on its C PASS | deferred_low_polish (D-29z1491)",
       "title": "HM5 proves the Pan-reset guard only through a keydown on the already-disabled button; the motivating case (reset refused during an active pointer gesture, button enabled, refusal re-announced on each repeat) has no row",
       "evidence": "b-round-425/sketch-review.md delta re-review",
       "repro": "read app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx (sketch c97f080f) HM5 / HM11b",
-      "added": "2026-11-10 B round 425 -> 426 planning"
+      "added": "2026-11-10 B round 425 -> 426 planning",
+      "confirmedBy": "a-round-426.md reviewer Medium (A-R426 code-reviewer), ruled D-29z1493"
     },
     {
       "id": "TL-R425-10-HM11B-VACUOUS-PREVENTED",
@@ -39593,6 +39619,17 @@
       "evidence": "b-round-425/sketch-review.md delta re-review",
       "repro": "read app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx (sketch c97f080f) HM5 / HM11b",
       "added": "2026-11-10 B round 425 -> 426 planning"
+    },
+    {
+      "id": "B-R426-GESTURE-REFUSAL-REPEAT-STATUS",
+      "severity": "low",
+      "origin": "pre-existing (B pre-check found it)",
+      "status": "closed_not_a_defect (D-29z1496): steady-state repeats do not bump statusSequence (HM5b full-snapshot assert; TL-R426 item 3) | deferred_low_polish (D-29z1493)",
+      "title": "during a pointer gesture a held Enter (or M, Delete, arrows) rewrites the gesture refusal status on every key repeat; the StudioWorkspace window keydown refusal branch has no repeat check",
+      "evidence": "b-round-426/sketch-review.md; HM5b on the sketch (statusSequence grows on the fresh press; repeats re-enter the same branch); same family as GATE274-S1-HELD-REPEAT-ANNOUNCE",
+      "repro": "start a clip drag (pointer down on a clip name bar), keep the pointer down, focus any button and hold Enter: the live region text is rewritten on every repeat",
+      "added": "2026-11-10 B round 426 -> 427 planning",
+      "note_d29z1497": "title/evidence/repro describe the withdrawn premise; superseded by D-29z1496 (not a defect)"
     }
   ],
   "regression_rounds": [
@@ -40725,7 +40762,7 @@
       "evidence": "retros/retro-200.md section 6; grep at 5b1a2bb",
       "size": "1 round",
       "acceptance_note": "key auto-repeat and held-key rows; one toggle per press; real-browser held Enter at both viewports",
-      "status": "in_progress (D-29z1489): stage 2a dispatched as round 426 (lane/group/master/tempo row + shared helper + soft-disabled type guard); stage 2b next (library, video dock, detail panel, grid menu, marker menu and editor Escape, export dialog, shortcut sheet, narrow screen, footer; fold every inline Enter-repeat copy onto preventRepeatedEnterKeyDown with a grep row, TL-R425-06) | in_progress (D-29z1475, D-29z1478): stage 1 done (C round 422 PASS, gate 422 published 875ff37); stage 2a (mixer/lane controls + shared repeat-safe props decision) and stage 2b (library, dock, menus, dialogs, marker editor Escape) queued after REGRESSION-2026-11-10 | in_progress (D-29z1473): stage 1 dispatched round 422 (transport Split/Follow/Back to start/Loop/Zoom to range + marker flag); stage 2 = remaining A-R107 sweep | queued (after SABA-B-4 stage 2, before STORE-2b; policy \"queued right after the current stage\") | 2026-10-27 B round 203 -> 204 planning (D-29z169): after round 204 (hidden focusables) and round 205 (B-R203-LEADMAGNET-AUTO-OPEN-FOCUS) | 2026-10-28: not yet run; order moved behind STUDIO-PERFORMANCE by Saba (D-29z172); unchanged",
+      "status": "in_progress (D-29z1492, D-29z1494): stage 2a done (C round 426 PASS, gate 426 published 052c76c); stage 2b split: 2b-i dispatched as round 427 (footer Snap/Envelope, library tree/fold/dismiss + inline folds, detail toggle + inline folds, video dock expand/close/return, HM5b); 2b-ii next (export dialog, grid menu, marker menu/row incl. held Escape, shortcut sheet + footer Shortcuts, library menu, narrow screen, closing inline-copy grep row) | in_progress (D-29z1489): stage 2a dispatched as round 426 (lane/group/master/tempo row + shared helper + soft-disabled type guard); stage 2b next (library, video dock, detail panel, grid menu, marker menu and editor Escape, export dialog, shortcut sheet, narrow screen, footer; fold every inline Enter-repeat copy onto preventRepeatedEnterKeyDown with a grep row, TL-R425-06) | in_progress (D-29z1475, D-29z1478): stage 1 done (C round 422 PASS, gate 422 published 875ff37); stage 2a (mixer/lane controls + shared repeat-safe props decision) and stage 2b (library, dock, menus, dialogs, marker editor Escape) queued after REGRESSION-2026-11-10 | in_progress (D-29z1473): stage 1 dispatched round 422 (transport Split/Follow/Back to start/Loop/Zoom to range + marker flag); stage 2 = remaining A-R107 sweep | queued (after SABA-B-4 stage 2, before STORE-2b; policy \"queued right after the current stage\") | 2026-10-27 B round 203 -> 204 planning (D-29z169): after round 204 (hidden focusables) and round 205 (B-R203-LEADMAGNET-AUTO-OPEN-FOCUS) | 2026-10-28: not yet run; order moved behind STUDIO-PERFORMANCE by Saba (D-29z172); unchanged",
       "added": "2026-10-27 B round 199 -> 200 planning (D-29z165)",
       "vetoable": "root or Saba may reorder without a B round",
       "status_note_d29z170": "2026-10-27 B round 204 -> 205 planning (D-29z170): still queued; order after round 205: SYS-1, SYS-2, SYS-3",
@@ -40740,7 +40777,8 @@
         "stage2a": "ArrangementLane, ArrangementGroupHeader, ArrangementMaster, ArrangementTempoRow sites + SIG-R422-REPEAT-SAFE-BUTTON-PROPS decision + A-R422-REVIEW-L1",
         "stage2b": "ArrangementLibrary, ArrangementVideoDock, ArrangementDetailPanel, ArrangementGridMenu, ArrangementMarkerMenu, ArrangementExportDialog, ArrangementShortcutSheet, StudioNarrowScreen, StudioWorkspace footer buttons, marker editor held Escape",
         "fit": "excluded (TH5 lock, idempotent)"
-      }
+      },
+      "carry_2b_ii_d29z1497": "stage 2b-ii scope: fold the 7 remaining inline copies (LibraryMenu 1, ExportDialog 1, MarkerRow 5); guard ExportDialog cancel + second button, GridMenu 4 items, MarkerMenu item, MarkerRow flag (held Escape probed at HEAD first), ShortcutSheet close + footer Shortcuts button, LibraryMenu anchor, NarrowScreen Send link; the button scan and the closing grep (0 inline key===Enter&&repeat copies outside studio-repeat-safe.ts) cover every folder /studio-lab renders (app/components/**, app/routes studio-lab route, app/lib/**) with roots app/** and perf/**, not only app/components/arrangement; grant l.4 of docs 274 and 275 to Completed (L28)"
     },
     {
       "id": "SYS-3",
@@ -41786,6 +41824,16 @@
       "status": "requested (D-29z1464); non-blocking: STEM-LANES also waits for AGREE; if unanswered when AGREE is answered, B plans S1 with tech-lead default (new module app/lib/arrangement/stem-lanes.ts, createArrangement unchanged) and records it as L46 default",
       "absorbs": "ARCH-CHECKPOINT-PERF9-STEM-CACHE (count once)",
       "note_d29z1486": "attach SIG-R424-BOUNDARY-FIBER-GUARD: the ArrangementLane shell/inner boundary was reshaped twice (409, 424); STEM-LANES touches the same lane code, so the checkpoint should say where per-gesture subscriptions live and whether a unit fiber-count guard is required for boundary changes"
+    },
+    {
+      "id": "ARCH-CHECKPOINT-SYS-2",
+      "decision": "D-29z1497",
+      "requested_of": "root (read-only frontend-architect, store/.claude/references/architecture-checkpoint.md)",
+      "question": "after SYS-2 closes: per-button preventRepeatedEnterKeyDown (about 40 sites) vs a StudioButton wrapper (conflicts with onKeyDown?: never and buttons with own key handlers) vs a scanner/lint row in verify that fails on an unguarded <button onClick> or an inline Enter-repeat copy",
+      "status": "planned: file with root after SYS-2 2b-ii C PASS; non-blocking",
+      "signals": [
+        "SIG-R426-STUDIO-BUTTON-REPEAT-DEFAULT"
+      ]
     }
   ],
   "leadmagnet_dialog_rulings_d29z170": {
@@ -41796,36 +41844,6 @@
     "DEVIATION_A1_ruling_d29z171": "accepted: the wasSubmittingRef effect re-anchors focus on the email input after a failed submit; C verified it in the browser (c-round-205/out/steps/fail-tree-1280.json) and m13 red-proves it. Residual in-flight window = C-R205-01 (Low, scheduled)."
   },
   "decisions_log_b": [
-    {
-      "id": "D-29z1437",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 413 -> 414 planning",
-      "decision": "Bookkeeping from independently evidenced C round 413 PASS (c-round-413.json: 11 rows passed, browserVerified/realVerified true, 0 bugs; blocked only the backend fake-bearer row and the Firefox row) and gate 413 published dc536a6 to both remotes: PERF-15b-ii-a done, PERF-15 done on the client (backend half = handoff doc; TLM-PERF15-FIREFOX record, deadline RETRO 416). TL-R411-L4, GATE410-L2, TL-R411-L9, A-R411-REVIEW-L5, TL-R413-L1, TL-R413-L2, TL-R413-L-C closed. Archive tasks/round-413.md = byte copy of the round-413 task."
-    },
-    {
-      "id": "D-29z1438",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 413 -> 414 planning",
-      "decision": "Round 414 = SYS-R2-FAKE-FIDELITY alone (test-only, workers/r2-proxy.test.mjs + new doc 266). SYS-R388-FAKE-WEB-AUDIO-HELPER is split off to round 415: the '+' in execution_order_d29z1436 was adjacency; SIG-R388 says it is not joined to SYS-R2 (different files, different fake); one round = one stage. RETRO stays at 416; REGRESSION-2026-11-10 precedes anything at the first planning on/after 2026-11-10. ROOT-REQ-VERIFY-WORKER-TESTS re-raised (verify still omits node --test workers/r2-proxy.test.mjs)."
-    },
-    {
-      "id": "D-29z1439",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 413 -> 414 planning",
-      "decision": "SYS-R2 rulings: (1) C-R311-01 mutant 1 (re-read else headers.delete('ETag')) and A-R309 #4 (If-None-Match * without httpEtag) are equivalent against R2 (R2 API reference: httpEtag `string`, not optional, l.147 vs range optional l.155): closed by ruling, no non-R2 fake object. (2) The fake's TypeError for a non-safe range value fires only in throw mode, so throw = strict R2 model and short = lenient R2 model (inference, labelled). (3) New fake flags headSeesNewVersion and goneOnSecondRead; new rows PR19-PR22; PR9, PR14, PR15, PR16 far, PR17 strengthened. (4) 'Bytes=' unit case is not pinned by a test (RFC 9110 14.1 case-insensitive, 14.2 MAY ignore): B-R414-RANGE-UNIT-CASE Low. (5) PR6 HEAD+Range 206 conflicts with RFC 9110 14.2 MUST ignore Range for non-GET: B-R414-HEAD-RANGE-206 Low, pre-existing, not changed in a test-only round. (6) MU-414-RANGE-NO-TRIM is equivalent (fetch Headers trims values). (7) The protected request fake gains etag/httpEtag (tech-lead v1 Medium TL-R414-M1) and a goneOnHead flag. Sketch v2 evidence on /tmp/b414: node --test 83/83; 14 mutants, 13 red on the sketch with the expected row, 11 of them green on the HEAD tests (new coverage), NO-TRIM equivalent (platform guarantee), pristine 4x rc 0, scratch status 0; tech-lead v2 APPROVE WITH LOWS (L1 mutant fixed before dispatch, L2 wording)."
-    },
-    {
-      "id": "D-29z1440",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 413 -> 414 planning",
-      "decision": "Rulings on round-413 Lows: A-R413-REVIEW-L1..L5 and GATE413-L1 -> deferred_low_polish (L4 redirect and L5 opaque-origin hardening noted for the next collection.ts/precomputed-peaks owner); A-R413-REVIEW-L6 closed by L28; GATE413-L2 = TL-R413-L-B (already deferred); GATE413-L3 = TL-R413-L-A contract; GATE413-I4 and INFO-A413-PS18-DUPLICATE-ID recorded. Architecture notes recorded as signals only (SIG-GATE413-PEAKS-PREFETCH-HELPER attached to ARCH-CHECKPOINT-PERF15-PEAKS; SIG-A413-CAPPED-BODY), not scheduled."
-    },
-    {
-      "id": "D-29z1441",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 414 -> 415 planning",
-      "decision": "From C round 414 PASS + gate 414 published 5be9294: SYS-R2-FAKE-FIDELITY done; closed C-R311-01, A-R311-REVIEW-L4, GATE311-L1, A-R309-REVIEW-TEST-GAPS. New Lows A-R414-REVIEW-PR20-LABEL, GATE414-S1, GATE414-S2 -> deferred_low_polish; reviewer architecture notes -> SIG-R414-R2-FAKE-SCENARIO (signal only). B-R414-RANGE-UNIT-CASE, B-R414-HEAD-RANGE-206 stay deferred; ROOT-REQ-VERIFY-WORKER-TESTS stays open."
-    },
     {
       "id": "D-29z1442",
       "date": "2026-11-08",
@@ -42125,6 +42143,43 @@
       "date": "2026-11-10",
       "by": "2026-11-10 B round 425 -> 426 planning",
       "decision": "L58 close-out for round 426: the dispatched sketch c97f080f differs from the reviewed 68e6c66a by the post-review delta (Pan reset guard + test rows), so tech-lead re-reviewed the delta (b-round-425/sketch-delta-68e6c66a-to-c97f080f.patch.txt): approve-with-lows on c97f080f. Its two Lows (TL-R425-09 HM5 lacks a gesture-active row; TL-R425-10 HM11b vacuous prevented checks) go to deferred_low_polish, not into the sketch (no further delta). B also ran on the sketch: the full vitest suite (265 files / 3,974, precheck-full.log), the lane render-name probe on a scratch dev server (names-sketch-* equal names-head-*), and rows 5-6 on HEAD (smoke-focus-*.json, focus ring measured as :focus-visible with a 1px solid outline). C-R425-01 wording corrected: B's 4 loads were on the already-warm :5173 server, so the cause is unattributed (D-29z1488 amended)."
+    },
+    {
+      "id": "D-29z1492",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 426 -> 427 planning",
+      "decision": "Round 426 accepted from C evidence only: c-round-426.json PASS, 0 bugs, browserVerified/realVerified true, L57 OK. B re-ran C's own compare (python3 -I c-round-426/probe/compare.py c-round-426/probe -> ALL OK (28 cells)) and diffed c-round-426/b425copy/mutants/summary.txt against b-round-425/mutants/summary.txt (identical). The fake-bearer row with a real backend stays BLOCKED (backend unavailable in cloud), open backend evidence, not a browserVerified gap. Gate 426 published 052c76c on both remotes = baseline for round 427. SYS-2 stage 2a done; A-R422-REVIEW-L1-ONKEYDOWN-SPREAD-ORDER closed by HM15 (MU-SPREAD-TYPE tsc rc 2); A-R107-SWEEP-HELD-ENTER-TOOLBAR advanced (HM1-HM14), stays open for 2b."
+    },
+    {
+      "id": "D-29z1493",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 426 -> 427 planning",
+      "decision": "TL-R425-09 (HM5 gesture-active row; A's reviewer rated it Medium) ruled: premise corrected, closed by a pin row. B's sketch run shows that during a pointer gesture the StudioWorkspace window keydown handler prevents a fresh Enter on any non-typing target and writes GESTURE_EDIT_BLOCKED_MESSAGE before the button can click, so a refused Pan reset is unreachable by Enter and the per-button guard is not observable there (TL-R425-02's premise did not hold). New row HM5b pins the real path (fresh Enter prevented, pan 0.5 kept, focus stays on the reset, refusal status written, repeats prevented, arrangement unchanged). HM5b is green at HEAD by design (a premise pin, not a guard row); stated in the task. The refusal status is rewritten on every key repeat while a gesture holds (window handler has no repeat check): new Low B-R426-GESTURE-REFUSAL-REPEAT-STATUS, same family as GATE274-S1-HELD-REPEAT-ANNOUNCE, deferred_low_polish (2026-10-23 rule). TL-R425-10 stays deferred.",
+      "superseded_in_part_by": "D-29z1496: the clause filing B-R426-GESTURE-REFUSAL-REPEAT-STATUS (refusal rewritten per repeat) is withdrawn; steady-state repeats do not bump statusSequence"
+    },
+    {
+      "id": "D-29z1494",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 426 -> 427 planning",
+      "decision": "SYS-2 stage 2b split by surface (advisor + L50 size rule): 2b-i (round 427) = persistent surfaces: footer Snap and Envelope toggles (StudioWorkspace), Library collection fold, All/collection/folder nodes and notice dismiss, Library/LibraryPreview/DetailPanel inline Enter-repeat copies folded onto the helper, detail panel toggle, video dock expand/close/placeholder return; plus HM5b. 2b-ii (next) = transient surfaces: ExportDialog cancel and second button + its inline copy, GridMenu 4 menu items, MarkerMenu item, MarkerRow flag/editor (incl. held Escape probe) + its 5 inline copies, ShortcutSheet close + footer Shortcuts button, LibraryMenu inline copy and anchor, NarrowScreen Send link, then a closing grep row (0 inline Enter-repeat copies under app/** and perf/**) and the scanner row. Video drag handle (KEYDOWN-NO-ENTER, no onClick) ruled out of scope: Enter has no action there. Transport Fit stays unguarded (TH5). Stage numbering: 1 = round 422 (doc 272), 2 = 2a round 426 (doc 274, l.4 published as \"stage 2 of 3\"), 3 = 2b-i (doc 275, \"stage 3 of 4\"), 4 = 2b-ii; the 2b-ii task grants l.4 of docs 274 and 275 to Completed (L28). Real defects at HEAD in Chromium (b-round-426/probe/head): Snap, Envelope, library collection fold, detail toggle, video expand, and Close/Return (the repeats re-float the docked video through the Expand button that receives focus). Ableton conformance: does not apply (no per-press behaviour change)."
+    },
+    {
+      "id": "D-29z1495",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 426 -> 427 planning",
+      "decision": "Gate 426 review Architecture note (repeated per-button onKeyDown guard, about 25 sites in 5 files, more in 2b) recorded as signal SIG-R426-STUDIO-BUTTON-REPEAT-DEFAULT, not a task. Its suggestion 1 (comment on the defensive group-name input guard) confirms TL-R425-04 of b-round-425/sketch-review.md (confirmedBy, no new id); suggestion 2 (a KeyboardEventHandler wrapper so the boolean return is not ignored in some places and used in others) attached to the same signal. At the SYS-2 boundary (after 2b-ii C PASS) B files one bounded frontend-architect checkpoint request with root: StudioButton wrapper vs a lint/scanner row in verify vs keep; non-blocking."
+    },
+    {
+      "id": "D-29z1496",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 426 -> 427 planning",
+      "decision": "B-R426-GESTURE-REFUSAL-REPEAT-STATUS withdrawn (closed, not a defect): tech-lead TL-R426 review item 3 shows reduceArrangementStatus keeps the previous entry for identical text while a gesture is active, and HM5b on the final sketch (aef454cd) asserts the whole snapshot, statusSequence included, is equal after 3 repeats (green). Residual hypothesis kept as INFO-TL-R426-MOVING-DRAG-REPEAT (a repeat during a drag that also writes preview text could re-announce; unmeasured). Sketch delta 82a785ce -> aef454cd is test-only (TL-R426-03/04/05 addressed); mutants, covering 68/1226 and full 266/3984 re-run on aef454cd; browser probe and smoke ran on the v1 source, identical to the final source."
+    },
+    {
+      "id": "D-29z1497",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 426 -> 427 planning",
+      "decision": "Planning tidy after the advisor close check: D-29z1493 marked superseded in part by D-29z1496; ARCH-CHECKPOINT-SYS-2 added as a planned (not yet requested) architecture checkpoint, filed with root after SYS-2 2b-ii C PASS (question: StudioButton wrapper vs a scanner/lint row in verify vs keep; tech-lead favours the check, TL-R426 Architecture); SYS-2 2b-ii carry recorded (scan scope = every folder /studio-lab renders). Task 427 gained claims K29-K32 (detail Space-only, options repeat, window typing skip, dock focus to Expand, L50 grep 0 added/removed lines, gate-426 timeout times) and compare.py asserts the focus map and ring for all 18 cells (ALL OK)."
     }
   ],
   "retro_candidates": [

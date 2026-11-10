@@ -1,0 +1,14 @@
+# B round 426->427 checkpoint
+- step1: archived tasks/round-426.md, before-copies saved
+- step2: C round 426 accepted from evidence (compare ALL OK 28 cells re-run by B; mutant summary identical; L57 OK). Gate 426 published 052c76c = baseline.
+- step3: inventory at 052c76c: scanner 37 ENTER-GUARD / 4 KEYDOWN-NO-ENTER / 21 NONE (/tmp/scan-head.txt -> b-round-426/data/scan-all-head.txt)
+- decision: split SYS-2 stage 2b into 2b-i (round 427: footer Snap/Env toggles, Library tree+fold+dismiss+inline fold, DetailPanel toggle+inline fold, LibraryPreview inline fold, VideoDock expand/return/close; TL-R425-09 HM5 gesture row) and 2b-ii (ExportDialog, GridMenu, MarkerMenu, MarkerRow flag/editor+inline fold, ShortcutSheet close + footer Shortcuts, LibraryMenu, NarrowScreen Send link, final no-inline-copy grep row)
+- next: scratch /tmp/b427 sketch
+- step4: sketch built (tools/make-sketch.py + tests), sketch-427.patch.txt; typecheck/lint/biome rc0; HM5b premise corrected (workspace window handler refuses Enter during gesture)
+- step5: mutants summary (12 lines), covering 68/1226, full 266/3984 rc0, browser probe HEAD vs sketch ALL OK 18 cells; 5174 stopped; next: tech-lead review + claims + task
+- step6: backlog v403 applied (D-29z1492..1495)
+- step7: smoke HEAD vs sketch equal both vp (probe/smoke-compare.txt); 5174 stopped
+- step8: review approve-with-lows; delta applied (HP snapshot fields, HP9 focus, HM5b characterization + full snapshot); final sha aef454cd; mutants 12 identical lines; covering 68/1226; full rerun
+- step9: task written; claims planning/sketch outputs saved; sketch-review.md written (L58 OK)
+- step10: feature-status, b-next.json, b-round-426.md written; store clean
+- step11: advisor close fixes: compare.py focus map + skip smoke, K29-K32 tags, L50 data, timeout from gate 426, row 5 own OUT, backlog v405 (D-29z1497), review copy renamed; claims rerun (16 diff lines, stderr empty, L58 OK); store clean. DONE

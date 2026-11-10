@@ -1,0 +1,48 @@
+diff --git a/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx b/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx
+index c1ffa55..43bb3d1 100644
+--- a/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx
+@@ -258,7 +258,7 @@ describe(
+       expect(sfx?.pan ?? 0).toBe(0);
+     });
+ 
+-    it('HM5b during a pointer gesture the workspace refuses a fresh Enter on Pan reset before it can click: pan unchanged, focus stays on the reset, refusal status written', async () => {
++    it('HM5b characterization (TL-R425-09, D-29z1493): during a pointer gesture the workspace refuses a fresh Enter on Pan reset before it can click; pan unchanged, focus stays on the reset, refusal written once and not re-announced by the repeats', async () => {
+       const mounted = await mountMixerWorkspace();
+       act(() => {
+         live(mounted.api).setTrackPan('sfx', 0.5);
+@@ -284,7 +284,7 @@ describe(
+       for (let held = 0; held < 3; held++) {
+         expect(pressEnter(reset, true)).toBe(false);
+       }
+-      expect(mounted.snapshot().arrangement).toBe(before.arrangement);
++      expect(mounted.snapshot()).toEqual(afterFirst);
+       expect(document.activeElement).toBe(reset);
+       const sfx = live(mounted.api)
+         .getArrangement()
+diff --git a/app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx b/app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx
+index 241bbfa..3947bf0 100644
+--- a/app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx
+@@ -141,6 +141,13 @@ async function mountPanelWorkspace() {
+     groupCollapsed: attributes('[data-group-id]', 'data-group-collapsed'),
+     pressed: attributes('button[aria-pressed]', 'aria-pressed'),
+     nameInput: view.queryByTestId('arrangement-group-name-input') !== null,
++    libraryExpanded: attributes(
++      '[data-testid="arrangement-library-tree"] button[aria-expanded]',
++      'aria-expanded',
++    ),
++    libraryCurrent: attributes('[data-testid="arrangement-library-tree"] button', 'aria-current'),
++    detailExpanded: attributes('[data-testid="arrangement-detail-toggle"]', 'aria-expanded'),
++    videoExpandLabel: attributes('[data-testid="arrangement-video-expand"]', 'aria-label'),
+     inputClicks,
+   });
+   const trackHeader = (trackId: string) => {
+@@ -290,6 +297,7 @@ describe(
+       expect(mounted.view.queryByTestId('arrangement-video-placeholder-return')).not.toBeNull();
+       holdEnter(back, mounted.snapshot);
+       expect(mounted.view.queryByTestId('arrangement-video-placeholder-return')).toBeNull();
++      expect(document.activeElement).toBe(mounted.view.getByTestId('arrangement-video-expand'));
+     });
+   },
+ );
