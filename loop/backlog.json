@@ -1,9 +1,9 @@
 {
- "version": 409,
+ "version": 410,
  "updated": "2026-11-10",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "Round 429: SYS-2 stage 5 (2b-ii-b, final) - fold the last six inline held-Enter copies (marker row, library menu) into preventRepeatedEnterKeyDown, add HK1-HK4 and the closing repo scan HS1/HS2; docs 274-277 Completed (current-task.md; sketch b-round-428/sketch-429.patch.txt)",
+ "current_task": "Round 430: SABA-B-12 stage 1 (STUDIO-VIS-1) - the Detail panel Clip Gain/From/To number fields lose the browser spin buttons via a shared STUDIO_NUMBER_FIELD_CLASS; rows NF1, NF2, F10; doc 278 (current-task.md; sketch b-round-429/sketch-430.patch.txt)",
  "advisor_used_by_B": "round 427 -> 428 planning: advisor available and consulted after orientation and before close",
  "baseline": {
   "tsc_errors": 0,
@@ -12231,8 +12231,16 @@
    "task": "current-task.md",
    "decision": "D-29z1508",
    "type": "SYS-2 stage 5 (2b-ii-b: MarkerRow/LibraryMenu folds + closing repo scan)",
-   "status": "dispatched",
+   "status": "c_pass_published (D-29z1510): gate 429 76f4147",
    "note": "baseline b604cfb clean; sketch b-round-428/sketch-429.patch.txt; claims b-round-428/claims-429.sh"
+  },
+  {
+   "round": 430,
+   "task": "current-task.md",
+   "decision": "D-29z1513",
+   "type": "SABA-B-12 stage 1 (STUDIO-VIS-1 number spin buttons)",
+   "status": "dispatched",
+   "note": "baseline 76f4147 clean; sketch b-round-429/sketch-430.patch.txt; claims b-round-429/claims-430.sh"
   }
  ],
  "post_current_stage_queue": [
@@ -27887,20 +27895,54 @@
    "id": "SABA-B-12",
    "severity": "medium",
    "origin": "Saba 2026-11-10 visual feedback",
-   "status": "scheduled (D-29z1507): first UI round after SYS-2 stage 5 and the due REGRESSION-2026-11-13; browser audit at that planning",
+   "status": "in_progress (D-29z1512, D-29z1513): stage 1 STUDIO-VIS-1 dispatched as round 430",
    "title": "Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cancel, radio, progress, scrollbar) must be custom-styled to Obsidian & Brass",
    "evidence": "policy section \"Saba visual feedback, 2026-11-10\"; b-round-428/data/saba-b-12-native-controls-grep.txt",
    "repro": "/studio-lab, add a clip, open Clip details: the From/To/Clip Gain number fields show native up/down spinners",
-   "added": "2026-11-10 B round 428 -> 429 planning"
-  },
-  {
-   "id": "INFO-C428-SPACE-ON-FOCUSED-BUTTON",
-   "severity": "info",
-   "origin": "B spec",
-   "status": "closed by design (D-29z1506)",
-   "title": "Space on the focused footer Shortcuts button plays (global Play shortcut) instead of opening the sheet; task 428 row 5 item 4 expected sheet-open",
-   "evidence": "c-round-428.json carried; c-round-428/probe/space.mjs (identical on HEAD)",
-   "added": "2026-11-10 B round 428 -> 429 planning"
+   "added": "2026-11-10 B round 428 -> 429 planning",
+   "stages": [
+    {
+     "stage": 1,
+     "id": "STUDIO-VIS-1",
+     "severity_audit": "high",
+     "what": "hide spin buttons on Detail panel Clip Gain/From/To number fields",
+     "status": "dispatched round 430"
+    },
+    {
+     "stage": 2,
+     "id": "STUDIO-VIS-2",
+     "severity_audit": "high",
+     "what": "6 native radios in ArrangementExportDialog + its <progress> bar (audit missed progress)",
+     "status": "planned next UI round (rule sr-only vs styled dot vs L1/hidden_focusables_rulings_d29z169)"
+    },
+    {
+     "stage": 3,
+     "id": "SABA-B-12-SEARCH-CANCEL",
+     "severity_audit": "n/a (audit missed it)",
+     "what": "ArrangementShortcutSheet type=search shows the native cancel; Library hides it and draws its own clear button; give the sheet the same pattern",
+     "status": "planned after stage 2"
+    },
+    {
+     "stage": 4,
+     "id": "STUDIO-VIS-3",
+     "severity_audit": "medium",
+     "what": "native <select> grid division + waveform zoom (zoom select has appearance-none and no chevron)",
+     "status": "deferred by Saba answer 2 (2026-11-10) -> REVIEW-RECOMMENDATIONS"
+    },
+    {
+     "stage": null,
+     "id": "SABA-B-12-RECORDINGS-NUMBER",
+     "what": "7 number inputs (+ search, select, radio, checkbox, progress) in app/components/recordings/*; reached only from routes recordings.$productId and scenes.$productId, not from /studio-lab (import closure 0)",
+     "status": "Store pages -> STORE-REDESIGN acceptance (TL-R430-10)"
+    },
+    {
+     "stage": null,
+     "id": "SABA-B-12-LEGACY-CHECKBOX",
+     "what": "app/components/studio/ExportDialog.tsx checkbox; only importer is protected studio.$productId.tsx",
+     "status": "recorded under SRW-21 (deferred_user); not scheduled"
+    }
+   ],
+   "why_we_missed_it": "D-29z1514 / L61"
   },
   {
    "id": "INFO-C428-AUTH-SECOND-VITE",
@@ -27910,6 +27952,104 @@
    "title": "C auth attempt 1: legacy route hydration error 'reading useState' while C ran a second vite server; workspace false, audio[src] 0 on every read; retry passed",
    "evidence": "c-round-428/auth/g428-auth-attempt1-hydration-error.json",
    "added": "2026-11-10 B round 428 -> 429 planning"
+  },
+  {
+   "id": "INFO-B-R429-K9-OVERSTATED",
+   "severity": "info",
+   "origin": "B spec",
+   "status": "closed (D-29z1511): doc 277 corrected by A",
+   "title": "task 429 K9 listed DetailPanel/Library/GroupHeader if(!event.repeat) sites as delegated menu containers",
+   "evidence": "a-round-429.md For B",
+   "added": "2026-11-10 B round 429 -> 430 planning"
+  },
+  {
+   "id": "TLM-SABA-B-12-FIREFOX-SAFARI",
+   "severity": "info",
+   "origin": "B spec",
+   "status": "open_tech_lead_manual (D-29z1513): deadline RETRO 435 (L46)",
+   "title": "SABA-B-12 stage 1 on Firefox and Safari: Detail panel number fields show no spin buttons at rest, hover and focus; ArrowUp/Down still step",
+   "evidence": "cloud runner has Chromium only",
+   "added": "2026-11-10 B round 429 -> 430 planning"
+  },
+  {
+   "id": "STUDIO-VIS-4",
+   "severity": "medium",
+   "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
+   "kind": "saba_approved_task",
+   "status": "scheduled (D-29z1512): COPY-PD-VIS (after SABA-B-12 stage 3)",
+   "title": "Rename \"Source offset\" -> \"Clip origin\" (strings.ts sourceOffsetLabel + selectedClipDetail)",
+   "evidence": "docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md",
+   "added": "2026-11-10 B round 429 -> 430 planning"
+  },
+  {
+   "id": "STUDIO-VIS-5",
+   "severity": "medium",
+   "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
+   "kind": "saba_approved_task",
+   "status": "scheduled (D-29z1512): REVIEW-RECOMMENDATIONS (Saba: defer)",
+   "title": "Detail panel spacing (gap-0.5 -> gap-1, px-3 -> px-4)",
+   "evidence": "docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md",
+   "added": "2026-11-10 B round 429 -> 430 planning"
+  },
+  {
+   "id": "STUDIO-VIS-6",
+   "severity": "medium",
+   "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
+   "kind": "saba_approved_task",
+   "status": "scheduled (D-29z1512): COPY-PD-VIS (after SABA-B-12 stage 3)",
+   "title": "\"From, s\" / \"To, s\" -> \"From\" / \"To\"",
+   "evidence": "docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md",
+   "added": "2026-11-10 B round 429 -> 430 planning"
+  },
+  {
+   "id": "STUDIO-VIS-7",
+   "severity": "low",
+   "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
+   "kind": "saba_approved_task",
+   "status": "scheduled (D-29z1512): COPY-PD-VIS (after SABA-B-12 stage 3)",
+   "title": "Export dialog primary button outline -> filled brass (Saba answer 3)",
+   "evidence": "docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md",
+   "added": "2026-11-10 B round 429 -> 430 planning"
+  },
+  {
+   "id": "STUDIO-VIS-8",
+   "severity": "low",
+   "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
+   "kind": "saba_approved_task",
+   "status": "scheduled (D-29z1512): REVIEW-RECOMMENDATIONS (Saba: defer)",
+   "title": "Insert marker blink timing",
+   "evidence": "docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md",
+   "added": "2026-11-10 B round 429 -> 430 planning"
+  },
+  {
+   "id": "STUDIO-VIS-9",
+   "severity": "low",
+   "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
+   "kind": "saba_approved_task",
+   "status": "scheduled (D-29z1512): REVIEW-RECOMMENDATIONS (Saba: defer)",
+   "title": "Purchased collection badge styling",
+   "evidence": "docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md",
+   "added": "2026-11-10 B round 429 -> 430 planning"
+  },
+  {
+   "id": "STUDIO-VIS-10",
+   "severity": "low",
+   "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
+   "kind": "saba_approved_task",
+   "status": "scheduled (D-29z1512): COPY-PD-VIS (after SABA-B-12 stage 3)",
+   "title": "\"CZABA\" brand link text-muted -> text-foreground, arrow stays muted (Saba answer 4)",
+   "evidence": "docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md",
+   "added": "2026-11-10 B round 429 -> 430 planning"
+  },
+  {
+   "id": "SABA-Q-NUMBER-FIELD-DRAG",
+   "severity": "info",
+   "origin": "B spec (L44)",
+   "kind": "question_for_saba",
+   "status": "awaiting_user (D-29z1513)",
+   "title": "Live 12 value fields change by vertical drag (manual 42.6, Shift = finer); CZABA Detail panel number fields (Clip Gain, From, To) have no drag (pre-existing; Clip Gain has a fader beside it). Add drag-to-change on these fields? Default: no change",
+   "evidence": "current-task.md round 430 Reference table; https://www.ableton.com/en/live-manual/12/live-keyboard-shortcuts/ 42.6",
+   "added": "2026-11-10 B round 429 -> 430 planning"
   }
  ],
  "tech_lead_notes": [
@@ -32423,7 +32563,7 @@
   {
    "id": "A-R107-SWEEP-HELD-ENTER-TOOLBAR",
    "severity": "low",
-   "status": "in_progress (D-29z1500): panels done (round 427, HP1-HP9); stage 4 (round 428: sheet, export dialog, narrow screen) and stage 5 (marker row, library menu, closing grep) remain | in_progress (D-29z1494): lane/group/master/tempo done (round 426); panels part in round 427 (HP1-HP9); transient surfaces in 2b-ii | in_progress (D-29z1489): lane/group/master/tempo part in round 426 (HM1-HM15); rest in SYS-2 stage 2b | in_progress (D-29z1475, D-29z1478): transport part done in round 422 (HE1-HE5); rest in SYS-2 stage 2a/2b | in_progress (D-29z1473): transport part in round 422 (HE1-HE5); rest in SYS-2 stage 2 | open - one held-Enter sweep round after the ARCH-R107-SHARED-ENTER-GUARD checkpoint; strongest: transport Loop (same toggle+history bug as Ctrl+L); Undo/Redo/Delete/Zoom back/Fit are taken in round 108",
+   "status": "closed (D-29z1511): SYS-2 stage 5 C round 429 PASS, gate 429 76f4147; closure table doc 277",
    "to": "held-Enter sweep",
    "title": "held Enter repeats on toolbar buttons without a guard: Loop, Play, Split, Follow, Zoom to range, Snap, Env, Metronome, video expand/return, track/group Mute/Solo, master mute, folds, detail toggle; Low: Home and marker flags restart the graph during playback; group name editor settles on a repeated Enter; held Escape on the marker editor",
    "evidence": "a-round-107.md Sweep 1 and Sweep 2",
@@ -39719,6 +39859,35 @@
    "added": "2026-11-10 B round 428 -> 429 planning",
    "fix_with": "SIG-R427-HELD-ENTER-TEST-HELPER",
    "confirmedBy": "gates/round-428/review.md Low 1 (D-29z1509)"
+  },
+  {
+   "id": "A-R429-REVIEW-SCAN-NEGATED-REPEAT",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1511); fix with ARCH-CHECKPOINT-SYS-2 follow-up",
+   "title": "held-enter-source-scan HS1 second regex branch matches '!event.repeat && event.key === \\'Enter\\'' (a fresh-Enter-only guard) -> false red; none in source today",
+   "evidence": "a-round-429.md For B; doc 277 TODO",
+   "added": "2026-11-10 B round 429 -> 430 planning",
+   "confirmedBy": "gates/round-429/review.md Low 1"
+  },
+  {
+   "id": "A-R429-REVIEW-EDITOR-REPEAT-ESCAPE",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1511); fix with ARCH-CHECKPOINT-SYS-2 follow-up",
+   "title": "no row pins that a repeated Escape still settles the marker name editor; a repeat-only mutant in the editor branch passes HK3",
+   "evidence": "a-round-429.md For B; doc 277 TODO",
+   "added": "2026-11-10 B round 429 -> 430 planning",
+   "confirmedBy": "gates/round-429/review.md Low 2"
+  },
+  {
+   "id": "A-R429-REVIEW-ROW-ID-COLLISIONS",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1511); fix with ARCH-CHECKPOINT-SYS-2 follow-up",
+   "title": "row ids HE/HK/HS/HP/HM reused across test files with different meanings (doc 277 table now names the file)",
+   "evidence": "a-round-429.md For B; doc 277 TODO",
+   "added": "2026-11-10 B round 429 -> 430 planning"
   }
  ],
  "regression_rounds": [
@@ -40851,7 +41020,7 @@
    "evidence": "retros/retro-200.md section 6; grep at 5b1a2bb",
    "size": "1 round",
    "acceptance_note": "key auto-repeat and held-key rows; one toggle per press; real-browser held Enter at both viewports",
-   "status": "in_progress (D-29z1505, D-29z1508): stage 4 (2b-ii-a) done (C round 428 PASS, gate 428 published b604cfb); stage 5 (2b-ii-b, final) dispatched as round 429",
+   "status": "done (D-29z1511): stages 1-5 C PASS + published (rounds 422, 426, 427, 428, 429; gate 429 76f4147)",
    "added": "2026-10-27 B round 199 -> 200 planning (D-29z165)",
    "vetoable": "root or Saba may reorder without a B round",
    "status_note_d29z170": "2026-10-27 B round 204 -> 205 planning (D-29z170): still queued; order after round 205: SYS-1, SYS-2, SYS-3",
@@ -41919,11 +42088,11 @@
    "decision": "D-29z1497",
    "requested_of": "root (read-only frontend-architect, store/.claude/references/architecture-checkpoint.md)",
    "question": "after SYS-2 closes: per-button preventRepeatedEnterKeyDown (about 40 sites) vs a StudioButton wrapper (conflicts with onKeyDown?: never and buttons with own key handlers) vs a scanner/lint row in verify that fails on an unguarded <button onClick> or an inline Enter-repeat copy",
-   "status": "planned: file with root after SYS-2 stage 5 (round 429) C PASS; non-blocking; scope adds SIG-R427-HELD-ENTER-TEST-HELPER and the round-428 reviewer note (D-29z1506)",
+   "status": "filed with root (D-29z1511): b-round-429-checkpoint-request.md; non-blocking; result awaited",
    "signals": [
     "SIG-R426-STUDIO-BUTTON-REPEAT-DEFAULT"
    ],
-   "confirmedBy": "gates/round-428/review.md Architecture note: grep test for unguarded type=button onClick with allowlist + shared pressHeldEnter util (D-29z1509)"
+   "confirmedBy": "gates/round-428/review.md Architecture note: grep test for unguarded type=button onClick with allowlist + shared pressHeldEnter util (D-29z1509) | gates/round-429/review.md Architecture note (lint rule vs scan; sibling helper for if(!event.repeat); SIG-R427 test helper)"
   }
  ],
  "leadmagnet_dialog_rulings_d29z170": {
@@ -41934,36 +42103,6 @@
   "DEVIATION_A1_ruling_d29z171": "accepted: the wasSubmittingRef effect re-anchors focus on the email input after a failed submit; C verified it in the browser (c-round-205/out/steps/fail-tree-1280.json) and m13 red-proves it. Residual in-flight window = C-R205-01 (Low, scheduled)."
  },
  "decisions_log_b": [
-  {
-   "id": "D-29z1455",
-   "date": "2026-11-08",
-   "by": "2026-11-08 B round 417 -> 418 planning",
-   "decision": "Round-417 rulings (L10): A-R417-REVIEW-M1 (reviewer Medium on the ruled BW5 method) downgraded to Low with reason (latent: needs a hoist refactor AND a full-build regression; mutant red today; C rated Low) and deferred with C-R417-BW5-HOIST-FRAGILE and GATE417-L2 merged; A-R417 L1-L3 and GATE417 L1/L3 deferred; A-R417 M2 closed (doc fixed), SIG-R415 scope corrected to EN10+VDS3 and A architecture note recorded there. C-R417-L58-SKETCH-REVIEW-MISSING: fixed in this planning (sketch-review.md + claims K19 l58-check); closes on C round 418 row 1."
-  },
-  {
-   "id": "D-29z1456",
-   "date": "2026-11-08",
-   "by": "2026-11-08 B round 417 -> 418 planning",
-   "decision": "SYS-R416-PREVIEW-CONTROLLER dispatched as round 418 (L46 default; no root answer to the preview checkpoint). Rulings in systemic_tasks ruling_d29z1456. One round: 12 new rows (< 20 split threshold). B browser pre-check on the sketch (port 5174, own cacheDir) found a regression of the first sketch (R1b seek-then-stall no fallback) and fixed it before dispatch (setErrorHandler, PC12, MU-SEEK-KEEPS-OLD-HANDLER). Reference-first / product-designer / screen budget N/A (behaviour-preserving fix round)."
-  },
-  {
-   "id": "D-29z1457",
-   "date": "2026-11-08",
-   "by": "2026-11-08 B round 417 -> 418 planning",
-   "decision": "Order after round 418 unchanged: SYS-R369 -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 (skip rule); REGRESSION-2026-11-10 at the first planning on/after 2026-11-10; next RETRO round 431 or end of STUDIO-PERFORMANCE. No architecture checkpoint request: same region as the 393 request, which this round closes by the L46 default."
-  },
-  {
-   "id": "D-29z1458",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 418 -> 419 planning",
-   "decision": "Round 418 accepted from independent evidence: C PASS (c-round-418.json, 8 rows passed, browserVerified/realVerified true; fake-bearer BLOCKED backend unavailable), gate 418 published 3579fcc (verify 3934/3934). SYS-R416-PREVIEW-CONTROLLER done; its 7 ids and C-R417-L58-SKETCH-REVIEW-MISSING (C row 1 K19 L58 OK) closed. Baseline for round 419 = 3579fcc (clean). context/head-sha.txt still read 061068d at planning (written before the gate commit): stale, not the baseline. REGRESSION not due: regression-last 2026-11-07, due on/after 2026-11-10 (today 2026-11-09)."
-  },
-  {
-   "id": "D-29z1459",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 418 -> 419 planning",
-   "decision": "Round-418 findings ruled (L10): A-R418-REVIEW-L1/L2/L3 + C confirmations + GATE418-L4 -> deferred_low_polish (L1+L2 close together with a readTime on ActiveStreamPreview and an updatable start; GATE418-L4 with TL-R418-L1). Architecture notes recorded as SIG-R418-PREVIEW-CONTROLLER-EXTRACT (signal, not scheduled; same item as ARCH-CHECKPOINT-PREVIEW-AFTER-13C)."
-  },
   {
    "id": "D-29z1460",
    "date": "2026-11-09",
@@ -42264,6 +42403,36 @@
    "date": "2026-11-10",
    "by": "2026-11-10 B round 428 -> 429 planning (close)",
    "decision": "Gate 428 review (gates/round-428/review.md: 3 Lows, 0 Medium+) recorded as confirmations: Low 1 (HQ1 value assert) confirmedBy on A-R428-REVIEW-L1-HQ1-VALUE-ASSERT; Low 2 (pressHeldEnter copied in 3 files) confirmedBy on SIG-R427-HELD-ENTER-TEST-HELPER; Low 3 (HX1/HX2 preventive) is the round-428 ruling 3, no id. Its Architecture note (grep-based test for type=button + onClick without an Enter guard, with an allowlist; shared pressHeldEnter util) is confirmedBy on ARCH-CHECKPOINT-SYS-2 and SIG-R426-STUDIO-BUTTON-REPEAT-DEFAULT; round 429 adds the inline-copy scan HS1 only, the button-guard allowlist test stays with the checkpoint. Closing-scan claims added to round 429 (advisor): K9c button-guard-scan-enter over components/arrangement on the sketch = 53 ENTER-GUARD, 9 others each ruled (GridMenu 4 + MarkerMenu 1 menuitems: delegated container; Library option: own !repeat; MarkerRow flag: guard inside handleFlagKeyDown, HK2; Transport Fit: TH5 lock; VideoDock drag handle: no onClick); K9d /studio-lab import closure 47 files, non-arrangement <button> files only app/components/ui/* reached through the barrel, of which only Modal is imported by Studio (ruled round 428), openers-in-closure 0. K13 is passed by location (backlog or archive), not byte equality, because the optimizer may archive closed ids between B and A/C."
+  },
+  {
+   "id": "D-29z1510",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 429 -> 430 planning",
+   "decision": "Round 429 accepted from C evidence: c-round-429.json PASS, 0 bugs, browserVerified/realVerified true. B re-runs: tools/l57-check.py L57 OK (b-round-429/l57-check-c429.txt); b-round-428/probe/compare.py on C probe JSONs ALL OK (8 cells) (b-round-429/recompare/compare.txt); C mutant lines identical to b-round-428/mutants/summary.txt; c-round-429/auth/g428-auth.json pass true. Gate 429 published 76f4147 on both remotes = baseline for round 430 (HEAD 7b66064 root docs commit was accepted by A and C: git diff b604cfb 7b66064 -- app empty)."
+  },
+  {
+   "id": "D-29z1511",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 429 -> 430 planning",
+   "decision": "SYS-2 done (stages 1-5, rounds 422 and 426-429, all C PASS + published). A-R107-SWEEP-HELD-ENTER-TOOLBAR closed (doc 277 closure table). A round-429 reviewer Lows -> deferred_low_polish: A-R429-REVIEW-SCAN-NEGATED-REPEAT (= gate 429 review Low 1, confirmedBy), A-R429-REVIEW-EDITOR-REPEAT-ESCAPE (= gate 429 review Low 2, confirmedBy), A-R429-REVIEW-ROW-ID-COLLISIONS; all three fixed with ARCH-CHECKPOINT-SYS-2 follow-up or the polish pass. INFO-B-R429-K9-OVERSTATED (origin B spec: task 429 K9 called the 11 if(!event.repeat) sites menu containers; only GridMenu/MarkerMenu are) closed: doc 277 corrected by A. Gate 429 architecture note (lint rule vs scan, sibling helper for the delegated form, test helper) attached to ARCH-CHECKPOINT-SYS-2; request filed with root now (b-round-429-checkpoint-request.md), non-blocking."
+  },
+  {
+   "id": "D-29z1512",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 429 -> 430 planning",
+   "decision": "SABA-B-12 planned as stages (L42, L7; the product-designer audit docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md is data; root policy 2026-11-10 table and Saba answers 1-4 are the authority). Stage 1 = STUDIO-VIS-1 (3 Detail panel number fields, round 430). Stage 2 = STUDIO-VIS-2 (6 Export dialog radios) + the Export dialog <progress> the audit missed; option (a) sr-only vs (b) styled dot is ruled at its planning against L1 and hidden_focusables_rulings_d29z169. Stage 3 = ShortcutSheet type=search native cancel (Library already hides it and has its own clear button; the sheet needs the same pattern = a new control, not a class tweak). STUDIO-VIS-3 (<select> grid division + waveform zoom) deferred by Saba answer 2 -> REVIEW-RECOMMENDATIONS, kept as SABA-B-12 stage 4. Legacy app/components/studio/ExportDialog.tsx checkbox: imported only by the protected studio.$productId.tsx (legacy purchased Studio, SRW-21 deferred_user) -> recorded under SRW-21, not scheduled. STUDIO-VIS-4/6/7/10 (copy + Export button fill + brand link) -> one COPY-PD-VIS round after SABA-B-12 stage 3; STUDIO-VIS-5/8/9 -> REVIEW-RECOMMENDATIONS (Saba: defer). Order after round 430: REGRESSION-2026-11-13 when due, else SABA-B-12 stage 2, stage 3, COPY-PD-VIS, then SYS-1, SYS-3; STEM-LANES jumps ahead when Saba answers."
+  },
+  {
+   "id": "D-29z1513",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 429 -> 430 planning",
+   "decision": "Round 430 = SABA-B-12 stage 1 (STUDIO-VIS-1) on 76f4147. Sketch b-round-429/sketch-430.patch.txt sha256 a459d97568d5f446442d43e827b23a5a8add5c36e0d9c91ac11dc69cc22de567: new studio-number-field.ts STUDIO_NUMBER_FIELD_CLASS ([appearance:textfield] + webkit inner/outer spin-button appearance-none) appended to the Detail panel inputClass (Clip Gain, From, To); rows NF1, NF2 (studio-number-field.test.ts) and F10 (detail-panel-fit.test.tsx); doc 278. Real Chromium HEAD vs sketch (second vite on :5174, own cacheDir): hover gutter diff 182 px at HEAD, 0 px on the sketch in 6/6 cells x 2 replicates; appearance auto -> textfield; box 80x24 equal; ArrowUp steps equal. Mutants 4/4 red. Covering 32 files 660/660; typecheck/lint rc 0. Firefox/Safari half = TLM-SABA-B-12-FIREFOX-SAFARI (Tech Lead, deadline RETRO 435). Reference: Live 12 manual 42.6 Adjusting Values (arrows, type-in, Enter/Esc; no stepper documented - absence of arrows in Live is an inference, not a confirmed fact). Post-advisor additions: focused-state and typed-commit cells measured on HEAD and the final sketch (focus 168 px at HEAD vs 0; commits equal); sketch-side claims b-round-429/claims-430-sketch-output.txt; full vitest on the sketch 268 files / 4001 rc 0 (precheck-full.log); field drag recorded as SABA-Q-NUMBER-FIELD-DRAG (awaiting_user, L44). STUDIO-VIS-4/5/6 are Medium in open_findings as Saba-scheduled tasks (kind saba_approved_task), not bug-gate blockers: Saba placed them in COPY-PD-VIS / REVIEW-RECOMMENDATIONS."
+  },
+  {
+   "id": "D-29z1514",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 429 -> 430 planning",
+   "decision": "Why we missed SABA-B-12: VISUAL-A and every RETRO whole-screen review used rest-state screenshots, and Chromium paints number spin buttons only on hover/focus; no task listed native control parts as rows. New lesson L61 (native control chrome is a row). lessons.md stays at 60 lines: old L9 (engine rounding, 1x) merged into L15 as a clause. Copy of the previous file: b-round-429/lessons-before-430.md."
   }
  ],
  "retro_candidates": [

@@ -1,0 +1,243 @@
+diff --git a/app/components/arrangement/ArrangementLibraryMenu.tsx b/app/components/arrangement/ArrangementLibraryMenu.tsx
+index 67abb58..169dd92 100644
+--- a/app/components/arrangement/ArrangementLibraryMenu.tsx
++++ b/app/components/arrangement/ArrangementLibraryMenu.tsx
+@@ -2,6 +2,7 @@ import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+ import { studioLibraryMenuStrings } from '~/lib/arrangement/strings';
+ import { armGridMenuDismissClickSwallow } from './ArrangementGridMenu';
++import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ 
+ const LIBRARY_MENU_VIEWPORT_MARGIN_PX = 4;
+ const LIBRARY_MENU_ITEM_CLASS =
+@@ -100,9 +101,7 @@ export function ArrangementLibraryMenu({
+       }
+       return;
+     }
+-    if (event.key === 'Enter' && event.repeat) {
+-      event.preventDefault();
+-    }
++    preventRepeatedEnterKeyDown(event);
+   };
+ 
+   return (
+diff --git a/app/components/arrangement/ArrangementMarkerRow.tsx b/app/components/arrangement/ArrangementMarkerRow.tsx
+index 609769f..47547fd 100644
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -47,6 +47,7 @@ import {
+   type MarkerMenuCloseReason,
+ } from './ArrangementMarkerMenu';
+ import { STUDIO_FOCUS_RING_EDGE_CLASS, STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
++import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ 
+ const MARKER_LABEL_MAX_PX = 160;
+ const MARKER_LABEL_GAP_PX = 4;
+@@ -779,8 +780,7 @@ function ArrangementMarkerRowViewInner({
+     event: KeyboardEvent<HTMLButtonElement>,
+     marker: ArrangementMarker,
+   ) => {
+-    if (event.key === 'Enter' && event.repeat) {
+-      event.preventDefault();
++    if (preventRepeatedEnterKeyDown(event)) {
+       return;
+     }
+     if (event.target !== event.currentTarget || event.ctrlKey || event.metaKey || event.altKey) {
+@@ -843,11 +843,7 @@ function ArrangementMarkerRowViewInner({
+           ref={addButtonRef}
+           type="button"
+           onClick={() => runUnlessGesture(beginAddMarker)}
+-          onKeyDown={(event) => {
+-            if (event.key === 'Enter' && event.repeat) {
+-              event.preventDefault();
+-            }
+-          }}
++          onKeyDown={preventRepeatedEnterKeyDown}
+           aria-label="Add marker (M)"
+           aria-keyshortcuts="M"
+           title={studioMarkerStrings.addTitle}
+@@ -859,11 +855,7 @@ function ArrangementMarkerRowViewInner({
+         <button
+           type="button"
+           onClick={() => runUnlessGesture(() => stepMarker(-1))}
+-          onKeyDown={(event) => {
+-            if (event.key === 'Enter' && event.repeat) {
+-              event.preventDefault();
+-            }
+-          }}
++          onKeyDown={preventRepeatedEnterKeyDown}
+           aria-label="Previous marker (Ctrl+←)"
+           aria-keyshortcuts="Control+ArrowLeft"
+           title={studioMarkerStrings.previousTitle}
+@@ -875,11 +867,7 @@ function ArrangementMarkerRowViewInner({
+         <button
+           type="button"
+           onClick={() => runUnlessGesture(() => stepMarker(1))}
+-          onKeyDown={(event) => {
+-            if (event.key === 'Enter' && event.repeat) {
+-              event.preventDefault();
+-            }
+-          }}
++          onKeyDown={preventRepeatedEnterKeyDown}
+           aria-label="Next marker (Ctrl+→)"
+           aria-keyshortcuts="Control+ArrowRight"
+           title={studioMarkerStrings.nextTitle}
+@@ -987,7 +975,7 @@ function ArrangementMarkerRowViewInner({
+               if (event.key === 'Enter' || event.key === 'Escape') {
+                 event.preventDefault();
+                 event.stopPropagation();
+-                if (event.key === 'Enter' && event.repeat) {
++                if (preventRepeatedEnterKeyDown(event)) {
+                   return;
+                 }
+                 settleEditor(event.key === 'Enter' ? 'enter' : 'escape');
+diff --git a/app/lib/arrangement/__tests__/held-enter-source-scan.test.ts b/app/lib/arrangement/__tests__/held-enter-source-scan.test.ts
+new file mode 100644
+index 0000000..be56088
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/held-enter-source-scan.test.ts
+@@ -0,0 +1,60 @@
++// @vitest-environment node
++import { readdirSync, readFileSync, statSync } from 'node:fs';
++import { join, relative, resolve } from 'node:path';
++import { describe, expect, it } from 'vitest';
++
++const STORE_ROOT = resolve(__dirname, '../../../..');
++const SCAN_ROOTS = ['app', 'perf'];
++const HELPER_PATH = 'app/components/arrangement/studio-repeat-safe.ts';
++const INLINE_REPEATED_ENTER_PATTERN =
++  /\.key\s*===\s*['"]Enter['"]\s*&&\s*[\w.]*\.repeat\b|[\w.]*\.repeat\s*&&\s*[\w.]*\.key\s*===\s*['"]Enter['"]/g;
++
++function listSourceFiles(dir: string): string[] {
++  const files: string[] = [];
++  for (const entry of readdirSync(dir)) {
++    const path = join(dir, entry);
++    if (entry === 'node_modules' || entry === '__tests__') {
++      continue;
++    }
++    if (statSync(path).isDirectory()) {
++      files.push(...listSourceFiles(path));
++    } else if (/\.(ts|tsx)$/.test(entry) && !/\.(test|spec)\.(ts|tsx)$/.test(entry)) {
++      files.push(path);
++    }
++  }
++  return files;
++}
++
++function findInlineRepeatedEnterCopies(): string[] {
++  const hits: string[] = [];
++  for (const root of SCAN_ROOTS) {
++    for (const file of listSourceFiles(resolve(STORE_ROOT, root))) {
++      const path = relative(STORE_ROOT, file).split('\\').join('/');
++      const lines = readFileSync(file, 'utf-8').split('\n');
++      lines.forEach((line, index) => {
++        if (line.match(INLINE_REPEATED_ENTER_PATTERN)) {
++          hits.push(`${path}:${index + 1}`);
++        }
++      });
++    }
++  }
++  return hits;
++}
++
++describe('held Enter: one shared guard (SYS-2 stage 5)', () => {
++  it('HS1: no source file under app/ or perf/ repeats the held-Enter check inline; the shared helper is the only home', () => {
++    expect(findInlineRepeatedEnterCopies()).toEqual([]);
++    expect(readFileSync(resolve(STORE_ROOT, HELPER_PATH), 'utf-8')).toContain(
++      "event.key !== 'Enter' || !event.repeat",
++    );
++  });
++
++  it('HS2: the scan pattern matches both written orders and ignores the helper form', () => {
++    const matches = (text: string) => (text.match(INLINE_REPEATED_ENTER_PATTERN) ?? []).length;
++    expect(matches("if (event.key === 'Enter' && event.repeat) {")).toBe(1);
++    expect(matches('if (event.repeat && event.key === "Enter") {')).toBe(1);
++    expect(matches("if (e.nativeEvent.key === 'Enter' && e.nativeEvent.repeat) {")).toBe(1);
++    expect(matches("if (event.key !== 'Enter' || !event.repeat) {")).toBe(0);
++    expect(matches('if (!event.repeat) {')).toBe(0);
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/markers-ui.test.tsx b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+index a0a7e3a..7b3dbd5 100644
+--- a/app/lib/arrangement/__tests__/markers-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+@@ -1061,3 +1061,54 @@ describe('marker row: playback continuity, gestures and typing', { timeout: 1500
+     expect(view.getByTestId('arrangement-marker-row').className).toContain('h-5');
+   });
+ });
++
++describe('marker row: held Enter (SYS-2 stage 5)', { timeout: 15000 }, () => {
++  it.each([
++    ['arrangement-marker-add'],
++    ['arrangement-marker-prev'],
++    ['arrangement-marker-next'],
++  ])('HK1: a repeated Enter on %s is prevented; a fresh Enter is not', async (testId) => {
++    const { view } = await mountMarkerWorkspace(
++      markerArrangement([
++        { id: 'k1', time: 2, name: 'One' },
++        { id: 'k2', time: 6, name: 'Two' },
++      ]),
++    );
++    const button = view.getByTestId(testId);
++    button.focus();
++    expect(fireEvent.keyDown(button, { key: 'Enter', code: 'Enter', repeat: true })).toBe(false);
++    expect(fireEvent.keyDown(button, { key: 'Enter', code: 'Enter' })).toBe(true);
++  });
++
++  it('HK2: a repeated Enter on a flag is prevented and changes nothing; a fresh Enter is not prevented', async () => {
++    const { api, view } = await mountMarkerWorkspace(
++      markerArrangement([{ id: 'k1', time: 4, name: 'Flag' }]),
++    );
++    const flag = flagAt(view, '4.000');
++    flag.focus();
++    const before = live(api).arrangement;
++    expect(fireEvent.keyDown(flag, { key: 'Enter', code: 'Enter', repeat: true })).toBe(false);
++    expect(live(api).arrangement).toBe(before);
++    expect(view.queryByRole('menu')).toBeNull();
++    expect(document.activeElement).toBe(flag);
++    expect(fireEvent.keyDown(flag, { key: 'Enter', code: 'Enter' })).toBe(true);
++  });
++
++  it('HK3: a repeated Enter in the name editor keeps it open and adds nothing; a fresh Enter commits one marker', async () => {
++    const { api, view } = await mountMarkerWorkspace();
++    act(() => live(api).seekTo(9));
++    pressM();
++    const input = nameInput(view);
++    fireEvent.change(input, { target: { value: 'Held' } });
++    expect(fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', repeat: true })).toBe(false);
++    expect(fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', repeat: true })).toBe(false);
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBe(input);
++    expect(document.activeElement).toBe(input);
++    expect(markerFlags(view)).toHaveLength(0);
++    expect(live(api).undoLabel).toBeNull();
++    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++    expect(markerTimes(view)).toEqual(['9.000']);
++    expect(live(api).undoLabel).toBe('Add Marker');
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/studio-link-view-in-store-ui.test.tsx b/app/lib/arrangement/__tests__/studio-link-view-in-store-ui.test.tsx
+index b3dfb6c..734e4bb 100644
+--- a/app/lib/arrangement/__tests__/studio-link-view-in-store-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/studio-link-view-in-store-ui.test.tsx
+@@ -258,6 +258,20 @@ describe('STUDIO-LINK-b View in store (round 300)', { timeout: 15_000 }, () => {
+     expect(document.activeElement).toBe(option);
+   });
+ 
++  it('HK4: a repeated Enter on the store link is prevented by the menu and keeps the menu open; a fresh Enter is not', () => {
++    renderWideStudio();
++    const option = libraryOption(MAPPED_SOURCE_ID);
++    option.focus();
++    fireEvent.keyDown(option, { key: 'F10', shiftKey: true });
++    const item = viewInStoreItem();
++    expect(document.activeElement).toBe(item);
++    expect(fireEvent.keyDown(item, { key: 'Enter', repeat: true })).toBe(false);
++    expect(fireEvent.keyDown(item, { key: 'Enter', repeat: true })).toBe(false);
++    expect(libraryMenu()).not.toBeNull();
++    expect(document.activeElement).toBe(item);
++    expect(fireEvent.keyDown(item, { key: 'Enter' })).toBe(true);
++  });
++
+   it('VS7: Enter on the link keeps its native activation and does not reach the Studio shortcuts', () => {
+     renderWideStudio();
+     rightClick(libraryOption(MAPPED_SOURCE_ID));

@@ -1,0 +1,129 @@
+diff --git a/app/components/arrangement/ArrangementDetailPanel.tsx b/app/components/arrangement/ArrangementDetailPanel.tsx
+index 2029fe3..84cfa9d 100644
+--- a/app/components/arrangement/ArrangementDetailPanel.tsx
++++ b/app/components/arrangement/ArrangementDetailPanel.tsx
+@@ -56,6 +56,7 @@ import type { Arrangement, ArrangementClip, TimeRange } from '~/types/arrangemen
+ import { ArrangementPeakPath } from './ArrangementClip';
+ import { STUDIO_LEVEL_FADER_CLASS, studioLevelFaderFillStyle } from './studio-fader';
+ import { STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
++import { STUDIO_NUMBER_FIELD_CLASS } from './studio-number-field';
+ import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ import { STUDIO_SCROLLBAR_CLASS } from './studio-scrollbar';
+ 
+@@ -985,8 +986,7 @@ function ArrangementDetailContentInner({
+     </p>
+   ) : null;
+ 
+-  const inputClass =
+-    'h-6 w-20 rounded-md border border-outline-strong bg-background px-1 font-mono tabular-nums text-foreground disabled:text-dim';
++  const inputClass = `h-6 w-20 rounded-md border border-outline-strong bg-background px-1 font-mono tabular-nums text-foreground disabled:text-dim ${STUDIO_NUMBER_FIELD_CLASS}`;
+ 
+   return (
+     <div
+diff --git a/app/components/arrangement/studio-number-field.ts b/app/components/arrangement/studio-number-field.ts
+new file mode 100644
+index 0000000..215a159
+--- /dev/null
++++ b/app/components/arrangement/studio-number-field.ts
+@@ -0,0 +1,5 @@
++export const STUDIO_NUMBER_FIELD_CLASS = [
++  '[appearance:textfield]',
++  '[&::-webkit-inner-spin-button]:appearance-none',
++  '[&::-webkit-outer-spin-button]:appearance-none',
++].join(' ');
+diff --git a/app/lib/arrangement/__tests__/detail-panel-fit.test.tsx b/app/lib/arrangement/__tests__/detail-panel-fit.test.tsx
+index 4502774..aca54fd 100644
+--- a/app/lib/arrangement/__tests__/detail-panel-fit.test.tsx
++++ b/app/lib/arrangement/__tests__/detail-panel-fit.test.tsx
+@@ -1,7 +1,8 @@
+-import { act, fireEvent, render } from '@testing-library/react';
++import { act, fireEvent, render, within } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
++import { STUDIO_NUMBER_FIELD_CLASS } from '~/components/arrangement/studio-number-field';
+ import {
+   type ArrangementContextValue,
+   ArrangementProvider,
+@@ -349,4 +350,30 @@ describe('detail panel content fits its height (D-29z5, C-R39-01, C-R30-01)', ()
+     expect(marker()).toBeNull();
+     expect(undoChainLabels(() => live(api))).toEqual([CLIP_GAIN_LABEL, CLIP_GAIN_LABEL]);
+   });
++  it('F10: every Detail panel number field carries the no-spin-button class, disabled, enabled and pending (SABA-B-12)', async () => {
++    const { api, view, field } = await mountFitWorkspace();
++    const spinTokens = STUDIO_NUMBER_FIELD_CLASS.split(/\s+/);
++    const numberFields = () => {
++      const fields = within(view.getByTestId('arrangement-detail-content')).getAllByRole(
++        'spinbutton',
++      );
++      expect(fields.map((input) => input.getAttribute('data-testid'))).toStrictEqual([
++        'arrangement-detail-start',
++        'arrangement-detail-end',
++        'arrangement-detail-clip-gain-input',
++      ]);
++      return fields;
++    };
++    for (const input of numberFields()) {
++      expect(input.hasAttribute('disabled')).toBe(true);
++      expect(classTokens(input)).toEqual(expect.arrayContaining(spinTokens));
++    }
++    act(() => live(api).selectClip('s1'));
++    for (const input of numberFields()) {
++      expect(input.hasAttribute('disabled')).toBe(false);
++      expect(classTokens(input)).toEqual(expect.arrayContaining(spinTokens));
++    }
++    fireEvent.change(field(), { target: { value: '3' } });
++    expect(classTokens(field())).toEqual(expect.arrayContaining([...spinTokens, 'border-warning']));
++  });
+ });
+diff --git a/app/lib/arrangement/__tests__/studio-number-field.test.ts b/app/lib/arrangement/__tests__/studio-number-field.test.ts
+new file mode 100644
+index 0000000..b3868bb
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/studio-number-field.test.ts
+@@ -0,0 +1,45 @@
++// @vitest-environment node
++import { readdirSync, readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++import { describe, expect, it } from 'vitest';
++import { STUDIO_NUMBER_FIELD_CLASS } from '~/components/arrangement/studio-number-field';
++
++const ARRANGEMENT_DIR = resolve(__dirname, '../../../components/arrangement');
++const NUMBER_INPUT = /type=["'`{]+number["'`}]+/g;
++const IMPORT_STATEMENT = /^import[\s\S]*?from\s+['"][^'"]+['"];?$/gm;
++const CONSTANT_USE = /\$\{STUDIO_NUMBER_FIELD_CLASS\}|cn\([^)]*STUDIO_NUMBER_FIELD_CLASS/;
++
++function sourceFiles(): string[] {
++  return readdirSync(ARRANGEMENT_DIR).filter(
++    (name) => name.endsWith('.tsx') && !name.includes('.test.'),
++  );
++}
++
++describe('Studio number fields have no browser spin buttons (SABA-B-12 stage 1)', () => {
++  it('NF1: the shared class carries the three spin-button tokens (token contract; the browser half is the C probe)', () => {
++    const tokens = STUDIO_NUMBER_FIELD_CLASS.split(/\s+/);
++    expect(tokens).toStrictEqual([
++      '[appearance:textfield]',
++      '[&::-webkit-inner-spin-button]:appearance-none',
++      '[&::-webkit-outer-spin-button]:appearance-none',
++    ]);
++  });
++
++  it('NF2: every arrangement file with a number input uses the shared class outside its imports', () => {
++    const owners = sourceFiles().filter(
++      (name) =>
++        (readFileSync(resolve(ARRANGEMENT_DIR, name), 'utf8').match(NUMBER_INPUT) ?? []).length > 0,
++    );
++    expect(
++      owners,
++      'a new number-input file must apply STUDIO_NUMBER_FIELD_CLASS and be added to this list',
++    ).toStrictEqual(['ArrangementDetailPanel.tsx']);
++    for (const name of owners) {
++      const body = readFileSync(resolve(ARRANGEMENT_DIR, name), 'utf8').replace(
++        IMPORT_STATEMENT,
++        '',
++      );
++      expect(CONSTANT_USE.test(body), `${name} applies STUDIO_NUMBER_FIELD_CLASS`).toBe(true);
++    }
++  });
++});
