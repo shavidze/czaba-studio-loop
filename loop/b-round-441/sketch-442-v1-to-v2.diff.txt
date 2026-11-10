@@ -1,0 +1,274 @@
+107c107
+< index 0000000..0958f81
+---
+> index 0000000..39b6145
+110,111c110,114
+< @@ -0,0 +1,5 @@
+< +import type { KeyboardEvent } from 'react';
+---
+> @@ -0,0 +1,8 @@
+> +export interface ImeCompositionKeyEvent {
+> +  keyCode: number;
+> +  nativeEvent: Pick<KeyboardEvent, 'isComposing'>;
+> +}
+113c116
+< +export function isImeCompositionKeyDown(event: KeyboardEvent<HTMLElement>): boolean {
+---
+> +export function isImeCompositionKeyDown(event: ImeCompositionKeyEvent): boolean {
+118c121
+< index 0000000..8cf1d33
+---
+> index 0000000..f6890dc
+121c124
+< @@ -0,0 +1,255 @@
+---
+> @@ -0,0 +1,260 @@
+123c126
+< +import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
+---
+> +import type { ReactNode } from 'react';
+240c243,245
+< +    form === 'isComposing' ? { key, code: key, isComposing: true } : { key, code: key, keyCode: 229 },
+---
+> +    form === 'isComposing'
+> +      ? { key, code: key, isComposing: true }
+> +      : { key, code: key, keyCode: 229 },
+254,257c259,262
+< +    const fake = (isComposing: boolean, keyCode: number) => {
+< +      const nativeEvent = new KeyboardEvent('keydown', { key: 'Enter', isComposing });
+< +      return { nativeEvent, keyCode } as unknown as ReactKeyboardEvent<HTMLElement>;
+< +    };
+---
+> +    const fake = (isComposing: boolean, keyCode: number) => ({
+> +      nativeEvent: new KeyboardEvent('keydown', { key: 'Enter', isComposing }),
+> +      keyCode,
+> +    });
+264,282c269,286
+< +  it.each(IME_FORMS)(
+< +    'IME1 BPM field (%s): a composing Enter or Escape keeps focus and the draft and commits nothing; a plain Enter then commits',
+< +    async (form) => {
+< +      const { view, snapshot } = await mountImeWorkspace();
+< +      const input = inputById(view, 'arrangement-tempo-input');
+< +      act(() => input.focus());
+< +      fireEvent.change(input, { target: { value: '96' } });
+< +      const before = snapshot();
+< +      expect(pressComposingKey(input, 'Enter', form)).toBe(true);
+< +      expect(pressComposingKey(input, 'Escape', form)).toBe(true);
+< +      expect(document.activeElement).toBe(input);
+< +      expect(input.value).toBe('96');
+< +      expect(snapshot()).toStrictEqual(before);
+< +      expect(fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' })).toBe(false);
+< +      expect(document.activeElement).not.toBe(input);
+< +      expect(input.value).toBe('96');
+< +      expect(snapshot().statusSequence).toBeGreaterThan(before.statusSequence);
+< +    },
+< +  );
+---
+> +  it.each(
+> +    IME_FORMS,
+> +  )('IME1 BPM field (%s): a composing Enter or Escape keeps focus and the draft and commits nothing; a plain Enter then commits', async (form) => {
+> +    const { view, snapshot } = await mountImeWorkspace();
+> +    const input = inputById(view, 'arrangement-tempo-input');
+> +    act(() => input.focus());
+> +    fireEvent.change(input, { target: { value: '96' } });
+> +    const before = snapshot();
+> +    expect(pressComposingKey(input, 'Enter', form)).toBe(true);
+> +    expect(pressComposingKey(input, 'Escape', form)).toBe(true);
+> +    expect(document.activeElement).toBe(input);
+> +    expect(input.value).toBe('96');
+> +    expect(snapshot()).toStrictEqual(before);
+> +    expect(fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' })).toBe(false);
+> +    expect(document.activeElement).not.toBe(input);
+> +    expect(input.value).toBe('96');
+> +    expect(snapshot().statusSequence).toBeGreaterThan(before.statusSequence);
+> +  });
+284,309c288,312
+< +  it.each(IME_FORMS)(
+< +    'IME2 marker name editor (%s): a composing Enter or Escape keeps the editor open and adds nothing; a plain Enter then adds the marker',
+< +    async (form) => {
+< +      const { api, view, snapshot } = await mountImeWorkspace();
+< +      fireEvent.click(view.getByTestId('arrangement-marker-add'));
+< +      const input = inputById(view, 'arrangement-marker-name-input');
+< +      expect(document.activeElement).toBe(input);
+< +      fireEvent.change(input, { target: { value: 'Hit' } });
+< +      const before = snapshot();
+< +      const parentKeydown = vi.fn();
+< +      document.body.addEventListener('keydown', parentKeydown);
+< +      expect(pressComposingKey(input, 'Enter', form)).toBe(true);
+< +      expect(pressComposingKey(input, 'Escape', form)).toBe(true);
+< +      document.body.removeEventListener('keydown', parentKeydown);
+< +      expect(parentKeydown).not.toHaveBeenCalled();
+< +      expect(view.getByTestId('arrangement-marker-name-input')).toBe(input);
+< +      expect(document.activeElement).toBe(input);
+< +      expect(input.value).toBe('Hit');
+< +      expect(snapshot()).toStrictEqual(before);
+< +      expect(fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' })).toBe(false);
+< +      expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
+< +      expect((live(api).getArrangement().markers ?? []).map((marker) => marker.name)).toStrictEqual([
+< +        'Hit',
+< +      ]);
+< +    },
+< +  );
+---
+> +  it.each(
+> +    IME_FORMS,
+> +  )('IME2 marker name editor (%s): a composing Enter or Escape keeps the editor open and adds nothing; a plain Enter then adds the marker', async (form) => {
+> +    const { api, view, snapshot } = await mountImeWorkspace();
+> +    fireEvent.click(view.getByTestId('arrangement-marker-add'));
+> +    const input = inputById(view, 'arrangement-marker-name-input');
+> +    expect(document.activeElement).toBe(input);
+> +    fireEvent.change(input, { target: { value: 'Hit' } });
+> +    const before = snapshot();
+> +    const parentKeydown = vi.fn();
+> +    document.body.addEventListener('keydown', parentKeydown);
+> +    expect(pressComposingKey(input, 'Enter', form)).toBe(true);
+> +    expect(pressComposingKey(input, 'Escape', form)).toBe(true);
+> +    document.body.removeEventListener('keydown', parentKeydown);
+> +    expect(parentKeydown).not.toHaveBeenCalled();
+> +    expect(view.getByTestId('arrangement-marker-name-input')).toBe(input);
+> +    expect(document.activeElement).toBe(input);
+> +    expect(input.value).toBe('Hit');
+> +    expect(snapshot()).toStrictEqual(before);
+> +    expect(fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' })).toBe(false);
+> +    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
+> +    expect((live(api).getArrangement().markers ?? []).map((marker) => marker.name)).toStrictEqual([
+> +      'Hit',
+> +    ]);
+> +  });
+311,337c314,339
+< +  it.each(IME_FORMS)(
+< +    'IME3 group name editor (%s): a composing Enter or Escape keeps the editor open and renames nothing; a plain Enter then renames',
+< +    async (form) => {
+< +      const { api, view, snapshot } = await mountImeWorkspace();
+< +      const name = view.getByTestId('arrangement-group-name');
+< +      act(() => name.focus());
+< +      fireEvent.keyDown(name, { key: 'F2', code: 'F2' });
+< +      const input = inputById(view, 'arrangement-group-name-input');
+< +      fireEvent.change(input, { target: { value: 'Bed' } });
+< +      const before = snapshot();
+< +      const parentKeydown = vi.fn();
+< +      document.body.addEventListener('keydown', parentKeydown);
+< +      expect(pressComposingKey(input, 'Enter', form)).toBe(true);
+< +      expect(pressComposingKey(input, 'Escape', form)).toBe(true);
+< +      document.body.removeEventListener('keydown', parentKeydown);
+< +      expect(parentKeydown).not.toHaveBeenCalled();
+< +      expect(view.getByTestId('arrangement-group-name-input')).toBe(input);
+< +      expect(document.activeElement).toBe(input);
+< +      expect(input.value).toBe('Bed');
+< +      expect(snapshot()).toStrictEqual(before);
+< +      expect(fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' })).toBe(false);
+< +      expect(live(api).undoLabel).toBe('Rename Group');
+< +      expect((live(api).getArrangement().groups ?? []).map((group) => group.name)).toStrictEqual([
+< +        'Bed',
+< +      ]);
+< +    },
+< +  );
+---
+> +  it.each(
+> +    IME_FORMS,
+> +  )('IME3 group name editor (%s): a composing Enter or Escape keeps the editor open and renames nothing; a plain Enter then renames', async (form) => {
+> +    const { api, view, snapshot } = await mountImeWorkspace();
+> +    const name = view.getByTestId('arrangement-group-name');
+> +    act(() => name.focus());
+> +    fireEvent.keyDown(name, { key: 'F2', code: 'F2' });
+> +    const input = inputById(view, 'arrangement-group-name-input');
+> +    fireEvent.change(input, { target: { value: 'Bed' } });
+> +    const before = snapshot();
+> +    const parentKeydown = vi.fn();
+> +    document.body.addEventListener('keydown', parentKeydown);
+> +    expect(pressComposingKey(input, 'Enter', form)).toBe(true);
+> +    expect(pressComposingKey(input, 'Escape', form)).toBe(true);
+> +    document.body.removeEventListener('keydown', parentKeydown);
+> +    expect(parentKeydown).not.toHaveBeenCalled();
+> +    expect(view.getByTestId('arrangement-group-name-input')).toBe(input);
+> +    expect(document.activeElement).toBe(input);
+> +    expect(input.value).toBe('Bed');
+> +    expect(snapshot()).toStrictEqual(before);
+> +    expect(fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' })).toBe(false);
+> +    expect(live(api).undoLabel).toBe('Rename Group');
+> +    expect((live(api).getArrangement().groups ?? []).map((group) => group.name)).toStrictEqual([
+> +      'Bed',
+> +    ]);
+> +  });
+339,356c341,361
+< +  it.each(IME_FORMS)(
+< +    'IME4 Detail From field (%s): a composing Enter applies no time selection; a plain Enter then applies it',
+< +    async (form) => {
+< +      const { api, view, snapshot } = await mountImeWorkspace();
+< +      act(() => live(api).selectClip('h1'));
+< +      const start = inputById(view, 'arrangement-detail-start');
+< +      act(() => start.focus());
+< +      fireEvent.change(start, { target: { value: '2' } });
+< +      const before = snapshot();
+< +      expect(pressComposingKey(start, 'Enter', form)).toBe(true);
+< +      expect(document.activeElement).toBe(start);
+< +      expect(start.value).toBe('2');
+< +      expect(snapshot()).toStrictEqual(before);
+< +      expect(fireEvent.keyDown(start, { key: 'Enter', code: 'Enter' })).toBe(false);
+< +      expect(snapshot().statusSequence).toBeGreaterThan(before.statusSequence);
+< +      expect(snapshot().status).toMatch(/^Time selection: 00:02\.000/);
+< +    },
+< +  );
+---
+> +  it.each(
+> +    IME_FORMS,
+> +  )('IME4 Detail From and To fields (%s): a composing Enter in either field applies no time selection; a plain Enter then applies it', async (form) => {
+> +    const { api, view, snapshot } = await mountImeWorkspace();
+> +    act(() => live(api).selectClip('h1'));
+> +    const start = inputById(view, 'arrangement-detail-start');
+> +    const end = inputById(view, 'arrangement-detail-end');
+> +    fireEvent.change(start, { target: { value: '2' } });
+> +    fireEvent.change(end, { target: { value: '10' } });
+> +    const before = snapshot();
+> +    for (const field of [start, end]) {
+> +      act(() => field.focus());
+> +      expect(pressComposingKey(field, 'Enter', form)).toBe(true);
+> +      expect(document.activeElement).toBe(field);
+> +    }
+> +    expect([start.value, end.value]).toStrictEqual(['2', '10']);
+> +    expect(snapshot()).toStrictEqual(before);
+> +    expect(fireEvent.keyDown(end, { key: 'Enter', code: 'Enter' })).toBe(false);
+> +    expect(snapshot().statusSequence).toBeGreaterThan(before.statusSequence);
+> +    expect(snapshot().status).toMatch(/^Time selection: 00:02\.000 — 00:10\.000/);
+> +  });
+358,375c363,383
+< +  it.each(IME_FORMS)(
+< +    'IME5 Detail Clip Gain field (%s): a composing Enter applies nothing and a composing Escape does not revert the text; a plain Enter then applies',
+< +    async (form) => {
+< +      const { api, view, snapshot } = await mountImeWorkspace();
+< +      act(() => live(api).selectClip('h1'));
+< +      const gain = inputById(view, 'arrangement-detail-clip-gain-input');
+< +      act(() => gain.focus());
+< +      fireEvent.change(gain, { target: { value: '-3' } });
+< +      const before = snapshot();
+< +      expect(pressComposingKey(gain, 'Enter', form)).toBe(true);
+< +      expect(pressComposingKey(gain, 'Escape', form)).toBe(true);
+< +      expect(document.activeElement).toBe(gain);
+< +      expect(gain.value).toBe('-3');
+< +      expect(snapshot()).toStrictEqual(before);
+< +      expect(fireEvent.keyDown(gain, { key: 'Enter', code: 'Enter' })).toBe(false);
+< +      expect(live(api).getArrangement().clips.find((clip) => clip.id === 'h1')?.gainDb).toBe(-3);
+< +    },
+< +  );
+---
+> +  it.each(
+> +    IME_FORMS,
+> +  )('IME5 Detail Clip Gain field (%s): a composing Enter applies nothing and a composing Escape does not revert the text; a plain Enter then applies', async (form) => {
+> +    const { api, view, snapshot } = await mountImeWorkspace();
+> +    act(() => live(api).selectClip('h1'));
+> +    const gain = inputById(view, 'arrangement-detail-clip-gain-input');
+> +    act(() => gain.focus());
+> +    fireEvent.change(gain, { target: { value: '-3' } });
+> +    const before = snapshot();
+> +    expect(pressComposingKey(gain, 'Enter', form)).toBe(true);
+> +    expect(pressComposingKey(gain, 'Escape', form)).toBe(true);
+> +    expect(document.activeElement).toBe(gain);
+> +    expect(gain.value).toBe('-3');
+> +    expect(snapshot()).toStrictEqual(before);
+> +    expect(fireEvent.keyDown(gain, { key: 'Enter', code: 'Enter' })).toBe(false);
+> +    expect(
+> +      live(api)
+> +        .getArrangement()
+> +        .clips.find((clip) => clip.id === 'h1')?.gainDb,
+> +    ).toBe(-3);
+> +  });
