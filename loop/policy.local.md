@@ -630,3 +630,19 @@ B also checks during ARCH-SPLIT planning:
 ### Evidence
 - `docs/technical/studio-real-workspace/architecture-file-size-audit-2026-11-10.md` (frontend-architect report, pending)
 - `docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md` (product-designer report)
+
+## Legacy removal policy (Saba, 2026-11-10)
+
+**Rule:** Legacy code that is not used anywhere must be removed incrementally. Do not keep dead code "just in case."
+
+**StudioContext.tsx (1,755 lines) — legacy Mixdown Studio:**
+- Route: `studio.$productId` (protected file — Saba changes it himself)
+- Shares zero code with ArrangementContext (the new DAW at `studio-lab`)
+- When ArrangementContext fully replaces the old Studio, StudioContext.tsx and its route will be removed
+- Until then: do not refactor StudioContext — it is frozen legacy. Do not add features to it
+
+**General legacy cleanup:**
+- B checks: is this file imported anywhere? (`grep -r "from.*<file>" app/`)
+- If no imports and no route references: mark for removal in the next ARCH-SPLIT or cleanup round
+- Dead exports inside living files: remove when touching that file (zero-cost cleanup)
+- Unused dependencies in package.json: remove in a PERF or SYS round
