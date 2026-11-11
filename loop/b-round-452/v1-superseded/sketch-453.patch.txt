@@ -1,0 +1,258 @@
+diff --git a/app/components/chat/ChatInput.tsx b/app/components/chat/ChatInput.tsx
+index 8662a67..26c91a4 100644
+--- a/app/components/chat/ChatInput.tsx
++++ b/app/components/chat/ChatInput.tsx
+@@ -81,7 +81,7 @@ export const ChatInput = forwardRef<HTMLDivElement, ChatInputProps>(
+               'p-2.5 rounded-lg',
+               'bg-brand text-background',
+               'transition-all duration-150',
+-              'hover:bg-brand-hover hover:shadow-glow',
++              'hover:bg-brand-hover',
+               'cursor-pointer',
+               (disabled || !value.trim()) && 'opacity-50 cursor-not-allowed',
+             )}
+diff --git a/app/components/chat/GuestForm.tsx b/app/components/chat/GuestForm.tsx
+index e5de5e3..c7e667c 100644
+--- a/app/components/chat/GuestForm.tsx
++++ b/app/components/chat/GuestForm.tsx
+@@ -96,7 +96,7 @@ export const GuestForm = forwardRef<HTMLDivElement, GuestFormProps>(({ onSubmit
+               'bg-brand text-background font-semibold',
+               'rounded-lg',
+               'transition-all duration-150',
+-              'hover:bg-brand-hover hover:shadow-glow',
++              'hover:bg-brand-hover',
+               'cursor-pointer',
+             )}
+           >
+diff --git a/app/components/ui/Button.tsx b/app/components/ui/Button.tsx
+index 89abd71..dc406f9 100644
+--- a/app/components/ui/Button.tsx
++++ b/app/components/ui/Button.tsx
+@@ -17,7 +17,7 @@ const variantStyles: Record<ButtonVariant, string> = {
+     'bg-brand text-background',
+     'hover:bg-brand-hover',
+     'active:opacity-90',
+-    'shadow-sm hover:shadow-glow',
++    'shadow-sm',
+   ].join(' '),
+ 
+   secondary: [
+diff --git a/app/lib/__tests__/store-glow-shadow.test.ts b/app/lib/__tests__/store-glow-shadow.test.ts
+new file mode 100644
+index 0000000..3d0ef2f
+--- /dev/null
++++ b/app/lib/__tests__/store-glow-shadow.test.ts
+@@ -0,0 +1,130 @@
++// @vitest-environment node
++import { describe, expect, it } from 'vitest';
++import {
++  ANY_STYLED_SOURCE_EXTENSIONS,
++  APP_ROOT,
++  allowListViolations,
++  countTealHits,
++  countZeroOffsetGlowHits,
++  hitsByFile,
++  listFiles,
++  readApp,
++  type StyleScanAllowList,
++} from './helpers/style-scan';
++
++const MIN_SCANNED_SOURCES = 200;
++const STORE_CSS_PATH = 'styles/app.css';
++
++const RETIRED_TOKEN_PATTERN = /--shadow-glow(?:-accent)?(?![\w-])/g;
++const RETIRED_UTILITY_PATTERN = /(?<![\w-])shadow-glow(?![\w-])/g;
++
++const GRANTED_GLOW_FREE_SOURCES: ReadonlyArray<string> = [
++  'components/ui/Button.tsx',
++  'components/chat/ChatInput.tsx',
++  'components/chat/GuestForm.tsx',
++  STORE_CSS_PATH,
++];
++
++const RETIRED_UTILITY_ALLOW_LIST: StyleScanAllowList = {
++  'components/studio/GlobalPlayhead.tsx': {
++    hits: 1,
++    reason: 'frozen legacy Studio (SRW-21 / legacy removal); inert once the token is gone',
++  },
++  'components/chat/ChatButton.tsx': {
++    hits: 1,
++    reason: 'LEGACY-DEAD-STORE-COMPONENTS (ChatWidget is mounted by no route)',
++  },
++  'components/ui/IconButton.tsx': {
++    hits: 1,
++    reason: 'LEGACY-DEAD-STORE-COMPONENTS (0 importers outside the ui barrel)',
++  },
++  'components/home/VideoShowcase.tsx': {
++    hits: 1,
++    reason: 'LEGACY-DEAD-STORE-COMPONENTS (0 importers outside the barrel)',
++  },
++};
++
++const PRIMARY_BUTTON_SELECTORS: ReadonlyArray<string> = [
++  '.btn-primary',
++  '.btn-primary:hover',
++  '.btn-primary:active',
++  '.button-primary',
++  '.button-primary:hover',
++];
++
++function countMatches(pattern: RegExp): (source: string) => number {
++  return (source) => (source.match(pattern) ?? []).length;
++}
++
++function topLevelRuleBodies(css: string, selector: string): string[] {
++  const bodies: string[] = [];
++  let lineStart = 0;
++  for (const line of css.split('\n')) {
++    if (line === `${selector} {`) {
++      const bodyStart = lineStart + line.length;
++      const bodyEnd = css.indexOf('\n}', bodyStart);
++      bodies.push(css.slice(bodyStart, bodyEnd));
++    }
++    lineStart += line.length + 1;
++  }
++  return bodies;
++}
++
++describe('store glow shadows (STORE-2b-3b)', () => {
++  it('GS1: the retired --shadow-glow and --shadow-glow-accent tokens are neither defined nor read anywhere in app', () => {
++    const hits = hitsByFile(
++      APP_ROOT,
++      ANY_STYLED_SOURCE_EXTENSIONS,
++      countMatches(RETIRED_TOKEN_PATTERN),
++    );
++    expect(hits).toEqual({});
++  });
++
++  it('GS2: only the allow-listed frozen or dead files name the shadow-glow utility, each at its exact count', () => {
++    const hits = hitsByFile(
++      APP_ROOT,
++      ANY_STYLED_SOURCE_EXTENSIONS,
++      countMatches(RETIRED_UTILITY_PATTERN),
++    );
++    expect(allowListViolations(hits, RETIRED_UTILITY_ALLOW_LIST)).toEqual({
++      unexpected: [],
++      drifted: [],
++    });
++  });
++
++  it('GS3: the primary button rules carry no glow, no teal and no teal gradient', () => {
++    const css = readApp(STORE_CSS_PATH);
++    for (const selector of PRIMARY_BUTTON_SELECTORS) {
++      const bodies = topLevelRuleBodies(css, selector);
++      expect(bodies, selector).toHaveLength(1);
++      const body = bodies[0] ?? '';
++      expect(countZeroOffsetGlowHits(body), selector).toBe(0);
++      expect(countTealHits(body), selector).toBe(0);
++      expect(body, selector).not.toContain('--gradient-primary');
++    }
++    const [buttonPrimary] = topLevelRuleBodies(css, '.button-primary');
++    expect(buttonPrimary).toContain('color: var(--color-brand-foreground);');
++    const [hover] = topLevelRuleBodies(css, '.btn-primary:hover');
++    expect(hover).toContain('background: var(--color-brand-hover);');
++    expect(hover).not.toContain('opacity');
++  });
++
++  it('GS4: the scan is non-vacuous and reads every granted file', () => {
++    const sources = listFiles(APP_ROOT, ANY_STYLED_SOURCE_EXTENSIONS);
++    expect(sources.length).toBeGreaterThanOrEqual(MIN_SCANNED_SOURCES);
++    for (const path of [...GRANTED_GLOW_FREE_SOURCES, ...Object.keys(RETIRED_UTILITY_ALLOW_LIST)]) {
++      expect(sources).toContain(path);
++    }
++    for (const path of GRANTED_GLOW_FREE_SOURCES) {
++      const source = readApp(path);
++      expect(countMatches(RETIRED_UTILITY_PATTERN)(source), path).toBe(0);
++      expect(countMatches(RETIRED_TOKEN_PATTERN)(source), path).toBe(0);
++    }
++    expect(countMatches(RETIRED_UTILITY_PATTERN)('hover:shadow-glow shadow-glow')).toBe(2);
++    expect(countMatches(RETIRED_UTILITY_PATTERN)('--shadow-glow shadow-glow-accent')).toBe(0);
++    expect(countMatches(RETIRED_TOKEN_PATTERN)('var(--shadow-glow) --shadow-glow-accent:')).toBe(2);
++    expect(topLevelRuleBodies('.a {\n  x: 1;\n}\n.a:hover {\n  y: 2;\n}', '.a')).toEqual([
++      '\n  x: 1;',
++    ]);
++  });
++});
+diff --git a/app/lib/__tests__/store-theme-tokens.test.ts b/app/lib/__tests__/store-theme-tokens.test.ts
+index 3d1f6ab..d20b635 100644
+--- a/app/lib/__tests__/store-theme-tokens.test.ts
++++ b/app/lib/__tests__/store-theme-tokens.test.ts
+@@ -84,7 +84,7 @@ const RETIRED_STORE_COLOUR_FRAGMENTS = [
+ ];
+ 
+ const BUTTON_UNCHANGED_VARIANT_BLOCKS = [
+-  "  primary: [\n    'bg-brand text-background',\n    'hover:bg-brand-hover',\n    'active:opacity-90',\n    'shadow-sm hover:shadow-glow',\n  ].join(' '),",
++  "  primary: [\n    'bg-brand text-background',\n    'hover:bg-brand-hover',\n    'active:opacity-90',\n    'shadow-sm',\n  ].join(' '),",
+   "  secondary: [\n    'bg-elevated text-foreground',\n    'border border-outline',\n    'hover:bg-outline hover:border-outline-hover',\n    'active:opacity-90',\n  ].join(' '),",
+   "  ghost: [\n    'bg-transparent text-muted',\n    'hover:bg-elevated hover:text-foreground',\n    'active:opacity-90',\n  ].join(' '),",
+   "  accent: [\n    'bg-accent text-background',\n    'hover:brightness-110',\n    'active:opacity-90',\n    'shadow-sm',\n  ].join(' '),",
+diff --git a/app/styles/app.css b/app/styles/app.css
+index 365b3e6..e4bf161 100644
+--- a/app/styles/app.css
++++ b/app/styles/app.css
+@@ -149,8 +149,6 @@ html.lenis, html.lenis body {
+   --shadow-md: 0 2px 8px hsl(220, 20%, 2%, 0.4);
+   --shadow-lg: 0 4px 16px hsl(220, 20%, 2%, 0.5);
+   --shadow-xl: 0 8px 32px hsl(220, 20%, 2%, 0.6);
+-  --shadow-glow: 0 0 40px hsl(175, 85%, 46%, 0.15);
+-  --shadow-glow-accent: 0 0 40px hsl(38, 95%, 55%, 0.15);
+   --shadow-card: 0 8px 32px hsl(220, 20%, 2%, 0.4);
+   --shadow-elevated: 0 16px 48px hsl(220, 20%, 2%, 0.6);
+ 
+@@ -408,19 +406,15 @@ html[data-focus-source="pointer"] :focus-visible {
+   font-weight: 600;
+   transition:
+     opacity 0.2s ease,
+-    box-shadow 0.3s ease,
+     background-color 0.2s ease;
+ }
+ 
+ .btn-primary:hover {
+-  opacity: 0.9;
+-  box-shadow: 0 0 20px -5px rgba(19, 217, 204, 0.5);
+   background: var(--color-brand-hover);
+ }
+ 
+ .btn-primary:active {
+   opacity: 0.8;
+-  box-shadow: 0 0 12px -3px rgba(19, 217, 204, 0.4);
+ }
+ 
+ /* Icon Button */
+@@ -492,14 +486,12 @@ button { cursor:pointer }
+ }
+ 
+ .button-primary {
+-  background: var(--gradient-primary);
+-  color: white;
+-  box-shadow: var(--shadow-lg);
++  background: var(--color-brand);
++  color: var(--color-brand-foreground);
+ }
+ 
+ .button-primary:hover {
+-  box-shadow: 0 0 50px hsl(175, 85%, 50%, 0.4);
+-  background: hsl(175, 85%, 40%);
++  background: var(--color-brand-hover);
+ }
+ 
+ .button-secondary {
+@@ -1751,10 +1743,6 @@ button { cursor:pointer }
+   transition: box-shadow 0.3s;
+ }
+ 
+-.special-offer-card:hover {
+-  box-shadow: var(--shadow-glow);
+-}
+-
+ .special-offer-bg {
+   position: absolute;
+   inset: 0;
+@@ -2227,7 +2215,6 @@ button { cursor:pointer }
+ 
+ .track-card:hover {
+   border-color: var(--color-outline-hover);
+-  box-shadow: var(--shadow-glow);
+ }
+ 
+ .track-card-image-wrapper {

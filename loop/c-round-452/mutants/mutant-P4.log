@@ -1,0 +1,74 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b452-mut-5524[39m
+
+ [31m❯[39m app/lib/__tests__/store-gradient-text.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 221[2mms[22m[39m
+     [32m✓[39m GT1: no app CSS rule paints text with a background clip, except the allow-listed dead rule at its exact count[32m 22[2mms[22m[39m
+[31m     [31m×[31m GT1b: no app or perf script clips text to a background (class, inline style or CSS text), except the allow-listed dead loader at its exact count[39m[32m 35[2mms[22m[39m
+     [32m✓[39m GT2: the --gradient-text token is neither defined nor read anywhere in app[32m 17[2mms[22m[39m
+     [32m✓[39m GT3: only the allow-listed dead files name the retired text-glow or hero-title-glow class, each at its exact count[32m 18[2mms[22m[39m
+     [32m✓[39m GT4: the CSS scan is non-vacuous and its parser handles case, lists, comments, quotes and alpha-zero fills[32m 6[2mms[22m[39m
+     [32m✓[39m GT4b: the script scan finds every gradient-text spelling and is non-vacuous[32m 34[2mms[22m[39m
+     [32m✓[39m GT5: the allow-listed dead components stay unmounted (no importer outside their own file and the barrels)[32m 50[2mms[22m[39m
+     [32m✓[39m GT5b: the allow-listed dead modules with common names are imported by no file outside their own file and their own barrels[32m 35[2mms[22m[39m
+ [31m❯[39m app/lib/__tests__/store-teal-sweep.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 292[2mms[22m[39m
+     [32m✓[39m TS1: every remaining teal hit in app sources sits in an allow-listed file[32m 137[2mms[22m[39m
+     [32m✓[39m TS2: the scan is non-vacuous and every allow-list entry keeps its exact hit count[32m 131[2mms[22m[39m
+     [32m✓[39m TS3: the granted store files carry no glow token, no zero-offset glow and no teal colour[32m 4[2mms[22m[39m
+[31m     [31m×[31m TS4: the entrance loader wordmark has no gradient text clip[39m[32m 6[2mms[22m[39m
+     [32m✓[39m TS5: perf sources carry no teal colour and the perf scan is non-vacuous[32m 11[2mms[22m[39m
+     [32m✓[39m TS6: the zero-offset glow scanner finds every spelling and skips offset shadows and rings[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT1b: no app or perf script clips text to a background (class, inline style or CSS text), except the allow-listed dead loader at its exact count
+[31m[1mAssertionError[22m: expected [ Array(1) ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "app/components/loading/SpotlightLoader.tsx",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m133:24[22m[39m
+    [90m131| [39m      [33mSCRIPT_GRADIENT_TEXT_ALLOW_LIST[39m[33m,[39m
+    [90m132| [39m    )[33m;[39m
+    [90m133| [39m    [34mexpect[39m(unexpected)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m134| [39m    [34mexpect[39m(drifted)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m135| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-teal-sweep.test.ts[2m > [22mstore teal sweep (STORE-2b-2a, STORE-2b-2b)[2m > [22mTS4: the entrance loader wordmark has no gradient text clip
+[31m[1mAssertionError[22m: expected [ 'WebkitBackgroundClip' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "WebkitBackgroundClip",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m app/lib/__tests__/store-teal-sweep.test.ts:[2m89:19[22m[39m
+    [90m 87| [39m    [35mconst[39m source [33m=[39m [34mreadApp[39m([33mSPOTLIGHT_LOADER_PATH[39m)[33m;[39m
+    [90m 88| [39m    const found = GRADIENT_TEXT_TOKENS.filter((token) => source.includ…
+    [90m 89| [39m    [34mexpect[39m(found)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                  [31m^[39m
+    [90m 90| [39m  })[33m;[39m
+    [90m 91| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m12 passed[39m[22m[90m (14)[39m
+[2m   Start at [22m 10:37:13
+[2m   Duration [22m 602ms[2m (transform 105ms, setup 0ms, import 196ms, tests 514ms, environment 0ms)[22m
+
+
+::error file=/tmp/b452-mut-5524/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT1b%3A no app or perf script clips text to a background (class%2C inline style or CSS text)%2C except the allow-listed dead loader at its exact count,line=133,column=24::AssertionError: expected [ Array(1) ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "app/components/loading/SpotlightLoader.tsx",%0A+ ]%0A%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:133:24%0A%0A
+
+::error file=/tmp/b452-mut-5524/app/lib/__tests__/store-teal-sweep.test.ts,title=app/lib/__tests__/store-teal-sweep.test.ts > store teal sweep (STORE-2b-2a%2C STORE-2b-2b) > TS4%3A the entrance loader wordmark has no gradient text clip,line=89,column=19::AssertionError: expected [ 'WebkitBackgroundClip' ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "WebkitBackgroundClip",%0A+ ]%0A%0A ❯ app/lib/__tests__/store-teal-sweep.test.ts:89:19%0A%0A

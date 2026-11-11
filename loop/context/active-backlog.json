@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-11T10:11:18.048Z",
-  "current_task": "Round 451: SYS-R450-STORE-STYLE-SCAN test-only (current-task.md)",
+  "_generatedUtc": "2026-11-11T10:45:52.960Z",
+  "current_task": "Round 452: SYS-R450-STORE-STYLE-SCAN re-dispatch, sketch v5 (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6617,7 +6617,7 @@
       "severity": "medium",
       "origin": "B spec (round 449 sketch GT1 scans CSS only; found by A code-reviewer)",
       "title": "store-gradient-text GT1 scans CSS only; gradient text re-introduced in TSX (Tailwind bg-clip-text + text-transparent, [background-clip:text], inline WebkitBackgroundClip/WebkitTextFillColor) would pass every test",
-      "status": "in_progress round 451 (D-29z1603): SYS-R450-STORE-STYLE-SCAN; closes on C PASS + gate | scheduled (D-29z1601): moved from STORE-2b-3b row GT1b into SYS-R450-STORE-STYLE-SCAN (tech-lead, RETRO 450) | scheduled (D-29z1597): row GT1b of STORE-2b-3b (the stage that next owns store-gradient-text / store- …[see backlog.json]",
+      "status": "in_progress round 452 (D-29z1606): re-dispatch with sketch v5 after round 451 short FAIL | in_progress round 451 (D-29z1603): SYS-R450-STORE-STYLE-SCAN; closes on C PASS + gate | scheduled (D-29z1601): moved from STORE-2b-3b row GT1b into SYS-R450-STORE-STYLE-SCAN (tech-lead, RETRO 450) | scheduled  …[see backlog.json]",
       "evidence": "a-round-449.md code-reviewer Medium; c-round-449.json notes; b-round-449/data/dead-importers.txt (bash b-round-449/dead-importers.sh)",
       "added": "2026-11-11 B round 449 -> 450 planning",
       "systemic_task": "SYS-R450-STORE-STYLE-SCAN"
@@ -6669,17 +6669,39 @@
       "severity": "info",
       "status": "logged (D-29z1604-i)",
       "title": "zero-offset glow scan misses 0 0 calc(...) and concatenated values; const backgroundClip = 'text' co"
+    },
+    {
+      "id": "A-R451-REVIEW-M1-GT5-BARREL-SCOPE",
+      "severity": "medium",
+      "origin": "B spec",
+      "status": "scheduled round 452 (D-29z1606): sketch v5 restores GT5's HEAD barrel list; closes on C PASS + gate",
+      "title": "Sketch v4 added components/audio/index.ts and components/index.ts to the shared BARREL_FILES, so GT5's dead-component name scan skipped 2 files HEAD scanned (L4 break)",
+      "evidence": "a-round-451.md STOP detail; a-round-451/mutant-gt5-root-barrel.txt; c-round-451/mutant-gt5.txt; b-round-451/v4-mutants/mutants.txt",
+      "repro": "append `export { ArtistBioSection as Bio } from './home';` to app/components/index.ts; npx vitest run app/lib/__tests__/store-gradient-text.test.ts -t 'GT5:' -> red at a8599a2, green on v4",
+      "added": "2026-11-11 B round 451 -> 452 planning",
+      "systemic_task": "SYS-R450-STORE-STYLE-SCAN",
+      "found_by": "A round 451 code-reviewer; reproduced by C round 451"
+    },
+    {
+      "id": "INFO-TL-R452-SELECTOR-SHIFT",
+      "severity": "info",
+      "status": "logged (D-29z1607)",
+      "title": "style-scan quote blanking of {}; inside strings can move a CSS hit to a different selector key; hit "
+    },
+    {
+      "id": "INFO-A451-L60-SED-DOC",
+      "severity": "info",
+      "status": "logged (D-29z1605); retro input RETRO 465",
+      "title": "A used sed -i for a one-line wording fix in its own new doc 295 (L60 forbids shell string edits in t"
+    },
+    {
+      "id": "INFO-C451-AUTH-COLD-START",
+      "severity": "info",
+      "status": "logged (D-29z1605); known class L38",
+      "title": "C's first auth-smoke run timed out on a cold dev server; rerun after browser warm-up passed"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 442,
-      "task": "current-task.md",
-      "decision": "D-29z1571",
-      "type": "SYS-3 stage 1 (IME composition guard on inline editors)",
-      "status": "done (D-29z1573): C PASS browserVerified true; gate 442 published 4aa3c82",
-      "note": "baseline 5d81795 (gate 441 published); sketch b-round-441/sketch-442.patch.txt (sha 0715fbdf); claims b-round-441/claims-442.sh"
-    },
     {
       "round": 443,
       "task": "current-task.md",
@@ -6752,8 +6774,16 @@
       "task": "current-task.md",
       "decision": "D-29z1603",
       "type": "SYS-R450-STORE-STYLE-SCAN (test-only)",
-      "status": "dispatched",
+      "status": "done: C short FAIL (STOPPED on A-R451-REVIEW-M1-GT5-BARREL-SCOPE), gate skipped (D-29z1605)",
       "note": "baseline a8599a2; manifest b-round-450/r451-tree-sha256.txt (1366); grants b-round-450/grants-451.txt; claims b-round-450/claims-451.sh"
+    },
+    {
+      "round": 452,
+      "task": "current-task.md",
+      "decision": "D-29z1606",
+      "type": "SYS-R450-STORE-STYLE-SCAN re-dispatch, sketch v5 (test-only)",
+      "status": "dispatched",
+      "note": "baseline a8599a2 + A's round-451 v4 tree; manifest b-round-451/r452-tree-sha256.txt (1366); grants b-round-451/grants-452.txt; claims b-round-451/claims-452.sh"
     }
   ],
   "other_keys": [

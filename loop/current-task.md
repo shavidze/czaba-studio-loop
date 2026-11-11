@@ -1,177 +1,223 @@
-# Round 452: SYS-R450-STORE-STYLE-SCAN re-dispatch — sketch v5 restores GT5's HEAD barrel scope (test-only fix-up)
+# Round 453: STORE-2b-3b — the glow shadows leave the Store: `--shadow-glow`, the primary-button glows and the zero-offset glow inventory
 
-**Planned by:** B at the round 451 → 452 planning, 2026-11-11 (`b-round-451.md`). The advisor was available and was consulted after orientation and before writing. The round-451 task is archived as `tasks/round-451.md`, a byte-identical copy.
+**Planned by:** B, at the round 452 → 453 planning, 2026-11-11 (`b-round-452.md`).
+- The advisor was available and was consulted after orientation, before writing.
+- The round-452 task is archived as `tasks/round-452.md` (a byte-identical copy made before this file was rewritten).
+- **Baseline:** gate 452 is `published`, commit `ee7cf7c` [K1]. The store tree is at `ee7cf7c` and clean at planning [K2, K15].
+- **Regression:** not due (last 2026-11-10, round 425; due on or after 2026-11-13). **Next RETRO:** round 465.
 
-## Decisions
-All are in `backlog.json` (v440 → v441) under `decisions_log_b`.
-- **D-29z1605: round 451 = short FAIL, routed to B.**
-  - C round 451: `taskStatus` FAIL (STOPPED), `browserVerified`/`realVerified` true. C1–C3, C10, C11 and C12 passed, and C reproduced the STOP's named check.
-  - C4–C9 were **not** C-verified. A's own results for them do not count.
-  - Gate 451 was `skipped` (C FAIL), so the baseline stays gate 449's `a8599a2` [K1] [K2].
-  - **A-R451-REVIEW-M1-GT5-BARREL-SCOPE (Medium, origin `B spec`)** is open and scheduled here. SYS-R450-STORE-STYLE-SCAN and its 7 ids stay open until this round passes C and the gate.
-- **D-29z1606: round 452 = this re-dispatch.**
-  - B rules the Medium as **fixed, not accepted** (L10).
-  - REGRESSION is due on or after 2026-11-13, not now [K26].
-- **D-29z1607: tech-lead review 4 on v5: APPROVE.** The residual rulings are in §5.
+## Why this round
+- **Round 452 closed.** C round 452 PASS (C1–C12, `browserVerified`/`realVerified` true, 0 bugs). Gate 452 published `ee7cf7c`. SYS-R450-STORE-STYLE-SCAN is done (D-29z1608).
+- **STORE-2b-3b is the next STORE-REDESIGN stage.** Its scope:
+  - The spec row STORE-2 says "Remove … `shadow-glow`".
+  - The round-452 task (§7, D-29z1604-c) assigns this stage the zero-offset glow inventory in app TS/TSX. HEAD has 5 hits [K17]: CinemaCurtainLoader 2, PurchaseHeader 1, GlobalPlayhead 1, `routes/store.tsx` 1.
+- **What is live at HEAD** (browser, `b-round-452/probe/glow-head.json`):
+  - A teal glow on hover and on press on every brass primary CTA: the header "Sign In", the hero "Discover the Collection", the 404 "Back Home", the `/account` "Sign In" (ui/Button) and the `/support` "Start Chat".
+  - The two stub pages `/account/login` and `/search`: a "Back to Home" link that is a teal gradient with white text. Its hover text contrast is **2.36:1**.
+  - The product page's "Added" state: a brass 20px glow.
 
-## Rules
-- **Read `lessons.md` first.** L4 "Port preserves HEAD" applies again. The v4 miss is exactly the class L4 names: a HEAD exclusion list was widened and mapped as "stronger". This round adds the HEAD-pin mutants N11/N11b and a whole scope sweep (§6).
-- **Not applicable in a test-only round:** reference-first, the Ableton conformance table, the product-designer step and the screen budget. Nothing visible changes.
-- **L57:** C's JSON carries all L57 fields. `mutantRedOnSketch` names `b-round-451/mutants.txt` and `b-round-451/head-mutants/mutants.txt`. Every bug carries an enum `origin`. Before hand-off, C runs `python3 -I tools/l57-check.py c-round-452.json c-round-452/l57-check.txt` and gets rc 0.
-- **L29:**
-  - Each fact about `store/` ends with a `[K#]` tag. The commands are in `b-round-451/claims-452.sh`.
-  - B's outputs are `b-round-451/claims-452-planning-output.txt` (run on A's round-451 tree in `store/`, before this round) and `b-round-451/claims-452-sketch-output.txt` (run with `STORE_ROOT=/tmp/b452-atree`: A's tree plus the v5 delta plus doc 295 l.4 set to 452, i.e. the expected end state).
-- **L60:** A never uses `git stash`, `git checkout --`, `sed -i` or other shell string edits in the store tree. Apply the sketch with `git apply`, then edit doc 295 with the editor tools only. Round 451 used one `sed -i` on doc 295 (INFO-A451-L60-SED-DOC); do not repeat it.
-- **Speed rules:** A runs `npm run typecheck`, `npm run lint` and the covering files only. C does not run the full suite. Full verify is a gate row.
+## What changes (user-visible)
+- **Primary buttons:**
+  - No glow at rest, on hover or on press.
+  - Hover shows the lighter brass `#D9B87F` at full opacity. The old 0.9 hover opacity is removed: without the glow, it made the hover almost invisible (`product-designer`).
+  - Press feedback stays: opacity 0.8 on `.btn-primary`, 0.9 on ui/Button.
+  - The keyboard focus ring is unchanged.
+- **Stub-page "Back to Home"** (`.button-primary`): brass fill, dark `#0E0D0C` text, the lighter brass on hover. Its drop shadow (`--shadow-lg`) and the teal glow go. Contrast goes from 2.36 to 10.28 on hover.
+- **Product page "Added" state:** no glow. The "Added" label, the Sparkles icon and the scale pulse stay.
+- **No box moves.** Every target's box equals HEAD's [probe].
+- **`/studio-lab`:** no computed-style change [probe STUDIO rows].
+- **Frozen legacy Studio** (`/studio/:id`, purchased only): the playhead and the Export Audio hover lose the teal halo (see the ruling lines; measured on the stubbed path).
 
-## Baseline: HEAD `a8599a2`, tree = A's round-451 work (v4 applied + doc 295)
-- **Gate:** gate 449 published `a8599a2`; gates 450 and 451 are `skipped` [K1]. HEAD is `a8599a2` [K2].
-- **Frozen files:**
-  - `b-round-451/r452-tree-sha256.txt` lists every tracked file except the grants, **1,366** entries (identical to round 451's manifest). From `store/`, `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-451/r452-tree-sha256.txt` gives rc 0 [K3].
-  - The 11 protected files in `b-round-318/protected-sha256.txt` also check rc 0 [K3].
-- **The tree at planning** holds v4: `sha256sum -c b-round-450/sketch-files-sha256.txt` gives rc 0 from `store/` [K29]. Nothing outside the grants is dirty [K4].
-- **Grants:** the same 5 paths, listed in `b-round-451/grants-452.txt`. No other file in `store/` may change [K4].
+## Reference
+- **Spec:** `store-redesign-spec.md`, row STORE-2: "Remove … `shadow-glow`". Spec l.18 allows removing glow on keep-list items. None of the keep-list items is touched here.
+- **Direction A** (`direction-decision.md`): one accent, brass, no glow.
+- **`product-designer` consult (this planning):**
+  - **Q1, primary-button feedback: option (b).** Hover changes the fill only. Button keeps its offset `shadow-sm`. `.btn-primary:hover` drops `opacity: .9`. `:active` keeps `opacity: .8`.
+    - Rejected (a), dropping `shadow-sm`: outside STORE-2 and inconsistent with the other filled variants.
+    - Rejected (c), adding lift or a border: new design that the direction does not ask for.
+  - **Q2, `.button-primary`: option (a).** Brass fill and brand-foreground text.
+    - Rejected (b), making it secondary: that takes away the page's only primary action.
+  - **Q3, dead and frozen sites stay as they are,** IconButton included, under the standing rule.
+  - **States to check:** rest, hover, active, keyboard focus-visible, no ring after a pointer press, disabled, 1280×720 and 1440×900. Each is a C row below.
+- **Ableton:** does not apply (Store marketing UI).
 
-| Path | What may change in this round |
-|---|---|
-| `app/lib/__tests__/store-gradient-text.test.ts` | Only the v5 delta (§2). It is applied by `git apply`, with no hand edits [K4] |
-| `app/lib/__tests__/helpers/style-scan.ts`, `app/lib/__tests__/store-teal-sweep.test.ts`, `app/lib/__tests__/studio-naming.test.tsx` | Nothing. They stay byte-equal to v4 = v5 (`b-round-451/sketch-files-sha256.txt`) [K29] |
-| `docs/implementation/2026/quarter-IV/295-sys-r450-store-style-scan.md` | The whole doc. l.4 is rewritten to 452 (L28 re-dispatch clause), and a Problem → Solution for the barrel scope is added (§1 step 6) [K21] |
+**Deviations:** none from the spec.
 
-**Frozen and read only (unchanged from round 451):** `app/styles/studio.css` and `app/styles/pages/studio.css` exist and have 0 clip lines today [K11]. They are scanned, never edited.
+**Screen budget:** no element is added. One element is removed: the invisible `/store` card "Hover Glow Effect" overlay (it paints nothing at HEAD).
 
-## 0. Why this round
-- **The Medium (C round 451, reproduced).** v4 appended `components/audio/index.ts` and `components/index.ts` to the shared `BARREL_FILES`, which GT5 and GT5b both use as their exclusion list. GT5's name scan therefore skipped 2 files that HEAD scanned.
-  - Mutant: appending `export { ArtistBioSection as Bio } from './home';` to the root barrel makes GT5 red at HEAD and green on v4 (`c-round-451/mutant-gt5.txt`; B's `b-round-451/v4-mutants/mutants.txt`).
-  - This breaks L4.
-- **Why B missed it:**
-  - B's §4 pin map recorded "GT5 plus … the audio barrel" as stronger.
-  - None of the 53 mutants removed a HEAD exclusion pin.
-  - Three reviews read the wider list as a strengthening.
-  - Recorded as retro candidate RETRO465-B-EXCLUSION-LIST-AS-STRONGER.
-- **The rest of SYS-R450 is unchanged.** It still closes A-R449-REVIEW-GT1-TSX (Medium) and the 6 Lows of round 451's §0.
+## Ruling lines (L4)
+- **`app/styles/**` is `global_forbidden` [K11]. B grants `app/styles/app.css` narrowly,** with the same precedent as rounds 192, 196, 201, 316 and 449. A may change only the hunks in `sketch-453.patch.txt`:
+  - remove the 2 `@theme` tokens;
+  - the 3 `.btn-primary` hunks;
+  - the 2 `.button-primary` hunks;
+  - delete `.special-offer-card:hover`;
+  - delete the `box-shadow` line of `.track-card:hover`.
 
-## 1. What A does
-1. **Read the primitives first** (L60: before any edit, including the `git apply`):
-   - `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `AGENT_DISCOVERABLE_CODE.md`, which the hook maps for `app/lib/__tests__/**`;
-   - `GEORGIAN_DOCS.md` and `docs/implementation/TEMPLATE.md`, for doc 295.
-2. **Check the start state, then apply.** From `store/`, run `sha256sum -c ../tmp/studio-real-loop/b-round-450/sketch-files-sha256.txt`.
-   - **rc 0** (expected; v4 is in the tree [K29]): run `git apply ../tmp/studio-real-loop/b-round-451/sketch-452-delta-v4-v5.patch.txt`. Its sha256 is in `b-round-451/sketch-452.sha256`. B ran `git apply --check` of it on a copy of A's round-451 tree: rc 0 (`b-round-451/apply-check.txt`) [K32].
-   - **rc ≠ 0** because the 4 files are back at HEAD (`git status` shows them clean): run `git apply ../tmp/studio-real-loop/b-round-451/sketch-452-full-v5.patch.txt` instead. This is v4 plus the same delta; B's check on clean HEAD gave rc 0 [K32].
-   - **Doc 295 missing** in either branch: write it fresh from TEMPLATE (same file name), with every §1 step 7 item.
-   - **Any other start state:** STOP (L11).
-   - Afterwards, `sha256sum -c ../tmp/studio-real-loop/b-round-451/sketch-files-sha256.txt` gives rc 0 [K29]. There are no fix-ups. Any other code change you want is a STOP (L11).
-3. **Run the checks** and save the logs under `a-round-452/`:
-   - `npm run typecheck`;
-   - `npm run lint`;
-   - the covering set: `npx vitest run app/lib/__tests__/store-teal-sweep.test.ts app/lib/__tests__/store-gradient-text.test.ts app/lib/__tests__/studio-naming.test.tsx`.
+  The obsidian block stays byte-identical [K8: `e9afeed85faec382`].
+- **Dead and frozen sites keep their `shadow-glow` class** (the dead-code rule wins; `product-designer` Q3). These are `ChatButton.tsx`, `ui/IconButton.tsx`, `home/VideoShowcase.tsx` and the frozen `components/studio/GlobalPlayhead.tsx` [K4, K5].
+  - With the token removed, the class paints nothing. The probe's INERT rows show `box-shadow: none` on `/` and `/studio-lab`.
+  - GS2 allow-lists them with exact counts. LEGACY-DEAD-STORE-COMPONENTS and the legacy Studio removal take them away.
+- **Token removal vs frozen legacy Studio:** the removal wins, as `@theme` changes have reached legacy Studio since round 192.
+  - GlobalPlayhead's non-amber playhead loses its teal 40px halo. Its brass line stays.
+  - The legacy ExportDialog's "Export Audio" (ui/Button primary) loses its teal hover glow too.
+  - Both are measured on the stubbed client path (HR-LEGACY-STUBBED, `probe/legacy-playhead-probe.cjs`): HEAD shows a teal `0 0 40px` on the playhead and on the hover; the sketch shows `none` and the `shadow-sm` offset shadow. This is C11. The ownership/backend half is not tested and stays BLOCKED.
+  - Doc 296 records it.
+- **Every ui/Button with the default or `primary` variant loses its hover glow by design**, including signed-in and frozen consumers that C cannot open unstubbed [K19]: `studio/ExportDialog`, `studio/DownloadDialog`, `account.downloads`, `studio.$productId`, the recordings and scenes pages, `gift-cards`, `account` and `cart`. No file of theirs changes; only the shared Button class and the token do.
+- **Loading, disabled cursor and default motion (`product-designer` states):**
+  - `isLoading` and the disabled cursor come from Button's base classes (`opacity-50 cursor-not-allowed pointer-events-none`), which this round does not touch. C5 covers the disabled hover; `isLoading` cannot be reached in the cloud without a backend action, so it has no browser row (source rows GS2/ST5).
+  - Default motion: C4 runs with `reducedMotion: 'reduce'`, the same as B's HEAD capture. C4b records one default-motion sample.
+- **Dead CSS rules that read the removed token:** `.special-offer-card:hover` and `.track-card:hover` have 0 TSX consumers [K9]. The `var()` read is deleted, not left dangling. The rest of those dead rules is STORE-2b-3d's.
+- **D-29z1604-c inventory [K17]:**
+  - PurchaseHeader (live) is fixed here.
+  - `routes/store.tsx`: the overlay is deleted. It paints nothing at HEAD, because `var(--color-brand)25` is invalid CSS (`probe/store-card-head.json`).
+  - CinemaCurtainLoader (2, dead) goes to STORE-2b-3d.
+  - GlobalPlayhead (frozen) is allow-listed.
+- **Not in this round** (K12 lists them, unchanged): every other teal or glow CSS rule. These are `.hover-glow`, `.audio-preview-inline-button`, `.audio-player-*`, `.track-row-waveform`, `glow-pulse`, `.product-detail-add-to-cart`, `.newsletter-button-large`, `.track-card-play-button`, and the `--gradient-primary` users other than `.button-primary`.
+  - Live ones go to STORE-2b-3c.
+  - Dead ones go to STORE-2b-3d. B re-greps them at that planning.
+- **A-R451-REVIEW-L2-ZERO-OFFSET-UNITS and INFO-TL-R451-GLOW-CALC:** re-checked by `tech-lead` this planning. Both still fail open (`0rem 0 20px`, `0 0 calc(…)`).
+  - The fix belongs in `helpers/style-scan.ts`, which is not granted here (gate-452 architecture note: no helper growth without an extraction task).
+  - Owner: STORE-2b-3c. Doc 296 says so.
+- **Test pin (L23):** `store-theme-tokens.test.ts` ST5 pins ui/Button's primary block as a literal [K7]. It is replaced by the new literal (`'shadow-sm',`), the same exact-literal strength, and GS2/GS4 add the glow ban. No assertion is removed. Mutant M2 turns ST5 red.
 
-   B's results on the sketch [K18] [K20]: typecheck rc 0; lint rc 0 with 205 warnings, the same as HEAD; covering 3 files and 16 tests. The full suite on the sketch, for information only (a gate row): 282 files, 4,128 tests [K19].
-4. **Run golden G1** in a throwaway clone (`git clone --shared`, with `node_modules` symlinked; never in `store/`).
-   - Copy `b-round-450/golden/style-scan-golden.test.ts` into its `app/lib/__tests__/`.
-   - Run it with `GOLDEN_OUT=<loop>/a-round-452/golden.json`. It must pass with `equal: true` and the sizes in [K17].
-5. **Run the named check from round 451** on a throwaway clone, never in `store/`. `run-mutants.sh` clones commits, not the working tree, so:
-   - `git clone -q --shared . /tmp/a452-src`, then `cp --parents` the 4 code grant files into it;
-   - commit inside that clone only;
-   - run `SRC=/tmp/a452-src OUT=<loop>/a-round-452/mutants IDS="BASE N11-GT5-ROOT-BARREL-ALIAS N11b-GT5-AUDIO-BARREL-ALIAS N8h-GT5b-OWN-BARRELS-DROPPED" bash <loop>/b-round-451/run-mutants.sh`.
+## 1. Changes (A applies `b-round-452/sketch-453.patch.txt`, sha256 `6e7710919c8315eb6ef441956832e0cd71e66c56e16db394762bbebe8ad73935`; per-file hashes `b-round-452/sketch-files-sha256.txt`)
 
-   Expected [K14]: BASE none; N11 GT5; N11b GT5; N8h GT5b. Remove the clone afterwards (L60).
-6. **Code-reviewer:** one file of code changes, plus the doc. Ask it once, on the delta and doc 295.
-   - Every Medium+ it raises is a STOP unless §5 already rules on it (L11, L22).
-   - Its Lows go into your report.
-7. **Doc 295** (editor tools only):
-   - **l.4** is exactly `**სტატუსი:** Completed (C round 452 PASS)` (L28) [K21].
-   - **Problem → Solution:** add one entry in Georgian. Problem: v4 widened GT5's exclusion to five barrels. Solution: GT5 keeps HEAD's 3, and GT5b excludes only each dead module's own barrels (`deadModuleBarrelFiles`).
-   - **Citations:** the N11/N11b mutants are loop artifacts, cited by path, not as row ids (L26). Every row id you cite exists [K12].
-   - **Headings:** the TEMPLATE heading order is kept (L26).
-
-## 2. What changes (the delta, `store-gradient-text.test.ts` only)
-- `BARREL_FILES` goes back to HEAD's three: `components/home/index.ts`, `components/loading/index.ts`, `components/common/index.ts` [K5] [K6]. **GT5 uses it exactly as HEAD did.**
-- New `deadModuleBarrelFiles(dead)` = `dead.barrels.map((barrel) => \`${barrel}/index.ts\`)`.
-  - **GT5b** excludes only the dead module's own file and its own barrels: Timeline → `components/audio/index.ts` and `components/index.ts`; email.server → none [K7].
-  - These two are the only re-exporters of the dead modules: the audio barrel names `Timeline`, and the root barrel does `export * from './audio'` [K10].
-- GT5b's title becomes "… outside their own file and their own barrels". The `it('GT5b` prefix is unchanged [K12].
-- No `expect(` is added or removed: teal 10, gradient 23, naming 6 (HEAD 8 / 10 / 6) [K30].
-- **Everything else in v4 stays:** §2–§4 of `tasks/round-451.md`, including the rulings D-29z1604-a…i.
-
-## 3. HEAD pin map change (L4)
-Only the GT5 row of round 451's §4 changes. Every other row stands as written there.
-
-| HEAD pin | Sketch v5 |
-|---|---|
-| GT5: 4 dead components, **exclusion = 3 barrels** | GT5: the same 3 barrels (**equal**) [K5] [K6], DEAD_COMPONENTS + `CinemaCurtainLoader` (stronger). Pin mutants N11/N11b are red at HEAD and on v5 [K14] [K15] |
-| (none at HEAD) | GT5b: per-module own barrels, narrower than v4's shared five (stronger; review 4, TL-a) |
-
-**Whole sweep:**
-- Every constant, allow-list and file filter of both HEAD suites was compared with v5 (`b-round-451/scope-sweep.md`; command in [K8]).
-- Only `DEAD_COMPONENTS` (a superset) and the GT1 allow-list key format (ruled D-29z1604-f) differ.
-- Every HEAD row scans an equal or larger file set.
-- tech-lead checked the same independently, including the `stripComments` → tokenizer row.
-
-## 4. Pre-check evidence (B, on the sketch)
-- **Mutants on v5:** `b-round-451/mutants.txt`, 57 lines. These are round 450's 54 plus three new ones [K14]:
-  - **N8h** (`deadModuleBarrelFiles` returns `[]`) → GT5b;
-  - **N11** (root-barrel alias) → GT5;
-  - **N11b** (audio-barrel alias `export { ArtistBioSection as Bio } from '../home';`) → GT5.
-
-  The other 54 lines equal `b-round-450/mutants.txt`.
-- **HEAD control:** `b-round-451/head-mutants/mutants.txt`, 37 lines. N11 and N11b are red at GT5 (HEAD pins); N8h shows EDIT-FAILED. The other 34 lines equal `b-round-450/head-mutants/mutants.txt` [K15].
-- **v4 control:** `b-round-451/v4-mutants/mutants.txt`. N11 and N11b are green: this is the bug [K16].
-- **Golden G1 on v5:** `equal: true`, sizes appTs 349, perfTs 17, appCss 5, appAny 354, tealApp 6, tealPerf 0, cssBySelectorAppAndBase 1, gt3 3, probe 5 [K17].
-- **Timeouts (L31):** at gate 449 the covering files took 158 ms, 334 ms and 406 ms [K31]; on the v5 sketch 208, 266 and 177 ms [K20]. All are below 50 % of the 5 s default.
-
-## 5. Sketch review and ruled residuals
-`b-round-451/sketch-review.md` (`tech-lead`, review 4) names the dispatched delta sha256 and the fallback's. **Verdict: APPROVE**, no Medium+ [K13].
-
-**Ruled residuals.** If A's code-reviewer raises one of these again, it is already ruled: not a STOP and not re-filed (L7: add `confirmedBy`).
-- **Everything ruled in round 451 §5:**
-  - TL-R451-L1…L4;
-  - INFO-TL-R451-FILL-FORMS, INFO-TL-R451-GLOW-CALC, INFO-TL-R451-WALKER-HOST and TL-R451-CODE4-TEAL-TEXT-SHADOW;
-  - SIG-R451-STYLE-SCAN-ENGINE-POLICY;
-  - D-29z1604-a…i.
-- **D-29z1606-a:** the alias hole **through HEAD's own three barrels** is pre-existing at HEAD: a barrel re-exports a dead component under an alias, and a consumer imports the alias.
-  - It is the existing deferred Low TL-R449-D2-BARREL-ALIAS, which closes with the dead-file deletion in STORE-2b-3d. It is not fixed here.
-  - Today the five barrels contain no `as` word at all [K9]; the grep was checked on a known single-line and multi-line alias (`b-round-451/k9-known-hit.txt`).
-- **D-29z1606-b: A-R451-REVIEW-L1-SCRIPT-CSS-MULTILINE** fails safe → `deferred_low_polish`.
-- **D-29z1606-c: A-R451-REVIEW-L2-ZERO-OFFSET-UNITS** → `deferred_low_polish`.
-  - The offsets `0rem`, `0em` and `-0` are not matched. It fails open, but the scanner is new in this sketch, so this is not a regression against HEAD.
-  - It is separate from INFO-TL-R451-GLOW-CALC, which is about the blur-value forms.
-  - STORE-2b-3b, which next owns the glow scanner, re-checks both ids.
-- **D-29z1606-d: A-R451-REVIEW-L3-REREAD** (about 200 ms) → `deferred_low_polish`.
-- **D-29z1607:**
-  - INFO-TL-R452-SELECTOR-SHIFT: quote blanking can move a hit to another selector; it fails loud.
-  - TL-R451-L2-SIDE-EFFECT-IMPORT gets `confirmedBy` review 4.
-- **Architecture note** (helper mixes the regex library, walker and resolver): `confirmedBy` on SIG-R451-STYLE-SCAN-ENGINE-POLICY. It is a signal only.
-
-A reviewer finding outside this list at Medium+ is a STOP (L11, L22).
-
-## 6. Acceptance (C)
-C runs the **full** C1–C12. Round 451 C-verified only C1–C3 and C10–C12.
-
-C runs from a clean copy of A's tree wherever a row needs edits. Destructive work stays under `c-round-452/` (L60).
-
-| # | Row | Pass when |
+| # | File | Change |
 |---|---|---|
-| C1 | SOURCE-SCOPE, start and end | Changed paths ⊆ `b-round-451/grants-452.txt`; `r452-tree-sha256.txt` rc 0; protected files rc 0 |
-| C2 | CLAIMS | Re-run `b-round-451/claims-452.sh` from `store/` on A's tree. Every line equals `b-round-451/claims-452-sketch-output.txt` (B's run on the expected end state), with no allowed delta. Empty stderr. The planning output (`claims-452-planning-output.txt`, A's v4 tree) is for reference only |
-| C3 | APPLY | From `store/`, `sha256sum -c ../tmp/studio-real-loop/b-round-451/sketch-files-sha256.txt` gives rc 0 (4 files, the untracked helper included) [K29] |
-| C4 | COVERING | The 3 covering files pass. Rows TS1–TS6, GT1, GT1b, GT2, GT3, GT4, GT4b, GT5 and GT5b exist [K12] |
-| C5 | GOLDEN G1 | `b-round-450/golden/style-scan-golden.test.ts`, run in a throwaway clone of A's tree, passes with `equal: true` and the sizes in [K17] |
-| C6 | MUTANTS on A's tree | Build `S=/tmp/c452-src` as `git clone --shared` of `store`. Copy A's 4 grant files plus the doc into it (`cp --parents`) and commit inside the clone only. Run `SRC=$S OUT=<loop>/c-round-452/mutants bash <loop>/b-round-451/run-mutants.sh`. `mutants.txt` equals `b-round-451/mutants.txt` line for line (57 lines). Write `mutantRedOnTree` |
-| C7 | HEAD control | `H=/tmp/c452-head`, a clone at `a8599a2`. Run `SRC=$H OUT=<loop>/c-round-452/head-mutants IDS="BASE $(python3 -I <loop>/b-round-451/mutants.py --list \| tr ' ' '\n' \| grep '^N' \| tr '\n' ' ')" bash <loop>/b-round-451/run-mutants.sh`. The output equals `b-round-451/head-mutants/mutants.txt` (37 lines). N11 and N11b must be red at GT5 |
-| C8 | NO-WEAKENING | Every HEAD `expect(` maps to its row (round 451 §4 + §3 here). The `grep -c "expect("` counts on A's tree equal `b-round-451/expect-counts.txt` [K30]. `BARREL_FILES` equals HEAD's [K5] [K6]. `store-header-footer.test.tsx` is unchanged (manifest) |
-| C9 | DOC 295 | TEMPLATE headings in order (L26). l.4 is exactly `**სტატუსი:** Completed (C round 452 PASS)` [K21]. It has a barrel-scope Problem → Solution. Every cited row id exists. No `pending` [K22] |
-| C10 | G452-AUTH (browser, 1440×900 and 1280×720) | Round 451's G451-AUTH recipe, verbatim. In a fresh anonymous context: `/studio-lab`, then `/studio/middle-east` (warm both first with one untimed browser load, L38), then `GET /api/studio-token?product=middle-east&file=stem.mp3` with no Authorization header. Expected: `localStorage.auth_user` null and the workspace opens; "Sign in required" with 0 `audio[src]`; the token API returns 401. Baseline: `c-round-451/auth-smoke.json` [K33]. Fake-bearer premium path: BLOCKED (backend unavailable in cloud) |
-| C11 | STUDIO-SMOKE (browser, both viewports) | Enter adds a clip, Play moves the position, Stop holds it, Export opens and closes with Esc. A sanity row: no runtime code changes |
-| C12 | L57 | `tools/l57-check.py` rc 0 |
-| gate | Full verify, typecheck, build, lint | `gates/gate-round-452.json` |
+| 1 | `app/styles/app.css` (narrow grant) | the hunks named in the ruling lines; nothing else |
+| 2 | `app/components/ui/Button.tsx` | primary: `'shadow-sm hover:shadow-glow'` → `'shadow-sm'` |
+| 3 | `app/components/chat/ChatInput.tsx`, `app/components/chat/GuestForm.tsx` | `'hover:bg-brand-hover hover:shadow-glow'` → `'hover:bg-brand-hover'` |
+| 4 | `app/components/product/PurchaseHeader.tsx` | the `justAdded ? 'shadow-[0_0_20px_…]'` class part is removed [K18] |
+| 5 | `app/routes/store.tsx` | the "Hover Glow Effect" overlay `div` and its comment are removed (9 lines) [K18]; `BRAND_COLOR` and `isHovered` stay in use |
+| 6 | `app/lib/__tests__/store-theme-tokens.test.ts` | the ST5 primary literal only |
+| 7 | NEW `app/lib/__tests__/store-glow-shadow.test.ts` (node) | GS1–GS4; it reuses `helpers/style-scan.ts` unchanged |
+| 8 | NEW doc `docs/implementation/2026/quarter-IV/296-store-2b-3b-glow-shadows.md` [K10] | see A step 4 |
 
-**What could break nearby:** nothing at runtime, because only a test file and a doc change. The risk is a weaker guard; C6–C8 cover it. STORE-2b-3b edits these suites' allow-lists next.
+**Tests and mutants** (`b-round-452/run-mutants.sh`, `mutants/mutants.txt`; HEAD control `head-control.log`: GS1–GS4 all red at HEAD):
 
-## 7. After this round
-- **Round 453:** REGRESSION-2026-11-13 if it is planned on or after 2026-11-13. Otherwise STORE-2b-3b (glow shadows: the zero-offset inventory of `tasks/round-451.md` D-29z1604-c, `--shadow-glow` and the shared Button), whose task re-checks A-R451-REVIEW-L2 and INFO-TL-R451-GLOW-CALC.
-- **Then, in order:** 2b-3c, 2b-3d with the dead-file deletion (closes TL-R449-D2-BARREL-ALIAS), 2b-4, STORE-2c…5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, then phase 2 under the skip rule.
-- **Next RETRO:** round 465.
+| Row | Checks | Mutant → red |
+|---|---|---|
+| GS1 | `--shadow-glow` / `--shadow-glow-accent` are neither defined nor read in app CSS/TS/TSX | M1 token restored → GS1 GS4; M8 `.special-offer-card:hover` read restored → GS1 GS4 |
+| GS2 | the `shadow-glow` utility appears only in the 4 allow-listed files, each exactly once | M2 Button glow back → GS2 GS4 ST5; M7 IconButton loses its token (drift) → GS2; M9 ChatInput glow back → GS2 GS4 |
+| GS3 | every rule whose selector ends in `.btn-primary`, `.btn-primary:hover`, `.btn-primary:active`, `.button-primary` or `.button-primary:hover` (including `@media`, descendant and comma forms): no zero-offset glow, no teal, no `--gradient-primary`; `.button-primary` has brand-foreground text; `.btn-primary:hover` has the brand-hover fill and no opacity | M3 M4 M5 M6 M10 M12 M13 M14 (`@media`) M15 (no space) M16 (descendant, comma) → GS3 |
+| GS4 | non-vacuous (≥ 200 sources, every granted and allow-listed file read); the 5 granted scripts and `app.css` carry no utility or token; the 5 granted scripts carry 0 zero-offset glows; matcher self-test | M17 ChatInput arbitrary brass glow → GS4; M18 PurchaseHeader glow back → GS4; M19 store-card overlay back → GS4 |
+| — | controls | BASE, M11 (an offset drop shadow on `.btn-primary:hover`) and M20 (the glow only inside a CSS comment) → none |
 
-## claims
-`b-round-451/claims-452.sh`: K1–K27 and K29–K33 (there is no K28). Outputs: `b-round-451/claims-452-planning-output.txt` and `b-round-451/claims-452-sketch-output.txt`.
+## 2. A: steps
+1. **Read first:** `lessons.md` (L11–L15, L26, L28, L60) and the primitives `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `FORWARDREF_COMPONENT.md` (Button), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, and `docs/implementation/TEMPLATE.md`.
+2. **Claims, before editing.** Run `bash b-round-452/claims-453.sh`.
+   - The output must equal `b-round-452/claims-453-planning-output.txt`, with stderr empty.
+   - Otherwise STOP (L11).
+3. **Apply.**
+   - Check the patch sha256 against `b-round-452/sketch-453.sha256`.
+   - Run `git apply b-round-452/sketch-453.patch.txt`.
+   - Run `sha256sum -c b-round-452/sketch-files-sha256.txt`; it must give rc 0.
+   - If the patch does not apply cleanly, STOP. Do not hand-port, and make no hand edits to code.
+4. **Doc 296**, in Georgian with English technical terms, edited with the editor tools only (L60).
+   - **Format:**
+     - l.3 is `**თარიღი:** 2026-11-11`.
+     - l.4 is exactly `**სტატუსი:** In Progress (stage 2b-3b of STORE-2b; C round 453 PASS)` (L28).
+     - The 7 TEMPLATE headings appear in order (L26), with no `pending`.
+   - **Content:**
+     - the `product-designer` choices;
+     - the HEAD measurements: teal hover glow, stub contrast 2.36, the "Added" glow;
+     - the GlobalPlayhead legacy visual change and the `.button-primary` `shadow-lg` removal;
+     - the inert `store.tsx` overlay;
+     - the D-29z1604-c inventory ruling;
+     - A-R451-REVIEW-L2 and INFO-TL-R451-GLOW-CALC: still fail open, owner STORE-2b-3c;
+     - GS1–GS4 and the ST5 literal.
+
+     Say that the mutants and probes are loop artifacts and are not in the repo (GATE452-L4).
+   - **TODO:** 2b-3c, 2b-3d (CinemaCurtainLoader, the dead allow-list, `.special-offer-card`/`.track-card`), 2b-4, and LEGACY-DEAD-STORE-COMPONENTS.
+   - Cite only test ids that exist.
+5. **Checks** (speed rules; no full suite):
+   - `npx vitest run $(cat b-round-452/covering-453.txt)`: 5 files green. B's run: 5 files / 66 tests, each file under 0.4 s.
+   - `npm run typecheck`: rc 0.
+   - `npm run lint`: rc 0, with 205 warnings, the same as HEAD.
+   - `npx biome check` on the 7 changed code files: rc 0 and 6 warnings, the same as HEAD on the same 6 existing files (`precheck-biome-head.log`).
+   - **Mutants**, on a scratch clone, never in the store tree:
+     1. `git clone --shared` the store at `ee7cf7c` into `/tmp/a453-src`.
+     2. Apply the patch, symlink `node_modules` and **commit**.
+     3. Run `SRC=/tmp/a453-src OUT=<abs a-round-453 dir>/mutants bash b-round-452/run-mutants.sh`. OUT must be absolute.
+
+     The result must equal `b-round-452/mutants/mutants.txt`.
+   - **code-reviewer** (3+ files). Pass its Architecture note to B.
+6. **Browser** (dev server `:5173` on A's tree, mock API on `:5199`; warm-up first, L38). Run on A's tree:
+   - `node b-round-452/probe/glow-probe.cjs http://127.0.0.1:5173 <a-round-453>/glow-tree.json 1440,1280 <a-round-453>/shots`, then `python3 -I b-round-452/probe/compare-glow.py b-round-452/probe/glow-head.json <a-round-453>/glow-tree.json`. It must end `ROWS 22 ALL_OK True`.
+   - `added-probe.cjs`: `addedShadow` is `none` at both viewports.
+   - `store-card-probe.cjs`: `glowing` is `[]`.
+7. **Claims, after editing.** Run `STORE_ROOT=<store> bash b-round-452/claims-453.sh`.
+   - Every K equals `b-round-452/claims-453-sketch-output.txt`, except K2 (HEAD sha), K10 and K15. B dry-ran this on a clone with the patch and a placeholder doc 296: only those three differ.
+   - K10 must read `1 files`, and K15 must read `outside 0 inside 9`.
+8. **`git status`** shows only the 9 paths in `b-round-452/grants-453.txt`.
+
+## 3. C: acceptance rows
+**Setup:**
+- Real Chromium (Playwright). Copy `b-round-452/probe/*` into `c-round-453/` before changing anything (L60).
+- **Servers:**
+  - The tree: dev server `:5173`.
+  - Mock API: `:5199` (`node tmp/studio-real-loop/mock-api/server.mjs`, started detached with `setsid`).
+  - HEAD control: `bash b-round-448/probe/serve-tree.sh start <c-round-453>/head 5178 /home/runner/czaba-project/store ee7cf7c`.
+- Warm each server with `node b-round-448/probe/warm.cjs <base> /studio-lab /studio/middle-east / /store` before its first timed probe. Run probes one at a time, never during a vitest run (L38).
+
+| Row | Action | Pass |
+|---|---|---|
+| C1 SOURCE-SCOPE | `git status --untracked-files=all` | only the 9 `grants-453.txt` paths. Unchanged: `app/root.tsx`, `app/components/studio/**`, `app/styles/` other than `app.css`, `app/contexts/**`, the protected routes, `helpers/style-scan.ts`, ChatButton, IconButton, VideoShowcase |
+| C2 CLAIMS | `claims-453.sh` on the tree vs `claims-453-sketch-output.txt` | equal except K2, K10 (`1 files`) and K15 (`outside 0 inside 9`); K8 obsidian sha `e9afeed85faec382`; K17 shows only CinemaCurtainLoader 2 and GlobalPlayhead 1 |
+| C3 APPLY | `sha256sum -c b-round-452/sketch-files-sha256.txt` on the tree | 8 OK; `app.css` diff vs `ee7cf7c` = exactly the sketch's hunks |
+| C4 PRIMARY-STATES (the change) | `glow-probe.cjs` on HEAD `:5178` and tree `:5173` at 1440 and 1280; `compare-glow.py <head> <tree>` | `ROWS 22 ALL_OK True`. Per enabled target (header Sign In, hero CTA, 404, 2 stubs, `/account` Sign In, `/support` Start Chat):<br>• no zero-offset or teal shadow at rest, hover, active or focus<br>• no teal background<br>• rest `rgb(201,164,106)`, hover `rgb(217,184,127)` at opacity 1<br>• text contrast ≥ 4.5 at rest and on hover (B: 8.32 / 10.28)<br>• active opacity 0.8 (`.btn-primary`), 0.9 (Button), 1 (stubs, chat)<br>• keyboard ring present and equal to HEAD<br>• box equal to HEAD<br>The HEAD control must show the teal hover glow (the script checks this). Keep the hover and focus crops of both trees.<br>A transition sample still in flight (a non-round value like `12.0136px` or an opacity between states) is environment-invalid: rerun that target once. A second unsettled sample is a finding |
+| C5 DISABLED | the same run, GIFTCARD-SELECT (disabled in the cloud: no gift-card product) | no hover change, opacity 0.5, no glow |
+| C6 POINTER-NO-RING | C4's `active` sample, taken while the mouse button is held on the target (`compare-glow.py` checks it) | `focusVisible` false and outline `none` on every enabled target at both viewports (B's sketch run: 14 of 14) |
+| C4b DEFAULT-MOTION | a copy of `glow-probe.cjs` with `reducedMotion` left at the default, on the tree at 1440, HEADER-SIGNIN and HERO-CTA only | `record`: hover fill and no glow, as in C4, after the 450 ms wait |
+| C7 ADDED-STUBBED | `added-probe.cjs` on HEAD and the tree (it stubs `POST /api/cart/items`, client path only, L36) | HEAD `addedShadow` contains `0px 0px 20px`; tree `none`; `addedText` "Added" on both; `posted` 1 |
+| C8 STORE-CARD | `store-card-probe.cjs` on HEAD and the tree | `glowing: []` on both. The overlay was inert at HEAD; the card href and the hover screenshot are unchanged |
+| C9 INERT + STUDIO | C4's INERT and STUDIO rows | the injected `.shadow-glow` element is `none` on the tree and teal on HEAD; the `/studio-lab` computed-style digest (rest and Export dialog) equals HEAD at both viewports. Pixel rows are not used: INFO-C449-C9-HEAD-CONTROL-FLAKE is unexplained, and the digest is deterministic (B: HEAD vs HEAD equal across 3 runs) |
+| C10 COVERING + MUTANTS | `npx vitest run $(cat b-round-452/covering-453.txt)`; then `run-mutants.sh` on a C scratch (`git clone --shared` at `ee7cf7c` + A's diff applied **and committed**; absolute OUT) | 5 files green; `mutants.txt` equals `b-round-452/mutants/mutants.txt` (21 lines) |
+| C11 LEGACY-STUBBED | `node legacy-playhead-probe.cjs <base> <out.json> <W> <H> <shots>` on HEAD and the tree, at 1440×900 and 1280×720; one throwaway load of `/studio/middle-east` first (HR-MP3-WARMUP, amended round 222) | client path only (HR-LEGACY-STUBBED):<br>• the `shadow-glow` playhead line: HEAD ends `0px 0px 40px 0px`, tree `none`<br>• "Export Audio" hover: HEAD teal `0 0 40px`, tree `rgba(4, 5, 6, 0.3) 0px 1px 2px 0px` with fill `rgb(217, 184, 127)`<br>• the button box equals HEAD's<br>• `audioSrc` 0 and 0 page errors<br>B's runs: `probe/legacy-{head,sketch}-{1440,1280}.json`. Ownership and backend stay BLOCKED |
+| C12 STUDIO + PURCHASE PROTECTION | from inside `c-round-453/` (create `shots/` there): `node <copy of b-round-452/probe/c12-run/c12-from-c448.cjs> <base> <tag> > c12-<tag>.json` on HEAD and the tree | at 1440 and 1280: `/studio-lab` clips 1, Playing with `posPlay` > 0, Stopped, `stopHeld` true; anonymous `/studio/middle-east`: `audioSrc` 0, `media` 0, "Sign in required"; equal to HEAD (B: `probe/c12-run/c12-sketch.json`) |
+| C13 DOCS | doc 296 | l.4 exact; TEMPLATE headings in order; no `pending`; every GS/ST id cited exists; the GlobalPlayhead, `shadow-lg`, inventory and fail-open (owner 2b-3c) lines present |
+| C14 L57 | `python3 -I tools/l57-check.py c-round-453.json c-round-453/l57-check.txt` | rc 0 |
+
+- **Gate rows** (full vitest, typecheck, build, Biome, verify) are `gate` and are not claimed by C. B's full suite on the sketch: 283 files / 4132 tests (`precheck-full-raw.log`).
+- **Fake-bearer premium path:** BLOCKED (backend unavailable in cloud).
+- **`c-round-453.json`:** write all L57 fields. Every finding has an `origin`. Fill these fields:
+  - `mutantRedOnSketch` = `b-round-452/mutants/mutants.txt`;
+  - `affectedChecksRunOnSketch` = `b-round-452/precheck-full-raw.log` and `b-round-452/probe/glow-compare.txt`.
+
+**Neighbours that could break:**
+- Every page with the header Sign In or ui/Button. C4 covers 8 targets.
+- The Sign-in modal: its submit is the `accent` variant, which is unchanged.
+- The `/store` card hover (C8).
+- The product page cart button (C7).
+- `/studio-lab`, including the Export dialog (C9).
+- The legacy Studio playhead and its Export dialog (C11, stubbed).
+- Tests that read `app.css` or Button: covering set + full-suite precheck.
+
+## 4. Claims
+- **Script:** `b-round-452/claims-453.sh` (K1–K19; K17 runs the real helper through `vite-node`).
+  - Planning output: `claims-453-planning-output.txt`.
+  - Sketch output (`STORE_ROOT=/tmp/b453-scratch`): `claims-453-sketch-output.txt`.
+  - Both stderr files are empty.
+- **Probes** (`b-round-452/probe/`):
+
+  | Script | Outputs |
+  |---|---|
+  | `glow-probe.cjs` + `compare-glow.py` | `glow-head.json`, `glow-sketch.json`, `glow-compare.txt`, `glow-compare-head-self-CONTROL.txt` (fails, as it must) |
+  | `added-probe.cjs` | `added-head.json`, `added-sketch.json` |
+  | `store-card-probe.cjs` | `store-card-head.json`, `store-card-sketch.json` |
+  | `c12-run/c12-from-c448.cjs` | `c12-sketch.json` |
+  | `legacy-playhead-probe.cjs` | `legacy-head-1440.json`, `legacy-head-1280.json`, `legacy-sketch-1440.json`, `legacy-sketch-1280.json` |
+
+  Screenshots are in `shots-*`. The v1 artifacts are in `v1-superseded/`.
+- **Pre-check (v2):**
+  - `precheck-typecheck.log` rc 0;
+  - `precheck-lint.log` 205 warnings;
+  - `precheck-biome-scoped.log` vs `precheck-biome-head.log`, 6 = 6;
+  - `precheck-full-raw.log`, 283 / 4132;
+  - `precheck-build.log` rc 0;
+  - `git apply --check` on the store tree: rc 0.
+- **Reviews:** `b-round-452/sketch-review.md`. The v1 `tech-lead` review was APPROVE-WITH-CHANGES with 5 Lows, all addressed in v2. The v2 delta review (APPROVE) is recorded there.
+
+## 5. After this round
+- **Round 454:** REGRESSION-2026-11-13 if it is planned on or after 2026-11-13; otherwise STORE-2b-3c (live teal and glow CSS, plus the helper's fail-open forms).
+- **Then:** 2b-3d (dead tokens, rules and files), 2b-4, STORE-2c…5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, and phase 2 under the skip rule.
