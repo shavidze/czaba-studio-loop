@@ -1,0 +1,49 @@
+
+ RUN  v4.0.16 /home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-442/scratch
+
+ ❯ app/lib/arrangement/__tests__/ime-composition-ui.test.tsx (15 tests | 2 failed) 1244ms
+     ✓ IME0 the helper reads nativeEvent.isComposing and keyCode 229, and nothing else 3ms
+     ✓ IME1 BPM field (isComposing): a composing Enter or Escape keeps focus and the draft and commits nothing; a plain Enter then commits 232ms
+     ✓ IME1 BPM field (keyCode229): a composing Enter or Escape keeps focus and the draft and commits nothing; a plain Enter then commits 107ms
+     ✓ IME2 marker name editor (isComposing): a composing Enter or Escape keeps the editor open and adds nothing; a plain Enter then adds the marker 96ms
+     ✓ IME2 marker name editor (keyCode229): a composing Enter or Escape keeps the editor open and adds nothing; a plain Enter then adds the marker 85ms
+     ✓ IME3 group name editor (isComposing): a composing Enter or Escape keeps the editor open and renames nothing; a plain Enter then renames 80ms
+     ✓ IME3 group name editor (keyCode229): a composing Enter or Escape keeps the editor open and renames nothing; a plain Enter then renames 67ms
+     ✓ IME4 Detail From and To fields (isComposing): a composing Enter in either field applies no time selection; a plain Enter then applies it 71ms
+     ✓ IME4 Detail From and To fields (keyCode229): a composing Enter in either field applies no time selection; a plain Enter then applies it 78ms
+     ✓ IME5 Detail Clip Gain field (isComposing): a composing Enter applies nothing and a composing Escape does not revert the text; a plain Enter then applies 67ms
+     ✓ IME5 Detail Clip Gain field (keyCode229): a composing Enter applies nothing and a composing Escape does not revert the text; a plain Enter then applies 59ms
+     × IME6 held key after a composing key (isComposing): auto-repeat Enter or Escape (repeat: true, not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96, marker and Clip Gain Escape cancel) 86ms
+     × IME6 held key after a composing key (keyCode229): auto-repeat Enter or Escape (repeat: true, not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96, marker and Clip Gain Escape cancel) 76ms
+     ✓ IME7 a plain Escape after a composing Escape cancels as before (isComposing): BPM draft dropped, marker editor closed, group name kept, Clip Gain text reverted 66ms
+     ✓ IME7 a plain Escape after a composing Escape cancels as before (keyCode229): BPM draft dropped, marker editor closed, group name kept, Clip Gain text reverted 69ms
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 13 passed (15)
+   Start at  00:32:50
+   Duration  3.50s (transform 1.23s, setup 0ms, import 1.70s, tests 1.24s, environment 413ms)
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-442/scratch/app/lib/arrangement/__tests__/ime-composition-ui.test.tsx,title=app/lib/arrangement/__tests__/ime-composition-ui.test.tsx > IME composition never commits or cancels a Studio editor (SYS-3 stage 1) > IME6 held key after a composing key (isComposing)%3A auto-repeat Enter or Escape (repeat%3A true%2C not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96%2C marker and Clip Gain Escape cancel),line=309,column=24::AssertionError: expected '0.0' to be '-3' // Object.is equality%0A%0AExpected: "-3"%0AReceived: "0.0"%0A%0A ❯ app/lib/arrangement/__tests__/ime-composition-ui.test.tsx:309:24%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-442/scratch/app/lib/arrangement/__tests__/ime-composition-ui.test.tsx,title=app/lib/arrangement/__tests__/ime-composition-ui.test.tsx > IME composition never commits or cancels a Studio editor (SYS-3 stage 1) > IME6 held key after a composing key (keyCode229)%3A auto-repeat Enter or Escape (repeat%3A true%2C not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96%2C marker and Clip Gain Escape cancel),line=309,column=24::AssertionError: expected '0.0' to be '-3' // Object.is equality%0A%0AExpected: "-3"%0AReceived: "0.0"%0A%0A ❯ app/lib/arrangement/__tests__/ime-composition-ui.test.tsx:309:24%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/ime-composition-ui.test.tsx > IME composition never commits or cancels a Studio editor (SYS-3 stage 1) > IME6 held key after a composing key (isComposing): auto-repeat Enter or Escape (repeat: true, not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96, marker and Clip Gain Escape cancel)
+ FAIL  app/lib/arrangement/__tests__/ime-composition-ui.test.tsx > IME composition never commits or cancels a Studio editor (SYS-3 stage 1) > IME6 held key after a composing key (keyCode229): auto-repeat Enter or Escape (repeat: true, not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96, marker and Clip Gain Escape cancel)
+AssertionError: expected '0.0' to be '-3' // Object.is equality
+
+Expected: "-3"
+Received: "0.0"
+
+ ❯ app/lib/arrangement/__tests__/ime-composition-ui.test.tsx:309:24
+    307|     holdAfterComposing(gain, 'Escape');
+    308|     expect(document.activeElement).toBe(gain);
+    309|     expect(gain.value).toBe('-3');
+       |                        ^
+    310|     expect(snapshot()).toStrictEqual(beforeGain);
+    311|     fireEvent.keyDown(gain, { key: 'Escape', code: 'Escape' });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+

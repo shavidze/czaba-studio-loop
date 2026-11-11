@@ -1,0 +1,172 @@
+--- a/app/components/arrangement/ArrangementTempoRow.tsx
++++ b/app/components/arrangement/ArrangementTempoRow.tsx
+@@ -259,11 +259,16 @@
+     }
+     if (event.key === 'Enter') {
+       event.preventDefault();
+-      event.currentTarget.blur();
++      if (!event.repeat) {
++        event.currentTarget.blur();
++      }
+       return;
+     }
+     if (event.key === 'Escape') {
+       event.preventDefault();
++      if (event.repeat) {
++        return;
++      }
+       skipCommitRef.current = true;
+       setDraft(null);
+       event.currentTarget.blur();
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -979,7 +979,7 @@
+                   return;
+                 }
+                 event.preventDefault();
+-                if (preventRepeatedEnterKeyDown(event)) {
++                if (event.repeat) {
+                   return;
+                 }
+                 settleEditor(event.key === 'Enter' ? 'enter' : 'escape');
+--- a/app/components/arrangement/ArrangementDetailPanel.tsx
++++ b/app/components/arrangement/ArrangementDetailPanel.tsx
+@@ -775,7 +775,9 @@
+       }
+     } else if (event.key === 'Escape') {
+       event.preventDefault();
+-      setClipGainText(displayedClipGainText);
++      if (!event.repeat) {
++        setClipGainText(displayedClipGainText);
++      }
+     }
+   });
+ 
+--- a/app/lib/arrangement/__tests__/ime-composition-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/ime-composition-ui.test.tsx
+@@ -6,6 +6,7 @@
+ import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { tempoStatusMessage } from '../tempo';
+ import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';
+ 
+@@ -159,6 +160,7 @@
+     expect(document.activeElement).not.toBe(input);
+     expect(input.value).toBe('96');
+     expect(snapshot().statusSequence).toBeGreaterThan(before.statusSequence);
++    expect(snapshot().status).toBe(tempoStatusMessage(96));
+   });
+ 
+   it.each(
+@@ -257,4 +259,109 @@
+         .clips.find((clip) => clip.id === 'h1')?.gainDb,
+     ).toBe(-3);
+   });
++
++  it.each(
++    IME_FORMS,
++  )('IME6 held key after a composing key (%s): auto-repeat Enter or Escape (repeat: true, not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96, marker and Clip Gain Escape cancel)', async (form) => {
++    const { api, view, snapshot } = await mountImeWorkspace();
++    const holdAfterComposing = (target: Element, key: ImeKey) => {
++      expect(pressComposingKey(target, key, form)).toBe(true);
++      for (let step = 0; step < 3; step += 1) {
++        expect(fireEvent.keyDown(target, { key, code: key, repeat: true })).toBe(false);
++      }
++    };
++
++    const tempo = inputById(view, 'arrangement-tempo-input');
++    act(() => tempo.focus());
++    fireEvent.change(tempo, { target: { value: '96' } });
++    const beforeTempo = snapshot();
++    holdAfterComposing(tempo, 'Enter');
++    holdAfterComposing(tempo, 'Escape');
++    expect(document.activeElement).toBe(tempo);
++    expect(tempo.value).toBe('96');
++    expect(snapshot()).toStrictEqual(beforeTempo);
++    expect(fireEvent.keyDown(tempo, { key: 'Enter', code: 'Enter' })).toBe(false);
++    expect(document.activeElement).not.toBe(tempo);
++    expect(snapshot().status).toBe(tempoStatusMessage(96));
++
++    fireEvent.click(view.getByTestId('arrangement-marker-add'));
++    const marker = inputById(view, 'arrangement-marker-name-input');
++    fireEvent.change(marker, { target: { value: 'Hit' } });
++    const beforeMarker = snapshot();
++    holdAfterComposing(marker, 'Enter');
++    holdAfterComposing(marker, 'Escape');
++    expect(view.getByTestId('arrangement-marker-name-input')).toBe(marker);
++    expect(document.activeElement).toBe(marker);
++    expect(marker.value).toBe('Hit');
++    expect(snapshot()).toStrictEqual(beforeMarker);
++    fireEvent.keyDown(marker, { key: 'Escape', code: 'Escape' });
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++    expect(live(api).getArrangement().markers ?? []).toStrictEqual([]);
++
++    act(() => live(api).selectClip('h1'));
++    const gain = inputById(view, 'arrangement-detail-clip-gain-input');
++    act(() => gain.focus());
++    fireEvent.change(gain, { target: { value: '-3' } });
++    const beforeGain = snapshot();
++    holdAfterComposing(gain, 'Enter');
++    holdAfterComposing(gain, 'Escape');
++    expect(document.activeElement).toBe(gain);
++    expect(gain.value).toBe('-3');
++    expect(snapshot()).toStrictEqual(beforeGain);
++    fireEvent.keyDown(gain, { key: 'Escape', code: 'Escape' });
++    expect(gain.value).not.toBe('-3');
++    expect(
++      live(api)
++        .getArrangement()
++        .clips.find((clip) => clip.id === 'h1')?.gainDb ?? 0,
++    ).toBe(0);
++  });
++
++  it.each(
++    IME_FORMS,
++  )('IME7 a plain Escape after a composing Escape cancels as before (%s): BPM draft dropped, marker editor closed, group name kept, Clip Gain text reverted', async (form) => {
++    const { api, view, snapshot } = await mountImeWorkspace();
++
++    const tempo = inputById(view, 'arrangement-tempo-input');
++    act(() => tempo.focus());
++    const beforeTempo = snapshot();
++    fireEvent.change(tempo, { target: { value: '96' } });
++    expect(pressComposingKey(tempo, 'Escape', form)).toBe(true);
++    expect(fireEvent.keyDown(tempo, { key: 'Escape', code: 'Escape' })).toBe(false);
++    expect(document.activeElement).not.toBe(tempo);
++    expect(tempo.value).toBe('');
++    expect(snapshot()).toStrictEqual(beforeTempo);
++
++    fireEvent.click(view.getByTestId('arrangement-marker-add'));
++    const marker = inputById(view, 'arrangement-marker-name-input');
++    fireEvent.change(marker, { target: { value: 'Hit' } });
++    expect(pressComposingKey(marker, 'Escape', form)).toBe(true);
++    expect(fireEvent.keyDown(marker, { key: 'Escape', code: 'Escape' })).toBe(false);
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++    expect(live(api).getArrangement().markers ?? []).toStrictEqual([]);
++
++    const name = view.getByTestId('arrangement-group-name');
++    act(() => name.focus());
++    fireEvent.keyDown(name, { key: 'F2', code: 'F2' });
++    const group = inputById(view, 'arrangement-group-name-input');
++    fireEvent.change(group, { target: { value: 'Bed' } });
++    expect(pressComposingKey(group, 'Escape', form)).toBe(true);
++    expect(fireEvent.keyDown(group, { key: 'Escape', code: 'Escape' })).toBe(false);
++    expect(view.queryByTestId('arrangement-group-name-input')).toBeNull();
++    expect((live(api).getArrangement().groups ?? []).map((entry) => entry.name)).toStrictEqual([
++      'Stems',
++    ]);
++
++    act(() => live(api).selectClip('h1'));
++    const gain = inputById(view, 'arrangement-detail-clip-gain-input');
++    act(() => gain.focus());
++    const shown = gain.value;
++    fireEvent.change(gain, { target: { value: '-3' } });
++    const before = snapshot();
++    expect(pressComposingKey(gain, 'Escape', form)).toBe(true);
++    expect(gain.value).toBe('-3');
++    expect(fireEvent.keyDown(gain, { key: 'Escape', code: 'Escape' })).toBe(false);
++    expect(gain.value).toBe(shown);
++    expect(snapshot().arrangement).toBe(before.arrangement);
++  });
+ });

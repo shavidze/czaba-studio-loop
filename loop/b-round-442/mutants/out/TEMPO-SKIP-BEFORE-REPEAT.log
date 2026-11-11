@@ -1,0 +1,49 @@
+
+ RUN  v4.0.16 /home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-442/scratch
+
+ ❯ app/lib/arrangement/__tests__/ime-composition-ui.test.tsx (15 tests | 2 failed) 1179ms
+     ✓ IME0 the helper reads nativeEvent.isComposing and keyCode 229, and nothing else 3ms
+     ✓ IME1 BPM field (isComposing): a composing Enter or Escape keeps focus and the draft and commits nothing; a plain Enter then commits 228ms
+     ✓ IME1 BPM field (keyCode229): a composing Enter or Escape keeps focus and the draft and commits nothing; a plain Enter then commits 103ms
+     ✓ IME2 marker name editor (isComposing): a composing Enter or Escape keeps the editor open and adds nothing; a plain Enter then adds the marker 92ms
+     ✓ IME2 marker name editor (keyCode229): a composing Enter or Escape keeps the editor open and adds nothing; a plain Enter then adds the marker 88ms
+     ✓ IME3 group name editor (isComposing): a composing Enter or Escape keeps the editor open and renames nothing; a plain Enter then renames 78ms
+     ✓ IME3 group name editor (keyCode229): a composing Enter or Escape keeps the editor open and renames nothing; a plain Enter then renames 58ms
+     ✓ IME4 Detail From and To fields (isComposing): a composing Enter in either field applies no time selection; a plain Enter then applies it 71ms
+     ✓ IME4 Detail From and To fields (keyCode229): a composing Enter in either field applies no time selection; a plain Enter then applies it 72ms
+     ✓ IME5 Detail Clip Gain field (isComposing): a composing Enter applies nothing and a composing Escape does not revert the text; a plain Enter then applies 71ms
+     ✓ IME5 Detail Clip Gain field (keyCode229): a composing Enter applies nothing and a composing Escape does not revert the text; a plain Enter then applies 57ms
+     × IME6 held key after a composing key (isComposing): auto-repeat Enter or Escape (repeat: true, not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96, marker and Clip Gain Escape cancel) 67ms
+     × IME6 held key after a composing key (keyCode229): auto-repeat Enter or Escape (repeat: true, not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96, marker and Clip Gain Escape cancel) 49ms
+     ✓ IME7 a plain Escape after a composing Escape cancels as before (isComposing): BPM draft dropped, marker editor closed, group name kept, Clip Gain text reverted 70ms
+     ✓ IME7 a plain Escape after a composing Escape cancels as before (keyCode229): BPM draft dropped, marker editor closed, group name kept, Clip Gain text reverted 70ms
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 13 passed (15)
+   Start at  00:32:58
+   Duration  3.45s (transform 1.22s, setup 0ms, import 1.73s, tests 1.18s, environment 407ms)
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-442/scratch/app/lib/arrangement/__tests__/ime-composition-ui.test.tsx,title=app/lib/arrangement/__tests__/ime-composition-ui.test.tsx > IME composition never commits or cancels a Studio editor (SYS-3 stage 1) > IME6 held key after a composing key (isComposing)%3A auto-repeat Enter or Escape (repeat%3A true%2C not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96%2C marker and Clip Gain Escape cancel),line=285,column=31::AssertionError: expected 'Demo collection ready. Drag a sound o…' to be 'Tempo 96 BPM · 4/4 — bars ruler updat…' // Object.is equality%0A%0AExpected: "Tempo 96 BPM · 4/4 — bars ruler updated. Grid only: audio is not stretched."%0AReceived: "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."%0A%0A ❯ app/lib/arrangement/__tests__/ime-composition-ui.test.tsx:285:31%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-442/scratch/app/lib/arrangement/__tests__/ime-composition-ui.test.tsx,title=app/lib/arrangement/__tests__/ime-composition-ui.test.tsx > IME composition never commits or cancels a Studio editor (SYS-3 stage 1) > IME6 held key after a composing key (keyCode229)%3A auto-repeat Enter or Escape (repeat%3A true%2C not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96%2C marker and Clip Gain Escape cancel),line=285,column=31::AssertionError: expected 'Demo collection ready. Drag a sound o…' to be 'Tempo 96 BPM · 4/4 — bars ruler updat…' // Object.is equality%0A%0AExpected: "Tempo 96 BPM · 4/4 — bars ruler updated. Grid only: audio is not stretched."%0AReceived: "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."%0A%0A ❯ app/lib/arrangement/__tests__/ime-composition-ui.test.tsx:285:31%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/ime-composition-ui.test.tsx > IME composition never commits or cancels a Studio editor (SYS-3 stage 1) > IME6 held key after a composing key (isComposing): auto-repeat Enter or Escape (repeat: true, not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96, marker and Clip Gain Escape cancel)
+ FAIL  app/lib/arrangement/__tests__/ime-composition-ui.test.tsx > IME composition never commits or cancels a Studio editor (SYS-3 stage 1) > IME6 held key after a composing key (keyCode229): auto-repeat Enter or Escape (repeat: true, not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96, marker and Clip Gain Escape cancel)
+AssertionError: expected 'Demo collection ready. Drag a sound o…' to be 'Tempo 96 BPM · 4/4 — bars ruler updat…' // Object.is equality
+
+Expected: "Tempo 96 BPM · 4/4 — bars ruler updated. Grid only: audio is not stretched."
+Received: "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."
+
+ ❯ app/lib/arrangement/__tests__/ime-composition-ui.test.tsx:285:31
+    283|     expect(fireEvent.keyDown(tempo, { key: 'Enter', code: 'Enter' })).…
+    284|     expect(document.activeElement).not.toBe(tempo);
+    285|     expect(snapshot().status).toBe(tempoStatusMessage(96));
+       |                               ^
+    286| 
+    287|     fireEvent.click(view.getByTestId('arrangement-marker-add'));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+

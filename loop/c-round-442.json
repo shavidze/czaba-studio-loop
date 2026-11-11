@@ -1,0 +1,48 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-10T23:56:45.0319230Z",
+  "round": 442,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R442-M1-HELD-KEY-UNRULED",
+   "severity": "medium",
+   "steps": [
+    "Read A's A-R442-REVIEW-M1 and the Tempo/Marker/Detail key handlers",
+    "Hypothesis: composing keydown (guarded) then non-composing auto-repeat keydowns with repeat:true"
+   ],
+   "expected": "A composing key sequence never commits or cancels (stage-1 goal)",
+   "actual": "By code reading (A and reviewer), repeated Escape on Marker/Tempo/Clip Gain and repeated Enter on Tempo are not repeat-filtered, so the first non-composing repeat commits/cancels, same end state as HEAD. NOT measured by C: no real IME delivers this sequence in the cloud; a CDP autoRepeat probe would be synthetic. Unverified hypothesis, not a regression versus HEAD.",
+   "evidence": "a-round-442.md section A-R442-REVIEW-M1; no C measurement. B must rule (stage 2 / TLM-SYS3-IME-PLATFORMS) per L11."
+  }
+ ],
+ "passed": [
+  "C1-source-scope",
+  "C2-patch-identity",
+  "C3-covering-60files-1114tests",
+  "C4-mutants-14-red-match",
+  "C5-claims",
+  "C6-ime-browser-18-cells-both-viewports",
+  "C6-head-control-18of18-fail-matches",
+  "C7-auth-not-bypassed-and-play",
+  "C9-doc-288",
+  "C10-source-scope-end"
+ ],
+ "blocked": [
+  "TLM-SYS3-IME-PLATFORMS: real macOS/Windows IME and Android keyboards cannot run in cloud (Tech Lead manual)",
+  "C8 held-Enter browser cells MEDIT/GEDIT not run (optional; jsdom held-Enter rows covered by C3)",
+  "gate rows: full vitest, typecheck, build, Biome, verify"
+ ],
+ "gateRows": [
+  "full-vitest",
+  "typecheck",
+  "build",
+  "biome",
+  "verify"
+ ]
+}
