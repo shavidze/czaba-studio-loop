@@ -1,0 +1,116 @@
+diff --git a/app/components/arrangement/ArrangementLibrary.tsx b/app/components/arrangement/ArrangementLibrary.tsx
+index e0939da..e306674 100644
+--- a/app/components/arrangement/ArrangementLibrary.tsx
++++ b/app/components/arrangement/ArrangementLibrary.tsx
+@@ -47,6 +47,7 @@ import {
+   sameLibraryLeafProps,
+ } from './ArrangementLibraryPreview';
+ import { STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
++import { isImeCompositionKeyDown } from './studio-ime-composition';
+ import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ import { STUDIO_SCROLLBAR_CLASS } from './studio-scrollbar';
+ 
+@@ -392,6 +393,9 @@ function ArrangementLibraryViewInner({
+   };
+ 
+   const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
++    if (isImeCompositionKeyDown(event)) {
++      return;
++    }
+     if (event.key === 'ArrowDown') {
+       event.preventDefault();
+       selectLibraryOption(resultIds[0] ?? null, true);
+@@ -399,7 +403,9 @@ function ArrangementLibraryViewInner({
+     }
+     if (event.key === 'Escape') {
+       event.preventDefault();
+-      setQuery('');
++      if (!event.repeat) {
++        setQuery('');
++      }
+     }
+   };
+ 
+diff --git a/app/components/arrangement/ArrangementShortcutSheet.tsx b/app/components/arrangement/ArrangementShortcutSheet.tsx
+index 8e176af..916fe3b 100644
+--- a/app/components/arrangement/ArrangementShortcutSheet.tsx
++++ b/app/components/arrangement/ArrangementShortcutSheet.tsx
+@@ -4,6 +4,7 @@ import { Modal } from '~/components/ui';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+ import { filterStudioShortcutGroups } from '~/lib/arrangement/shortcuts';
+ import { studioShortcutSheetStrings } from '~/lib/arrangement/strings';
++import { isNativeImeCompositionKeyDown } from './studio-ime-composition';
+ import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ import { STUDIO_DIALOG_SCROLLBAR_CLASS } from './studio-scrollbar';
+ 
+@@ -65,7 +66,14 @@ export function ArrangementShortcutSheet({
+     }
+     const handleSheetKeyDown = (event: KeyboardEvent) => {
+       if (event.key === 'Escape') {
++        if (isNativeImeCompositionKeyDown(event)) {
++          event.stopPropagation();
++          return;
++        }
+         event.preventDefault();
++        if (event.repeat) {
++          event.stopPropagation();
++        }
+         return;
+       }
+       if (event.repeat && (event.key === '?' || (event.shiftKey && event.code === 'Slash'))) {
+diff --git a/app/components/arrangement/studio-ime-composition.ts b/app/components/arrangement/studio-ime-composition.ts
+index 39b6145..52eab26 100644
+--- a/app/components/arrangement/studio-ime-composition.ts
++++ b/app/components/arrangement/studio-ime-composition.ts
+@@ -3,6 +3,15 @@ export interface ImeCompositionKeyEvent {
+   nativeEvent: Pick<KeyboardEvent, 'isComposing'>;
+ }
+ 
++export type NativeImeCompositionKeyEvent = Pick<KeyboardEvent, 'isComposing' | 'keyCode'>;
++
++export function isNativeImeCompositionKeyDown(event: NativeImeCompositionKeyEvent): boolean {
++  return event.isComposing || event.keyCode === 229;
++}
++
+ export function isImeCompositionKeyDown(event: ImeCompositionKeyEvent): boolean {
+-  return event.nativeEvent.isComposing || event.keyCode === 229;
++  return isNativeImeCompositionKeyDown({
++    isComposing: event.nativeEvent.isComposing,
++    keyCode: event.keyCode,
++  });
+ }
+diff --git a/app/lib/focus-source.ts b/app/lib/focus-source.ts
+index 7e29c9b..c8960d8 100644
+--- a/app/lib/focus-source.ts
++++ b/app/lib/focus-source.ts
+@@ -46,8 +46,16 @@ const FOCUS_SOURCE_MULTILINE_EDITING_KEYS: ReadonlySet<string> = new Set([
+   'PageDown',
+ ]);
+ 
++function isFocusSourceComposingKey(event: KeyboardEvent): boolean {
++  return event.isComposing || event.key === 'Unidentified' || event.keyCode === 229;
++}
++
++function isFocusSourceAltGraphCharacter(event: KeyboardEvent): boolean {
++  return event.key.length === 1 && event.getModifierState('AltGraph');
++}
++
+ export function isFocusSourceFieldEditingKey(event: KeyboardEvent): boolean {
+-  if (event.ctrlKey || event.metaKey || event.altKey || typeof event.key !== 'string') {
++  if (typeof event.key !== 'string') {
+     return false;
+   }
+   const target = event.target;
+@@ -59,6 +67,12 @@ export function isFocusSourceFieldEditingKey(event: KeyboardEvent): boolean {
+   if (!isMultiLine && !isSingleLine) {
+     return false;
+   }
++  if (isFocusSourceComposingKey(event) || isFocusSourceAltGraphCharacter(event)) {
++    return true;
++  }
++  if (event.ctrlKey || event.metaKey || event.altKey) {
++    return false;
++  }
+   if (event.key.length === 1 || FOCUS_SOURCE_FIELD_EDITING_KEYS.has(event.key)) {
+     return true;
+   }

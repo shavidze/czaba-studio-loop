@@ -1,0 +1,49 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b443-mut/work-M7-SHEET-REPEAT[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/ime-composition-stage2-ui.test.tsx [2m([22m[2m5 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 2005[2mms[22m[39m
+     [32m✓[39m IME8 the native helper reads isComposing and keyCode 229 only, and the React helper delegates to it[32m 17[2mms[22m[39m
+     [33m[2m✓[22m[39m IME9 Library search (isComposing): a composing Escape keeps the query and a composing ArrowDown keeps focus; held Escape repeats clear nothing; a plain Escape then clears and a plain ArrowDown moves to the first result [33m 625[2mms[22m[39m
+     [33m[2m✓[22m[39m IME9 Library search (keyCode229): a composing Escape keeps the query and a composing ArrowDown keeps focus; held Escape repeats clear nothing; a plain Escape then clears and a plain ArrowDown moves to the first result [33m 322[2mms[22m[39m
+[31m     [31m×[31m IME10 shortcut sheet search (isComposing): a composing Escape and held Escape repeats keep the sheet open with focus and query; a plain Escape then closes it and focus returns to the footer button[39m[33m 712[2mms[22m[39m
+[31m     [31m×[31m IME10 shortcut sheet search (keyCode229): a composing Escape and held Escape repeats keep the sheet open with focus and query; a plain Escape then closes it and focus returns to the footer button[39m[33m 323[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 01:33:18
+[2m   Duration [22m 9.48s[2m (transform 4.18s, setup 0ms, import 5.78s, tests 2.00s, environment 1.31s)[22m
+
+
+::error file=/tmp/b443-mut/work-M7-SHEET-REPEAT/app/lib/arrangement/__tests__/ime-composition-stage2-ui.test.tsx,title=app/lib/arrangement/__tests__/ime-composition-stage2-ui.test.tsx > IME composition never clears%2C moves or closes Studio search fields (SYS-3 stage 2a) > IME10 shortcut sheet search (isComposing)%3A a composing Escape and held Escape repeats keep the sheet open with focus and query; a plain Escape then closes it and focus returns to the footer button,line=233,column=48::AssertionError: expected [ false, true, true ] to strictly equal [ false, false, false ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    false,%0A-   false,%0A-   false,%0A+   true,%0A+   true,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/ime-composition-stage2-ui.test.tsx:233:48%0A%0A
+
+::error file=/tmp/b443-mut/work-M7-SHEET-REPEAT/app/lib/arrangement/__tests__/ime-composition-stage2-ui.test.tsx,title=app/lib/arrangement/__tests__/ime-composition-stage2-ui.test.tsx > IME composition never clears%2C moves or closes Studio search fields (SYS-3 stage 2a) > IME10 shortcut sheet search (keyCode229)%3A a composing Escape and held Escape repeats keep the sheet open with focus and query; a plain Escape then closes it and focus returns to the footer button,line=233,column=48::AssertionError: expected [ false, true, true ] to strictly equal [ false, false, false ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    false,%0A-   false,%0A-   false,%0A+   true,%0A+   true,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/ime-composition-stage2-ui.test.tsx:233:48%0A%0A
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/ime-composition-stage2-ui.test.tsx[2m > [22mIME composition never clears, moves or closes Studio search fields (SYS-3 stage 2a)[2m > [22mIME10 shortcut sheet search (isComposing): a composing Escape and held Escape repeats keep the sheet open with focus and query; a plain Escape then closes it and focus returns to the footer button
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/ime-composition-stage2-ui.test.tsx[2m > [22mIME composition never clears, moves or closes Studio search fields (SYS-3 stage 2a)[2m > [22mIME10 shortcut sheet search (keyCode229): a composing Escape and held Escape repeats keep the sheet open with focus and query; a plain Escape then closes it and focus returns to the footer button
+[31m[1mAssertionError[22m: expected [ false, true, true ] to strictly equal [ false, false, false ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    false,[22m
+[32m-   false,[39m
+[32m-   false,[39m
+[31m+   true,[39m
+[31m+   true,[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/ime-composition-stage2-ui.test.tsx:[2m233:48[22m[39m
+    [90m231| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m(search)[33m;[39m
+    [90m232| [39m    [34mexpect[39m(search[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m'pl'[39m)[33m;[39m
+    [90m233| [39m    expect(pressHeldRepeats(search, 'Escape')).toStrictEqual([false, f…
+    [90m   | [39m                                               [31m^[39m
+    [90m234| [39m    [34mexpect[39m([34msheetDialog[39m(view))[33m.[39mnot[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m235| [39m    [34mexpect[39m([34msheetSearchInput[39m(view))[33m.[39m[34mtoBe[39m(search)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
