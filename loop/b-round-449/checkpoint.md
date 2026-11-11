@@ -1,0 +1,13 @@
+# B round 449 -> 450 checkpoint
+- step1 done: tasks/round-449.md archived; backups *-before-450; backlog accept D-29z1597 applied (update-backlog-accept.done); retro input snapshot b-round-449/backlog-retro-input.json
+- step2 done: analysis scripts ported to b-round-449/*.py (window 435-449), outputs in b-round-449/data/
+- step3: data computed (cost, classify, l57/l58 windows, deadlines); 0 new Saba issues in window; next: screen captures, consults, retro report
+- step4: screens captured b-round-449/screens (counts = 435); consults tech-lead + product-designer launched (inputs consult-inputs.md)
+- step5: manifest b-round-449/r450-tree-sha256.txt (1369, rc0; protected 11x1); firefox not installed; waiting consults
+- step6: retros/retro-450.md draft written with @@S5..S13@@ placeholders
+- step7: consults saved (consult-tech-lead.md, consult-product-designer.md); next: lessons edit, screen-review-450, retro sections, backlog retro update, task 450
+- step8: lessons edited (D-29z1600; diff 3c3 6c6 9c9 55c55 60c60), screen-review-450.md, questions-retro-450.md (Q1-Q7), retro-450.md complete; next: backlog retro update, feature-status, task 450, claims, b-round-449.md, b-next.json
+- step9: backlog v439 (D-29z1598..1601, update-backlog-retro.done); feature-status updated; next: task 450 + claims + b-round-449.md + b-next.json
+- step10: current-task.md (round 450) written; claims-450 planning output saved (rc0)
+- step11: b-round-449.md and b-next.json written; next: advisor final check
+- step12: advisor follow-ups applied (dead-importers.sh/K31, L22 2x, RT-LESSONS wording, feature-status მუშავდება, SYS studio.css); claims rerun rc0. PLANNING COMPLETE

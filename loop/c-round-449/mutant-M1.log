@@ -1,0 +1,87 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b449-mut-9393[39m
+
+ [31m❯[39m app/lib/__tests__/store-gradient-text.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 83[2mms[22m[39m
+[31m     [31m×[31m GT1: no store CSS rule paints text with a background clip, except the allow-listed dead rule at its exact count[39m[32m 19[2mms[22m[39m
+[31m     [31m×[31m GT2: the --gradient-text token is neither defined nor read anywhere in app[39m[32m 14[2mms[22m[39m
+[31m     [31m×[31m GT3: only the allow-listed dead files name the retired text-glow or hero-title-glow class, each at its exact count[39m[32m 13[2mms[22m[39m
+     [32m✓[39m GT4: the scan is non-vacuous[32m 7[2mms[22m[39m
+     [32m✓[39m GT5: the allow-listed dead components stay unmounted (no importer outside their own file and the barrels)[32m 29[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a)[2m > [22mGT1: no store CSS rule paints text with a background clip, except the allow-listed dead rule at its exact count
+[31m[1mAssertionError[22m: expected [ '.text-glow' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   ".text-glow",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m136:24[22m[39m
+    [90m134| [39m      (selector) [33m=>[39m [33m![39m(selector [35min[39m [33mGRADIENT_TEXT_ALLOW_LIST[39m)[33m,[39m
+    [90m135| [39m    )[33m;[39m
+    [90m136| [39m    [34mexpect[39m(unexpected)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m137| [39m    [35mconst[39m drifted [33m=[39m [33mObject[39m[33m.[39m[34mentries[39m([33mGRADIENT_TEXT_ALLOW_LIST[39m)
+    [90m138| [39m      .filter(([selector, entry]) => (counts[selector] ?? 0) !== entry…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a)[2m > [22mGT2: the --gradient-text token is neither defined nor read anywhere in app
+[31m[1mAssertionError[22m: expected [ 'styles/base/utilities.css' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "styles/base/utilities.css",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m147:23[22m[39m
+    [90m145| [39m      [33mRETIRED_TOKEN_PATTERN[39m[33m.[39m[34mtest[39m([34mreadApp[39m(path))[33m,[39m
+    [90m146| [39m    )[33m;[39m
+    [90m147| [39m    [34mexpect[39m(offenders)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m148| [39m  })[33m;[39m
+    [90m149| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a)[2m > [22mGT3: only the allow-listed dead files name the retired text-glow or hero-title-glow class, each at its exact count
+[31m[1mAssertionError[22m: expected [ 'styles/base/utilities.css' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "styles/base/utilities.css",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m159:24[22m[39m
+    [90m157| [39m    }
+    [90m158| [39m    const unexpected = Object.keys(counts).filter((path) => !(path in …
+    [90m159| [39m    [34mexpect[39m(unexpected)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m160| [39m    [35mconst[39m drifted [33m=[39m [33mObject[39m[33m.[39m[34mentries[39m([33mRETIRED_CLASS_ALLOW_LIST[39m)
+    [90m161| [39m      [33m.[39m[34mfilter[39m(([path[33m,[39m entry]) [33m=>[39m (counts[path] [33m??[39m [34m0[39m) [33m!==[39m entry[33m.[39mhits)
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 08:30:47
+[2m   Duration [22m 270ms[2m (transform 35ms, setup 0ms, import 45ms, tests 83ms, environment 0ms)[22m
+
+
+::error file=/tmp/b449-mut-9393/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a) > GT1%3A no store CSS rule paints text with a background clip%2C except the allow-listed dead rule at its exact count,line=136,column=24::AssertionError: expected [ '.text-glow' ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   ".text-glow",%0A+ ]%0A%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:136:24%0A%0A
+
+::error file=/tmp/b449-mut-9393/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a) > GT2%3A the --gradient-text token is neither defined nor read anywhere in app,line=147,column=23::AssertionError: expected [ 'styles/base/utilities.css' ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "styles/base/utilities.css",%0A+ ]%0A%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:147:23%0A%0A
+
+::error file=/tmp/b449-mut-9393/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a) > GT3%3A only the allow-listed dead files name the retired text-glow or hero-title-glow class%2C each at its exact count,line=159,column=24::AssertionError: expected [ 'styles/base/utilities.css' ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "styles/base/utilities.css",%0A+ ]%0A%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:159:24%0A%0A

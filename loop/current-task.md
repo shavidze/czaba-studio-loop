@@ -1,201 +1,151 @@
-# Round 449: STORE-2b-3a — gradient text leaves the Store; each emphasised heading word becomes plain light ink
+# Round 450: RETRO 450 (eighteenth retrospective, rounds 435–449; trigger: 15 rounds since RETRO 435) + whole-screen and journey review. No app code. A: nothing to implement. C: checks that the retro is traceable, plus the auth guard, a short Studio smoke test and the screen capture in the browser
 
-**Planned by:** B, at the round 448 → 449 planning, 2026-11-11 (`b-round-448.md`).
-- The advisor was available and was consulted after orientation and before writing.
-- The round-448 task is archived as `tasks/round-448.md` (byte-identical copy made before this file was rewritten).
-- **Baseline:** gate 448 is `published`, commit `48e16b8` [K1]. The store tree is at `48e16b8` and clean at planning [K2, K18, K19]. `context/head-sha.txt` says `cce5eda`; the gate's `commit` wins.
-- **Regression:** not due (last 2026-11-10, round 425; due on or after 2026-11-13). **RETRO:** round 450, the next round.
+**Planned by:** B, at the round 449 → 450 planning, 2026-11-11 (`b-round-449.md`). The advisor was available and was consulted after orientation and before writing. The round-449 task is archived as `tasks/round-449.md`, a byte-identical copy [K15].
 
-## Why this round
-- C round 448 PASS (`browserVerified`/`realVerified` true; C1–C6 and C8–C13 passed; C7, the real mail send, BLOCKED because there is no Brevo key in the cloud; 0 bugs). Gate 448 published `48e16b8`.
-  - **STORE-2b-2b is done.** B-R447-HIREUS-EMAIL-LIGHT-CLIENT is closed (D-29z1593).
-- **STORE-2b-3 is split** (D-29z1594). The store CSS holds 70 teal hits [K21] plus the glow, blur and gradient rules, which is too much for one checkable round. The stages:
-  - **2b-3a (this round):** gradient text.
-  - **2b-3b:** glow shadows: `--shadow-glow` and its TSX users, including `ui/Button` and `ui/IconButton`.
-  - **2b-3c:** the remaining live teal CSS rules.
-  - **2b-3d:** dead tokens and rules, removed with the LEGACY cleanup.
+## Decisions
+All are recorded in `backlog.json` (v437 → v439) under `decisions_log_b` [K10].
+- **D-29z1597: round 449 accepted.** C PASS in `c-round-449.json` (0 bugs, `browserVerified`/`realVerified` true; C8 WebKit BLOCKED). B's L57 run is OK (`b-round-449/l57-check-c449.txt`). Gate 449 published `a8599a2` [K1].
+  - A-R449-REVIEW-GT1-TSX stays Medium. B's grep at `a8599a2` found only one TSX hit, the inline style in the dead `CinemaCurtainLoader` (referenced only by two barrels), so there is no live regression.
+  - Gate 449 Low 2 → GATE449-S2-BARE-SPANS (deferred). Low 1, Low 3 and info 4 become `confirmedBy` entries (L7).
+  - Logged: INFO-C449-C9-HEAD-CONTROL-FLAKE and ROOT-REQ-ENV-MOCK-API-HEALTH.
+- **D-29z1598: RETRO data.** The window is 435–449. `b-next.json` said 436–449; `retro_policy` says 435–449, which wins.
+- **D-29z1599: L46 rulings** → `user-review/questions-retro-450.md` Q1–Q7 [K24].
+- **D-29z1600: lessons**, the retro-candidate rulings and ROOT-REQ-GATE-L57-UNRULED-MEDIUM.
+- **D-29z1601: outputs.** The systemic task SYS-R450-STORE-STYLE-SCAN, screen candidates SR-450-1…5, the order after this round, and this dispatch.
 
-  B re-greps each stage at its own planning.
-- **Why gradient text first:**
-  - It is self-contained: 1 token, 2 live rules and 8 live words, with no Studio consumer [K4].
-  - `/studio-lab` stays at 0 px [K11], and the Studio's obsidian block is untouched [K8].
-  - It is fully browser-measurable. At HEAD each word's glyphs are a light-grey → teal gradient, 34–80 % teal ink [K10].
-  - 2b-3b is not first because `--shadow-glow` has no obsidian override and `ui/Button` users, so it needs its own Studio rows.
+## Rules
+- **Policy:** "Retrospective: stop, look back, improve" (2026-10-26), "Look back on every issue Saba finds, and guard the whole screen" (2026-10-28), the RETRO journey step (2026-10-31), and `backlog.json` → `retro_policy`.
+- **Window and report:** rounds 435–449 (15 rounds); the report is `retros/retro-450.md`.
+- **Read `lessons.md` first.** This planning changed l.3, l.6 (L1), l.9 (L4), l.55 (L22) and l.60 (L60) [K18]. The new L22 clause applies to C from this round on.
+- **L57 / L22:** C's JSON carries all L57 fields. Every field is `null` with the reason "RETRO: no assert specified", except `gateChecksNamed` and the four manifest fields. Every bug carries an enum `origin`. Before hand-off, C runs `python3 -I tools/l57-check.py c-round-450.json c-round-450/l57-check.txt` and gets rc 0.
+- **L29:** untagged code text below is a row id, a loop-artifact path or a description of what C runs. The only facts about `store/` are HEAD, the tree, the manifest and the protected list [K1] [K2] [K3] [K4] [K19] [K30].
+- **L59 / L60:** run every row until it has a result, browser rows first. Write `c-round-450/progress.json` after each row. Destructive commands stay inside `c-round-450/`.
+- **Not applicable in a RETRO round:** reference-first, the Ableton conformance check, the product-designer design step and the screen budget. Nothing visible changes.
 
-## What changes (user-visible)
-- **Eight emphasised heading words** stop being painted with the light-grey → teal gradient. Each takes its heading's own light ink #ECE6DA:
-  - "CZABA" in the home hero h1;
-  - "Releases" in Latest Releases;
-  - "Studio" in CZABA Studio;
-  - "Inner Circle" in Join the Inner Circle;
-  - "Cinema" and "Stand For" on `/about`;
-  - "Sound" on the 404 page;
-  - the LeadMagnet popup's "CZABA" eyebrow (keep-list: restyle only, so text and behaviour are unchanged [K23]).
-- **Nothing moves.** Every word box, heading box and line count equals HEAD [K10].
-- **Nothing else changes:** no other page, no Studio file, no token value, and the obsidian block is byte-identical [K8].
+## Baseline: HEAD `a8599a2`, clean tree
+- **Gate:** gate 449 published `a8599a2…` on both remotes [K1]. `context/head-sha.txt` may still show `48e16b8`; `git rev-parse HEAD` is the truth.
+- **Tree:** at planning, `git status --short --untracked-files=all` was empty and HEAD was `a8599a2` [K2] [K19].
+- **Frozen files:** every tracked file is in `b-round-449/r450-tree-sha256.txt`, **1,369** entries [K3]. Check from `store/` with `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-449/r450-tree-sha256.txt`; B got rc 0 [K30]. Each of the 11 protected files in `b-round-318/protected-sha256.txt` appears exactly once [K4], and that file also checks rc 0 [K30].
+- **Grants: none.** No file in `store/` may change in this round.
 
-## Reference
-- **Store spec:**
-  - `store-redesign-spec.md`, row STORE-2: "Remove the 6 blur glow blobs, **the gradient text** and `shadow-glow`. Text brightness: titles #ECE6DA…".
-  - Spec l.18 allows "removal of glow and gradients" on keep-list items [K26]; their content, behaviour, timing and placement stay.
-  - Direction A ("Obsidian & Brass gallery", `direction-decision.md`) has one accent, brass.
-- **`product-designer` consult (this planning):**
-  - **Chosen: option A, solid light ink.** The gradient was decoration, not meaning. Round 447 already put titles and the loader wordmark in light ink.
-  - **Rejected B, a brass word.** Brass in heading text stops marking clickable things, reads as a link and weakens the brass CTAs.
-  - **Rejected C, muting the rest of the heading.** It lowers title contrast.
-  - **Exception: none.** The designer would prefer caption grey for the LeadMagnet eyebrow. The popup is restyle-only, so it takes light ink and Saba is asked once (SABA-Q-LEADMAGNET-EYEBROW-TONE; the light-ink default ships).
-  - **States the designer named:** the pages above at 1440, 1280 and 375; text selection; forced-colors; WebKit; no leftover gradient; the same line wraps. Each is a C row below. WebKit is a Tech Lead row because there is no WebKit in the cloud.
-- **Ableton:** does not apply (Store marketing typography).
+## 0. Why this round
+- **The RETRO is due:** `retro_policy.next_due` named round 450 (D-29z1543).
+- **Nothing blocks a code-free round.** No Critical or High finding is open. The only loop-runnable open Medium, A-R449-REVIEW-GT1-TSX, has no live regression and is scheduled in SYS-R450-STORE-STYLE-SCAN. The other open Mediums are manual, root, Saba or scheduled items (2026-10-23 clarification).
+- **REGRESSION is not due:** `regression-last.json` says 2026-11-10 [K13], so it is due at the first planning on or after 2026-11-13.
 
-**Deviations:** none from the spec.
+## 1. What B produced (the objects under test)
+| File | Content |
+|---|---|
+| `retros/retro-450.md` | Georgian analysis for Saba, 13 sections, window 435–449 |
+| `lessons.md` | **60 lines** [K7]. Before-copy `b-round-449/lessons-before-450.md`; diff `b-round-449/lessons-diff.txt`, hunks `3c3 6c6 9c9 55c55 60c60` [K18]. Lesson ids unchanged [K12]; L23 and L58 unchanged [K14] |
+| `user-review/screen-review-450.md` | No change in line counts from 435; SR-450-1…5. Captures in `b-round-449/screens/`: `capture.mjs`, `capture.log`, `screen450.json`, 12 PNGs [K5] [K6] [K9] |
+| `user-review/questions-retro-450.md` | Q1–Q7, each with a default [K24] |
+| `b-round-449/consult-tech-lead.md`, `consult-product-designer.md`, `consult-inputs.md` | Consult inputs and returned reports |
+| `b-round-449/*.py`, `misc-outputs.sh`, `data/*` | The scripts and data behind every number |
+| `backlog.json` (v439) | D-29z1597…D-29z1601 and the ids of [K22] [K26] [K29]. Before-copy `b-round-449/backlog-before-450.json`. Edit scripts `update-backlog-accept.py` and `update-backlog-retro.py`, each with a `.done` marker. Retro input `b-round-449/backlog-retro-input.json` (v438) [K23] |
+| `feature-status.md` | Round 449 done; the RETRO 450 row [K27] |
 
-**Screen budget:** no element is added, moved or removed. Only the paint of 8 existing words changes.
+**Order of work for the scripts:**
+1. Copy `b-round-449/*.py` and `misc-outputs.sh` to `c-round-450/scripts/`. Rewrite every `b-round-449/data/` output path to `c-round-450/data/`, keeping the inputs `b-round-449/backlog-retro-input.json` and `archive-findings-snapshot.json`. Run from the loop root.
+2. Run order: `collect.py` (stdout = `collect.txt`; writes `rounds-435-449.json`) → `cost.py` (stdout = `cost.txt`; writes `cost-rows.json`) → `classify.py`, `fails-detail.py`, `gate-reviews.py`, `l57-coverage.py`, `manifest-fields.py`, `exp-fields.py`, `awaiting-user.py`, `retro450-deadlines.py` (each stdout = `<name>.txt`) → `stage-sums.py` → `misc-outputs.sh c-round-450/data`. `cmp` each output with B's file of the same name. Any difference is a finding.
+3. Loops: `l57-check-window.txt` = `tools/l57-check.py c-round-N.json /dev/null`, last line, N = 435…449. `l58-check-window.txt` = `tools/l58-check.py tasks/round-N.md`, last line, N = 436…449. Re-run both and `cmp`.
+4. **Do not run** `update-backlog-*.py`, `edit-lessons.py` or `update-feature-status.py`. Their `.done` markers make them refuse.
 
-## Ruling lines (L4)
-- **"Keep-list: restyle only" vs removing the class token in `LeadMagnetPopup.tsx`:** the class removal wins. It is a paint-only restyle. The text, the remaining classes `tracking-[0.5em] uppercase` [K22], the DOM and the behaviour stay. C5 checks the dialog against HEAD.
-- **"Dead code is not restyled" (the round-447 rule) vs "no file names the retired class":** the dead-code rule wins.
-  - `ArtistBioSection.tsx`, `TestimonialsSection.tsx` and `VideoShowcase.tsx` have 0 importers outside the barrel [K5]. They keep their `text-glow` token, allow-listed with exact counts (GT3) and guarded against re-import (GT5).
-  - The dead rule `.loading-brand` keeps its clip, allow-listed (GT1). Its consumer, `PianoLoadingAnimation`, has 0 importers [K5].
-- **`.product-detail-title` (0 users [K5b]):** its 4 gradient declarations are removed, because they read the removed token. Nothing else of that rule changes.
-- **`.hero-title-glow` `text-shadow`:** it reads `--primary-hue`, which is defined nowhere [K7], so it paints nothing at HEAD. Its removal changes no pixel.
-- **The `span` elements stay.** Only their `className` goes, so the DOM tree is unchanged. NM2 (`studio-naming.test.tsx`) reads `heading.querySelector('span')`; only its title text changes [K9b].
-- **Tests:** `store-header-footer.test.tsx` asserts no `.text-glow` in the header [K9]. It stays as is and still passes.
+## 2. A: nothing to implement
+A writes `a-round-450.md` with one line: "RETRO round, no implementation." **STOP (L11):** if the frozen manifest is not rc 0, A reports the failing paths and changes nothing.
 
-## 1. Changes (A applies `b-round-448/sketch-449.patch.txt`; its sha256 is in `b-round-448/sketch-review.md` [K12])
+## 3. C: what to verify
+C writes `c-round-450.md` and `c-round-450.json` as it goes, plus `c-round-450/progress.json` after every row. Browser rows (2–4) go first.
 
-| # | File | Change |
-|---|---|---|
-| 1 | `app/styles/app.css` | • the `--gradient-text` token is removed. It has 1 definition + 4 `var()` reads [K6]<br>• the `.text-glow` and `.hero-title-glow` rules are removed<br>• `.product-detail-title` loses `background: var(--gradient-text)` and its 3 clip/fill lines<br>• nothing else changes; the obsidian block stays byte-identical [K8] |
-| 2 | `app/styles/base/utilities.css` | its duplicate `.text-glow` rule and comment are removed [K3] |
-| 3 | `app/components/home/HeroSection.tsx`, `app/components/home/NewsletterSection.tsx`, `app/components/home/StudioShowcase.tsx`, `app/components/marketing/LeadMagnetPopup.tsx`, `app/routes/$.tsx`, `app/routes/_index.tsx`, `app/routes/about.tsx` (×2) | the `text-glow` / `hero-title-glow` class token is removed from each span [K4] |
-| 4 | NEW `app/lib/__tests__/store-gradient-text.test.ts` (node) | GT1–GT5 [K24] |
-| 5 | `app/lib/__tests__/studio-naming.test.tsx` | NM2 **title only**: "with the glow on Studio" → "with the emphasised span on Studio" [K9b]; its assertions are byte-identical |
-| 6 | NEW doc `docs/implementation/2026/quarter-IV/294-store-2b-3a-gradient-text.md` [K16] | see A step 4 |
+| # | Row | Check | PASS means |
+|---|---|---|---|
+| 1 | **SOURCE-SCOPE** (start) | `git status --short --untracked-files=all` in `store/`; the r450 manifest and the protected manifest | 0 lines; both rc 0 |
+| 2 | **G450-AUTH (browser)** | Fresh anonymous context at 1440×900 and 1280×720: open `/studio-lab`, then `/studio/middle-east` (warm both first with one untimed browser load, L38), then `GET /api/studio-token?product=middle-east&file=stem.mp3` with no Authorization header | `localStorage.auth_user` is null and the workspace opens; "Sign in required" with 0 `audio[src]`; the token API returns 401. Fake-bearer premium path: BLOCKED (backend unavailable in cloud) |
+| 3 | **STUDIO-SMOKE-450 (browser)** | Both viewports, after `Demo collection ready`: add one library item with Enter; Play about 1.5 s, then Stop; open Export, then close it | The clip appears; the position advances and then stops; the dialog opens and closes. Screenshots under `c-round-450/` |
+| 4 | **RT-SCREEN (browser)** | Check `http://127.0.0.1:5199/api/products`; if it is not 200, start `node mock-api/server.mjs` in the background and stop it afterwards. Run `b-round-415/screens/warmup.mjs` from `store/`. Then, from the loop root, run `node <abs>/b-round-449/screens/capture.mjs <abs c-round-450/screens>`, and open the PNGs `screen-review-450.md` cites | Line counts equal B's [K5]: 138/168/118/144, outside 97/124/86/101; ±2 per cell for status-line timing, each delta explained. The journey: 3 clips in view at `left` 512 / 1152 / 1792, and the status names the fourth at 00:48.000 "(nearest free spot)" [K6]. Each SR-450-n statement matches its PNG: the Expand/Collapse chevrons (SR-450-1), "0.0" field + "0 dB" read-out (SR-450-2), the filled header Sign In (SR-450-3), the grey unselected Premium name/price (SR-450-4), "$29.00 USD" vs "$29" (SR-450-5) |
+| 5 | **CLAIMS** | `bash b-round-449/claims-450.sh` compared with `b-round-449/claims-450-planning-output.txt` | No `MISSING`; stderr empty. Differences only where C's own work changes a value (expected: none), each explained. K10 may differ if root's optimizer rewrote `backlog.json`; check that the last D-ID is still D-29z1601 |
+| 6 | **RT-NUM** | Re-run the scripts (§1) and `cmp`. Recompute every number in `retro-450.md` §1, §2, §4, §9 and §12 (counters) from its named file, at least the list below | Every number matches its source. A number without a source is a finding (origin `B spec`) |
+| 7 | **RT-CAUSE** | For each fact in §3, §5, §6, §7 and §8, open the quoted source, at least the list below | Each fact is in its source. Each opinion is labelled as `tech-lead`'s or `product-designer`'s. The B-cost cause in §2 stays labelled a hypothesis. No invented cause |
+| 8 | **RT-IDS** | [K22], [K26], [K29]; and in `backlog.json`: `retro_candidates` (the 7 ids of §8) each carry a `ruled (D-29z1600)` or `counter` status; `retro_runs` round 450; `retro_policy.next_due` names round 465 | All present, with the status the retro states. SYS-R450-STORE-STYLE-SCAN `closes` lists exactly the 7 ids of §11, and each of those carries `systemic_task` SYS-R450-STORE-STYLE-SCAN |
+| 9 | **RT-LESSONS** | `lessons.md` against `b-round-449/lessons-before-450.md` | ≤ 60 lines, three parts. The diff touches only l.3, l.6, l.9, l.55 and l.60. Each of those lines keeps all of its old text and only appends: l.3 the pointer change (`retro-450.md`, `435–449`) plus the RETRO 450 sentence; l.6 the inventory-grep evidence sentence; l.9 the "Port preserves HEAD" clause; l.55 the "A STOP naming an unruled Medium+" clause; l.60 the "Store tree" clause. The rule sentences of the L4, L22 and L60 clauses equal the quoted clause text in `b-round-449/consult-tech-lead.md` §1 / §5 word for word. The bold heading label, the round numbers in parentheses and the evidence list may differ: B added the heading label, A-R441-REVIEW-L1-OUTLINE-ORDER's full id, and in L22 the second case A-R439-REVIEW-M1 (2×, advisor follow-up). l.6 adds one evidence sentence, which `tech-lead` asked for as "evidence id only" |
+| 10 | **RT-CHECKERS** | The L57 and L58 loops (§1.3); `python3 -I tools/l58-check.py current-task.md` [K28] | The loops equal B's files: 442, 443, 447 L57 INCOMPLETE and all others OK; L58 OK 14/14 [K21]. l58 on this task gives rc 0 ("no sketch") |
+| 11 | **RT-SABA** | `retro-450.md` §12, `screen-review-450.md`, `questions-retro-450.md` | Every rule change and screen item is information, a proposal or a question; nothing is presented as Saba's decision. Each question has a default. Q5 is labelled a proposal (`.claude/` is not changed by the loop). Q6 states that TestimonialsSection is not deleted |
+| 12 | **SOURCE-SCOPE** (end) + **L57** | As row 1; then `l57-check` on `c-round-450.json` | 0 lines and both rc 0; then rc 0 |
 
-**Tests.** Every row has a named mutant that turns it red (`b-round-448/mutant-M*.log` [K13]); M6 is the green control:
+**RT-NUM, at least:**
+- **Totals [K16]:** $264.79; B $198.56, A $55.61, C $10.62.
+- **Medians and averages (`data/cost.txt`):** round $17.87; B $13.11; B min/max 8.14/19.78; A average FAIL 5.47, PASS 3.58.
+- **Per-round rows:** `data/cost-rows.json`.
+- **Stage sums (`data/stage-sums.txt`):** STORE-2b $74.65, SYS-3 $62.04, SYS-R435 $43.67, COPY-PD-VIS $35.47, SYS-1 $34.28, RETRO 435 $14.68; B share 75.0 %.
+- **Verdicts [K20]:** 14 PASS, FAIL [438], gate skipped [435, 438], `browserVerified` 15/15.
+- **STOPs [K17]:** 439, 442.
+- **Findings:** C bugs 5 with severities (`data/fails-detail.txt`); deferred Lows in the window 45 (A 25, gate 18, B 1, C 1) with the regex categories; archive window 11 (`data/classify.txt`).
+- **Gate reviews:** 13 reviews, 54 items: low 21, info 14, unlabelled 19 (`data/gate-reviews.txt`).
+- **Checker coverage:** L57 INCOMPLETE on 442/443/447 (`data/l57-check-window.txt`); L58 14/14 (`data/l58-check-window.txt`).
+- **Lesson sizes [K14]:** L23 5058 and L58 4988.
+- **retro-435 comparison:** 255.35, 15.62, 11.63, 4.37 (`b-round-434/data/cost.txt`); B share 70.5 % (`b-round-434/data/stage-sums.txt`).
+- **446–449 B average $13.73:** the mean of the four B values in `data/cost-rows.json`.
+- **Cluster counts in §4:** 10 and 11, counted from the ids listed there.
+- **Screen counts [K5].**
 
-| Row | Checks | Mutant → red rows |
-|---|---|---|
-| GT1 | A rule-aware scan of `app.css` + `styles/base/*`: no rule paints text through a background clip or a transparent text fill (case-insensitive, any spacing, `padding-box, text`, `#0000`), except the dead `.loading-brand` at exactly 3 | M4 (`-webkit-text-fill-color: transparent` alone on a new rule) → GT1; M5 (`.loading-brand` loses a line) → GT1; M9 (`background-clip : padding-box, text`) → GT1 |
-| GT2 | `--gradient-text` is neither defined nor read in any app CSS/TS/TSX | M2 (token restored) → GT2 |
-| GT3 | only the 3 dead home sections name `text-glow`/`hero-title-glow`, each exactly once | M3 (`_index.tsx` span gets `text-glow` back) → GT3; M7 (a dead file loses its token) → GT3 |
-| GT4 | the scan is non-vacuous: both CSS files are read, ≥ 200 TS/TSX sources, and the parser self-test (nested `@media`, comment, upper case, space before the colon, value list, `#0000`) files 5 hits under the right selectors | M8 (the parser reads the outer selector) → GT4; M11 (the old case-sensitive regex) → GT4 |
-| GT5 | the 4 dead components (`ArtistBioSection`, `TestimonialsSection`, `VideoShowcase`, `PianoLoadingAnimation`) are named in no TS/TSX outside their own file and the 3 barrels | M10 (`ArtistBioSection` added to the `_index.tsx` import) → GT5 |
-| — | control | M1 (the `.text-glow` rule restored in `utilities.css`) → GT1 GT2 GT3; M6 (the clip inside a CSS comment) → none |
-
-## 2. A: steps
-1. **Claims, before editing.** Run `bash b-round-448/claims-449.sh`.
-   - K1–K15 and K17–K30 must equal `b-round-448/claims-449-planning-output.txt`, except K20, which reads `rc=0`.
-   - K16 must read `absent prefix-294-files=0`, and K19 must read 0 outside and 0 inside the grants.
-   - Otherwise STOP (L11).
-2. **Apply the sketch.** Check `b-round-448/sketch-449.patch.txt`'s sha256 against `sketch-review.md` (K12), then `git apply` it. If it does not apply cleanly, STOP; do not hand-port.
-3. **Mutants, on a scratch, never in the store tree.**
-   1. `git clone --shared` the store at `48e16b8` into `/tmp/a449-scratch`.
-   2. Apply the sketch, symlink `node_modules` and commit.
-   3. Run `SRC=/tmp/a449-scratch OUT=<a-round-449 dir> bash b-round-448/run-mutants.sh`.
-
-   Each mutant must be red on exactly K13's rows. Save `a-round-449/mutants.txt`.
-4. **Doc 294**, in Georgian with English technical terms.
-   - Format:
-     - l.3 is `**თარიღი:** 2026-11-11`.
-     - l.4 is exactly `**სტატუსი:** In Progress (stage 2b-3a of STORE-2b; C round 449 PASS)` (L28).
-     - The seven TEMPLATE headings appear in order (L26).
-   - Content:
-     - The 2b-3 split.
-     - Why the dead sections and `.loading-brand` are allow-listed, not restyled.
-     - The `product-designer` ruling (light ink, brass rejected).
-     - The HEAD measurement: teal ink 34–80 %, boxes equal.
-     - The tests GT1–GT5 and the NM2 title. The mutants and the browser probe are process evidence, not repo tests.
-     - A line that `docs/design/star-brand-audit.md` (its `text-glow` lines [K25]) is superseded by this stage. Do not edit that file: it is outside the grants, and STORE-5 updates the design docs.
-   - TODO:
-     - 2b-3b, 2b-3c, 2b-3d and 2b-4;
-     - LEGACY-DEAD-STORE-COMPONENTS (now also the 3 home sections, and Saba's question on the testimonials);
-     - TLM-R449-WEBKIT-HEADING-INK;
-     - the TL-R449 deferred Lows.
-   - Cite only test ids that exist.
-5. **Checks** (speed rules; no full suite):
-   - `npx vitest run $(cat b-round-448/covering-449.txt)`: all green. A red file, or a test slower than 50 % of its timeout, is a STOP (L11).
-   - `npm run typecheck`: rc 0.
-   - `npm run lint`: rc 0, with warnings ≤ 205, which is HEAD [K14d].
-   - `npx biome check` on the changed TS/TSX paths: rc 0, with 2 warnings, the same as HEAD on those files [K14d].
-   - `npm run build`: rc 0.
-   - code-reviewer (3+ files).
-6. **Browser re-measure, with the dev server on `:5173`.**
-   - **Preconditions:** the mock API answers on `:5199`; if it does not, start `node tmp/studio-real-loop/mock-api/server.mjs`. B's HEAD capture was taken with it up. Warm the server first with `node b-round-448/probe/warm.cjs http://127.0.0.1:5173 /studio-lab /studio/middle-east /` (L38).
-   - Run `node b-round-448/probe/gradient-text-probe.cjs http://127.0.0.1:5173 a-round-449/gt-tree.json 1440,1280,375 a-round-449/shots`.
-   - Then run `python3 -I b-round-448/probe/compare-gt.py b-round-448/probe/gt-head.json a-round-449/gt-tree.json x`. It must end `ROWS 24 ALL_OK True`.
-   - A `NOT FOUND` row is environment-invalid: B saw it on the first 1440 page after each server start [K28]. Rerun it.
-   - If a row fails on `boxSame` only, capture HEAD yourself (`bash b-round-448/probe/serve-tree.sh start /tmp/a449-head 5178 /home/runner/czaba-project/store 48e16b8`, warm it, run the probe) and compare against that. A mismatch that persists against your own HEAD is a STOP (L11).
-7. **Claims, after editing.** Run `bash b-round-448/claims-449.sh`.
-   - Only K3, K3b, K4, K6, K9, K9b, K16, K19, K21 and K24 may differ from the planning output (K2 differs only on B's committed scratch).
-   - K3, K3b, K4, K6, K9, K9b, K21 and K24 must equal `b-round-448/claims-449-sketch-output.txt`.
-   - K16 must be the new doc's l.4, and K19 must read 0 outside and 12 inside the grants.
-   - Save the diff as `a-round-449/claims-diff.txt`.
-8. **`git status`** shows only paths in `b-round-448/grants-449.txt` [K19].
-
-## 3. C: acceptance rows
-**Setup:**
-- Use real Chromium (Playwright).
-- **Warm-up:** run `node b-round-448/probe/warm.cjs <base> /studio-lab /studio/middle-east /` on each server before its first timed probe (L38). B's first C12 run on fresh servers timed out on `/studio-lab` (`b-round-448/probe/c12-run/invalid-cold/`).
-- **Servers:**
-  - Dev server on `http://127.0.0.1:5173`.
-  - Mock API on `:5199`. If it is down, start it with `node tmp/studio-real-loop/mock-api/server.mjs`.
-  - HEAD control: `bash b-round-448/probe/serve-tree.sh start <c-round-449 dir>/head 5178 /home/runner/czaba-project/store 48e16b8`. It runs `git archive` of HEAD with its own Vite `cacheDir` (L38). Use it instead of `sketch-server.sh`, whose patch mode is a silent no-op.
-- **Probes:** copy `b-round-448/probe/*` into `c-round-449/` before changing anything (L60).
-- **Run order:** HEAD and tree probes one at a time, never both at once. Warm each server with one untimed browser load of `/` and `/studio-lab` before any timed probe (L38).
-
-| Row | Action | Pass |
-|---|---|---|
-| C1 SOURCE-SCOPE | `git status --untracked-files=all` | only `grants-449.txt` paths [K19]. Unchanged [K18]: `app/root.tsx`, `app/components/studio/**`, `app/styles/studio.css`, `app/styles/pages/**`, `app/contexts/**`, the protected routes and the 3 dead home sections |
-| C2 CLAIMS | `bash b-round-448/claims-449.sh` vs `claims-449-planning-output.txt` | only the K ids in A step 7 differ, and those equal `claims-449-sketch-output.txt`. K3 app.css 12 → 3, utilities 3 → 0; K6 5 → 0; K8 unchanged (obsidian block sha `e9afeed85faec382`) |
-| C3 HEADING-INK (the change) | `gradient-text-probe.cjs` on HEAD `:5178` and tree `:5173` at 1440, 1280 and 375, then `compare-gt.py <head.json> <tree.json> x` | `ROWS 24 ALL_OK True`, i.e. for each of the 8 words × 3 viewports:<br>• HEAD: fill transparent, a gradient `background-image`, teal ink ≥ 0.2 [K10]. B's lowest is 0.338; HERO over 3 replicates per viewport stays at 0.341–0.349 / 0.654–0.656 [K28]<br>• tree: fill `rgb(236, 230, 218)`, `background-image: none`, teal ink ≤ 0.01, core ink within 8 per channel of (236, 230, 218), core-ink contrast ≥ 4.5 (B's sketch: 13.6–15.7)<br>• span box, heading box and line count identical to HEAD<br>Keep the crops of both trees |
-| C4 DEFAULT-MOTION | the same probe with `reducedMotion` left at the browser default (copy the script and drop that option), at 1440, `/` and `/about` only | `record`: fill and teal ink as in C3 once the reveal settles; a word still mid-animation is re-sampled after 3 s |
-| C5 LEADMAGNET (keep-list) | `lm-dialog.cjs <out> http://127.0.0.1:5178 http://127.0.0.1:5173` (opens the popup by scroll + timer at 1440); also C3's LEADMAGNET rows | dialog text, tag sequence and box equal HEAD [K23]; the eyebrow is light ink, 0 teal; a screenshot of the open dialog on both trees |
-| C6 SELECTION | `node b-round-448/probe/extras-probe.cjs <base> <out.json> <shotDir>` on the tree (and HEAD as the control), at 1440: it double-clicks "Releases" and "Cinema" | `selection.<id>.selected` is the word; the highlight covers the crop: `bluishFraction` ≥ 0.5 (B's sketch: 0.754 and 0.829; HEAD 0.756 and 0.831 [K29]) |
-| C7 FORCED-COLORS | the same run, `forced` part (`forcedColors: 'active'`): `/` hero, "Releases" and `/about` "Cinema" | `forcedMediaMatches` true; tree fill `rgb(236, 230, 218)` and `inkFraction` ≥ 0.5 (B's sketch: 0.79–0.82 [K29]); HEAD: `record` (fill transparent, ink is drawn by forced colours) |
-| C8 WEBKIT | Safari | BLOCKED "no WebKit on the cloud runner"; listed under `blocked`; TLM-R449-WEBKIT-HEADING-INK |
-| C9 STUDIO 0 px | `studio-pixel.cjs <out> <shots> http://127.0.0.1:5178 http://127.0.0.1:5178 http://127.0.0.1:5173 http://127.0.0.1:5178` | every pair 0 px at 1440 and 1280 [K11]. A HEAD-vs-HEAD pair above 0 means the control is invalid (L37) and the run is replaced, with at most 2 replacement attempts. B saw it once, unexplained: in `b-round-448/probe/studio-pixel-run1-INVALID.json` the second HEAD shot at 1440 differed from the first in every pixel while HEAD-vs-sketch was 0; the rerun overwrote those PNGs. A warm-up is not proven to prevent it |
-| C10 COVERING | `npx vitest run $(cat b-round-448/covering-449.txt)` | green, with the counts recorded (B's sketch: 16 files / 190 tests [K14c]) |
-| C11 MUTANTS | `SRC=<C scratch> OUT=<c-round-449 dir> bash b-round-448/run-mutants.sh`, where the C scratch is a `git clone --shared` at `48e16b8` with A's diff applied **and committed** (the runner clones `$SRC`, so uncommitted files never reach the mutants), never the store tree | each mutant red on its K13 rows; BASE and M6 green |
-| C12 STUDIO + PURCHASE PROTECTION | after the warm-up, from inside `c-round-449/` (the script writes `shots/<tag>-*.png` relative to the working directory, so create `shots/` there): `node <your copy>/c12-from-c448.cjs http://127.0.0.1:5178 head > c12-head.json` and `… http://127.0.0.1:5173 tree > c12-tree.json` | for each of 1440 and 1280:<br>• `/studio-lab`: `clips` 1, `playState` Playing with `posPlay` > 0, `stopState` Stopped, `stopHeld` true<br>• anonymous `/studio/middle-east`: `audioSrc` 0, `media` 0, the text contains "Sign in required"<br>All values equal HEAD (B's run on HEAD and sketch: `b-round-448/probe/c12-run/c12-summary.txt` [K30]) |
-| C13 DOCS | doc 294 | l.4 exact; TEMPLATE headings in order; every GT/NM id it cites exists in the test files; the `star-brand-audit` supersede line is present; no `pending` |
-
-- **Gate rows** (full vitest, typecheck, build, Biome, verify) are `gate` and are not claimed by C.
-- **`c-round-449.json`:**
-  - Write **all L57 fields**, and run `python3 -I tools/l57-check.py c-round-449.json c-round-449/l57-check.txt` (rc 0) before hand-off.
-  - Every finding has an `origin`.
-  - `mutantRedOnSketch` = `b-round-448/mutant-M1.log` … `mutant-M11.log`.
-  - `affectedChecksRunOnSketch` = `b-round-448/precheck-covering.log` and `b-round-448/probe/gt-compare.txt`.
-
-**Neighbours that could break:**
-- The home sections' reveal animations. C3 compares boxes and C4 records default motion.
-- The LeadMagnet dialog: covering tests `store-lead-magnet-dialog`, `store-lead-magnet-routes` and `store-focus-ring`, plus C5.
-- `studio-naming` NM2.
-- The header test's `.text-glow` absence assertions [K9].
-- Any Studio surface that imports `app.css` (C9).
-- The e2e specs that visit `/` or `/about` [K27] are not gate rows; B's full suite on the sketch is green [K14b].
+**RT-CAUSE, at least:**
+- `c-round-438.json` (C-R438-01) and `backlog.json` → `retro_candidates` B-R438-REVERSE-DIRECTION-MATRIX and B-R439-SIBLING-SUITE-GAP;
+- `c-round-442.json` (C-R442-M1, no `origin`), `a-round-442.md` (STOP) and `gates/gate-round-442.json` (published `4aa3c82`);
+- `a-round-447.md` and the candidate RETRO450-A-SHELL-EDITS-BYPASS-HOOK;
+- `b-round-448.md` §2 (the inventory first pass) and §1 (A-R448-REVIEW-M1-GOLDEN);
+- `a-round-449.md` (code-reviewer) and `gates/round-449/review.md`;
+- `b-round-449/consult-tech-lead.md` §1–§6 and `consult-product-designer.md`;
+- the dead-file list in Q6 and the GT1-TSX hit: run `bash b-round-449/dead-importers.sh > c-round-450/data/dead-importers.txt` and `cmp` it with `b-round-449/data/dead-importers.txt` [K31]. Word hits outside barrels for `Timeline` are comments or aria text; the "JSX use or import" section is empty, and both importer counts are 0;
+- `a-round-439.md` l.3 (STOP on A-R439-REVIEW-M1), `c-round-439.json` (C-R439-01, PASS) and `gates/gate-round-439.json` (published `efd71f6`): the second L22 case.
 
 ## 4. Claims
-- **Script:** `b-round-448/claims-449.sh` (K1–K30). Planning output: `b-round-448/claims-449-planning-output.txt`. Sketch output (`STORE_ROOT=/tmp/b449-scratch`): `b-round-448/claims-449-sketch-output.txt`.
-- **Probes** (in `b-round-448/probe/`):
-  - Scripts:
-    - `gradient-text-probe.cjs` and `compare-gt.py`;
-    - `lm-dialog.cjs`;
-    - `studio-pixel.cjs`;
-    - `serve-tree.sh`;
-    - `c12-from-c448.cjs`;
-    - `warm.cjs` and `extras-probe.cjs`.
-  - Outputs:
-    - `gt-head.json`, `gt-sketch.json`, `gt-sketch-1440.json` (the first sketch run's 1440 `/` rows were a cold start; they were rerun) and `gt-compare.txt` [K10];
-    - `lm-dialog-sketch.json` [K23];
-    - `studio-pixel.json` [K11] (and `studio-pixel-run1-INVALID.json`);
-    - `shots-head/` and `shots-sketch/` [K15];
-    - `hero-replicates.txt` [K28], `extras-sketch.json` / `extras-head.json` [K29], `c12-run/c12-summary.txt` [K30].
-- **Sketch pre-check** (v3):
-  - `precheck-typecheck.log`, `precheck-lint.log` (205 warnings = HEAD) and `precheck-biome-scoped.log` vs `precheck-biome-head.log` [K14, K14d];
-  - `precheck-covering.log` (16 files / 190 tests) [K14c];
-  - `precheck-full.log` [K14b];
-  - `precheck-build.log` [K14];
-  - `git apply --check` on the store tree: rc 0.
-- **Mutants:** `run-mutants.sh`, `mutants.txt` and `mutant-M1.log` … `mutant-M11.log` [K13].
-- **Review:** `sketch-review.md` [K12]. v2 got APPROVE-WITH-CHANGES; both Mediums were fixed in v3; the delta review gave APPROVE. v2 artifacts are in `v2-superseded/`.
+The script is `b-round-449/claims-450.sh`. B's run is saved in `b-round-449/claims-450-planning-output.txt`, with stderr in `b-round-449/claims-450-planning.err` (empty).
+
+| Claim | What it checks |
+|---|---|
+| K1 | Gate 449 |
+| K2 | The tree at planning |
+| K3 | The manifest count |
+| K4 | Each protected file appears once in the manifest |
+| K5 | Screen line counts |
+| K6 | Journey clips |
+| K7 | `lessons.md` line count |
+| K8 | Every artifact in `b-round-449/cited-artifacts.txt` exists |
+| K9 | PNG count |
+| K10 | Backlog version and last D-ID |
+| K11 | l57 check on `c-round-449.json` |
+| K12 | Lesson ids |
+| K13 | Regression date |
+| K14 | L23, L58 and L61 byte counts |
+| K15 | The archived task equals B's copy |
+| K16 | Cost medians and totals |
+| K17 | STOP rounds |
+| K18 | Lessons diff hunks |
+| K19 | HEAD and status now |
+| K20 | Fail, blocked, gate-skipped and browser counts |
+| K21 | l58-check on tasks 436–449 |
+| K22 | Finding ids (`tools/find-ids.py`, archive-aware) |
+| K23 | The retro input is v438 |
+| K24 | The questions file has 7 questions |
+| K25 | AGREE-STEM-LANES answer-word count (2 at planning; a change means Saba answered, so report it) and no STEM-LANES transcripts |
+| K26 | Ids in `screen_review_candidates`, `architecture_signals`, `tech_lead_manual_checks` and `root_requests_b`; `retro_runs` 450; `next_due` |
+| K27 | The feature-status RETRO row and 5 SR rows in the screen review |
+| K28 | l58-check on this task |
+| K29 | The systemic task's `closes` list |
+| K30 | Protected manifest and r450 manifest rc |
+| K31 | `dead-importers.sh` output equals `b-round-449/data/dead-importers.txt` |
+
+## 5. After this round (D-29z1601)
+1. **Round 451:** REGRESSION-2026-11-13 if it is planned on or after 2026-11-13, with its `scope_additions` (L6). Otherwise **SYS-R450-STORE-STYLE-SCAN**.
+2. Then:
+   - SYS-R450-STORE-STYLE-SCAN, if not yet done;
+   - STORE-2b-3b, after B identifies INFO-C449-C9-HEAD-CONTROL-FLAKE;
+   - 2b-3c;
+   - 2b-3d, with the dead-file deletion of Q6;
+   - 2b-4 and STORE-2c…5;
+   - ARCH-SPLIT;
+   - REVIEW-RECOMMENDATIONS;
+   - T12-ADVANCED;
+   - phase 2, under the skip rule.
+3. **STEM-LANES** jumps ahead as soon as Saba answers AGREE-STEM-LANES.
+4. **Next RETRO:** round 465.

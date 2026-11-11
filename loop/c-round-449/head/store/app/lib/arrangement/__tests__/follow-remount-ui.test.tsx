@@ -1,0 +1,144 @@
+import { act, render } from '@testing-library/react';
+import { type ReactNode, useState } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+import { ArrangementProvider } from '~/contexts/ArrangementContext';
+import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+import { createArrangement } from '../model';
+import { insertMarkerStatusKind } from '../playback-start';
+import { studioTempoStrings } from '../strings';
+import { useWorkspaceStatusProbe, type WorkspaceStatusProbeValue } from './helpers/workspace-probe';
+import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';
+
+vi.mock('@remix-run/react', () => ({
+  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+    <a href={to} className={className}>
+      {children}
+    </a>
+  ),
+}));
+
+const {
+  fakeClock,
+  FakeAudioContext,
+  FakeOfflineAudioContext,
+  FakeAudioBuffer,
+  FakeResizeObserver,
+} = createWorkspaceTestEnvironment();
+
+beforeEach(() => {
+  fakeClock.base = Date.now() / 1000;
+  vi.stubGlobal('AudioContext', FakeAudioContext);
+  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+  vi.stubGlobal('requestAnimationFrame', () => 1);
+  vi.stubGlobal('cancelAnimationFrame', () => undefined);
+  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
+  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+const remountCollection: WorkspaceCollection = {
+  id: 'remount',
+  label: 'remount',
+  origin: 'demo',
+  sources: [
+    {
+      id: 'stem-90',
+      title: 'Slow stem',
+      collectionLabel: 'remount',
+      kind: 'stem',
+      origin: 'demo',
+      bpm: 90,
+    },
+    { id: 'song', title: 'Song', collectionLabel: 'remount', kind: 'music', origin: 'demo' },
+  ],
+  loadSource: async () => new AudioBuffer({ length: 400, numberOfChannels: 1, sampleRate: 100 }),
+};
+
+function remountArrangement(clips: ArrangementClip[]): Arrangement {
+  const base = createArrangement([
+    { id: 'video', kind: 'video', name: 'Video' },
+    { id: 'music', kind: 'audio', name: 'Music' },
+    { id: 'sfx', kind: 'audio', name: 'SFX' },
+  ]);
+  return { ...base, clips };
+}
+
+interface RemountApiRef {
+  current: WorkspaceStatusProbeValue | null;
+  showWorkspace: ((next: boolean) => void) | null;
+}
+
+function RemountHarness({ api }: { api: RemountApiRef }) {
+  const [shown, setShown] = useState(true);
+  api.current = useWorkspaceStatusProbe();
+  api.showWorkspace = setShown;
+  return shown ? <StudioWorkspace /> : null;
+}
+
+function live(api: RemountApiRef): WorkspaceStatusProbeValue {
+  if (!api.current) {
+    throw new Error('provider not mounted');
+  }
+  return api.current;
+}
+
+async function settle() {
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+}
+
+async function mountRemountWorkspace(sourceId: string) {
+  const api: RemountApiRef = { current: null, showWorkspace: null };
+  const view = render(
+    <ArrangementProvider
+      collection={remountCollection}
+      initialArrangement={remountArrangement([
+        { id: 'c1', trackId: 'music', sourceId, start: 2, sourceOffset: 0, duration: 4 },
+      ])}
+    >
+      <RemountHarness api={api} />
+    </ArrangementProvider>,
+  );
+  await settle();
+  act(() => live(api).setInsertMarker(20));
+  act(() => live(api).setStatus(live(api).describeSpaceStart()));
+  const remount = async () => {
+    act(() => api.showWorkspace?.(false));
+    act(() => api.showWorkspace?.(true));
+    await settle();
+  };
+  return { api, view, remount };
+}
+
+describe('Follow sync on a workspace remount under a live provider', () => {
+  it('RM1 a remount with a tempo-source clip keeps the stopped insert-marker text, with no tempo append', async () => {
+    const { api, remount } = await mountRemountWorkspace('stem-90');
+    const stoppedText = live(api).status;
+    expect(insertMarkerStatusKind(stoppedText)).toBe('stopped');
+    await remount();
+    expect(live(api).status).toBe(stoppedText);
+    expect(live(api).status).not.toContain(
+      studioTempoStrings.seeded({ bpm: '90', title: 'Slow stem' }),
+    );
+  });
+
+  it('RM2 a remount re-writes the unchanged stopped text once, so the status is announced again', async () => {
+    const { api, remount } = await mountRemountWorkspace('song');
+    const stoppedText = live(api).status;
+    const before = live(api).statusSequence;
+    expect(insertMarkerStatusKind(stoppedText)).toBe('stopped');
+    await remount();
+    expect(live(api).status).toBe(stoppedText);
+    expect(live(api).statusSequence).toBe(before + 1);
+  });
+});
