@@ -1,188 +1,92 @@
-# Round 455: SABA-B-14 — the Store player's seek thumb stays on the brass fill edge
+# Round 456: STORE-2b-3c-2a — one shared CSS rule reader, and proof that the "dead" teal rules really have no mounted consumer
 
-**Planned by:** B, at the round 454 → 455 planning, 2026-11-11 (`b-round-454.md`).
-- **Advisor:** available, and consulted after orientation and before writing.
-- **Archive:** the round-454 task is saved as `tasks/round-454.md`, a byte-identical copy made before this file was rewritten.
-- **Baseline:** gate 454 is `published` with commit `2e26962` [K1]. The store tree is at `2e26962` and clean at planning [K2].
-- **Regression:** not due. The last ran 2026-11-10, round 425; the next is due on or after 2026-11-13.
-- **Next RETRO:** round 465.
+**Planned by:** B, at the round 455 → 456 planning, 2026-11-11 (`b-round-455.md`).
+- **Advisor:** available; consulted after orientation and before writing (order, baseline, split, checkpoint), and again before hand-off (it added the saved `expect(` counts, apply-check and scoped Biome runs, the C7 baseline, the verbose reporter, the doc 299 stage form and the naming check).
+- **Archive:** the round-455 task is saved as `tasks/round-455.md`, a byte-identical copy (`cmp` OK).
+- **Baseline:** HEAD `db95f40` = gate 455 `commit` (published) [K1][K2]. `context/head-sha.txt` and the gate's `head` field still name `2e26962`; the `commit` field wins.
+- **Type:** test-only (plus two doc lines). No app source, CSS, route or Studio file changes. The reference-first, `product-designer`, screen-budget and journey rules do not apply (policy: "Not in scope: … test-only"). C still runs the Studio and purchase-protection smoke so `browserVerified` stays real.
 
 ## Why this round
-- **Round 454 is closed.** C round 454 returned PASS on C1–C10, with `browserVerified` and `realVerified` true and 0 bugs. Gate 454 published `2e26962`, so STORE-2b-3c-1 is done (D-29z1615).
-- **Saba reported two Store bugs on 2026-11-11.** Both are Medium because Saba saw them himself (bug gate 2026-10-23). They are recorded at this planning (L42, D-29z1616):
-  - **SABA-B-14**, the subject of this round: the white seek thumb on the Store audio player runs ahead of the brass progress fill.
-  - **SABA-B-13**: the Store entrance animation needs a minimum display time. It is the next STORE-2b stage after 2b-3c-2, because it needs a design consult and a reference section first.
-- **This round goes before STORE-2b-3c-2** (D-29z1617). 2b-3c-2 is a test-only helper round, and a Medium bug that Saba saw on a mounted screen comes first. 2b-3c-2 becomes round 456. Nothing is dropped.
+- **A-R454-REVIEW-M-DEAD-UNCHECKED (open Medium, promised to round 456).** `store-live-teal.test.ts` LT3/LT5/LT6 allow-list teal in rules labelled "dead", but nothing proves those classes have no mounted consumer. Four of the dead tokens do appear in component source today [K6].
+- **One CSS parser instead of three.** `store-live-teal.test.ts` has a line-regex rule reader (`hitsByEnclosingRule`, `TOP_LEVEL_HEADER`) [K4], `store-glow-shadow.test.ts` has a second one (`ruleBodiesFor`) [K5], and `helpers/style-scan.ts` has a brace-aware walker only for gradient text [K3]. Signals SIG-R453-CSSRULEBODIES and SIG-R454-HITSBYRULE asked for one nesting-aware reader.
+- **Lows owned by the same change:** TL-R454-L-BRACE-PREFIX-HEADER (a `} .live:hover {` line escapes attribution), A-R454-REVIEW-L3 (LT1 sees only top-level exact lines), A-R454-REVIEW-L4 (the `@theme` bucket never closes), A-R453-REVIEW-L-GS-TEST-GAPS (GS2 misses `shadow-glow-accent`, GS3's reader skips nested/quoted braces, GS3 does not assert the `.button-primary` fill).
+- **Ruling owed from round 455 (L10):** doc 298 l.4 reads `In Progress (SABA-B-14, round 455)` at HEAD [K10]. It was B's task text that pinned it against lesson L28; the origin is B spec (B-R455-DOC298-STATUS-LINE). This round grants that one line.
+- **Order:** the recorded order stands (D-29z1616/1617, D-29z1619): 2b-3c-2a now, then SABA-B-13 (entrance; needs its own `product-designer` consult, reference section and production-build probe), then 2b-3c-2b (the zero-offset glow regex forms A-R451-REVIEW-L2-ZERO-OFFSET-UNITS, INFO-TL-R451-GLOW-CALC, GATE452-L1 — Low/info only). REGRESSION-2026-11-13 runs first if round 457 is planned on or after 2026-11-13.
 
-## What B measured at HEAD (real Chromium, `/products/pulse-loop-kit`, the mock API, a 150 s preview, track 464 px)
-- **Probe:** `b-round-454/probe/seek-probe.mjs`. It wraps `window.Audio` to reach the preview element, which is not in the DOM (INFO-B454-PREVIEW-AUDIO-ELEMENT).
-- **Method:** pause at 10 times between 0.4 s and 149.6 s. For each one:
-  - The **thumb centre** is the middle of the white pixels on the track row.
-  - The **fill edge** is the last brass pixel, read with the thumb hidden by an injected style.
-- **HEAD result:** the thumb leads the fill by 4–7 px early in the track and lags it by 4–5 px near the end. The largest gap is 7 px at both viewports [K11]. The files are `probe/seek-5173-1440.txt` and `probe/seek-5173-1280.txt`.
-- **Two causes, both measured:**
-  1. **Whole-second snapping.** The progress `<input type="range">` has no `step` [K3], so it uses the default step of 1. Its value, and so the thumb, snaps to whole seconds: at currentTime 3.6 the value is 4. The gradient fill uses the exact fractional time (`progressPercentage` [K4]).
-  2. **Thumb inset.** The 12 px thumb [K5] has its centre travel from 6 px to width − 6 px, while the fill stop runs from 0 to 100 % of the width.
-- **Root's guess ("a CSS transition delay") is not the cause.** The fill is an inline gradient with no transition, and the thumb and the fill update in the same render.
-- **The volume slider** in the same player has the same inset, but not the snapping (it has `step="0.01"` [K3]). It gets the same fill.
-- **Other Store ranges are out of scope.** The four `recordings/*` files with `type="range"` each have at least as many `step=` attributes as ranges, use `accent-*` classes, and have no `linear-gradient` [K12]. Their fill is the browser's own accent fill, which the browser keeps under the thumb. Only `AudioPlayer.tsx` paints its own fill gradient (`linear-gradient(to right` outside the Studio folders: that file only, 2 hits) [K13].
-- **Studio sliders are not touched.** They are separate Arrangement components.
-
-## What changes (user-visible)
-- **The fill follows the thumb.** While a preview plays, the brass fill ends exactly at the centre of the white thumb, at every point in the track, at both viewports, and the thumb moves smoothly instead of in 1 s jumps. The volume slider's fill also ends at its thumb centre.
-- **The keyboard stays as it was.** Every arrow key, with or without Shift, Alt, Ctrl or Meta, still seeks ±1 s, now from the exact time. For example, 10.4 → 11.4, where HEAD rounded first and went 10.4 → 11.
-  - **At HEAD,** B measured that every modified ArrowRight goes +1 s [K16], and that Alt+ArrowLeft seeks −1 s without navigating back [K15]. Both are the native range behaviour with step 1.
-  - **The sketch keeps that:** it gives +1.0 s and −1 s, and stays on the page.
-  - **The seek is clamped** to 0 and to the duration.
-  - **PageUp/PageDown (10 %), Home and End stay native.**
-- **Screen readers.** The position is announced as `m:ss of m:ss` (`aria-valuetext`). Without it, a fractional value would be read out as, for example, "10.4".
-- **Nothing else moves.** The player's layout, colours, sizes and every other control are unchanged. No new persistent element is added, so the screen budget (L39) does not apply.
-
-## Reference
-- **There is no Ableton reference.** This is the Store player, not the Studio.
-- **WAI-ARIA APG, "Media Seek Slider Example"** (`https://www.w3.org/WAI/ARIA/apg/patterns/slider/examples/slider-seek/`, read 2026-11-11):
-  - The arrows move one step and Page Up/Down move larger steps.
-  - Home and End go to the minimum and maximum.
-  - `aria-valuetext` gives a user-friendly time instead of the raw number.
-
-  **Deviation:** APG's Page step is 15 steps; ours stays the native 10 % (the HEAD behaviour, unchanged). The reason: this round fixes a visual desync and does not redesign keyboard steps.
-- **Established practice:** the fill ends under the thumb centre. That is the visual contract Saba asked for ("they should move together"). **No other source was fetched;** B does not claim any other product's exact geometry.
-- **`product-designer` is not consulted.** This is a fix-up, not a new feature.
-- **`tech-lead` reviewed the sketch:** APPROVE (`b-round-454/sketch-review.md`).
-
-## Why we missed it (Saba-found issue rule)
-- **Which phase should have caught it:** the B spec of STORE-1b (round 187). That round fixed the fill colour (the undefined `--color-primary`) and C checked that the fill was visible. No row compared the fill edge with the thumb, and nobody looked at the range's `step`.
-- **Why it was missed:** the rows were colour rows taken from a still screenshot at one position. The 1 s snapping only shows while playing, and the inset only shows away from the middle.
-- **Rule:** L61 gains a "painted range fill" clause in this planning (no new line; the lessons file stays at 60 lines). C checks that the clause exists (row C8).
+## What B measured at HEAD `db95f40`
+- **Rule-reader keys equal the old allow-list.** On the sketch, `hitsByCssRule` over `styles/app.css` and `styles/base/utilities.css` returns exactly the 23 old `TEAL_RULE_ALLOW_LIST` keys without the trailing ` {`, with the same counts (app.css 37, utilities.css 6) (sketch run: LT3/LT5 green; `b-round-455/precheck-covering.log`).
+- **Dead-token consumers** [K6]: `audio-preview-inline-button` → `components/audio/AudioPreviewButton.tsx`; `waveform-bar` → `components/audio/WaveForm.tsx`, `components/product/TrackRow.tsx`; `track-row-waveform` → `components/loading/TrackRowSkeleton.tsx`, `components/product/TrackRow.tsx`; `loading-brand` → `components/loading/PianoLoadingAnimation.tsx`. The other 12 dead tokens have no script consumer.
+- **Reachability** (`b-round-455/probe/reach.py`, a Python prototype; `reach-head.txt`) [K7]: from `root.tsx`, `entry.client.tsx`, `entry.server.tsx` and `routes/**` (37 roots, 288 of 349 app scripts reached), TrackRow, WaveForm, TrackRowSkeleton and PianoLoadingAnimation are **unreachable**; AudioPreviewButton and the frozen legacy StemsLoadingAnimation are reachable. **Control:** following whole barrels instead of imported names marks all four reachable (`wholebarrel-control.txt`), so the name-precise rule is what makes the check meaningful.
+- **AudioPreviewButton:** default `variant = 'overlay'`; 3 JSX uses, all `variant="overlay"`, no spread [K8]. So the inline class is never rendered.
+- **Dead keyframes:** `audioPlayingPulse` is used only by `.audio-preview-inline-button.playing`, `playButtonPulse` only by `.audio-player-button-play.is-playing` [K9]; no script sets `is-playing` [K6].
+- **A legitimate `@media` copy:** `.audio-player-artwork` has a top-level rule and one nested `@media` copy (size only) [K14]. LT1 therefore expects 2 rules for it.
+- **GS facts:** no script uses `shadow-glow-accent`, and no script reads a dead teal theme token by utility or `var()` [K15]; `.button-primary` is `background: var(--color-brand); color: var(--color-brand-foreground);` [K16].
 
 ## Ruling lines (L4)
-- **`step="any"` versus the arrow step:** the key handler wins for ArrowLeft, ArrowRight, ArrowUp and ArrowDown with any modifier. Every other key is native.
-  - **Why modifiers are included:** with `step="any"`, a native arrow moves 1 % of the range. B's first sketch excluded Alt, Ctrl and Meta and measured +1.5 s for them, a regression against HEAD's +1 s (`probe/extra-5181-*` before the fix, recorded in `sketch-review.md`).
-- **Fill helper:** the volume slider uses the same helper. Its rendered fill moves by up to 6 px, by design, so that it also ends at its thumb centre. That is the only visual change outside the progress bar.
-- **The changed assertion in `audio-preview-player.test.tsx`:** the K1 `_REGRESSION` row "draws the played and set parts with var(--color-brand)" changes its two `toContain` strings from `var(--color-brand) 25%` / `70%` to the calc form. Its intent (the brand token, the fraction) stays, and no assertion is lost.
-- **Non-finite durations:** previews are finite files. With an infinite duration, `aria-valuetext` would read "… of 0:00", the fill would stay at 0 and `max` would fall back to the native default, the same as at HEAD (this is `tech-lead`'s reasoning, not measured). This is not a row.
+- **Allow-list keys change form, counts do not.** Every key in `TEAL_RULE_ALLOW_LIST` and `TEAL_TOKEN_READ_RULE_ALLOW_LIST` loses its trailing ` {` (the rule reader returns the normalized header). Counts and reasons are unchanged. This is the only allowed edit to those two tables.
+- **No assertion lost; equal or stronger replacements allowed.** The old `lineCount` header rows become `cssRuleSelectorCount` rows (every rule whose selector list names the selector, at any nesting) plus a teal-free and glow-free check of each such body; `.audio-player-artwork` becomes 2. The old LT6 fixture expectations keep their cases with the new keys, and gain the brace-prefix, nested at-rule, quoted-brace, comment and `@theme` cases. GS4's `'--shadow-glow shadow-glow-accent'` → 0 row becomes two rows: `'--shadow-glow --shadow-glow-accent'` → 0 and `'hover:shadow-glow-accent shadow-glow-accents'` → 1 (stronger: the accent utility is now caught).
+- **`StyleScanAllowList` reasons:** LT7 treats a key as dead when its reason starts with `dead`. The frozen-legacy keys (`stems-loader-list`) are not dead and are not in LT7.
+- **Where the walker stops:** `reachableScripts` follows `import`/`export … from` and `import('…')` with `~/` or relative specifiers; it treats a file as a barrel only when every statement is `export … from`; it follows a named import from a barrel only into re-exports of those names, and passes the names through `export *`. It does not model JSX usage (an imported but unused component counts as mounted — fail-safe).
 
 ## 1. Changes
-A applies `b-round-454/sketch-455.patch.txt` with sha256 `c3feb71895df31ec00d1d17cc6483129d04d00d12f789ca30d40173bc25a28c3`. `tech-lead` reviewed this exact sha (`sketch-review.md`, review 2) [K17]. The per-file hashes are in `b-round-454/sketch-files-sha256.txt`.
-- **`app/components/audio/AudioPlayer.tsx`:**
-  - adds `AUDIO_PLAYER_THUMB_PX = 12` and `AUDIO_PLAYER_KEY_STEP_SECONDS`;
-  - exports `audioPlayerRangeFill(fraction)`, which clamps to 0..1, prints a non-finite value as 0, and sets the edge to `calc(6px + f * (100% - 12px))`;
-  - replaces `progressPercentage` with `progressFraction`;
-  - adds `handleProgressKeyDown`;
-  - on the progress input, adds `step="any"`, `onKeyDown` and `aria-valuetext`;
-  - makes both inputs use the helper.
-- **`app/lib/__tests__/audio-preview-player.test.tsx`:**
-  - the K1 assertion moves to the calc form;
-  - a new describe "the seek thumb stays on the brass fill edge (SABA-B-14)" adds ST1, ST2, ST3, ST3b, ST3c, ST4, ST5, ST6, ST7 and ST8. ST5: Alt/Ctrl/Meta+ArrowRight seek +1 s; PageUp, PageDown, Home and End are not handled.
-- **`docs/implementation/2026/quarter-IV/298-saba-b-14-store-seek-thumb.md`** (new): written by A, in Georgian, with the `docs/implementation/TEMPLATE.md` headings in order.
-  - l.3 is exactly `**თარიღი:** 2026-11-11`.
-  - l.4 is exactly `**სტატუსი:** In Progress (SABA-B-14, round 455)`.
-  - The word `pending` appears nowhere (L28).
+**A runs `git apply b-round-455/sketch-456.patch.txt` (sha256 `b3eab344…`, in `b-round-455/sketch-456.sha256`; `tech-lead` APPROVE on this exact sha after an APPROVE-WITH-CHANGES on v1, see `b-round-455/sketch-review.md`) with no hand edits to the three test files, then writes the two docs.**
 
-  The doc must contain:
-  - the two measured causes, with the HEAD numbers from this task;
-  - the keyboard ruling and the volume-fill ruling;
-  - the `aria-valuetext` reason;
-  - the ST ids;
-  - the Firefox Tech Lead row (TLM-R455-FIREFOX-SEEK-THUMB);
-  - the "Why we missed it" line.
+Grants (`b-round-455/grants-456.txt`, exactly these 5 paths):
+1. `app/lib/__tests__/helpers/style-scan.ts` — sketch only. Adds `CssRuleBlock`, `cssRuleBlocks`, `cssRuleBodies`, `cssRuleBlocksListing`, `cssRuleSelectorCount`, `cssRuleKey`, `hitsByCssRule`, `isReExportBarrel`, `reachableScripts`, `appScriptSources`, `ImportBinding`. `ResolvedImport` gains `bindings` (`{imported, exported}`; a default import is recorded as imported `default`), and `names` keeps listing the imported names (plus `default`); GT5b's use of `names` is unchanged in result (`tech-lead` review 2) [K3].
+2. `app/lib/__tests__/store-live-teal.test.ts` — sketch only. Drops `hitsByEnclosingRule`, `TOP_LEVEL_HEADER`, `TOP_LEVEL_SELECTOR_CONTINUATION`, `lineCount` [K4]; LT1/LT5/LT6 use the shared reader; new **LT7** (dead-labelled keys ↔ `DEAD_RULE_TOKENS`; each token's consumer files equal `DEAD_TOKEN_CONSUMERS`; every `unmounted` consumer outside `reachableScripts`; every dead token appears in its own rule's header or body; every teal `@theme` declaration names one of the 5 listed tokens; AudioPreviewButton reachable, SpotlightLoader reachable; the component signature defaults `variant = 'overlay'`, its overlay branch holds the overlay class and not the inline class, and the inline class sits after that branch; ≥ 3 JSX uses each without spread and without a non-overlay `variant=`; every CSS rule that animates a dead keyframe has the dead class in its header) and **LT8** (walker on a synthetic file map: named barrel import, namespace import, dynamic import, `export *` chain, `export { default as X }`, `export { A as B }`, `export { default }` with a default import, orphan file; token-pattern and tag-parser self-tests).
+3. `app/lib/__tests__/store-glow-shadow.test.ts` — sketch only. `ruleBodiesFor` removed [K5], GS3/GS4 use `cssRuleBodies`; `RETIRED_UTILITY_PATTERN` also matches `shadow-glow-accent`; GS3 asserts `background: var(--color-brand);` in `.button-primary` and no `gradient(` in any primary-button body; GS4 sample gains `.a::after { content: '}'; }` and a `@supports`→`@media` nested `.a`.
+4. `docs/implementation/2026/quarter-IV/298-saba-b-14-store-seek-thumb.md` — **l.4 only** (today `In Progress (SABA-B-14, round 455)` [K10]), to exactly `**სტატუსი:** Completed (C round 455 PASS)`. No other byte of doc 298 changes.
+5. `docs/implementation/2026/quarter-IV/299-store-2b-3c-2-shared-rule-reader.md` — new (Georgian, English technical terms; `docs/implementation/TEMPLATE.md` headings in order; l.3 `**თარიღი:** 2026-11-11`; l.4 exactly `**სტატუსი:** In Progress (stage 1 of 2; C round 456 PASS)` (L28 stage form; stage 2 = 2b-3c-2b); no `pending`). It cites LT1, LT5, LT6, LT7, LT8, GS2, GS3, GS4 (each present in the test files, L26), the walker's limits (Ruling lines), the closed/advanced ids, and that 2b-3c-2b is next for the glow regex forms.
 
-**Grants:** exactly `b-round-454/grants-455.txt` (the 3 paths above). No other file. `app/styles/app.css` is **not** granted: the thumb CSS stays as it is (12 px wide [K5]), and ST8 pins that width.
+Nothing else changes. Protected auth/purchase files (`app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`), `app/styles/**`, `app/components/**`, `app/routes/**`, `app/root.tsx`, `vitest.config.ts`, `package.json` are untouched.
 
 ## 2. A: steps
-1. Read `lessons.md` (the A part), the primitives `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`, and `.claude/prompts/new-test.md`.
-2. Run `bash b-round-454/claims-455.sh > a-round-455/claims-before.txt 2> a-round-455/claims-before.err`. It must equal `b-round-454/claims-455-planning-output.txt`, and stderr must be empty. On a mismatch, STOP and report it.
-3. Check and apply the patch. Make **no hand edits** to the 2 code files (C3 pins their hashes).
-   - Run `sha256sum -c b-round-454/sketch-455.sha256`.
-   - In the store, run `git apply <loop>/b-round-454/sketch-455.patch.txt`.
-   - Then run `sha256sum -c b-round-454/sketch-files-sha256.txt` from the store root: 2 OK.
-4. Write doc 298 as in §1.
-5. Run the checks for the changed code only (speed rules):
-   - `npm run typecheck`: rc 0.
-   - `npm run lint`: rc 0, with the warning count equal to HEAD's.
-   - `npx biome check app/components/audio/AudioPlayer.tsx app/lib/__tests__/audio-preview-player.test.tsx`: 5 warnings, all the pre-existing `useButtonType`, the same as HEAD [K18]; no format diff.
-   - `npx vitest run $(cat <loop>/b-round-454/covering-455.txt)`: 6 files / 73 tests green.
-   - **Mutants:**
-     - Make a scratch with `git clone --shared` at `2e26962`, apply the patch, **commit it in the scratch only**, and symlink `node_modules`.
-     - Run `bash b-round-454/run-mutants.sh <scratch> a-round-455/mutants/mutants.txt`.
-     - The output must equal `b-round-454/mutants/mutants.txt` (14 lines: BASE green, M1–M13 red). The script also writes one log per mutant, `mutant-<id>.log`, next to the output.
-   - The code-reviewer is only needed for 3 or more changed files. 3 paths are changed, so run it, and pass its Architecture note to B without acting on it.
-6. **Browser (A's own check, not C's rows):**
-   - Use the tree's dev server `:5173` and the mock API `:5199` (start it detached with `setsid node <loop>/mock-api/server.mjs` if it is down).
-   - Warm the server twice.
-   - Run `node <loop>/b-round-454/probe/seek-probe.mjs http://127.0.0.1:5173 <w> <h> a-round-455/seek-<w>.json a-round-455/shots` at 1440 900 and 1280 720. Each run must print `MAX_ABS_LEAD_PX` ≤ 1.00. B measured 0.00.
-   - Run `key-probe.mjs http://127.0.0.1:5173 none`. Its output must equal `b-round-454/probe/key-sketch.txt` in every key and value.
-7. Run `claims-455.sh` again. Its output must equal `b-round-454/claims-455-sketch-output.txt`. That file is the script's own output on a clone with the sketch applied and a doc 298 present. It differs from the planning output only in K2, K3, K4, K6, K8 and K13. stderr must be empty.
-8. `git status --short --untracked-files=all` must show only the 3 grants.
-9. Write `a-round-455.md`: the changed files, each step with its real result and log path, the reviewer's findings with ids, and the known gaps.
+1. Read `lessons.md` (A part), the primitives `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, `AGENT_DISCOVERABLE_CODE.md`, and `docs/implementation/TEMPLATE.md`. B checked the sketch's new export names against `AGENT_DISCOVERABLE_CODE.md` rule 1 (2–3+ words, one domain term: `cssRuleBlocks`, `hitsByCssRule`, `reachableScripts`, `appScriptSources`, `ImportBinding` …) and they follow the helper's existing style (`countTealHits`, `hitsByFile`); A does not rename them (the sha is pinned).
+2. `bash b-round-455/claims-456.sh > a-round-456/claims-before.txt 2> a-round-456/claims-before.err` → equal to `b-round-455/claims-456-planning-output.txt`, stderr empty.
+3. `cd b-round-455 && sha256sum -c sketch-456.sha256`; `git apply b-round-455/sketch-456.patch.txt` in the store; `sha256sum -c b-round-455/sketch-files-sha256.txt` → 3 OK.
+4. Edit doc 298 l.4; write doc 299.
+5. `npm run typecheck`, `npm run lint` (warning count equal to HEAD's), `npx biome check` on the 3 test files (no format diff), `npx vitest run $(cat b-round-455/covering-456.txt)` → 4 files / 26 tests green (B: `b-round-455/precheck-covering.log`).
+6. Mutants on a scratch (`git clone --shared` at `db95f40` + the sketch applied, `node_modules` symlinked): `bash b-round-455/run-mutants.sh <scratch> a-round-456/mutants/mutants.txt` → equal to `b-round-455/mutants/mutants.txt` (22 lines: BASE and C1 green, M1–M20 red).
+7. `bash b-round-455/claims-456.sh > a-round-456/claims-after.txt` → equal to `b-round-455/claims-456-sketch-output.txt` except K2 (dirty count 5 instead of 3) and K10 (doc 298 l.4 and `299=1`); stderr empty.
+8. `git status --short --untracked-files=all` → only the 5 grants.
+9. 3+ files changed → run `code-reviewer`; pass Architecture notes to B, do not act on them.
+
+**STOP (L11)** if a covering test fails, a mutant result differs, the sketch does not apply, or claims-before differs from the planning output.
 
 ## 3. C: acceptance rows
 **Setup:**
-- Real Chromium (Playwright).
-- Copy `b-round-454/probe/*.mjs` into `c-round-455/` before changing anything (L60).
-- **Servers:**
-  - The tree: dev `:5173`.
-  - The mock API: `:5199`.
-  - The HEAD control: `bash b-round-448/probe/serve-tree.sh start <c-round-455>/head 5182 /home/runner/czaba-project/store 2e26962`. Stop it afterwards.
-- Warm each server twice with `node b-round-448/probe/warm.cjs <base> / /products/pulse-loop-kit /studio-lab /studio/middle-east`.
-- Run probes one at a time, never during a vitest run (L38).
+- Real Chromium (Playwright) for C7. Servers: dev `:5173` and the mock API `:5199`. If `:5199` is down (A found it down in round 455), start it detached: `setsid node mock-api/server.mjs > c-round-456/mock-api.log 2>&1 &` from the loop folder.
+- Warm the dev server twice with `node b-round-448/probe/warm.cjs http://127.0.0.1:5173 / /products/pulse-loop-kit /studio-lab /studio/middle-east`.
+- Run browser probes one at a time and never during a vitest run (L38). Write `c-round-456/progress.json` after every row (L59). No HEAD control server is needed: no app file changes.
 
 | Row | Action | Pass |
 |---|---|---|
-| C1 SOURCE-SCOPE | `git status --untracked-files=all` | Only the 3 `grants-455.txt` paths. `app/styles/**`, `app/contexts/AudioContext.tsx`, `app/components/recordings/**`, `app/components/arrangement/**`, `app/root.tsx` and the protected routes are unchanged |
-| C2 CLAIMS | `S=<a git clone --shared at 2e26962, with the store `node_modules` symlinked> bash b-round-454/claims-455.sh`, then `bash b-round-454/claims-455.sh` on the tree | The clone equals `claims-455-planning-output.txt`; the tree equals `claims-455-sketch-output.txt`, which differs from the planning output only in K2/K3/K4/K6/K8/K13; stderr empty. Also run L29's grep over this task |
-| C3 APPLY | `sha256sum -c b-round-454/sketch-files-sha256.txt` in the store | 2 OK |
-| C4 THUMB-ON-FILL (the bug) | `seek-probe.mjs` on HEAD `:5182` and on the tree `:5173`, at 1440×900 and 1280×720 | **HEAD (control):** `MAX_ABS_LEAD_PX` ≥ 4 at both viewports (B: 7.00) and `value` integer while playing. **Tree:** \|lead\| ≤ 1 px at all 10 paused samples (0.4 s … 149.6 s) at both viewports (B: 0.00); while playing, `step` is `any` and `value` is fractional. Keep the crops of the 3.6 s and 149.6 s samples from both trees |
-| C4b PLAYING VISUAL | On the tree, let the preview play for 3 s at each viewport and take 6 crops of the player track about 0.5 s apart | In every crop, the brass fill ends under the thumb: no brass visible beyond the thumb's right edge, and no grey gap between the fill and the thumb's left edge. Attach the crops |
-| C5 KEYBOARD | `key-probe.mjs <base> none` and `altleft-probe.mjs <base>` on HEAD and on the tree | **Tree** `key-probe` equals `b-round-454/probe/key-sketch.txt`: arrows ±1.0 s from 10.4, clamped at 0 and at the end; PageUp/PageDown 10 %; Home 0; End = duration; valuetext `2:30 of 2:30`. **HEAD** equals `key-head.txt` (the control differs). **Alt+ArrowLeft:** both stay on `/products/pulse-loop-kit`; HEAD ct 9, tree ct 9.4 (B: `altleft-*.txt`) |
-| C5b VOLUME, HOVER, DRAG, MODIFIED ARROWS | `extra-probe.mjs <base> <w> <h> <out.json>` on HEAD and on the tree at 1440×900 and 1280×720 | **Volume** (clicks at 0.05/0.35/0.7/0.95): tree `VOLUME_MAX_ABS_LEAD_PX` ≤ 1 (B: 0.00), HEAD ≥ 4 (B: 5.00, control); `MUTE [0,0.7]` on both. **Hover** at 30.3 s: tree \|leadPx\| ≤ 1 with `thumbWidthPx` 14 (the hover scale; B: 0), HEAD 3. **Drag** 20 → 60 % while paused: tree `ctMinusValue` 0, `paused` true, \|leadPx\| ≤ 1 (B: 0, `ctFraction` 0.6026). **Modified arrows** (Shift, Alt, Control, Meta + ArrowRight from 10.4): tree ct 11.4 for all four, HEAD 11 for all four; the URL is unchanged. B: `probe/extra-{5173,5181}-*.txt` |
-| C6 COVERING + MUTANTS | `npx vitest run $(cat b-round-454/covering-455.txt)`; then `run-mutants.sh` on a C scratch (`git clone --shared` at `2e26962` + A's diff applied **and committed**; absolute OUT) | 6 files / 73 tests green; `mutants.txt` equals `b-round-454/mutants/mutants.txt` (14 lines) |
-| C7 STUDIO + PURCHASE PROTECTION | From inside `c-round-455/`: `node <copy of b-round-453/probe/c12-run/c12-from-c448.cjs> <base> <tag> > c12-<tag>.json` on HEAD and on the tree | At 1440 and 1280: `/studio-lab` has 1 clip, goes to Playing with `posPlay` > 0 and then Stopped, and `stopHeld` is true; anonymous `/studio/middle-east` shows "Sign in required" with `audioSrc` 0 and `media` 0. Equal to HEAD except `url` and `posPlay` |
-| C8 DOCS + LESSON | doc 298; `lessons.md` | Doc 298: l.4 exact; the TEMPLATE headings in order; no `pending`; ST1–ST8 (with ST3b and ST3c) cited and present in the test file; the two causes and the Firefox TLM row present. `lessons.md`: 60 lines or fewer, and line L61 matches `grep -ic "painted range fill"` (B: 1) |
-| C9 L57 | `python3 -I tools/l57-check.py c-round-455.json c-round-455/l57-check.txt` | rc 0 |
+| C1 SOURCE-SCOPE | `git status --short --untracked-files=all` | Only the 5 `grants-456.txt` paths; `git diff db95f40 -- docs/implementation/2026/quarter-IV/298-*` is one line (l.4) |
+| C2 CLAIMS | `S=<git clone --shared at db95f40 + node_modules symlink> bash b-round-455/claims-456.sh`; then on the tree | Clone = `claims-456-planning-output.txt`; tree = `claims-456-sketch-output.txt` except K2/K10 as in A step 7; stderr empty. Run L29's grep over this task |
+| C3 APPLY | `sha256sum -c b-round-455/sketch-files-sha256.txt` in the store | 3 OK |
+| C4 COVERING | `npx vitest run --reporter=verbose $(cat b-round-455/covering-456.txt)` | 4 files / 26 tests green (B: `b-round-455/precheck-covering.log`); in the verbose output LT1–LT8 and GS1–GS4 each appear as passed |
+| C5 MUTANTS | `run-mutants.sh` on a C scratch (`db95f40` + A's diff applied **and committed**; absolute OUT) | `mutants.txt` equals `b-round-455/mutants/mutants.txt` (22 lines: BASE, C1 green; M1–M20 red with the same test ids) |
+| C6 NO ASSERTION LOST | Read `git diff db95f40 -- app/lib/__tests__` | Every removed `expect(` has an equal or stronger replacement per the Ruling lines (list each old → new pair in `c-round-456/assert-map.md`); `expect(` count per file equal to `b-round-455/expect-counts.txt` [K17] (live-teal 27 → 55, glow-shadow 18 → 21, gradient-text 23, teal-sweep 10; none lower than HEAD) |
+| C7 STUDIO + PURCHASE PROTECTION | From `c-round-456/`: `node <copy of b-round-453/probe/c12-run/c12-from-c448.cjs> http://127.0.0.1:5173 tree > c12-tree.json` | At 1440 and 1280: `/studio-lab` has 1 clip, Playing with `posPlay` > 0, then Stopped, `stopHeld` true; anonymous `/studio/middle-east` shows "Sign in required" with `audioSrc` 0 and `media` 0. The app code is byte-identical to round 455's tree, so the result equals `c-round-455/c12-tree.json` except `url`/`posPlay` timing values |
+| C8 DOCS | doc 298 l.4; doc 299 | Doc 298 l.4 exactly `**სტატუსი:** Completed (C round 455 PASS)`. Doc 299: l.4 exact, TEMPLATE headings in order, no `pending`, every cited LT/GS id present in the test files |
+| C9 L57 | `python3 -I tools/l57-check.py c-round-456.json c-round-456/l57-check.txt` | rc 0 |
 
 **Notes for C:**
-- **Gate rows** (full vitest, typecheck, build, Biome, verify) are marked `gate` and are not claimed by C. B's run on the dispatched sketch gave 284 files / 4148 tests, rc 0 (`b-round-454/precheck-full-raw.log`). Build rc 0 on the first sketch (`precheck-build.log`); the delta is TS logic and tests only.
-- **Not testable in the cloud:** Firefox `step="any"` and the moz-range-thumb inset (reasoned by `tech-lead`, not measured). This is Tech Lead row TLM-R455-FIREFOX-SEEK-THUMB, deadline RETRO 465.
-- **BLOCKED (backend unavailable in the cloud):** none expected. The Store player runs on the mock API.
-- **`c-round-455.json`:** write all the L57 fields, and give every finding an `origin`. Set `mutantRedOnSketch` = `b-round-454/mutants/mutants.txt` and `affectedChecksRunOnSketch` = `b-round-454/precheck-covering.log`, `b-round-454/probe/seek-5181-*.txt` and `b-round-454/probe/extra-5181-*.txt`.
+- **Gate rows** (full vitest, typecheck, build, Biome, verify) are `gate`. B's run on the dispatched sketch: full vitest 284 files / 4150 tests rc 0 (`b-round-455/precheck-full-raw.log`), `tsc` rc 0 (`precheck-typecheck.log`), lint 205 warnings = HEAD (`precheck-lint.log`). Build not run by B: no app file changes.
+- **Also saved by B on the sketch:** `git apply --check` rc 0 against HEAD (`b-round-455/apply-check.txt` [K18]); scoped `biome check` on the 3 test files rc 0, no fixes (`b-round-455/precheck-biome-scoped.log` [K18]).
+- **BLOCKED:** none expected (no backend needed).
+- `c-round-456.json`: all L57 fields (`manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, `origin` per finding, `assertsSpecified`, `mutantsRecorded`, `mutantRedOnSketch` = `b-round-455/mutants/mutants.txt`), plus `gateChecksNamed` (full vitest, typecheck, build, Biome, verify), `gateChecksRunOnSketch` = `b-round-455/precheck-full-raw.log`, `chainHeadGateRunGreen` (gate 455), `affectedChecksNamed` (covering-456, mutants, c12) and `affectedChecksRunOnSketch` = `b-round-455/precheck-covering.log`.
 
-**Neighbours that could break:**
-- **Every page with the sticky player.** C4 runs on the product page, the buyer's journey: product → play → player.
-- **The player's other buttons:** C5b covers mute.
-- **Track skip at the end.** ArrowRight at the end seeks to the duration and fires `ended`, the same as HEAD. C5's End row reads the value only.
-- **The Studio and purchase protection:** C8.
+**Neighbours that could break:** the other `helpers/style-scan.ts` importers (`store-gradient-text.test.ts`, `store-teal-sweep.test.ts`) — in the covering set; nothing user-visible (no app file changes; C7 confirms).
 
 ## 4. Claims
-Run `bash b-round-454/claims-455.sh` (it also runs `tools/l58-check.py`). The planning output is `b-round-454/claims-455-planning-output.txt`. The output on a clone with the sketch applied is `b-round-454/claims-455-sketch-output.txt` (run with `S=/tmp/b455-claims`). Both stderr files are empty.
+K1–K18 in `b-round-455/claims-456.sh`; planning output `b-round-455/claims-456-planning-output.txt` (HEAD `db95f40`), sketch output `b-round-455/claims-456-sketch-output.txt` (scratch with the sketch applied).
 
-| Tag | Claim | Expected at planning |
-|---|---|---|
-| K1 | gate 454 status and commit | `published 2e26962` |
-| K2 | store HEAD, dirty count | `2e26962 dirty=0` |
-| K3 | `step=` in AudioPlayer.tsx | `1  step="0.01"\|` (volume only; the progress range has none) |
-| K4 | `progressPercentage` count; `onKeyDown`/`aria-valuetext` count | `2 0` |
-| K5 | width of the 4 player thumb rules in app.css | `width:12px;` × 4 |
-| K6 | old assertion `var(--color-brand) 25%` in the test | `1` |
-| K7 | patch sha OK; review exists; mutant lines; red lines | `…: OK review 14 13` |
-| K8 | doc 298 exists | `0` |
-| K9 | SpotlightLoader total and session key (for SABA-B-13, not this round) | `SPOTLIGHT_ENTRANCE_TOTAL_MS = 1150 1` |
-| K10 | cited `b-round-454/` files exist (23) | `11111111111111111111111` |
-| K11 | max lead per probe file (HEAD 1440, HEAD 1280, sketch 1440, sketch 1280) | `7.00 7.00 0.00 0.00` |
-| K12 | per `recordings/` file with `type="range"`: ranges, `step=`, `accent-`, `linear-gradient` counts; root imports from recordings | `RecordingCatalogRow:r1,s1,a1,g0 SfxQuickEdit:r3,s5,a4,g0 SfxSceneBuilder:r4,s8,a5,g0 SfxVideoSync:r1,s2,a3,g0 root=0` |
-| K13 | `.tsx` files painting `linear-gradient(to right` outside `arrangement/` and `studio/`; hits in AudioPlayer.tsx | `app/components/audio/AudioPlayer.tsx 2` |
-| K14 | HEAD vs sketch volume max lead and hover lead (1440) | `5.00`, hover `3` / `0.00`, hover `0` |
-| K15 | Alt+ArrowLeft with history, HEAD then sketch | both stay on `/products/pulse-loop-kit`; ct `9` / `9.4` |
-| K16 | Alt+ArrowRight from 10.4, HEAD then sketch | `11` / `11.4` |
-| K17 | L58 check; dispatched sha named in `sketch-review.md` | `L58 OK 3` |
-| K18 | Biome diagnostics on the 2 code files (rule counts; `format` lines) | ` 5 lint/a11y/useButtonType 0` |
+## Known limits (recorded, not in scope)
+TL-R455-WALKER-LIMITS (Low, `deferred_low_polish`): the walker and rule-reader limits listed in `b-round-455/sketch-review.md` (both reviews). A finding C makes that is on that list is not a new bug.
+
+## Architecture checkpoint
+Requested from root, non-blocking: `b-round-455-checkpoint-request.md` (ARCH-CHECKPOINT-STYLE-SCAN). A does not act on it.
 
 ## 5. After this round
-- **Round 456:** STORE-2b-3c-2. It covers the style-scan helper's fail-open forms with a golden test, A-R454-REVIEW-M-DEAD-UNCHECKED (the reachability check for the "dead" CSS allow-list), and the related Lows.
-- **REGRESSION-2026-11-13:** it takes precedence if round 456 is planned on or after 2026-11-13.
-- **Then:**
-  1. **SABA-B-13** (the entrance minimum display time; `product-designer` consult and reference section first);
-  2. **2b-3d**, then **2b-4** and **STORE-2c…5**;
-  3. the **design-philosophy acceptance gate** (root, after STORE-2b);
-  4. **ARCH-SPLIT**, **REVIEW-RECOMMENDATIONS** and **T12-ADVANCED**;
-  5. **phase 2**, under the skip rule.
+SABA-B-13 entrance (or REGRESSION-2026-11-13 first if planned on/after 2026-11-13), then 2b-3c-2b, 2b-3d, 2b-4, STORE-2c…5, DP-GATE (root), ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2 (skip rule). Next RETRO: round 465.

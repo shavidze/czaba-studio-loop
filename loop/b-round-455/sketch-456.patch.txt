@@ -1,0 +1,894 @@
+diff --git a/app/lib/__tests__/helpers/style-scan.ts b/app/lib/__tests__/helpers/style-scan.ts
+index 1a1130c..58b0a45 100644
+--- a/app/lib/__tests__/helpers/style-scan.ts
++++ b/app/lib/__tests__/helpers/style-scan.ts
+@@ -64,9 +64,15 @@ const ZERO_OFFSET_GLOW_PATTERN_SOURCE = [
+   `(?:box-?shadow|text-?shadow)['"]?\\s*:${SHADOW_VALUE_SPAN}${LAYER_START}0(?:px)?\\s+0(?:px)?\\s+${GLOW_BLUR}`,
+ ].join('|');
+ 
++export interface ImportBinding {
++  imported: string;
++  exported: string;
++}
++
+ export interface ResolvedImport {
+   target: string;
+   names: string[];
++  bindings: ImportBinding[];
+   namespace: boolean;
+ }
+ 
+@@ -95,19 +101,28 @@ export function resolvedImports(source: string, importer: string): ResolvedImpor
+       continue;
+     }
+     const braced = /\{([^}]*)\}/.exec(clause)?.[1] ?? '';
+-    const names = braced
++    const bindings: ImportBinding[] = braced
+       .split(',')
+-      .map((part) =>
+-        part
+-          .trim()
+-          .replace(/^type\s+/, '')
+-          .split(/\s+as\s+/)[0]
+-          .trim(),
+-      )
+-      .filter((name) => name.length > 0);
++      .map((part) => part.trim().replace(/^type\s+/, ''))
++      .filter((part) => part.length > 0)
++      .map((part) => {
++        const [imported = '', exported = imported] = part
++          .split(/\s+as\s+/)
++          .map((name) => name.trim());
++        return { imported, exported };
++      });
++    const defaultClause = clause
++      .replace(/\{[^}]*\}/, '')
++      .replace(/\*\s*as\s+[\w$]+/, '')
++      .replace(/,/g, '')
++      .trim();
++    if (match[1] !== undefined && /^[\w$]+$/.test(defaultClause)) {
++      bindings.push({ imported: 'default', exported: defaultClause });
++    }
+     imports.push({
+       target,
+-      names,
++      names: bindings.map((binding) => binding.imported),
++      bindings,
+       namespace: match[3] !== undefined || /\*/.test(clause) || clause.trim() === '',
+     });
+   }
+@@ -222,6 +237,171 @@ export function cssGradientTextHits(css: string): CssDeclarationHit[] {
+   return hits;
+ }
+ 
++export interface CssRuleBlock {
++  chain: ReadonlyArray<string>;
++  header: string;
++  body: string;
++}
++
++const GROUPING_AT_RULE = /^@(?:media|supports|layer|container|scope)\b/i;
++
++function normalizedHeader(text: string): string {
++  return text.replace(/\s+/g, ' ').trim();
++}
++
++export function cssRuleBlocks(css: string): CssRuleBlock[] {
++  const source = blankCommentsAndQuotedDelimiters(css);
++  const blocks: CssRuleBlock[] = [];
++  const open: Array<{ header: string; body: string[] }> = [];
++  let segmentStart = 0;
++  for (let index = 0; index < source.length; index += 1) {
++    const character = source[index];
++    if (character === '{') {
++      open.push({ header: normalizedHeader(source.slice(segmentStart, index)), body: [] });
++      segmentStart = index + 1;
++    } else if (character === '}') {
++      const closing = open.pop();
++      if (closing !== undefined) {
++        closing.body.push(source.slice(segmentStart, index));
++        blocks.push({
++          chain: open.map((parent) => parent.header),
++          header: closing.header,
++          body: closing.body.join('\n'),
++        });
++      }
++      segmentStart = index + 1;
++    } else if (character === ';') {
++      open[open.length - 1]?.body.push(source.slice(segmentStart, index + 1));
++      segmentStart = index + 1;
++    }
++  }
++  return blocks;
++}
++
++function selectorTargets(header: string): string[] {
++  return header.split(',').map(
++    (part) =>
++      part
++        .trim()
++        .split(/[\s>+~]+/)
++        .pop() ?? '',
++  );
++}
++
++export function cssRuleBodies(css: string, selector: string): string[] {
++  return cssRuleBlocks(css)
++    .filter((block) => selectorTargets(block.header).includes(selector))
++    .map((block) => block.body);
++}
++
++export function cssRuleBlocksListing(css: string, selector: string): CssRuleBlock[] {
++  return cssRuleBlocks(css).filter((block) =>
++    block.header.split(',').some((part) => part.trim() === selector),
++  );
++}
++
++export function cssRuleSelectorCount(css: string, selector: string): number {
++  return cssRuleBlocksListing(css, selector).length;
++}
++
++export function cssRuleKey(block: CssRuleBlock): string {
++  const path = [...block.chain, block.header];
++  const ownRule = path.findIndex((header) => !GROUPING_AT_RULE.test(header));
++  return path.slice(0, ownRule === -1 ? path.length : ownRule + 1).join(' ');
++}
++
++export function hitsByCssRule(
++  path: string,
++  css: string,
++  count: (source: string) => number,
++): Record<string, number> {
++  const hits: Record<string, number> = {};
++  for (const block of cssRuleBlocks(css)) {
++    const found = count(block.body);
++    if (found > 0) {
++      const key = `${path} ${cssRuleKey(block)}`;
++      hits[key] = (hits[key] ?? 0) + found;
++    }
++  }
++  return hits;
++}
++
++const MOUNT_ROOT_PATTERN = /^(?:root\.tsx|entry\.(?:client|server)\.tsx|routes\/.+\.tsx?)$/;
++
++function withoutComments(source: string): string {
++  return source.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, ' ');
++}
++
++export function isReExportBarrel(source: string): boolean {
++  const statements = withoutComments(source)
++    .split(/;|\n(?=\s*export\b)/)
++    .map((statement) => statement.trim())
++    .filter((statement) => statement.length > 0);
++  return (
++    statements.length > 0 &&
++    statements.every((statement) => /^export\b[\s\S]*\bfrom\s*['"][^'"]+['"]$/.test(statement))
++  );
++}
++
++function scriptFileFor(target: string, sources: ReadonlyMap<string, string>): string | null {
++  for (const candidate of [
++    `${target}.ts`,
++    `${target}.tsx`,
++    `${target}/index.ts`,
++    `${target}/index.tsx`,
++  ]) {
++    if (sources.has(candidate)) {
++      return candidate;
++    }
++  }
++  return null;
++}
++
++export function reachableScripts(sources: ReadonlyMap<string, string>): Set<string> {
++  const reached = new Set<string>();
++  const visited = new Set<string>();
++  const pending: Array<{ file: string; names: ReadonlyArray<string> | null }> = [...sources.keys()]
++    .filter((file) => MOUNT_ROOT_PATTERN.test(file))
++    .map((file) => ({ file, names: null }));
++  for (let next = pending.pop(); next !== undefined; next = pending.pop()) {
++    const visitKey = `${next.file}|${next.names === null ? '*' : [...next.names].sort().join(',')}`;
++    if (visited.has(visitKey)) {
++      continue;
++    }
++    visited.add(visitKey);
++    reached.add(next.file);
++    const source = sources.get(next.file) ?? '';
++    const barrelNames = isReExportBarrel(source) ? next.names : null;
++    for (const entry of resolvedImports(source, next.file)) {
++      const file = scriptFileFor(entry.target, sources);
++      if (file === null) {
++        continue;
++      }
++      if (barrelNames !== null && !entry.namespace) {
++        const forwarded = entry.bindings
++          .filter((binding) => barrelNames.includes(binding.exported))
++          .map((binding) => binding.imported);
++        if (forwarded.length > 0) {
++          pending.push({ file, names: forwarded });
++        }
++        continue;
++      }
++      const names = entry.namespace ? barrelNames : entry.names;
++      pending.push({ file, names: isReExportBarrel(sources.get(file) ?? '') ? names : null });
++    }
++  }
++  return reached;
++}
++
++export function appScriptSources(): Map<string, string> {
++  return new Map(
++    listFiles(APP_ROOT, SCRIPT_SOURCE_EXTENSIONS).map((path): [string, string] => [
++      path,
++      readApp(path),
++    ]),
++  );
++}
++
+ export function allowListViolations(
+   counts: Readonly<Record<string, number>>,
+   allowList: StyleScanAllowList,
+diff --git a/app/lib/__tests__/store-glow-shadow.test.ts b/app/lib/__tests__/store-glow-shadow.test.ts
+index 3cb9bcf..435179e 100644
+--- a/app/lib/__tests__/store-glow-shadow.test.ts
++++ b/app/lib/__tests__/store-glow-shadow.test.ts
+@@ -6,6 +6,7 @@ import {
+   allowListViolations,
+   countTealHits,
+   countZeroOffsetGlowHits,
++  cssRuleBodies,
+   hitsByFile,
+   listFiles,
+   readApp,
+@@ -16,7 +17,7 @@ const MIN_SCANNED_SOURCES = 200;
+ const STORE_CSS_PATH = 'styles/app.css';
+ 
+ const RETIRED_TOKEN_PATTERN = /--shadow-glow(?:-accent)?(?![\w-])/g;
+-const RETIRED_UTILITY_PATTERN = /(?<![\w-])shadow-glow(?![\w-])/g;
++const RETIRED_UTILITY_PATTERN = /(?<![\w-])shadow-glow(?:-accent)?(?![\w-])/g;
+ 
+ const GRANTED_GLOW_FREE_SCRIPTS: ReadonlyArray<string> = [
+   'components/ui/Button.tsx',
+@@ -62,24 +63,6 @@ function countMatches(pattern: RegExp): (source: string) => number {
+   return (source) => (source.match(pattern) ?? []).length;
+ }
+ 
+-function ruleBodiesFor(css: string, selector: string): string[] {
+-  const source = css.replace(/\/\*[\s\S]*?\*\//g, ' ');
+-  const bodies: string[] = [];
+-  for (const match of source.matchAll(/([^{}]*)\{([^{}]*)\}/g)) {
+-    const targets = (match[1] ?? '').split(',').map(
+-      (part) =>
+-        part
+-          .trim()
+-          .split(/[\s>+~]+/)
+-          .pop() ?? '',
+-    );
+-    if (targets.includes(selector)) {
+-      bodies.push(match[2] ?? '');
+-    }
+-  }
+-  return bodies;
+-}
+-
+ describe('store glow shadows (STORE-2b-3b)', () => {
+   it('GS1: the retired --shadow-glow and --shadow-glow-accent tokens are neither defined nor read anywhere in app', () => {
+     const hits = hitsByFile(
+@@ -105,7 +88,7 @@ describe('store glow shadows (STORE-2b-3b)', () => {
+   it('GS3: the primary button rules carry no glow, no teal and no teal gradient', () => {
+     const css = readApp(STORE_CSS_PATH);
+     for (const selector of PRIMARY_BUTTON_SELECTORS) {
+-      const bodies = ruleBodiesFor(css, selector);
++      const bodies = cssRuleBodies(css, selector);
+       expect(bodies.length, selector).toBeGreaterThanOrEqual(1);
+       for (const body of bodies) {
+         expect(countZeroOffsetGlowHits(body), selector).toBe(0);
+@@ -113,10 +96,18 @@ describe('store glow shadows (STORE-2b-3b)', () => {
+         expect(body, selector).not.toContain('--gradient-primary');
+       }
+     }
+-    expect(ruleBodiesFor(css, '.button-primary').join('')).toContain(
++    expect(cssRuleBodies(css, '.button-primary').join('')).toContain(
+       'color: var(--color-brand-foreground);',
+     );
+-    const hoverBodies = ruleBodiesFor(css, '.btn-primary:hover');
++    expect(cssRuleBodies(css, '.button-primary').join('')).toContain(
++      'background: var(--color-brand);',
++    );
++    for (const selector of PRIMARY_BUTTON_SELECTORS) {
++      for (const body of cssRuleBodies(css, selector)) {
++        expect(body, selector).not.toMatch(/gradient\(/);
++      }
++    }
++    const hoverBodies = cssRuleBodies(css, '.btn-primary:hover');
+     expect(hoverBodies.join('')).toContain('background: var(--color-brand-hover);');
+     expect(hoverBodies.join('')).not.toContain('opacity');
+   });
+@@ -136,7 +127,10 @@ describe('store glow shadows (STORE-2b-3b)', () => {
+       expect(countZeroOffsetGlowHits(readApp(path)), path).toBe(0);
+     }
+     expect(countMatches(RETIRED_UTILITY_PATTERN)('hover:shadow-glow shadow-glow')).toBe(2);
+-    expect(countMatches(RETIRED_UTILITY_PATTERN)('--shadow-glow shadow-glow-accent')).toBe(0);
++    expect(countMatches(RETIRED_UTILITY_PATTERN)('--shadow-glow --shadow-glow-accent')).toBe(0);
++    expect(
++      countMatches(RETIRED_UTILITY_PATTERN)('hover:shadow-glow-accent shadow-glow-accents'),
++    ).toBe(1);
+     expect(countMatches(RETIRED_TOKEN_PATTERN)('var(--shadow-glow) --shadow-glow-accent:')).toBe(2);
+     const sample = [
+       '.a { x: 1; }',
+@@ -145,11 +139,14 @@ describe('store glow shadows (STORE-2b-3b)', () => {
+       '@media (hover: hover) { .a{ w: 3; } }',
+       '.hero .a, .b > .a { v: 4; }',
+       '.ab { u: 5; }',
++      ".a::after { content: '}'; }",
++      '@supports (display: grid) { @media (hover: hover) { .a { t: 6; } } }',
+     ].join('\n');
+-    expect(ruleBodiesFor(sample, '.a').map((body) => body.trim())).toEqual([
++    expect(cssRuleBodies(sample, '.a').map((body) => body.trim())).toEqual([
+       'x: 1;',
+       'w: 3;',
+       'v: 4;',
++      't: 6;',
+     ]);
+   });
+ });
+diff --git a/app/lib/__tests__/store-live-teal.test.ts b/app/lib/__tests__/store-live-teal.test.ts
+index db72839..05e2f05 100644
+--- a/app/lib/__tests__/store-live-teal.test.ts
++++ b/app/lib/__tests__/store-live-teal.test.ts
+@@ -3,10 +3,17 @@ import { describe, expect, it } from 'vitest';
+ import {
+   APP_ROOT,
+   allowListViolations,
++  appScriptSources,
+   countTealHits,
+   countZeroOffsetGlowHits,
++  cssRuleBlocks,
++  cssRuleBlocksListing,
++  cssRuleKey,
++  cssRuleSelectorCount,
++  hitsByCssRule,
+   hitsByFile,
+   listFiles,
++  reachableScripts,
+   readApp,
+   STYLE_SOURCE_EXTENSIONS,
+   type StyleScanAllowList,
+@@ -15,21 +22,21 @@ import {
+ const STORE_CSS_PATH = 'styles/app.css';
+ const UTILITIES_CSS_PATH = 'styles/base/utilities.css';
+ 
+-const LIVE_HEADER_COUNTS: Readonly<Record<string, number>> = {
+-  '.audio-player-artwork {': 1,
+-  '.audio-player-artwork:hover {': 1,
+-  '.audio-player-button-play {': 1,
+-  '.audio-player-button-play:hover {': 1,
+-  '.audio-player-progress::-webkit-slider-thumb:hover {': 1,
+-  '.audio-player-progress::-moz-range-thumb:hover {': 1,
+-  '.light-flicker-effect::before {': 1,
+-  '.not-found-grid {': 1,
+-  '.code-4 {': 1,
+-  '.code-0 {': 1,
+-  '.command-palette-item.selected {': 2,
+-  '.styled-scrollbar {': 1,
+-  '.styled-scrollbar::-webkit-scrollbar-thumb {': 1,
+-  '.styled-scrollbar::-webkit-scrollbar-thumb:hover {': 1,
++const LIVE_SELECTOR_COUNTS: Readonly<Record<string, number>> = {
++  '.audio-player-artwork': 2,
++  '.audio-player-artwork:hover': 1,
++  '.audio-player-button-play': 1,
++  '.audio-player-button-play:hover': 1,
++  '.audio-player-progress::-webkit-slider-thumb:hover': 1,
++  '.audio-player-progress::-moz-range-thumb:hover': 1,
++  '.light-flicker-effect::before': 1,
++  '.not-found-grid': 1,
++  '.code-4': 1,
++  '.code-0': 1,
++  '.command-palette-item.selected': 2,
++  '.styled-scrollbar': 1,
++  '.styled-scrollbar::-webkit-scrollbar-thumb': 1,
++  '.styled-scrollbar::-webkit-scrollbar-thumb:hover': 1,
+ };
+ 
+ const LIVE_RULE_BLOCKS: ReadonlyArray<readonly [string, string]> = [
+@@ -174,57 +181,57 @@ const LIVE_RULE_BLOCKS: ReadonlyArray<readonly [string, string]> = [
+ ];
+ 
+ const TEAL_RULE_ALLOW_LIST: StyleScanAllowList = {
+-  'styles/app.css @theme {': { hits: 6, reason: 'dead teal tokens (STORE-2b-3d)' },
+-  'styles/app.css .hover-glow:hover {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
+-  'styles/app.css .interactive-card:hover {': { hits: 2, reason: 'dead (STORE-2b-3d)' },
+-  'styles/app.css .audio-preview-inline-button::before {': {
++  'styles/app.css @theme': { hits: 6, reason: 'dead teal tokens (STORE-2b-3d)' },
++  'styles/app.css .hover-glow:hover': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .interactive-card:hover': { hits: 2, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .audio-preview-inline-button::before': {
+     hits: 1,
+     reason: 'dead: every AudioPreviewButton caller passes variant="overlay" (STORE-2b-3d)',
+   },
+-  'styles/app.css .audio-preview-inline-button:hover {': {
++  'styles/app.css .audio-preview-inline-button:hover': {
+     hits: 1,
+     reason: 'dead: inline variant never rendered (STORE-2b-3d)',
+   },
+-  'styles/app.css @keyframes audioPlayingPulse {': {
++  'styles/app.css @keyframes audioPlayingPulse': {
+     hits: 4,
+     reason: 'dead: animates only the inline variant (STORE-2b-3d)',
+   },
+-  'styles/app.css @keyframes playButtonPulse {': {
++  'styles/app.css @keyframes playButtonPulse': {
+     hits: 4,
+     reason: 'dead: animates only .is-playing, which no component sets (STORE-2b-3d)',
+   },
+-  'styles/app.css .audio-player-progress.is-playing {': {
++  'styles/app.css .audio-player-progress.is-playing': {
+     hits: 1,
+     reason: 'dead: no component sets .is-playing (STORE-2b-3d)',
+   },
+-  'styles/app.css .product-detail-add-to-cart:hover {': { hits: 3, reason: 'dead (STORE-2b-3d)' },
+-  'styles/app.css .newsletter-button-large:hover {': { hits: 3, reason: 'dead (STORE-2b-3d)' },
+-  'styles/app.css .testimonial-card:hover {': { hits: 2, reason: 'dead (STORE-2b-3d)' },
+-  'styles/app.css .waveform-bar.active {': {
++  'styles/app.css .product-detail-add-to-cart:hover': { hits: 3, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .newsletter-button-large:hover': { hits: 3, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .testimonial-card:hover': { hits: 2, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .waveform-bar.active': {
+     hits: 1,
+     reason:
+       'dead: WaveForm/TrackRow are reached only through the unmounted AssetListingPage (STORE-2b-3d)',
+   },
+-  'styles/app.css .track-row-waveform:hover {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
+-  'styles/app.css .loading-brand {': {
++  'styles/app.css .track-row-waveform:hover': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .loading-brand': {
+     hits: 1,
+     reason: 'dead: PianoLoadingAnimation has no importer outside its barrel (STORE-2b-3d)',
+   },
+-  'styles/app.css .pack-card-3d:hover > div {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
+-  'styles/app.css .about-image-overlay {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
+-  'styles/app.css .value-card:hover {': { hits: 2, reason: 'dead (STORE-2b-3d)' },
+-  'styles/app.css .glass-card:hover {': { hits: 2, reason: 'dead (STORE-2b-3d)' },
+-  'styles/base/utilities.css .hover-glow:hover {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
+-  'styles/base/utilities.css .interactive-card:hover {': { hits: 2, reason: 'dead (STORE-2b-3d)' },
+-  'styles/base/utilities.css .stems-loader-list {': {
++  'styles/app.css .pack-card-3d:hover > div': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .about-image-overlay': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .value-card:hover': { hits: 2, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .glass-card:hover': { hits: 2, reason: 'dead (STORE-2b-3d)' },
++  'styles/base/utilities.css .hover-glow:hover': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++  'styles/base/utilities.css .interactive-card:hover': { hits: 2, reason: 'dead (STORE-2b-3d)' },
++  'styles/base/utilities.css .stems-loader-list': {
+     hits: 1,
+     reason: 'frozen legacy Studio StemsLoadingAnimation (legacy removal)',
+   },
+-  'styles/base/utilities.css .stems-loader-list::-webkit-scrollbar-thumb {': {
++  'styles/base/utilities.css .stems-loader-list::-webkit-scrollbar-thumb': {
+     hits: 1,
+     reason: 'frozen legacy Studio StemsLoadingAnimation (legacy removal)',
+   },
+-  'styles/base/utilities.css .stems-loader-list::-webkit-scrollbar-thumb:hover {': {
++  'styles/base/utilities.css .stems-loader-list::-webkit-scrollbar-thumb:hover': {
+     hits: 1,
+     reason: 'frozen legacy Studio StemsLoadingAnimation (legacy removal)',
+   },
+@@ -241,17 +248,13 @@ const TEAL_TOKEN_READ_ALLOW_LIST: StyleScanAllowList = {
+ };
+ 
+ const TEAL_TOKEN_READ_RULE_ALLOW_LIST: StyleScanAllowList = {
+-  'styles/app.css .product-detail-add-to-cart {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
+-  'styles/app.css .newsletter-button-large {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .product-detail-add-to-cart': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .newsletter-button-large': { hits: 1, reason: 'dead (STORE-2b-3d)' },
+ };
+ 
+ const TEAL_HEX_WITH_ALPHA_PATTERN =
+   /#(?:13d9cc|14b8a6|0d9488|2dd4bf|5eead4|0f766e)[0-9a-f]{2}(?![0-9a-f])/gi;
+ 
+-const TOP_LEVEL_HEADER = /^[^\s}][^{]*\{/;
+-
+-const TOP_LEVEL_SELECTOR_CONTINUATION = /^[^\s}][^{]*,\s*$/;
+-
+ const CSS_TEAL_ALLOW_LIST: StyleScanAllowList = {
+   'styles/app.css': {
+     hits: 37,
+@@ -273,44 +276,142 @@ const CSS_TEAL_ALLOW_LIST: StyleScanAllowList = {
+   },
+ };
+ 
+-function occurrences(source: string, literal: string): number {
+-  return source.split(literal).length - 1;
++type DeadConsumerRuling = 'unmounted' | 'overlay-variant-only';
++
++const DEAD_RULE_TOKENS: Readonly<Record<string, ReadonlyArray<string>>> = {
++  'styles/app.css @theme': [
++    'glow-primary',
++    'video-sync',
++    'gradient-primary',
++    'gradient-hero',
++    'gradient-glow',
++  ],
++  'styles/app.css .hover-glow:hover': ['hover-glow'],
++  'styles/app.css .interactive-card:hover': ['interactive-card'],
++  'styles/app.css .audio-preview-inline-button::before': ['audio-preview-inline-button'],
++  'styles/app.css .audio-preview-inline-button:hover': ['audio-preview-inline-button'],
++  'styles/app.css @keyframes audioPlayingPulse': ['audioPlayingPulse'],
++  'styles/app.css @keyframes playButtonPulse': ['playButtonPulse'],
++  'styles/app.css .audio-player-progress.is-playing': ['is-playing'],
++  'styles/app.css .product-detail-add-to-cart:hover': ['product-detail-add-to-cart'],
++  'styles/app.css .product-detail-add-to-cart': ['product-detail-add-to-cart'],
++  'styles/app.css .newsletter-button-large:hover': ['newsletter-button-large'],
++  'styles/app.css .newsletter-button-large': ['newsletter-button-large'],
++  'styles/app.css .testimonial-card:hover': ['testimonial-card'],
++  'styles/app.css .waveform-bar.active': ['waveform-bar'],
++  'styles/app.css .track-row-waveform:hover': ['track-row-waveform'],
++  'styles/app.css .loading-brand': ['loading-brand'],
++  'styles/app.css .pack-card-3d:hover > div': ['pack-card-3d'],
++  'styles/app.css .about-image-overlay': ['about-image-overlay'],
++  'styles/app.css .value-card:hover': ['value-card'],
++  'styles/app.css .glass-card:hover': ['glass-card'],
++  'styles/base/utilities.css .hover-glow:hover': ['hover-glow'],
++  'styles/base/utilities.css .interactive-card:hover': ['interactive-card'],
++};
++
++const THEME_TOKEN_NAMES: ReadonlyArray<string> = DEAD_RULE_TOKENS['styles/app.css @theme'] ?? [];
++
++const DEAD_TOKEN_CONSUMERS: Readonly<Record<string, Readonly<Record<string, DeadConsumerRuling>>>> =
++  {
++    'audio-preview-inline-button': {
++      'components/audio/AudioPreviewButton.tsx': 'overlay-variant-only',
++    },
++    'waveform-bar': {
++      'components/audio/WaveForm.tsx': 'unmounted',
++      'components/product/TrackRow.tsx': 'unmounted',
++    },
++    'track-row-waveform': {
++      'components/loading/TrackRowSkeleton.tsx': 'unmounted',
++      'components/product/TrackRow.tsx': 'unmounted',
++    },
++    'loading-brand': { 'components/loading/PianoLoadingAnimation.tsx': 'unmounted' },
++  };
++
++const DEAD_KEYFRAME_RULE_TOKENS: Readonly<Record<string, string>> = {
++  audioPlayingPulse: 'audio-preview-inline-button',
++  playButtonPulse: 'is-playing',
++};
++
++function escapedPattern(literal: string): string {
++  return literal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+ }
+ 
+-function countMatches(pattern: RegExp): (source: string) => number {
+-  return (source) => (source.match(pattern) ?? []).length;
++function tokenPattern(token: string): RegExp {
++  const word = escapedPattern(token);
++  return THEME_TOKEN_NAMES.includes(token)
++    ? new RegExp(`(?<![\\w/.])(?:[\\w-]*-)?${word}(?![\\w-])`)
++    : new RegExp(`(?<![\\w-])${word}(?![\\w-])`);
+ }
+ 
+-function lineCount(source: string, line: string): number {
+-  return source.split('\n').filter((candidate) => candidate === line).length;
++function deadRuleKeys(): string[] {
++  return [
++    ...Object.entries(TEAL_RULE_ALLOW_LIST),
++    ...Object.entries(TEAL_TOKEN_READ_RULE_ALLOW_LIST),
++  ]
++    .filter(([, entry]) => entry.reason.startsWith('dead'))
++    .map(([key]) => key);
+ }
+ 
+-function hitsByEnclosingRule(
+-  path: string,
+-  source: string,
+-  count: (line: string) => number,
+-): Record<string, number> {
+-  const hits: Record<string, number> = {};
+-  let header = '(file start)';
+-  let pendingSelectors: string[] = [];
+-  for (const line of source.split('\n')) {
+-    if (TOP_LEVEL_SELECTOR_CONTINUATION.test(line)) {
+-      pendingSelectors.push(line.trim());
+-    } else if (TOP_LEVEL_HEADER.test(line)) {
+-      header = [...pendingSelectors, line.trim()].join(' ');
+-      pendingSelectors = [];
++function bracedBlockAfter(source: string, anchor: string): string {
++  const start = source.indexOf(anchor);
++  if (start === -1) {
++    return '';
++  }
++  let depth = 0;
++  for (let index = start + anchor.length - 1; index < source.length; index += 1) {
++    const character = source[index];
++    if (character === '{') {
++      depth += 1;
++    } else if (character === '}') {
++      depth -= 1;
++      if (depth === 0) {
++        return source.slice(start, index + 1);
++      }
+     }
+-    const found = count(line);
+-    if (found > 0) {
+-      const key = `${path} ${header}`;
+-      hits[key] = (hits[key] ?? 0) + found;
++  }
++  return '';
++}
++
++function deadRuleText(key: string): string {
++  const [path = '', ...rest] = key.split(' ');
++  const ruleKey = rest.join(' ');
++  return cssRuleBlocks(readApp(path))
++    .filter((block) => cssRuleKey(block) === ruleKey)
++    .map((block) => `${block.header}\n${block.body}`)
++    .join('\n');
++}
++
++function elementTags(source: string, component: string): string[] {
++  const tags: string[] = [];
++  const opening = new RegExp(`<${component}(?![\\w$])`, 'g');
++  for (const match of source.matchAll(opening)) {
++    let depth = 0;
++    let end = match.index;
++    for (; end < source.length; end += 1) {
++      const character = source[end];
++      if (character === '{') {
++        depth += 1;
++      } else if (character === '}') {
++        depth -= 1;
++      } else if (character === '>' && depth === 0) {
++        break;
++      }
+     }
++    tags.push(source.slice(match.index, end + 1));
+   }
+-  return hits;
++  return tags;
++}
++
++function occurrences(source: string, literal: string): number {
++  return source.split(literal).length - 1;
++}
++
++function countMatches(pattern: RegExp): (source: string) => number {
++  return (source) => (source.match(pattern) ?? []).length;
+ }
+ 
+ function tealHitsByEnclosingRule(path: string, source: string): Record<string, number> {
+-  return hitsByEnclosingRule(path, source, countTealHits);
++  return hitsByCssRule(path, source, countTealHits);
+ }
+ 
+ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+@@ -321,9 +422,15 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+       expect(countTealHits(block), label).toBe(0);
+       expect(countZeroOffsetGlowHits(block), label).toBe(0);
+     }
+-    for (const [header, count] of Object.entries(LIVE_HEADER_COUNTS)) {
+-      const path = header.startsWith('.styled-scrollbar') ? UTILITIES_CSS_PATH : STORE_CSS_PATH;
+-      expect(lineCount(readApp(path), header), header).toBe(count);
++    for (const [selector, count] of Object.entries(LIVE_SELECTOR_COUNTS)) {
++      const path = selector.startsWith('.styled-scrollbar') ? UTILITIES_CSS_PATH : STORE_CSS_PATH;
++      expect(cssRuleSelectorCount(readApp(path), selector), selector).toBe(count);
++      const bodies = cssRuleBlocksListing(readApp(path), selector).map((block) => block.body);
++      expect(bodies.length, selector).toBe(count);
++      for (const body of bodies) {
++        expect(countTealHits(body), selector).toBe(0);
++        expect(countZeroOffsetGlowHits(body), selector).toBe(0);
++      }
+     }
+   });
+ 
+@@ -383,8 +490,8 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+     expect(
+       allowListViolations(
+         {
+-          ...hitsByEnclosingRule(STORE_CSS_PATH, readApp(STORE_CSS_PATH), tokenReads),
+-          ...hitsByEnclosingRule(UTILITIES_CSS_PATH, readApp(UTILITIES_CSS_PATH), tokenReads),
++          ...hitsByCssRule(STORE_CSS_PATH, readApp(STORE_CSS_PATH), tokenReads),
++          ...hitsByCssRule(UTILITIES_CSS_PATH, readApp(UTILITIES_CSS_PATH), tokenReads),
+         },
+         TEAL_TOKEN_READ_RULE_ALLOW_LIST,
+       ),
+@@ -418,7 +525,7 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+           '}',
+         ].join('\n'),
+       ),
+-    ).toEqual({ 'x.css .a, .b {': 1, 'x.css @keyframes k {': 1 });
++    ).toEqual({ 'x.css .a, .b': 1, 'x.css @keyframes k': 1 });
+     expect(
+       tealHitsByEnclosingRule(
+         'x.css',
+@@ -433,10 +540,47 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+         ].join('\n'),
+       ),
+     ).toEqual({
+-      'x.css .dead {': 1,
+-      'x.css .live:hover { color: #13d9cc; }': 1,
+-      'x.css .c { /* note */': 1,
++      'x.css .dead': 1,
++      'x.css .live:hover': 1,
++      'x.css .c': 1,
++    });
++    expect(
++      tealHitsByEnclosingRule(
++        'x.css',
++        [
++          '.dead { color: #13d9cc;',
++          '}',
++          '} .live:hover { border-color: rgba(19, 217, 204, 0.3); }',
++          '@media (hover: hover) {',
++          '  @supports (color: red) { .nested { color: #14b8a6; } }',
++          '}',
++          ".q::after { content: '}'; color: #13d9cc; }",
++          '/* .commented { color: #13d9cc; } */',
++          '@theme {',
++          '  --a: #13d9cc;',
++          '}',
++          '.after-theme { color: #14b8a6; }',
++        ].join('\n'),
++      ),
++    ).toEqual({
++      'x.css .dead': 1,
++      'x.css .live:hover': 1,
++      'x.css @media (hover: hover) @supports (color: red) .nested': 1,
++      'x.css .q::after': 1,
++      'x.css @theme': 1,
++      'x.css .after-theme': 1,
+     });
++    expect(
++      cssRuleSelectorCount(
++        ['.x { a: 1; }', '.y,', '.x { b: 2; }', '@media (min-width: 1px) { .x { c: 3; } }'].join(
++          '\n',
++        ),
++        '.x',
++      ),
++    ).toBe(3);
++    expect(
++      cssRuleBlocks('.x { a: 1; .y { b: 2; } c: 3; }').map((block) => block.body.trim()),
++    ).toEqual(['b: 2;', 'a: 1;\n c: 3;']);
+   });
+ 
+   it('LT4: the scan is non-vacuous and the teal matcher sees the CSS forms this stage removed', () => {
+@@ -452,4 +596,139 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+     expect(countZeroOffsetGlowHits('box-shadow: 0 0 20px rgba(19, 217, 204, 0.35);')).toBe(1);
+     expect(countZeroOffsetGlowHits('text-shadow: 0 0 60px rgba(19, 217, 204, 0.3);')).toBe(1);
+   });
++
++  it('LT7: every dead-labelled teal rule has no mounted consumer (A-R454-REVIEW-M-DEAD-UNCHECKED)', () => {
++    expect([...new Set(deadRuleKeys())].sort()).toEqual(Object.keys(DEAD_RULE_TOKENS).sort());
++    for (const [key, ruleTokens] of Object.entries(DEAD_RULE_TOKENS)) {
++      const text = deadRuleText(key);
++      expect(text.length, key).toBeGreaterThan(0);
++      for (const token of ruleTokens) {
++        expect(tokenPattern(token).test(text), `${key} names ${token}`).toBe(true);
++      }
++    }
++    const themeTealDeclarations = deadRuleText('styles/app.css @theme')
++      .split(';')
++      .filter((declaration) => countTealHits(declaration) > 0)
++      .map((declaration) => declaration.trim().split(':')[0] ?? '');
++    expect(themeTealDeclarations.length).toBeGreaterThanOrEqual(5);
++    for (const property of themeTealDeclarations) {
++      expect(
++        THEME_TOKEN_NAMES.some((token) => property.endsWith(`-${token}`)),
++        property,
++      ).toBe(true);
++    }
++    const sources = appScriptSources();
++    const reachable = reachableScripts(sources);
++    const tokens = [...new Set(Object.values(DEAD_RULE_TOKENS).flat())];
++    for (const token of tokens) {
++      const pattern = tokenPattern(token);
++      const consumers = [...sources.entries()]
++        .filter(([, source]) => pattern.test(source))
++        .map(([path]) => path)
++        .sort();
++      expect(consumers, token).toEqual(Object.keys(DEAD_TOKEN_CONSUMERS[token] ?? {}).sort());
++    }
++    for (const [token, rulings] of Object.entries(DEAD_TOKEN_CONSUMERS)) {
++      for (const [path, ruling] of Object.entries(rulings)) {
++        if (ruling === 'unmounted') {
++          expect(reachable.has(path), `${token} <- ${path}`).toBe(false);
++        }
++      }
++    }
++    expect(reachable.has('components/audio/AudioPreviewButton.tsx')).toBe(true);
++    expect(reachable.has('components/loading/SpotlightLoader.tsx')).toBe(true);
++    const previewSource = readApp('components/audio/AudioPreviewButton.tsx');
++    expect(previewSource).toMatch(
++      /export function AudioPreviewButton\(\{[^}]*\bvariant = 'overlay'[^}]*\}/,
++    );
++    const overlayBranch = bracedBlockAfter(previewSource, "if (variant === 'overlay') {");
++    expect(overlayBranch).toContain('audio-preview-overlay-button');
++    expect(overlayBranch).not.toContain('audio-preview-inline-button');
++    expect(previewSource.indexOf('audio-preview-inline-button')).toBeGreaterThan(
++      previewSource.indexOf(overlayBranch) + overlayBranch.length,
++    );
++    const previewTags = [...sources.values()].flatMap((source) =>
++      elementTags(source, 'AudioPreviewButton'),
++    );
++    expect(previewTags.length).toBeGreaterThanOrEqual(3);
++    for (const tag of previewTags) {
++      expect(tag.includes('{...') || /\bvariant=(?!"overlay")/.test(tag), tag).toBe(false);
++    }
++    for (const path of listFiles(APP_ROOT, STYLE_SOURCE_EXTENSIONS)) {
++      for (const block of cssRuleBlocks(readApp(path))) {
++        for (const [keyframes, ruleToken] of Object.entries(DEAD_KEYFRAME_RULE_TOKENS)) {
++          if (tokenPattern(keyframes).test(block.body)) {
++            expect(tokenPattern(ruleToken).test(block.header), `${path} ${block.header}`).toBe(
++              true,
++            );
++          }
++        }
++      }
++    }
++  });
++
++  it('LT8: the mount walker follows routes, barrels by name, namespaces, re-export stars and dynamic imports', () => {
++    const files = new Map<string, string>([
++      ['root.tsx', "import { Live } from '~/components/kit';"],
++      [
++        'routes/a.tsx',
++        "import * as Ns from './../components/ns';\nconst L = import('~/components/lazy');",
++      ],
++      ['routes/b.ts', "export { Star } from '~/components/star';"],
++      ['components/kit/index.ts', "export { Live } from './Live';\nexport { Dead } from './Dead';"],
++      ['components/kit/Live.tsx', 'export const Live = 1;'],
++      ['components/kit/Dead.tsx', 'export const Dead = 1;'],
++      ['components/ns/index.ts', "export { One } from './One';\nexport { Two } from './Two';"],
++      ['components/ns/One.tsx', 'export const One = 1;'],
++      ['components/ns/Two.tsx', 'export const Two = 1;'],
++      ['components/lazy.tsx', 'export default 1;'],
++      ['components/star/index.ts', "export * from './inner';"],
++      [
++        'components/star/inner/index.ts',
++        "export { Star } from './Star';\nexport { Other } from './Other';",
++      ],
++      ['components/star/inner/Star.tsx', 'export const Star = 1;'],
++      ['components/star/inner/Other.tsx', 'export const Other = 1;'],
++      ['components/orphan.tsx', "import { Dead } from '~/components/kit/Dead';"],
++      ['routes/c.tsx', "import Def, { Row, B as Bee } from '~/components/al';"],
++      [
++        'components/al/index.ts',
++        "export { default as Row } from './Row';\nexport { A as B } from './A';\nexport { default } from './D';\nexport { Skip } from './Skip';",
++      ],
++      ['components/al/Row.tsx', 'export default 1;'],
++      ['components/al/A.tsx', 'export const A = 1;'],
++      ['components/al/D.tsx', 'export default 1;'],
++      ['components/al/Skip.tsx', 'export const Skip = 1;'],
++    ]);
++    expect([...reachableScripts(files)].sort()).toEqual(
++      [
++        'components/kit/Live.tsx',
++        'components/kit/index.ts',
++        'components/lazy.tsx',
++        'components/ns/One.tsx',
++        'components/ns/Two.tsx',
++        'components/ns/index.ts',
++        'components/star/index.ts',
++        'components/star/inner/Star.tsx',
++        'components/star/inner/index.ts',
++        'root.tsx',
++        'routes/a.tsx',
++        'routes/b.ts',
++        'routes/c.tsx',
++        'components/al/index.ts',
++        'components/al/Row.tsx',
++        'components/al/A.tsx',
++        'components/al/D.tsx',
++      ].sort(),
++    );
++    expect(tokenPattern('video-sync').test("from '~/lib/arrangement/video-sync';")).toBe(false);
++    expect(tokenPattern('glow-primary').test('className="hover:bg-glow-primary"')).toBe(true);
++    expect(
++      tokenPattern('gradient-primary').test("style={{ background: 'var(--gradient-primary)' }}"),
++    ).toBe(true);
++    expect(tokenPattern('value-card').test('className="value-card-x"')).toBe(false);
++    expect(
++      elementTags('<AudioPreviewButton\n  track={t}\n  variant="inline"\n/>', 'AudioPreviewButton'),
++    ).toEqual(['<AudioPreviewButton\n  track={t}\n  variant="inline"\n/>']);
++  });
+ });

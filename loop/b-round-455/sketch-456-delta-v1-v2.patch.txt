@@ -1,0 +1,208 @@
+2c2
+< index 1a1130c..9a45563 100644
+---
+> index 1a1130c..58b0a45 100644
+5c5,60
+< @@ -222,6 +222,169 @@ export function cssGradientTextHits(css: string): CssDeclarationHit[] {
+---
+> @@ -64,9 +64,15 @@ const ZERO_OFFSET_GLOW_PATTERN_SOURCE = [
+>    `(?:box-?shadow|text-?shadow)['"]?\\s*:${SHADOW_VALUE_SPAN}${LAYER_START}0(?:px)?\\s+0(?:px)?\\s+${GLOW_BLUR}`,
+>  ].join('|');
+>  
+> +export interface ImportBinding {
+> +  imported: string;
+> +  exported: string;
+> +}
+> +
+>  export interface ResolvedImport {
+>    target: string;
+>    names: string[];
+> +  bindings: ImportBinding[];
+>    namespace: boolean;
+>  }
+>  
+> @@ -95,19 +101,28 @@ export function resolvedImports(source: string, importer: string): ResolvedImpor
+>        continue;
+>      }
+>      const braced = /\{([^}]*)\}/.exec(clause)?.[1] ?? '';
+> -    const names = braced
+> +    const bindings: ImportBinding[] = braced
+>        .split(',')
+> -      .map((part) =>
+> -        part
+> -          .trim()
+> -          .replace(/^type\s+/, '')
+> -          .split(/\s+as\s+/)[0]
+> -          .trim(),
+> -      )
+> -      .filter((name) => name.length > 0);
+> +      .map((part) => part.trim().replace(/^type\s+/, ''))
+> +      .filter((part) => part.length > 0)
+> +      .map((part) => {
+> +        const [imported = '', exported = imported] = part
+> +          .split(/\s+as\s+/)
+> +          .map((name) => name.trim());
+> +        return { imported, exported };
+> +      });
+> +    const defaultClause = clause
+> +      .replace(/\{[^}]*\}/, '')
+> +      .replace(/\*\s*as\s+[\w$]+/, '')
+> +      .replace(/,/g, '')
+> +      .trim();
+> +    if (match[1] !== undefined && /^[\w$]+$/.test(defaultClause)) {
+> +      bindings.push({ imported: 'default', exported: defaultClause });
+> +    }
+>      imports.push({
+>        target,
+> -      names,
+> +      names: bindings.map((binding) => binding.imported),
+> +      bindings,
+>        namespace: match[3] !== undefined || /\*/.test(clause) || clause.trim() === '',
+>      });
+>    }
+> @@ -222,6 +237,171 @@ export function cssGradientTextHits(css: string): CssDeclarationHit[] {
+150,152c205,209
+< +        const shared = entry.names.filter((name) => barrelNames.includes(name));
+< +        if (shared.length > 0) {
+< +          pending.push({ file, names: shared });
+---
+> +        const forwarded = entry.bindings
+> +          .filter((binding) => barrelNames.includes(binding.exported))
+> +          .map((binding) => binding.imported);
+> +        if (forwarded.length > 0) {
+> +          pending.push({ file, names: forwarded });
+280c337
+< index db72839..dbbf41d 100644
+---
+> index db72839..05e2f05 100644
+283c340
+< @@ -3,10 +3,16 @@ import { describe, expect, it } from 'vitest';
+---
+> @@ -3,10 +3,17 @@ import { describe, expect, it } from 'vitest';
+291a349
+> +  cssRuleKey,
+300c358
+< @@ -15,21 +21,21 @@ import {
+---
+> @@ -15,21 +22,21 @@ import {
+337c395
+< @@ -174,57 +180,57 @@ const LIVE_RULE_BLOCKS: ReadonlyArray<readonly [string, string]> = [
+---
+> @@ -174,57 +181,57 @@ const LIVE_RULE_BLOCKS: ReadonlyArray<readonly [string, string]> = [
+418c476
+< @@ -241,17 +247,13 @@ const TEAL_TOKEN_READ_ALLOW_LIST: StyleScanAllowList = {
+---
+> @@ -241,17 +248,13 @@ const TEAL_TOKEN_READ_ALLOW_LIST: StyleScanAllowList = {
+438c496
+< @@ -273,44 +275,113 @@ const CSS_TEAL_ALLOW_LIST: StyleScanAllowList = {
+---
+> @@ -273,44 +276,142 @@ const CSS_TEAL_ALLOW_LIST: StyleScanAllowList = {
+538c596,611
+< -    }
+---
+> +function bracedBlockAfter(source: string, anchor: string): string {
+> +  const start = source.indexOf(anchor);
+> +  if (start === -1) {
+> +    return '';
+> +  }
+> +  let depth = 0;
+> +  for (let index = start + anchor.length - 1; index < source.length; index += 1) {
+> +    const character = source[index];
+> +    if (character === '{') {
+> +      depth += 1;
+> +    } else if (character === '}') {
+> +      depth -= 1;
+> +      if (depth === 0) {
+> +        return source.slice(start, index + 1);
+> +      }
+>      }
+542a616,628
+> +  }
+> +  return '';
+> +}
+> +
+> +function deadRuleText(key: string): string {
+> +  const [path = '', ...rest] = key.split(' ');
+> +  const ruleKey = rest.join(' ');
+> +  return cssRuleBlocks(readApp(path))
+> +    .filter((block) => cssRuleKey(block) === ruleKey)
+> +    .map((block) => `${block.header}\n${block.body}`)
+> +    .join('\n');
+> +}
+> +
+579c665
+< @@ -321,9 +392,15 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+---
+> @@ -321,9 +422,15 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+598c684
+< @@ -383,8 +460,8 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+---
+> @@ -383,8 +490,8 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+609c695
+< @@ -418,7 +495,7 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+---
+> @@ -418,7 +525,7 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+618c704
+< @@ -433,10 +510,47 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+---
+> @@ -433,10 +540,47 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+628c714
+<      });
+---
+> +    });
+654c740
+< +    });
+---
+>      });
+669c755
+< @@ -452,4 +566,98 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+---
+> @@ -452,4 +596,139 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+675a762,779
+> +    for (const [key, ruleTokens] of Object.entries(DEAD_RULE_TOKENS)) {
+> +      const text = deadRuleText(key);
+> +      expect(text.length, key).toBeGreaterThan(0);
+> +      for (const token of ruleTokens) {
+> +        expect(tokenPattern(token).test(text), `${key} names ${token}`).toBe(true);
+> +      }
+> +    }
+> +    const themeTealDeclarations = deadRuleText('styles/app.css @theme')
+> +      .split(';')
+> +      .filter((declaration) => countTealHits(declaration) > 0)
+> +      .map((declaration) => declaration.trim().split(':')[0] ?? '');
+> +    expect(themeTealDeclarations.length).toBeGreaterThanOrEqual(5);
+> +    for (const property of themeTealDeclarations) {
+> +      expect(
+> +        THEME_TOKEN_NAMES.some((token) => property.endsWith(`-${token}`)),
+> +        property,
+> +      ).toBe(true);
+> +    }
+696c800,809
+< +    expect(readApp('components/audio/AudioPreviewButton.tsx')).toContain("variant = 'overlay'");
+---
+> +    const previewSource = readApp('components/audio/AudioPreviewButton.tsx');
+> +    expect(previewSource).toMatch(
+> +      /export function AudioPreviewButton\(\{[^}]*\bvariant = 'overlay'[^}]*\}/,
+> +    );
+> +    const overlayBranch = bracedBlockAfter(previewSource, "if (variant === 'overlay') {");
+> +    expect(overlayBranch).toContain('audio-preview-overlay-button');
+> +    expect(overlayBranch).not.toContain('audio-preview-inline-button');
+> +    expect(previewSource.indexOf('audio-preview-inline-button')).toBeGreaterThan(
+> +      previewSource.indexOf(overlayBranch) + overlayBranch.length,
+> +    );
+739a853,861
+> +      ['routes/c.tsx', "import Def, { Row, B as Bee } from '~/components/al';"],
+> +      [
+> +        'components/al/index.ts',
+> +        "export { default as Row } from './Row';\nexport { A as B } from './A';\nexport { default } from './D';\nexport { Skip } from './Skip';",
+> +      ],
+> +      ['components/al/Row.tsx', 'export default 1;'],
+> +      ['components/al/A.tsx', 'export const A = 1;'],
+> +      ['components/al/D.tsx', 'export default 1;'],
+> +      ['components/al/Skip.tsx', 'export const Skip = 1;'],
+754a877,881
+> +        'routes/c.tsx',
+> +        'components/al/index.ts',
+> +        'components/al/Row.tsx',
+> +        'components/al/A.tsx',
+> +        'components/al/D.tsx',

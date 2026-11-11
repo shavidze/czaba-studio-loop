@@ -1,0 +1,69 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "C1 SOURCE-SCOPE",
+  "C2 CLAIMS",
+  "C3 APPLY",
+  "C4 THUMB-ON-FILL",
+  "C4b PLAYING VISUAL",
+  "C5 KEYBOARD",
+  "C5b VOLUME-HOVER-DRAG-MODKEYS",
+  "C6 COVERING+MUTANTS",
+  "C7 STUDIO+PURCHASE PROTECTION",
+  "C8 DOCS+LESSON",
+  "C9 L57"
+ ],
+ "blocked": [
+  "TLM-R455-FIREFOX-SEEK-THUMB: Firefox step=any and moz-range-thumb inset not testable in cloud (Tech Lead manual row, deadline RETRO 465); not a failure"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-11T22:18:05.5725850Z",
+  "round": 455,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": 3,
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": 2,
+ "assertsSpecified": true,
+ "mutantsRecorded": 14,
+ "mutantRedOnSketch": "b-round-454/mutants/mutants.txt",
+ "mutantRedOnTree": "c-round-455/mutants/mutants.txt equals B's 14 lines (BASE green, M1-M13 red)",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": "b-round-454/precheck-full-raw.log",
+ "chainHeadGateRunGreen": true,
+ "affectedChecksNamed": [
+  "covering-455 (6 files/73 tests)",
+  "seek-probe",
+  "extra-probe",
+  "key-probe",
+  "altleft-probe",
+  "c12 studio+purchase"
+ ],
+ "affectedChecksRunOnSketch": "b-round-454/precheck-covering.log; b-round-454/probe/seek-5181-*.txt and extra-5181-*.txt",
+ "notes": [
+  "HEAD control (2e26962 on :5182) reproduces the bug: MAX_ABS_LEAD_PX 7.00 at both viewports, integer value while playing, volume lead 5, modified arrows +1.",
+  "Tree: lead 0.00 at all 10 paused samples, both viewports; step=any, fractional value; 6 playing crops per viewport show no brass beyond thumb and no gap left of it; volume lead 0; hover 0; drag 0; modified arrows 11.4; Alt+ArrowLeft stays on page, ct 9.4.",
+  "Playing value follows timeupdate (~4 Hz), so thumb and fill move together in ~1-2 px steps, not 1 s jumps; consistent with the task.",
+  "For B (not bugs): doc 298 l.4 is 'In Progress' as the task pins; L28 post-PASS form is 'Completed (C round 455 PASS)' - B to decide whether root edits it. A's Info notes R455-1..6 (non-finite duration guard, hardcoded rgba) left to B.",
+  "B probe label swap: b-round-454 altleft-5173/5181 files are named for the opposite trees; the task text (HEAD 9, tree 9.4) is what C observed."
+ ],
+ "evidence": "c-round-455/ (seek-*.txt/json, playcrops-*.txt, shots/, extra-*.txt, key-*.txt, altleft-*.txt, c12-*.json, mutants/, covering.log, claims-*.txt, c1-status.txt)"
+}
