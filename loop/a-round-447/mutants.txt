@@ -1,0 +1,13 @@
+M1 | red rows: TS1 TS3  | mutant:      Tests  2 failed | 2 passed (4) | after revert:      Tests  4 passed (4)
+M2 | red rows: TS1  | mutant:      Tests  1 failed | 3 passed (4) | after revert:      Tests  4 passed (4)
+M3 | red rows: TS2  | mutant:      Tests  1 failed | 3 passed (4) | after revert:      Tests  4 passed (4)
+M4 | red rows: TS3  | mutant:      Tests  1 failed | 3 passed (4) | after revert:      Tests  4 passed (4)
+M5 | red rows: TS4  | mutant:      Tests  1 failed | 3 passed (4) | after revert:      Tests  4 passed (4)
+
+Exact mutant edits (each applied alone on a `git clone --shared` scratch of 5df7717 + a.diff + the new test, then reverted):
+M1 app/components/home/StudioMockup.tsx: 'h-full bg-brand rounded-full' -> 'h-full bg-teal-500 rounded-full' (first occurrence)
+M2 app/lib/__tests__/store-teal-sweep.test.ts: delete the line "  'lib/email.server.ts': 'STORE-2b-2b e-mail HTML',"
+M3 app/lib/__tests__/store-teal-sweep.test.ts: after 'const TEAL_ALLOW_LIST: Readonly<Record<string, string>> = {' insert "  'components/home/NewsletterSection.tsx': 'fake',"
+M4 app/components/home/SpecialOffersSection.tsx: first 'group relative min-h-[300px] overflow-hidden rounded-xl"' -> 'group relative min-h-[300px] overflow-hidden rounded-xl hover:shadow-[0_0_20px_rgba(201,164,106,0.3)]"'
+M5 app/components/loading/SpotlightLoader.tsx: after 'font-bold text-foreground"' insert a line "            style={{ WebkitBackgroundClip: 'text' }}"
+Diff used: a-round-447/a.diff (7 source files). Scratch removed after the run.

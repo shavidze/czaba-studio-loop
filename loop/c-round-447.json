@@ -1,0 +1,47 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "C1-SOURCE-SCOPE",
+  "C2-CLAIMS",
+  "C3-TEAL-SCAN-1440",
+  "C4-HOVER-STATES",
+  "C5-LOADER",
+  "C6-REDUCED-MOTION-parity",
+  "C7-STUDIO-SHOWCASE",
+  "C8-CHECKOUT-SUCCESS",
+  "C9-FULL-PAGE-SHOTS",
+  "C10-KEEP-LIST",
+  "C11-LCP-CLS",
+  "C12-COVERING",
+  "C13-MUTANTS",
+  "C14-STUDIO-LAB",
+  "C15-DOCS"
+ ],
+ "blocked": [
+  "C14 anonymous /studio/middle-east 'Sign in required' text: backend unavailable in cloud; the route renders a blank page on both tree and HEAD, with 0 audio[src] and 0 media requests (purchase protection not bypassed, identical to HEAD)",
+  "account.downloads.tsx ProductCard browser half: backend unavailable in cloud (jsdom product-price-cards green)"
+ ],
+ "gate": [
+  "full vitest / typecheck / build / verify (gate-round-447.json)"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-11T05:56:21.0877719Z",
+  "round": 447,
+  "attempt": 1,
+  "store": 200
+ },
+ "notes": {
+  "observations": [
+   "O1 (info, A also noted) sweep line bg-brand/50 on the loader is ~1.59:1 vs the loader background; decorative 1px rule, WCAG 1.4.11 not applicable",
+   "O2 (info) StudioMockup S button keeps bg-yellow-500 and M bg-red-500; the solo waveform is now foreground, so the solo state no longer matches its S button colour. Out of this round (B already listed it)",
+   "O3 (info) home full-page pixel diff vs HEAD: 7 px at 1440 (y530-567) and 75 px at 1280 (y434-615), 0 px elsewhere; in the hero band, not in any of the 21 mapped hits, probably animated CSS glow timing; not attributed",
+   "O4 task text says '23/9'; measured 23 hits in 7 files (A flagged it), 21 hits in 7 files removed = 44-21",
+   "O5 teal-scan at 375 (record-only) not run; showcase/loader/checkout were checked at 375 through states and rows scripts",
+   "O6 first HEAD teal-scan gave 0 on / when run concurrently with the tree scan; rerun alone gave 34 (B's count); tree 18, all on hero-title-glow, text-glow, light-flicker-effect (2b-3 CSS), 0 on svg/path"
+  ]
+ },
+ "evidence": "c-round-447.md; c-round-447/ (rows-tree.json, rows-head.json, rows2-*.json, states-*.json, teal-*.json, pdiff.json, studio-tree.json, shots/)"
+}

@@ -1,0 +1,539 @@
+diff --git a/app/lib/__tests__/hire-us-inquiry-email-contrast.test.ts b/app/lib/__tests__/hire-us-inquiry-email-contrast.test.ts
+new file mode 100644
+index 0000000..93edf07
+--- /dev/null
++++ b/app/lib/__tests__/hire-us-inquiry-email-contrast.test.ts
+@@ -0,0 +1,82 @@
++// @vitest-environment jsdom
++import { describe, expect, it } from 'vitest';
++import { buildHireUsInquiryEmailHtml } from '../hire-us-inquiry-email.server';
++
++const WCAG_AA_TEXT = 4.5;
++
++function relativeLuminance(hex: string): number {
++  const channels = [1, 3, 5].map((start) => Number.parseInt(hex.slice(start, start + 2), 16) / 255);
++  const [red = 0, green = 0, blue = 0] = channels.map((value) =>
++    value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4,
++  );
++  return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
++}
++
++function contrastRatio(first: string, second: string): number {
++  const [light, dark] = [relativeLuminance(first), relativeLuminance(second)].sort((a, b) => b - a);
++  return ((light ?? 0) + 0.05) / ((dark ?? 0) + 0.05);
++}
++
++function inlineColour(element: Element, property: 'color' | 'background-color'): string | null {
++  const style = element.getAttribute('style') ?? '';
++  const match = style.match(new RegExp(`(?:^|;)\\s*${property}:\\s*(#[0-9a-f]{6})`, 'i'));
++  if (match?.[1]) {
++    return match[1].toLowerCase();
++  }
++  if (property === 'background-color') {
++    return element.getAttribute('bgcolor')?.toLowerCase() ?? null;
++  }
++  return null;
++}
++
++function nearestColour(element: Element, property: 'color' | 'background-color'): string | null {
++  for (let node: Element | null = element; node; node = node.parentElement) {
++    const value = inlineColour(node, property);
++    if (value) {
++      return value;
++    }
++  }
++  return null;
++}
++
++function textElements(html: string): Element[] {
++  const document = new DOMParser().parseFromString(html, 'text/html');
++  return [...document.body.querySelectorAll('*')].filter((element) =>
++    [...element.childNodes].some(
++      (node) => node.nodeType === Node.TEXT_NODE && (node.textContent ?? '').trim() !== '',
++    ),
++  );
++}
++
++const SAMPLE_HTML = buildHireUsInquiryEmailHtml({
++  name: 'Nino Probe',
++  email: 'nino@example.com',
++  projectTypeLabel: 'Film/Video Scoring',
++  budgetLabel: '$1,000 - $5,000',
++  message: 'Line one.',
++});
++
++describe('hire-us inquiry e-mail contrast (STORE-2b-2b)', () => {
++  it('HE8: every text element has its own inline colour and a painted background inside the e-mail', () => {
++    const elements = textElements(SAMPLE_HTML);
++    expect(elements).toHaveLength(12);
++    const unpainted = elements
++      .filter(
++        (element) =>
++          !nearestColour(element, 'color') || !nearestColour(element, 'background-color'),
++      )
++      .map((element) => element.textContent?.trim());
++    expect(unpainted).toEqual([]);
++  });
++
++  it('HE9: every text element meets WCAG AA 4.5:1 against its nearest painted background', () => {
++    const failing = textElements(SAMPLE_HTML)
++      .map((element) => {
++        const foreground = nearestColour(element, 'color') ?? '#000000';
++        const background = nearestColour(element, 'background-color') ?? '#ffffff';
++        return { text: element.textContent?.trim(), ratio: contrastRatio(foreground, background) };
++      })
++      .filter((row) => row.ratio < WCAG_AA_TEXT);
++    expect(failing).toEqual([]);
++  });
++});
+diff --git a/app/lib/__tests__/hire-us-inquiry-email.test.ts b/app/lib/__tests__/hire-us-inquiry-email.test.ts
+new file mode 100644
+index 0000000..880a894
+--- /dev/null
++++ b/app/lib/__tests__/hire-us-inquiry-email.test.ts
+@@ -0,0 +1,183 @@
++// @vitest-environment node
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++import { afterEach, describe, expect, it, vi } from 'vitest';
++import {
++  buildHireUsInquiryEmailHtml,
++  HIRE_US_INQUIRY_EMAIL_PALETTE,
++  type HireUsInquiryEmailFields,
++} from '../hire-us-inquiry-email.server';
++
++const APP_CSS_PATH = resolve(__dirname, '../../styles/app.css');
++const HEX_COLOUR = /#[0-9a-f]{3,8}\b/gi;
++const TEAL_PATTERN =
++  /teal-[0-9]+|cyan-[0-9]+|emerald-[0-9]+|#(13d9cc|14b8a6|0d9488|2dd4bf|5eead4|0f766e)\b|rgba?\( ?(19|20|45|13)[ ,]+(217|184|212|148)[ ,]+(204|166|191|136)[^)]*\)|hsla?\( ?17[0-9][ ,][^)]*\)/i;
++
++const SAMPLE_FIELDS: HireUsInquiryEmailFields = {
++  name: 'Nino Probe',
++  email: 'nino@example.com',
++  projectTypeLabel: 'Film/Video Scoring',
++  budgetLabel: '$1,000 - $5,000',
++  message: 'Line one.\nLine two.',
++};
++
++interface SentBrevoEmail {
++  subject: string;
++  htmlContent: string;
++}
++
++function isSentBrevoEmail(value: unknown): value is SentBrevoEmail {
++  return (
++    typeof value === 'object' &&
++    value !== null &&
++    'subject' in value &&
++    typeof value.subject === 'string' &&
++    'htmlContent' in value &&
++    typeof value.htmlContent === 'string'
++  );
++}
++
++function themeTokenValue(token: string): string | undefined {
++  const css = readFileSync(APP_CSS_PATH, 'utf8');
++  const themeStart = css.indexOf('@theme {');
++  const themeBlock = css.slice(themeStart, css.indexOf('\n}', themeStart));
++  const match = themeBlock.match(new RegExp(`--color-${token}:\\s*(#[0-9a-f]{6})\\b`, 'i'));
++  return match?.[1]?.toLowerCase();
++}
++
++function hireUsForm(fields: Record<string, string>): FormData {
++  const form = new FormData();
++  for (const [key, value] of Object.entries(fields)) {
++    form.set(key, value);
++  }
++  return form;
++}
++
++async function submitHireUsAction(form: FormData) {
++  const { action } = await import('../../routes/hire-us');
++  return action({
++    request: new Request('http://localhost/hire-us', { method: 'POST', body: form }),
++    params: {},
++    context: {},
++  });
++}
++
++function stubBrevoFetch(): unknown[] {
++  const sent: unknown[] = [];
++  vi.stubGlobal(
++    'fetch',
++    vi.fn(async (_url: string, init: { body: string }) => {
++      sent.push(JSON.parse(init.body));
++      return new Response('{}', { status: 201 });
++    }),
++  );
++  return sent;
++}
++
++afterEach(() => {
++  vi.unstubAllEnvs();
++  vi.unstubAllGlobals();
++  vi.resetModules();
++});
++
++describe('hire-us inquiry e-mail (STORE-2b-2b)', () => {
++  it('HE1: every palette hex equals its @theme token value in app.css', () => {
++    const entries = Object.entries(HIRE_US_INQUIRY_EMAIL_PALETTE);
++    expect(entries).toHaveLength(6);
++    for (const [token, hex] of entries) {
++      expect(themeTokenValue(token), token).toBe(hex);
++    }
++  });
++
++  it('HE2: the e-mail uses only palette colours and no teal', () => {
++    const html = buildHireUsInquiryEmailHtml(SAMPLE_FIELDS);
++    const palette = new Set<string>(Object.values(HIRE_US_INQUIRY_EMAIL_PALETTE));
++    const used = [...html.matchAll(HEX_COLOUR)].map((match) => match[0].toLowerCase());
++    expect(used.length).toBeGreaterThanOrEqual(10);
++    expect(used.filter((hex) => !palette.has(hex))).toEqual([]);
++    expect(TEAL_PATTERN.test(html)).toBe(false);
++  });
++
++  it('HE3: the outer presentation table paints the background with bgcolor and background-color', () => {
++    const html = buildHireUsInquiryEmailHtml(SAMPLE_FIELDS).trimStart();
++    const background = HIRE_US_INQUIRY_EMAIL_PALETTE.background;
++    expect(html.startsWith('<table role="presentation"')).toBe(true);
++    const openingTable = html.slice(0, html.indexOf('>') + 1);
++    expect(openingTable).toContain(`bgcolor="${background}"`);
++    expect(openingTable).toContain(`background-color: ${background};`);
++  });
++
++  it('HE4: every user-supplied field is HTML-escaped', () => {
++    const payload = `<script>alert("x")</script>'&`;
++    const escaped = '&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;&#39;&amp;';
++    const html = buildHireUsInquiryEmailHtml({
++      name: `n${payload}`,
++      email: `e${payload}`,
++      projectTypeLabel: `p${payload}`,
++      budgetLabel: `b${payload}`,
++      message: `m${payload}`,
++    });
++    expect(html).not.toContain('<script');
++    for (const prefix of ['n', 'e', 'p', 'b', 'm']) {
++      expect(html, prefix).toContain(`${prefix}${escaped}`);
++    }
++    expect(html).toContain(`href="mailto:e${escaped}"`);
++  });
++
++  it('HE5: the hire-us action sends the builder output for the submitted form', async () => {
++    vi.stubEnv('BREVO_API_KEY', 'test-key');
++    const sent = stubBrevoFetch();
++    const response = await submitHireUsAction(
++      hireUsForm({
++        name: 'Nino <b>Probe</b>',
++        email: 'nino@example.com',
++        projectType: 'film',
++        budget: '1000-5000',
++        message: 'Line one. Line two.',
++      }),
++    );
++    expect(response.status).toBe(200);
++    expect(sent).toHaveLength(1);
++    const body = sent[0];
++    expect(isSentBrevoEmail(body)).toBe(true);
++    if (!isSentBrevoEmail(body)) {
++      return;
++    }
++    expect(body.subject).toBe('🎬 New Project Inquiry: Film/Video Scoring');
++    expect(body.htmlContent).toBe(
++      buildHireUsInquiryEmailHtml({
++        name: 'Nino <b>Probe</b>',
++        email: 'nino@example.com',
++        projectTypeLabel: 'Film/Video Scoring',
++        budgetLabel: '$1,000 - $5,000',
++        message: 'Line one. Line two.',
++      }),
++    );
++  });
++
++  it('HE6: unknown project type and budget fall back to General / Not specified as at HEAD', async () => {
++    vi.stubEnv('BREVO_API_KEY', 'test-key');
++    const sent = stubBrevoFetch();
++    await submitHireUsAction(
++      hireUsForm({ name: 'Nino', email: 'nino@example.com', message: 'Hello' }),
++    );
++    const body = sent[0];
++    expect(isSentBrevoEmail(body)).toBe(true);
++    if (!isSentBrevoEmail(body)) {
++      return;
++    }
++    expect(body.subject).toBe('🎬 New Project Inquiry: General');
++    expect(body.htmlContent.match(/>Not specified</g)).toHaveLength(2);
++  });
++
++  it('HE7 (characterisation): without a Brevo key the action refuses with 500 and sends nothing', async () => {
++    vi.stubEnv('BREVO_API_KEY', '');
++    const fetchSpy = vi.fn();
++    vi.stubGlobal('fetch', fetchSpy);
++    const response = await submitHireUsAction(
++      hireUsForm({ name: 'Nino', email: 'nino@example.com', message: 'Hello' }),
++    );
++    expect(response.status).toBe(500);
++    expect(fetchSpy).not.toHaveBeenCalled();
++  });
++});
+diff --git a/app/lib/__tests__/store-teal-sweep.test.ts b/app/lib/__tests__/store-teal-sweep.test.ts
+index 0d0dd8f..01b9b71 100644
+--- a/app/lib/__tests__/store-teal-sweep.test.ts
++++ b/app/lib/__tests__/store-teal-sweep.test.ts
+@@ -4,6 +4,8 @@ import { join, relative, resolve } from 'node:path';
+ import { describe, expect, it } from 'vitest';
+ 
+ const APP_ROOT = resolve(__dirname, '../..');
++const PERF_ROOT = resolve(APP_ROOT, '../perf');
++const MIN_SCANNED_PERF_SOURCES = 10;
+ const MIN_SCANNED_SOURCES = 200;
+ const SPOTLIGHT_LOADER_PATH = 'components/loading/SpotlightLoader.tsx';
+ 
+@@ -18,22 +20,34 @@ const GRANTED_TEAL_FREE_SOURCES: ReadonlyArray<string> = [
+   'routes/checkout.success.tsx',
+   SPOTLIGHT_LOADER_PATH,
+   'components/home/StudioMockup.tsx',
++  'routes/hire-us.tsx',
++  'lib/hire-us-inquiry-email.server.ts',
+ ];
+ 
+-const TEAL_ALLOW_LIST: Readonly<Record<string, string>> = {
+-  'components/studio/StudioTrack.tsx': 'frozen legacy Studio (SRW-21 / legacy removal)',
+-  'lib/email.server.ts': 'STORE-2b-2b e-mail HTML',
+-  'routes/hire-us.tsx': 'STORE-2b-2b e-mail HTML',
+-  'components/audio/Timeline.tsx': 'LEGACY-DEAD-STORE-COMPONENTS',
+-  'components/loading/CinemaCurtainLoader.tsx': 'LEGACY-DEAD-STORE-COMPONENTS',
+-  'components/audio/StemsPlayerModal.tsx': 'STORE-4 stems modal',
+-  'components/audio/StemControl.tsx': 'STORE-4 stems modal',
++interface TealAllowListEntry {
++  hits: number;
++  reason: string;
++}
++
++const TEAL_ALLOW_LIST: Readonly<Record<string, TealAllowListEntry>> = {
++  'components/studio/StudioTrack.tsx': {
++    hits: 1,
++    reason: 'frozen legacy Studio (SRW-21 / legacy removal)',
++  },
++  'lib/email.server.ts': { hits: 5, reason: 'LEGACY-DEAD-STORE-COMPONENTS (0 importers)' },
++  'components/audio/Timeline.tsx': { hits: 5, reason: 'LEGACY-DEAD-STORE-COMPONENTS' },
++  'components/loading/CinemaCurtainLoader.tsx': {
++    hits: 7,
++    reason: 'LEGACY-DEAD-STORE-COMPONENTS',
++  },
++  'components/audio/StemsPlayerModal.tsx': { hits: 1, reason: 'STORE-4 stems modal' },
++  'components/audio/StemControl.tsx': { hits: 1, reason: 'STORE-4 stems modal' },
+ };
+ 
+ const GLOW_TOKENS: ReadonlyArray<string> = ['shadow-[0_0_', 'drop-shadow(0 0'];
+ const GRADIENT_TEXT_TOKENS: ReadonlyArray<string> = ['WebkitBackgroundClip', 'backgroundClip'];
+ 
+-function listAppSources(): string[] {
++function listSources(root: string): string[] {
+   const files: string[] = [];
+   const walk = (directory: string) => {
+     for (const entry of readdirSync(directory)) {
+@@ -43,14 +57,18 @@ function listAppSources(): string[] {
+           walk(path);
+         }
+       } else if (/\.(ts|tsx)$/.test(entry)) {
+-        files.push(relative(APP_ROOT, path).split('\\').join('/'));
++        files.push(relative(root, path).split('\\').join('/'));
+       }
+     }
+   };
+-  walk(APP_ROOT);
++  walk(root);
+   return files.sort();
+ }
+ 
++function listAppSources(): string[] {
++  return listSources(APP_ROOT);
++}
++
+ function readAppSource(path: string): string {
+   return readFileSync(resolve(APP_ROOT, path), 'utf8');
+ }
+@@ -75,21 +93,23 @@ function tealHitsByFile(): Record<string, number> {
+   return hits;
+ }
+ 
+-describe('store teal sweep (STORE-2b-2a)', () => {
++describe('store teal sweep (STORE-2b-2a, STORE-2b-2b)', () => {
+   it('TS1: every remaining teal hit in app sources sits in an allow-listed file', () => {
+     const unexpected = Object.keys(tealHitsByFile()).filter((path) => !(path in TEAL_ALLOW_LIST));
+     expect(unexpected).toEqual([]);
+   });
+ 
+-  it('TS2: the scan is non-vacuous and every allow-list entry still has a teal hit', () => {
++  it('TS2: the scan is non-vacuous and every allow-list entry keeps its exact hit count', () => {
+     const sources = listAppSources();
+     expect(sources.length).toBeGreaterThanOrEqual(MIN_SCANNED_SOURCES);
+     for (const path of GRANTED_TEAL_FREE_SOURCES) {
+       expect(sources).toContain(path);
+     }
+     const hits = tealHitsByFile();
+-    const stale = Object.keys(TEAL_ALLOW_LIST).filter((path) => (hits[path] ?? 0) < 1);
+-    expect(stale).toEqual([]);
++    const drifted = Object.entries(TEAL_ALLOW_LIST)
++      .filter(([path, entry]) => (hits[path] ?? 0) !== entry.hits)
++      .map(([path, entry]) => `${path}: ${hits[path] ?? 0} != ${entry.hits}`);
++    expect(drifted).toEqual([]);
+   });
+ 
+   it('TS3: the granted store files carry no glow token and no teal colour', () => {
+@@ -109,4 +129,13 @@ describe('store teal sweep (STORE-2b-2a)', () => {
+     const found = GRADIENT_TEXT_TOKENS.filter((token) => source.includes(token));
+     expect(found).toEqual([]);
+   });
++
++  it('TS5: perf sources carry no teal colour and the perf scan is non-vacuous', () => {
++    const sources = listSources(PERF_ROOT);
++    expect(sources.length).toBeGreaterThanOrEqual(MIN_SCANNED_PERF_SOURCES);
++    const offenders = sources.filter(
++      (path) => countTealHits(readFileSync(resolve(PERF_ROOT, path), 'utf8')) > 0,
++    );
++    expect(offenders).toEqual([]);
++  });
+ });
+diff --git a/app/lib/hire-us-inquiry-email.server.ts b/app/lib/hire-us-inquiry-email.server.ts
+new file mode 100644
+index 0000000..902e461
+--- /dev/null
++++ b/app/lib/hire-us-inquiry-email.server.ts
+@@ -0,0 +1,68 @@
++export const HIRE_US_INQUIRY_EMAIL_PALETTE = {
++  background: '#0e0d0c',
++  surface: '#161412',
++  foreground: '#ece6da',
++  muted: '#a39b8e',
++  outline: '#24211e',
++  brand: '#c9a46a',
++} as const;
++
++export interface HireUsInquiryEmailFields {
++  name: string;
++  email: string;
++  projectTypeLabel: string;
++  budgetLabel: string;
++  message: string;
++}
++
++export function escapeEmailHtml(value: string): string {
++  return value
++    .replace(/&/g, '&amp;')
++    .replace(/</g, '&lt;')
++    .replace(/>/g, '&gt;')
++    .replace(/"/g, '&quot;')
++    .replace(/'/g, '&#39;');
++}
++
++export function buildHireUsInquiryEmailHtml(fields: HireUsInquiryEmailFields): string {
++  const color = HIRE_US_INQUIRY_EMAIL_PALETTE;
++  const labelCell = `padding: 10px; border-bottom: 1px solid ${color.outline}; color: ${color.muted};`;
++  const valueCell = `padding: 10px; border-bottom: 1px solid ${color.outline}; color: ${color.foreground};`;
++  return `
++          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="${color.background}" style="width: 100%; background-color: ${color.background};">
++          <tr>
++          <td bgcolor="${color.background}" style="padding: 24px; background-color: ${color.background};">
++          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: ${color.background}; color: ${color.foreground};">
++            <h2 style="color: ${color.foreground};">New Project Inquiry</h2>
++
++            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
++              <tr>
++                <td style="${labelCell}">Name</td>
++                <td style="${valueCell}">${escapeEmailHtml(fields.name)}</td>
++              </tr>
++              <tr>
++                <td style="${labelCell}">Email</td>
++                <td style="${valueCell}"><a href="mailto:${escapeEmailHtml(fields.email)}" style="color: ${color.brand};">${escapeEmailHtml(fields.email)}</a></td>
++              </tr>
++              <tr>
++                <td style="${labelCell}">Project Type</td>
++                <td style="${valueCell}">${escapeEmailHtml(fields.projectTypeLabel)}</td>
++              </tr>
++              <tr>
++                <td style="${labelCell}">Budget</td>
++                <td style="${valueCell}">${escapeEmailHtml(fields.budgetLabel)}</td>
++              </tr>
++            </table>
++
++            <h3 style="color: ${color.foreground}; margin-top: 30px;">Message</h3>
++            <div style="background-color: ${color.surface}; padding: 20px; border-radius: 8px; color: ${color.foreground}; white-space: pre-wrap;">${escapeEmailHtml(fields.message)}</div>
++
++            <p style="color: ${color.muted}; font-size: 12px; margin-top: 30px;">
++              Sent from CZABA Hire Us form
++            </p>
++          </div>
++          </td>
++          </tr>
++          </table>
++        `;
++}
+diff --git a/app/routes/hire-us.tsx b/app/routes/hire-us.tsx
+index 8837296..9308a4c 100644
+--- a/app/routes/hire-us.tsx
++++ b/app/routes/hire-us.tsx
+@@ -6,15 +6,7 @@
+ 
+ import { type ActionFunctionArgs, json, type MetaFunction } from '@remix-run/node';
+ import * as React from 'react';
+-
+-function escapeHtml(str: string): string {
+-  return str
+-    .replace(/&/g, '&amp;')
+-    .replace(/</g, '&lt;')
+-    .replace(/>/g, '&gt;')
+-    .replace(/"/g, '&quot;')
+-    .replace(/'/g, '&#39;');
+-}
++import { buildHireUsInquiryEmailHtml, escapeEmailHtml } from '~/lib/hire-us-inquiry-email.server';
+ 
+ export const meta: MetaFunction = () => {
+   return [
+@@ -103,38 +95,14 @@ export async function action({ request }: ActionFunctionArgs) {
+         sender: { name: 'CZABA Website', email: 'noreply@czaba.store' },
+         to: [{ email: NOTIFICATION_EMAIL }],
+         replyTo: { email, name },
+-        subject: `🎬 New Project Inquiry: ${escapeHtml(projectTypeLabels[projectType] || 'General')}`,
+-        htmlContent: `
+-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
+-            <h2 style="color: #13D9CC;">New Project Inquiry</h2>
+-
+-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+-              <tr>
+-                <td style="padding: 10px; border-bottom: 1px solid #333; color: #888;">Name</td>
+-                <td style="padding: 10px; border-bottom: 1px solid #333; color: #fff;">${escapeHtml(name)}</td>
+-              </tr>
+-              <tr>
+-                <td style="padding: 10px; border-bottom: 1px solid #333; color: #888;">Email</td>
+-                <td style="padding: 10px; border-bottom: 1px solid #333; color: #fff;"><a href="mailto:${escapeHtml(email)}" style="color: #13D9CC;">${escapeHtml(email)}</a></td>
+-              </tr>
+-              <tr>
+-                <td style="padding: 10px; border-bottom: 1px solid #333; color: #888;">Project Type</td>
+-                <td style="padding: 10px; border-bottom: 1px solid #333; color: #fff;">${escapeHtml(projectTypeLabels[projectType] || 'Not specified')}</td>
+-              </tr>
+-              <tr>
+-                <td style="padding: 10px; border-bottom: 1px solid #333; color: #888;">Budget</td>
+-                <td style="padding: 10px; border-bottom: 1px solid #333; color: #fff;">${escapeHtml(budgetLabels[budget] || 'Not specified')}</td>
+-              </tr>
+-            </table>
+-
+-            <h3 style="color: #13D9CC; margin-top: 30px;">Message</h3>
+-            <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; color: #fff; white-space: pre-wrap;">${escapeHtml(message)}</div>
+-
+-            <p style="color: #666; font-size: 12px; margin-top: 30px;">
+-              Sent from CZABA Hire Us form
+-            </p>
+-          </div>
+-        `,
++        subject: `🎬 New Project Inquiry: ${escapeEmailHtml(projectTypeLabels[projectType] || 'General')}`,
++        htmlContent: buildHireUsInquiryEmailHtml({
++          name,
++          email,
++          projectTypeLabel: projectTypeLabels[projectType] || 'Not specified',
++          budgetLabel: budgetLabels[budget] || 'Not specified',
++          message,
++        }),
+       }),
+     });
+ 
