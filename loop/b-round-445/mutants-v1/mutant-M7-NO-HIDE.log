@@ -1,0 +1,65 @@
+
+ RUN  v4.0.16 /tmp/b445-scratch/store
+
+ ❯ app/lib/__tests__/store-lead-magnet-routes.test.tsx (27 tests | 1 failed) 35ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/products/pulse-loop-kit) is true 2ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/products/a/b) is true 1ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/cart) is true 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/cart/) is true 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/checkout) is true 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/checkout/success) is true 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/checkout/cancel) is true 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/store) is false 1ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/products) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/cartography) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/checkouts) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/free-downloads) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/gift-cards) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/account/downloads) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/recordings/7) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/scenes/7) is false 0ms
+     ✓ LMR2 control: on home a 40 % scroll and 8 s show the popup and count one view 10ms
+     ✓ LMR3 /products/pulse-loop-kit: a 40 percent scroll and 8 s show nothing and count no view 2ms
+     ✓ LMR3 /cart: a 40 percent scroll and 8 s show nothing and count no view 1ms
+     ✓ LMR3 /checkout/success: a 40 percent scroll and 8 s show nothing and count no view 1ms
+     ✓ LMR3 /checkout/cancel: a 40 percent scroll and 8 s show nothing and count no view 1ms
+     ✓ LMR4 exit intent on a product page shows nothing; on home after a fresh scroll it shows once 2ms
+     ✓ LMR5 scroll on a product page does not carry over: home needs its own scroll 2ms
+     × LMR6 an open popup hides on an excluded route without a dismissal, back to the offer step 5ms
+     ✓ LMR7 journey: scroll on home, go to a product before 8 s, the popup never opens there 2ms
+     ✓ LMR8 between two allowed pages the armed window carries over as before 1ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 26 passed (27)
+   Start at  04:15:55
+   Duration  580ms (transform 55ms, setup 0ms, import 163ms, tests 35ms, environment 281ms)
+
+
+::error file=/tmp/b445-scratch/store/app/lib/__tests__/store-lead-magnet-routes.test.tsx,title=app/lib/__tests__/store-lead-magnet-routes.test.tsx > LeadMagnet route exclusion (STORE-2b-1) > LMR6 an open popup hides on an excluded route without a dismissal%2C back to the offer step,line=180,column=34::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/__tests__/store-lead-magnet-routes.test.tsx:180:34%0A%0A
+stderr | app/lib/__tests__/store-lead-magnet-routes.test.tsx > LeadMagnet route exclusion (STORE-2b-1) > LMR2 control: on home a 40 % scroll and 8 s show the popup and count one view
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/store-lead-magnet-routes.test.tsx > LeadMagnet route exclusion (STORE-2b-1) > LMR6 an open popup hides on an excluded route without a dismissal, back to the offer step
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ app/lib/__tests__/store-lead-magnet-routes.test.tsx:180:34
+    178|     expect(current().shouldShow).toBe(true);
+    179|     navigateTo('/products/pulse-loop-kit');
+    180|     expect(current().shouldShow).toBe(false);
+       |                                  ^
+    181|     expect(current().currentStep).toBe('offer');
+    182|     expect(storedState()).toEqual(expect.objectContaining({ viewCount:…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

@@ -1,0 +1,273 @@
+diff --git a/app/hooks/useLeadMagnet.ts b/app/hooks/useLeadMagnet.ts
+index 19906de..9623b25 100644
+--- a/app/hooks/useLeadMagnet.ts
++++ b/app/hooks/useLeadMagnet.ts
+@@ -1,3 +1,4 @@
++import { useLocation } from '@remix-run/react';
+ import { useEffect, useState } from 'react';
+ 
+ interface LeadMagnetState {
+@@ -24,6 +25,16 @@ const MAX_VIEWS_PER_DAY = 10; // Max 2 views per day (less annoying)
+ const SHOW_DELAY_MS = 8000; // Wait 8 seconds before checking
+ const SCROLL_THRESHOLD = 40; // User must scroll 40% to be considered engaged
+ 
++export function isLeadMagnetExcludedPath(pathname: string): boolean {
++  return (
++    pathname.startsWith('/products/') ||
++    pathname === '/cart' ||
++    pathname.startsWith('/cart/') ||
++    pathname === '/checkout' ||
++    pathname.startsWith('/checkout/')
++  );
++}
++
+ function getTodayDate(): string {
+   return new Date().toISOString().split('T')[0];
+ }
+@@ -73,11 +84,19 @@ export function useLeadMagnet(isLoggedIn: boolean): UseLeadMagnetReturn {
+   const [currentStep, setCurrentStep] = useState<Step>('offer');
+   const [isSubmitting, setIsSubmitting] = useState(false);
+   const [error, setError] = useState<string | null>(null);
++  const { pathname } = useLocation();
++  const isExcludedRoute = isLeadMagnetExcludedPath(pathname);
+ 
+   useEffect(() => {
+     // Don't run on server
+     if (typeof window === 'undefined') return;
+ 
++    if (isExcludedRoute) {
++      setShouldShow(false);
++      setCurrentStep('offer');
++      return;
++    }
++
+     // 1. Check if user is logged in
+     if (isLoggedIn) {
+       setShouldShow(false);
+@@ -171,7 +190,7 @@ export function useLeadMagnet(isLoggedIn: boolean): UseLeadMagnetReturn {
+       window.removeEventListener('scroll', handleScroll);
+       document.removeEventListener('mouseleave', handleMouseLeave);
+     };
+-  }, [isLoggedIn]);
++  }, [isLoggedIn, isExcludedRoute]);
+ 
+   const close = () => {
+     setShouldShow(false);
+diff --git a/app/lib/__tests__/store-lead-magnet-routes.test.tsx b/app/lib/__tests__/store-lead-magnet-routes.test.tsx
+new file mode 100644
+index 0000000..0ebd3ca
+--- /dev/null
++++ b/app/lib/__tests__/store-lead-magnet-routes.test.tsx
+@@ -0,0 +1,212 @@
++import { act, cleanup, render } from '@testing-library/react';
++import type { NavigateFunction } from 'react-router-dom';
++import { MemoryRouter, useNavigate } from 'react-router-dom';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { isLeadMagnetExcludedPath, useLeadMagnet } from '~/hooks/useLeadMagnet';
++
++const STORAGE_KEY = 'czaba_lead_magnet';
++const SHOW_DELAY_MS = 8000;
++
++interface LeadMagnetProbeSnapshot {
++  shouldShow: boolean;
++  currentStep: string;
++  setStep: (step: 'offer' | 'email' | 'success') => void;
++  navigate: NavigateFunction;
++}
++
++const probe: { current: LeadMagnetProbeSnapshot | null } = { current: null };
++
++function LeadMagnetProbe() {
++  const leadMagnet = useLeadMagnet(false);
++  const navigate = useNavigate();
++  probe.current = {
++    shouldShow: leadMagnet.shouldShow,
++    currentStep: leadMagnet.currentStep,
++    setStep: leadMagnet.setStep,
++    navigate,
++  };
++  return null;
++}
++
++function current(): LeadMagnetProbeSnapshot {
++  const snapshot = probe.current;
++  if (!snapshot) throw new Error('probe not rendered');
++  return snapshot;
++}
++
++function renderAt(path: string) {
++  return render(
++    <MemoryRouter initialEntries={[path]}>
++      <LeadMagnetProbe />
++    </MemoryRouter>,
++  );
++}
++
++function setScrollPercent(percent: number) {
++  Object.defineProperty(document.documentElement, 'scrollHeight', {
++    configurable: true,
++    value: 2000,
++  });
++  Object.defineProperty(window, 'innerHeight', { configurable: true, value: 1000 });
++  Object.defineProperty(window, 'scrollY', { configurable: true, value: (1000 * percent) / 100 });
++  act(() => {
++    window.dispatchEvent(new Event('scroll'));
++  });
++}
++
++function exitIntent() {
++  act(() => {
++    document.dispatchEvent(new MouseEvent('mouseleave', { clientY: 0, clientX: 10 }));
++  });
++}
++
++function advance(ms: number) {
++  act(() => {
++    vi.advanceTimersByTime(ms);
++  });
++}
++
++function navigateTo(path: string) {
++  act(() => {
++    current().navigate(path);
++  });
++}
++
++function storedState(): { viewCount: number; dismissed: boolean } | null {
++  const raw = localStorage.getItem(STORAGE_KEY);
++  return raw ? JSON.parse(raw) : null;
++}
++
++const EXCLUDED_PATHS = [
++  '/products/pulse-loop-kit',
++  '/cart',
++  '/checkout/success',
++  '/checkout/cancel',
++];
++
++beforeEach(() => {
++  vi.useFakeTimers();
++  vi.setSystemTime(new Date('2026-11-11T12:00:00Z'));
++  localStorage.clear();
++  probe.current = null;
++});
++
++afterEach(() => {
++  cleanup();
++  vi.useRealTimers();
++  setScrollPercent(0);
++});
++
++describe('LeadMagnet route exclusion (STORE-2b-1)', () => {
++  it.each([
++    ['/products/pulse-loop-kit', true],
++    ['/products/a/b', true],
++    ['/cart', true],
++    ['/cart/', true],
++    ['/checkout', true],
++    ['/checkout/success', true],
++    ['/checkout/cancel', true],
++    ['/', false],
++    ['/store', false],
++    ['/products', false],
++    ['/cartography', false],
++    ['/checkouts', false],
++    ['/free-downloads', false],
++    ['/gift-cards', false],
++    ['/account/downloads', false],
++    ['/recordings/7', false],
++    ['/scenes/7', false],
++  ])('LMR1 isLeadMagnetExcludedPath(%s) is %s', (path, expected) => {
++    expect(isLeadMagnetExcludedPath(path)).toBe(expected);
++  });
++
++  it('LMR2 control: on home a 40 % scroll and 8 s show the popup and count one view', () => {
++    renderAt('/');
++    setScrollPercent(55);
++    advance(SHOW_DELAY_MS);
++    expect(current().shouldShow).toBe(true);
++    expect(storedState()?.viewCount).toBe(1);
++  });
++
++  it.each(
++    EXCLUDED_PATHS,
++  )('LMR3 %s: a 40 percent scroll and 8 s show nothing and count no view', (path) => {
++    renderAt(path);
++    setScrollPercent(55);
++    advance(SHOW_DELAY_MS * 2);
++    expect(current().shouldShow).toBe(false);
++    expect(storedState()?.viewCount ?? 0).toBe(0);
++  });
++
++  it('LMR4 exit intent on a product page shows nothing; on home after a fresh scroll it shows once', () => {
++    renderAt('/products/pulse-loop-kit');
++    setScrollPercent(55);
++    exitIntent();
++    expect(current().shouldShow).toBe(false);
++    expect(storedState()?.viewCount ?? 0).toBe(0);
++    navigateTo('/');
++    exitIntent();
++    expect(current().shouldShow).toBe(false);
++    setScrollPercent(56);
++    exitIntent();
++    expect(current().shouldShow).toBe(true);
++    expect(storedState()?.viewCount).toBe(1);
++  });
++
++  it('LMR5 scroll on a product page does not carry over: home needs its own scroll', () => {
++    renderAt('/products/pulse-loop-kit');
++    setScrollPercent(55);
++    advance(5000);
++    navigateTo('/');
++    advance(SHOW_DELAY_MS);
++    expect(current().shouldShow).toBe(false);
++    exitIntent();
++    expect(current().shouldShow).toBe(false);
++    setScrollPercent(56);
++    exitIntent();
++    expect(current().shouldShow).toBe(true);
++    expect(storedState()?.viewCount).toBe(1);
++  });
++
++  it('LMR6 an open popup hides on an excluded route without a dismissal, back to the offer step', () => {
++    renderAt('/');
++    setScrollPercent(55);
++    advance(SHOW_DELAY_MS);
++    act(() => {
++      current().setStep('email');
++    });
++    expect(current().shouldShow).toBe(true);
++    navigateTo('/products/pulse-loop-kit');
++    expect(current().shouldShow).toBe(false);
++    expect(current().currentStep).toBe('offer');
++    expect(storedState()).toEqual(expect.objectContaining({ viewCount: 1, dismissed: false }));
++    navigateTo('/');
++    setScrollPercent(57);
++    advance(SHOW_DELAY_MS - 1);
++    expect(current().shouldShow).toBe(false);
++    advance(1);
++    expect(current().shouldShow).toBe(true);
++    expect(current().currentStep).toBe('offer');
++    expect(storedState()?.viewCount).toBe(2);
++  });
++
++  it('LMR7 journey: scroll on home, go to a product before 8 s, the popup never opens there', () => {
++    renderAt('/');
++    setScrollPercent(55);
++    advance(3000);
++    navigateTo('/products/pulse-loop-kit');
++    advance(SHOW_DELAY_MS * 2);
++    expect(current().shouldShow).toBe(false);
++    expect(storedState()?.viewCount ?? 0).toBe(0);
++  });
++
++  it('LMR8 between two allowed pages the armed window carries over as before', () => {
++    renderAt('/');
++    setScrollPercent(55);
++    advance(3000);
++    navigateTo('/store');
++    advance(SHOW_DELAY_MS - 3000);
++    expect(current().shouldShow).toBe(true);
++    expect(storedState()?.viewCount).toBe(1);
++  });
++});

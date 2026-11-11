@@ -1,0 +1,75 @@
+
+ RUN  v4.0.16 /tmp/b445-scratch/store
+
+ ✓ app/lib/__tests__/store-lead-magnet-dialog.test.tsx (18 tests) 369ms
+ ❯ app/lib/__tests__/store-lead-magnet-routes.test.tsx (34 tests | 1 failed) 173ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/products/pulse-loop-kit) is true 2ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/products/a/b) is true 1ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/cart) is true 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/cart/) is true 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/checkout) is true 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/checkout/success) is true 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/checkout/cancel) is true 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/store) is false 1ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/products) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/cartography) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/checkouts) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/free-downloads) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/gift-cards) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/account/downloads) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/recordings/7) is false 0ms
+     ✓ LMR1 isLeadMagnetExcludedPath(/scenes/7) is false 0ms
+     ✓ LMR2 control: on home a 40 % scroll and 8 s show the popup and count one view 10ms
+     ✓ LMR3 /products/pulse-loop-kit: a 40 percent scroll and 8 s show nothing and count no view 2ms
+     ✓ LMR3 /cart: a 40 percent scroll and 8 s show nothing and count no view 1ms
+     ✓ LMR3 /checkout/success: a 40 percent scroll and 8 s show nothing and count no view 1ms
+     ✓ LMR3 /checkout/cancel: a 40 percent scroll and 8 s show nothing and count no view 1ms
+     ✓ LMR4 exit intent on a product page shows nothing; on home after a fresh scroll it shows once 4ms
+     ✓ LMR5 scroll on a product page does not carry over: home needs its own scroll 2ms
+     ✓ LMR6 an open popup hides on an excluded route without a dismissal, back to the offer step 2ms
+     ✓ LMR11 no render on an excluded route reports the popup as shown 2ms
+     ✓ LMR12 a route hide clears the last submit error 4ms
+     ✓ LMR13 keep-list: the 8 s check is one-shot; after it passes unscrolled, scroll plus 8 s shows nothing 1ms
+     ✓ LMR7 journey: scroll on home, go to a product before 8 s, the popup never opens there 1ms
+     ✓ LMR8 between two allowed pages the armed window carries over as before 1ms
+     × LMR9 an open popup hidden by a route change unlocks the body and does not restore the old scroll 113ms
+     ✓ LMR10 control: closing the popup on an allowed page still restores the scroll 17ms
+     ✓ SL1 without options an unlock restores the locked scroll (as before) 1ms
+     ✓ SL2 restoreScrollOnUnlock false: unlock and unmount clear the lock without scrolling 2ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 51 passed (52)
+   Start at  04:43:10
+   Duration  1.18s (transform 481ms, setup 0ms, import 892ms, tests 542ms, environment 649ms)
+
+
+::error file=/tmp/b445-scratch/store/app/lib/__tests__/store-lead-magnet-routes.test.tsx,title=app/lib/__tests__/store-lead-magnet-routes.test.tsx > LeadMagnet route hide keeps the new page scroll (STORE-2b-1) > LMR9 an open popup hidden by a route change unlocks the body and does not restore the old scroll,line=303,column=26::AssertionError: expected "bound " to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st bound  call:%0A%0A    Array [%0A      0,%0A      550,%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ app/lib/__tests__/store-lead-magnet-routes.test.tsx:303:26%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/store-lead-magnet-routes.test.tsx > LeadMagnet route hide keeps the new page scroll (STORE-2b-1) > LMR9 an open popup hidden by a route change unlocks the body and does not restore the old scroll
+AssertionError: expected "bound " to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st bound  call:
+
+    Array [
+      0,
+      550,
+    ]
+
+
+Number of calls: 1
+
+ ❯ app/lib/__tests__/store-lead-magnet-routes.test.tsx:303:26
+    301|     expect(document.body.style.position).toBe('');
+    302|     expect(document.body.style.top).toBe('');
+    303|     expect(scrollTo).not.toHaveBeenCalled();
+       |                          ^
+    304|   });
+    305| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

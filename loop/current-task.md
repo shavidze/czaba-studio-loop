@@ -1,208 +1,117 @@
-# Round 445: SYS-3 stage 2b (last) — one key-intent helper for the five inline editors, and a held Escape no longer collapses the floating video
+# Round 446: STORE-2b-1 — the LeadMagnet popup no longer opens on product, cart and checkout pages
 
-**Planned by:** B, at the round 444 → 445 planning, 2026-11-11 (`b-round-444.md`).
+**Planned by:** B, at the round 445 → 446 planning, 2026-11-11 (`b-round-445.md`).
 - The advisor was available and was consulted after orientation and before hand-off.
-- The round-444 task is archived as `tasks/round-444.md` (byte-identical copy made before this file was rewritten) [K11].
-- **Runtime change, one user-visible behaviour:** with the floating video expanded, a held Escape that closes the shortcut sheet, the Export dialog, the BPM edit or the marker editor no longer collapses the video through its auto-repeat keydowns. A fresh Escape still returns the video as before. The five inline-editor handlers move onto one helper with **no** behaviour change (HEAD truth table pinned, IME12). 6 source files, 4 test files and 3 docs change (13 paths, `b-round-444/grants-445.txt`).
-- **What does not apply, and why:** reference-first, `product-designer` and the screen budget. This is a bug-fix and refactor round with nothing added to the screen. There is no Ableton reference for IME or auto-repeat handling; the rule is the platform text-input standard (W3C UI Events `KeyboardEvent.isComposing`, `KeyboardEvent.repeat`) and the loop's "a held key acts once" rule (L4 ruling from round 443). Recorded as "no Ableton reference; platform standard".
-- **Baseline:** gate 444 is `published`, commit `616729c` [K1]. The store tree is clean [K2].
-- **Regression:** not due. `regression-last.json` is 2026-11-10 [K25]; the next one is due on or after 2026-11-13.
+- The round-445 task is archived as `tasks/round-445.md` (byte-identical copy made before this file was rewritten) [K18].
+- **Baseline:** gate 445 is `published`, commit `4bfebd7` [K1]. The store tree is clean at planning [K2].
+- **Regression:** not due. `regression-last.json` is 2026-11-10 (round 425); the next one is due on or after 2026-11-13.
+- **RETRO:** round 450.
 
-## Decisions (`backlog.json` v430 → v431, `decisions_log_b`)
-- **D-29z1579: round 444 accepted** from C evidence: `c-round-444.json` PASS, `browserVerified` true, 0 bugs [K12]; gate 444 published `616729c`.
-  - A-R203-REVIEW-M1 is closed.
-  - A-R203-REVIEW-I1 is closed for the **AltGr half only**. Gate-444 finding 1: Chrome and Safari on macOS do not report AltGraph for Option+character, so that path is unchanged. It is split out as **GATE444-L1-MACOS-OPTION** (Low, `deferred_low_polish`, plus a TLM step). No macOS heuristic is chosen without a real Mac.
-  - A-R444-REVIEW-L1 (Cmd+Option and `metaKey`) → **A-R444-REVIEW-L1-ALTGRAPH-META**, `deferred_low_polish`. `focus-source.ts` is not owned by this stage (tech-lead R3).
-  - A-R444-REVIEW-I1 (rated Info by A's reviewer) is **reproduced in real Chromium by B** and raised to Low: **A-R444-REVIEW-I1-HELD-ESC-VIDEO**, fixed in this round.
-  - Gate-444 finding 2 needs no fix. Finding 3 (the Library repeat Escape does not stop propagation) is noted in doc 290. Finding 4 is info.
-  - Gate Architecture note → SIG-R444-COMPOSING-LIB-HELPER (signal only). A's Architecture note → `confirmedBy` on TL-R444-L2.
-- **D-29z1580: round 445 = SYS-3 stage 2b.**
-  - **Why a Low is fixed now:** under the 2026-10-23 rule, a new Low is fixed early only when the round owns the code and the cost is small. A-R444-REVIEW-I1 qualifies: it is the same held-key class as TL-R443-G3, the fix is one guarded line, and HEAD is red in 8 browser cells.
-  - Closes on C PASS: TL-R443-G3-PLAIN-HELD-ROWS, A-R443-REVIEW-L1/L2, A-R444-REVIEW-I1-HELD-ESC-VIDEO, and SIG-R442-INLINE-EDITOR-KEYS (implemented).
-  - **GATE443-L1 is ruled "no user-visible effect"** (tech-lead R1 confirmed). The Workspace window handler returns for typing targets [K26]. Tempo blurs on the fresh press, so its repeats target the body and are handled by this round's fix. B's probe shows Clip Gain and Library-search held Escape leave the video expanded at HEAD (`b-round-444/probe/head.json`, GAIN and LIBSEARCH cells). Propagation stays as at HEAD (IME12). The finding closes when C's run of the same cells passes.
-  - New items: TL-R445-R4-LEADMAGNET-INLINE-COMPOSING (store-side Low, deferred) and TL-R445-I1-SCAN-NESTED-DESTRUCTURING (signal only).
-- **D-29z1581: order after this round.**
-  1. REGRESSION-2026-11-13, at the first planning on or after 2026-11-13. It goes first if due.
-  2. STORE-REDESIGN 2b…5.
-  3. ARCH-SPLIT (root's frontend-architect checkpoint first).
-  4. REVIEW-RECOMMENDATIONS.
-  5. T12-ADVANCED.
-  6. Phase 2 under the skip rule.
+## Why this round
+- C round 445 PASS (`browserVerified` true, 0 bugs) [K19] and gate 445 published `4bfebd7`. **SYS-3 is complete.** No C bug is open. No Critical/High is open; the open Mediums are root/manual/Saba-gated or scheduled (`context/active-summary.md`).
+- Order D-29z1581: STORE-REDESIGN 2b…5 is next. STEM-LANES is still `awaiting_user` (no answer to `user-review/AGREE-STEM-LANES.md`), so it does not outrank STORE-2b.
+- **STORE-2b is split (D-29z1583)**, one bounded stage per round, nothing dropped:
+  - **2b-1 (this round):** PD-REVIEW F4 / Saba Q3 — LeadMagnet route exclusion. It goes first because it is a Saba-approved behaviour (Medium in the PD review), it is small, and it removes the auto-opening popup that interrupts C's product-page probes in STORE-4 (L1).
+  - **2b-2:** hardcoded teal sweep in TS/TSX (recount at `4bfebd7`: 24 hits in 9 files with the regex in `b-round-445.md` §4; the old 37/14 count was at `caa09af` with a different regex).
+  - **2b-3:** glow blobs, gradient text, `shadow-glow`, teal gradient/glow tokens and alias colours in `app/styles/app.css`. `app/styles/**` is `global_forbidden`; 2b-3 gets a B narrow grant for `app/styles/app.css` with an exact byte scope, as rounds 192, 196, 201 and 316 did (`narrow_grants`).
+  - **2b-4:** F6 visual part, inside the restyle stages.
 
-  The next RETRO is round 450. SYS-3 is complete on this round's C PASS.
+## What changes (user-visible)
+1. On `/products/<handle>`, `/cart`, `/checkout` and `/checkout/<anything>` the popup never opens: neither the 8 s timer nor exit intent shows it, and no view is counted.
+2. Scrolling on an excluded page does not count as engagement for later pages. When the visitor returns to an allowed page, that page needs its own ≥ 40 % scroll inside a new 8 s window (or an exit intent after its own scroll), exactly as on a first page today.
+3. If the popup is open and the visitor reaches an excluded page (browser Back/Forward), the popup closes **without** being marked dismissed, the body unlocks, the new page does not jump to the old page's scroll offset, the step goes back to the offer, and the last submit error is cleared.
+4. Everything else is unchanged (keep-list): content, steps, copy, the 8 s one-shot timer, the 40 % threshold, exit intent, the 10-per-day cap, dismissal, submission, focus behaviour, and every allowed page (`/`, `/store`, `/free-downloads`, `/gift-cards`, `/about`, `/account/*`, `/recordings/*`, `/scenes/*`, …). Moving between two allowed pages keeps HEAD's carried-over window (LMR8).
 
-## Read first
-Read `lessons.md`. These apply most:
-- L4: one element, one rule. The "held key acts once" clause wins over "Esc returns the video" for repeat keydowns.
-- L11: STOP.
-- L23 and L58: every asserted number below comes from B's run on the dispatched sketch.
-- L26 and L28: docs.
-- L31: timeout headroom is checked; the files that gain rows peak at 807 ms against the 5 s default (`b-round-444/logs/l31-headroom.txt`).
-- L38: no vitest during a browser probe.
-- L47: focus targets.
-- L49: kept side effects.
-- L50: focus origins.
+Not changed, and why: `app/root.tsx` is protected (`global_forbidden`), so the mount stays where it is and the exclusion lives in the hook. `MAX_VIEWS_PER_DAY = 10` with its comment "Max 2 views per day" [K8] is not in Saba's decision → signal `SIG-R446-LEADMAGNET-CAP-COMMENT`, not touched.
 
-## 1. What changes
-- Sketch: `b-round-444/sketch-445.patch.txt`, sha256 in `b-round-444/sketch-445.sha256` [K6].
-- 10 paths are listed in `b-round-444/sketch-paths.txt`, with copies in `b-round-444/sketch-files/`.
-- Review: `b-round-444/sketch-review.md`. tech-lead gave v1 approve-with-changes with 0 Medium+; L1–L3 and Info 1 are applied in v2; the v2 delta was approved. The reviewed sha equals the dispatched sha.
+## Reference: how established stores do it
+The Ableton reference does not apply: this is a Store change. Store sources:
 
-| Site | HEAD (`616729c`) [K7][K8] | After |
+| Point | Source | What it says | CZABA decision |
+|---|---|---|---|
+| Overlays in checkout | Baymard Institute guideline #709 "Overlays Appearing During Checkout" (https://baymard.com/guidelines/709-overlays-appearing-during-checkout, fetched 2026-11-11; only the public summary is readable, the research is behind a login) | "Site-initiated overlays in checkout distract users at a critical time, slowing their progress", adding abandonment risk | No popup on `/cart`, `/checkout*` |
+| Product page | No primary source found (searched "Baymard checkout newsletter popup interrupt cart product page best practice"; the results were vendor blogs, treated as opinion) | — | Saba's decision Q3 (`docs/technical/studio-real-workspace/product-design-review-2026-10-31.md`, F4 and Q3) is the authority: `/products/*` excluded [K24] |
+| Behaviour details | `product-designer` consult at this planning | (a) suppress silently, count no view; (b) a fresh window after an excluded page; (c) an open popup hides on an excluded route without a dismissal; (d) only Saba's list, whole path segments | Adopted. One correction: the designer's row "after that, scroll 40 % and wait 8 s: dialog appears" is not HEAD behaviour (the 8 s check is one-shot; after it, only exit intent shows the popup). The keep-list wins, so the rows below follow HEAD's one-shot timer |
+
+Research folder: `docs/technical/store-redesign/research/*.md` searched for `popup|newsletter|interstitial|lead magnet` — one unrelated hit (`competitors.md` on Shopify newsletter captcha gates); nothing on popup timing or exclusion.
+
+Deviations and B's smallest-honest choices beyond Q3 (L44: each goes to Saba once as `SABA-Q-LEADMAGNET-NAV-RULES`, `awaiting_user`; the round implements the defaults below and does not wait):
+- **(c) An open popup is closed by navigation** to an excluded page. Q3 says "does not open there"; leaving a modal over the cart would defeat Q3's purpose, so B chose the hide (no dismissal recorded). Alternative for Saba: leave it open.
+- **(b) The 8 s window re-arms after every excluded page.** At HEAD a spent window never re-arms in the same visit; with this round, a visitor who goes home → product → home gets a new window on the second home visit, and a Back-hide can be followed by another show (each counts a view, capped at 10 per day). Alternative for Saba: no re-arm once a window was spent.
+
+Open question for Saba (not in scope, default "not excluded"): should `/recordings/*` and `/scenes/*` (product-detail-like views) also be excluded? → `SABA-Q-LEADMAGNET-RECORDINGS-SCENES` (`awaiting_user`).
+
+Not applicable, with reasons: the STORE stage rows for LCP/CLS, contrast and reduced motion (no markup, style or animation changes; the popup's markup is untouched); YouTube/AGREE (Saba already decided Q3 on 2026-10-31); screen budget (nothing persistent is added; a popup is removed from some routes); L55 product model (no data or lane model changes); Ableton parity rows (Store change).
+
+## Ruling lines (L4)
+- Popup on an excluded route: "does not open" (Saba) wins over "behaviour unchanged" (keep-list).
+- An already-open popup reaching an excluded route: hide (ruling c) wins over "leave it open".
+- The 8 s window: HEAD's one-shot check (keep-list) wins over the designer's "wait 8 s again" wording. The premise is pinned by LMR13, green on the sketch and on the HEAD hook [K25].
+- The popup's own `email` and `validationError` state survive a route hide (the component stays mounted, as with every hide at HEAD): kept this round, recorded as `TL-R446-L3-LOCAL-STATE` (deferred Low).
+- Scroll after a route hide: "no jump to the old page's offset" wins over `useScrollLock`'s restore; every other caller of `useScrollLock` (`AuthModal`, `ui/Modal`) keeps the restore through the default `true` [K9].
+- A Back that lands on an excluded route while the popup is open loses Remix's saved scroll position for that page (tech-lead v2 Low, `TL-R446-L1-POP-RESTORE-LOST`): the page lands at its top. Accepted for this round; C7 compares with the no-popup control, whose saved position in the recipe is also the top.
+
+## 1. The sketch (apply it unchanged)
+- Patch: `b-round-445/sketch-446.patch.txt`, sha256 in `b-round-445/sketch-446.sha256` [K6]. Paths: `b-round-445/sketch-paths.txt`, copies in `b-round-445/sketch-files/`.
+- Review: `b-round-445/sketch-review.md`. tech-lead v1: approve-with-changes (M1 scroll restore, M2 same-render mask, L3 error reset, L4 router warnings), all applied in v2; v2 delta review: approve. v3 adds only test row LMR13 (test-only delta review: approve; title nit `TL-R446-V3-TITLE` accepted). Reviewed sha = dispatched sha [K21].
+
+| File | HEAD `4bfebd7` | After |
 |---|---|---|
-| `studio-ime-composition.ts` | `isImeCompositionKeyDown`, `isNativeImeCompositionKeyDown` | Adds `InlineEditorSettleKey` (`'Enter' \| 'Escape'`), `INLINE_EDITOR_SETTLE_KEYS`, `INLINE_EDITOR_ENTER_ONLY_KEYS` and `inlineEditorKeyIntent(event, keys)`. It returns `other` (the key is not in the list), then `composing` (`isComposing` or keyCode 229), then `held` (`repeat`), else `settle`. It is pure and has no side effects |
-| BPM `handleTempoKeyDown` | inline composing check, then Enter / Escape branches with their own repeat checks | `other`/`composing` → return; else `preventDefault`; `held` → return; Escape → skip commit + drop the draft; then `blur()` |
-| Marker and group name editors | Enter/Escape: `stopPropagation` first, then the composing return, `preventDefault` and the repeat check | Same order through the intent: `other` → return; `stopPropagation`; `composing` → return; `preventDefault`; `settle` → `settleEditor` |
-| Detail From/To `handleRangeInputKeyDown` | composing return; Enter → `preventDefault`, apply when not repeated | `INLINE_EDITOR_ENTER_ONLY_KEYS`; `other`/`composing` → return; `preventDefault`; `settle` → apply |
-| Clip Gain `handleClipGainKeyDown` | composing return; Enter or Escape → `preventDefault`, act when not repeated | `other`/`composing` → return; `preventDefault`; `held` → return; Enter → commit; `else if` Escape → revert the text |
-| `StudioWorkspace` window Escape branch, video expanded | `preventDefault` + `returnFloatingVideo()` for every Escape, repeats included [K24] | `preventDefault` always; `returnFloatingVideo()` only when `!event.repeat`. No later Escape branch exists in that handler (tech-lead R2) |
+| `app/hooks/useLeadMagnet.ts` | effect deps `[isLoggedIn]` [K7]; timer 8000, threshold 40, cap 10, exit intent [K8] | adds exported `isLeadMagnetExcludedPath(pathname)` (`/products/` prefix; `/cart` or `/cart/…`; `/checkout` or `/checkout/…`) and reads `useLocation()` from `@remix-run/react`; effect deps `[isLoggedIn, isExcludedRoute]`; on an excluded route: `setShouldShow(false)`, `setCurrentStep('offer')`, `setError(null)`, return (no listeners, no timer); returns `shouldShow: shouldShow && !isExcludedRoute` and `isRouteExcluded` |
+| `app/hooks/useScrollLock.ts` | `useScrollLock(isLocked)` restores the locked scroll on unlock and unmount [K23] | `useScrollLock(isLocked, { restoreScrollOnUnlock })`, default `true`, read through a ref at unlock/cleanup (tech-lead: keep the ref-in-render form) |
+| `app/components/marketing/LeadMagnetPopup.tsx` | `useScrollLock(shouldShow)` [K9] | `useScrollLock(shouldShow, { restoreScrollOnUnlock: !isRouteExcluded })`; nothing else |
+| `app/lib/__tests__/store-lead-magnet-routes.test.tsx` | — | new: LMR1–LMR13, SL1–SL2 |
 
-- **Kept side effects (L49):** every handler keeps its HEAD `preventDefault`, `stopPropagation`, blur, commit, cancel and revert calls, in HEAD order, for every key × {composing, held, plain} cell. IME12 pins the HEAD table (`defaultPrevented`, reached `document`); B ran it unchanged on a clean `616729c` copy: 10 passed, rc 0 [K22] (`b-round-444/logs/headrun-truth-table.log`). The only removed effect is the video return on a repeat Escape, which is the fix.
-- **Focus targets (L47):** a swallowed held key leaves focus where the fresh press put it. In the browser, measured by B (`b-round-444/probe/head.json` vs `sketch-merged.json` `afterFresh`, `FRESH ALL SAME (14 cells)` [K16]):
+Callers swept [K11]: `useLeadMagnet` is used only by `LeadMagnetPopup` (plus the mock in `store-lead-magnet-dialog.test.tsx`, which returns no `isRouteExcluded`, so the popup keeps the restore there); no e2e or perf file references the popup.
 
-  | Fresh Escape on | Focus after it |
-  |---|---|
-  | Sheet | the footer button "Keyboard shortcuts (?)" |
-  | Export | its opener, the toolbar button "Export" (`b-round-444/probe/export-focus-head.json`, both viewports) |
-  | Tempo | focus leaves the field, through the HEAD `blur()` (round 443 wording). This round neither changes nor rules that target; it is pre-existing and out of scope here |
-  | Marker editor | `arrangement-marker-add` |
-  | Clip Gain | stays in the field |
-  | Library search | stays in the field |
+## Focus origins (L50, L47)
+`grep -nE 'onPointerDown(Capture)?|onBlur|settleEditor\(|\.focus\(|^\s*\{[^}]*(\.map\(|&&|\?)' app/components/marketing/LeadMagnetPopup.tsx app/hooks/useLeadMagnet.ts app/hooks/useScrollLock.ts` → 12 hits, all in the popup; saved with line numbers in `b-round-445/logs/l50-focus-origins.txt` [K26].
+- **R-A (open focus, return focus):** the route hide runs the popup's return-focus cleanup, which focuses the saved element only when it is still connected. Two origins, each a C row: nothing focused before the popup (the old page's element is gone → the focus a plain Back leaves, C8a), and a persistent header link focused before the popup (still connected → focus returns to that header link, C8b).
+- **R-B (step focus on email/success, the email retry focus):** not reached by a route hide (the step resets to offer while hidden, and the step-focus ref resets when hidden); unchanged, covered by `store-lead-magnet-dialog.test.tsx`.
+- **R-C (Tab wrap inside the dialog):** unchanged; dialog tests.
+- **R-D (step, error and submitting conditional renders):** step reset LMR6, error reset LMR12; local `email`/`validationError` kept (ruling above).
 
-  Nothing new unmounts.
-- **Focus origins (L50):** `grep -nE 'onPointerDown(Capture)?|onBlur|settleEditor\(|\.focus\(|^\s*\{[^}]*(\.map\(|&&|\?)'` over the 6 granted source files finds 62 hits at HEAD [K23] (`b-round-444/logs/l50-focus-origins.txt`). The sketch changes one source line that matches: the group editor's `settleEditor(...)`, which is re-indented under `intent === 'settle'`, the same guard as HEAD's `!event.repeat` after the composing return (`b-round-444/logs/l50-changed-lines.txt`). One class ruling: no hit gets a new origin.
-- **Element rulings (L4):**
-  - Held Escape with the video expanded: "held key acts once" wins. Only a fresh Escape returns the video.
-  - GATE443-L1: HEAD propagation is kept and not unified (tech-lead: `stopPropagation` legitimately differs per editor).
-- **Tests:**
-  - **`ime-composition-ui.test.tsx`: IME6 is split** into 3 editors × 2 forms, titled `IME6 held key after a composing key, %s editor (%s): …`. Clip Gain's final assertion becomes `toBe(shown)` (A-R443-REVIEW-L1/L2).
-  - **New `ime-composition-stage2b-ui.test.tsx`:**
-    - **IME11:** helper table.
-    - **IME12** (×5 editors): HEAD truth table.
-    - **IME13** (5 rows, TL-R443-G3): a plain held Enter/Escape (repeat only, no IME) on BPM, marker, group, From and Clip Gain changes nothing; then a fresh key acts once.
-  - **New `ime-composition-source-scan.test.ts`:**
-    - **IME14:** no inline `isComposing`, keyCode/which 229 or destructured `isComposing` in `app/components/arrangement` outside the helper [K9]. The 4 editor files call `inlineEditorKeyIntent`; only Library and the shortcut sheet call the composition helper directly.
-    - **IME15:** pattern self-test.
-  - **`floating-video.test.tsx`: FV-HELD.** Three repeat Escapes on `window` are prevented and keep the video floating; a fresh Escape returns it.
-- **Neighbours that could break:** the stage-1/2a IME suites, `floating-video`, the tempo, marker, group, Detail and Clip Gain suites, and `held-enter-*`. All are in the 60-file covering set, which passes on the sketch with 1082 tests [K14]. The full suite passes on the sketch: 277 files, 4071 tests, rc 0 [K15].
+## 2. A: steps
+1. Run `bash b-round-445/claims-446.sh` before editing; K1, K2, K5 and K6 must print the values in `b-round-445/claims-446-planning-output.txt`. Otherwise STOP (L11).
+2. `git apply --check -p1` then `git apply -p1 b-round-445/sketch-446.patch.txt`. No hand edits to the four sketch files.
+3. Write `docs/implementation/2026/quarter-IV/291-store-2b-1-leadmagnet-route-exclusion.md` (Georgian, technical terms in English):
+   - l.1 title; l.3 `**თარიღი:** 2026-11-11`; l.4 exactly `**სტატუსი:** Completed (C round 446 PASS)` (L28); l.5 `**შეცვლილი პროექტი:** Store (…)`.
+   - The seven TEMPLATE headings in order (`## კონტექსტი` … `## TODO / შემდეგი ნაბიჯები`, L26).
+   - Content: Saba Q3/F4 and the Baymard #709 summary; rulings (a)–(d) and the one-shot-timer correction; the scroll-restore problem (tech-lead M1; B's browser measurement on the interim sketch before the scroll fix (`b-round-445/sketch-446-interim.patch.txt`): product page at y = 206 after Back vs 0 in the no-popup control, `b-round-445/probe/sketch-back-1440.json` (BACK vs BACKCTL rows)) and its fix; the same-render mask; TL-R446-L1-POP-RESTORE-LOST; a Mermaid diagram of route → hook → popup → scroll lock; the 4 changed files; the 14 mutant ids from `b-round-445/mutants/results.jsonl`; only test titles that exist (L26); TODO: STORE-2b-2/2b-3/2b-4, SIG-R446-LEADMAGNET-CAP-COMMENT, SABA-Q-LEADMAGNET-RECORDINGS-SCENES, TL-R446-L1-POP-RESTORE-LOST, TL-R446-L3-LOCAL-STATE, SABA-Q-LEADMAGNET-NAV-RULES.
+   - No `pending` form (L28).
+4. Checks A runs (speed rules, no full suite):
+   - A1: the four sketch paths are byte-identical to `b-round-445/sketch-files/` (K4 = 4/4).
+   - A2: `npx vitest run $(cat b-round-445/covering-files.txt)` — 4 files, 100 tests green, as in `b-round-445/logs/covering-sketch.log`.
+   - A3: `npm run typecheck` rc 0; `npm run lint` rc 0 with the warning count of `b-round-445/logs/lint-sketch.log`; `npx biome check` on the 4 sketch paths rc 0.
+   - A4: `bash b-round-445/claims-446.sh` after all edits; its diff against `b-round-445/claims-446-sketch-output.txt` shows only K17 (doc 291) changed.
+   - code-reviewer (3+ files rule).
+5. `git status` = exactly the 5 paths in `b-round-445/grants-446.txt` [K2]. No protected file [K3].
 
-## 2. A — implementation (Claude Opus 5.5)
-1. **Precondition:** run `bash b-round-444/claims-445.sh | grep -E '^K(1|2|5|6) '`. It must print:
-   - `K1 head 616729c gate444 published 616729c`
-   - `K2 status total 0 outside-grants 0`
-   - `K5 sketch-applies yes`
-   - `K6 sketch-sha 07714283ff34c710 expected 07714283ff34c710`
+## 3. C: acceptance rows
+Real Chromium (Playwright) on `http://127.0.0.1:5173` with the mock API on `:5199` (start `node tmp/studio-real-loop/mock-api/server.mjs` if it is not up). Store rows at **1440×900, 1280×720 and 375×812**; exit-intent rows at 1440 and 1280. Fresh context per cell, empty storage, cookies declined. Warm up once in a browser before timed cells (L38). The probe is `b-round-445/probe/lm-routes.cjs` (helpers from `c-round-205/tools/lib.cjs`); copy it into `c-round-446/` before editing (L60). HEAD control on a second server: `bash b-round-445/probe/sketch-server.sh start <c-round-446 dir> 5178 none` (`none` = HEAD without a patch, own Vite cacheDir; B ran this exact mode, `b-round-445/logs/head-server-none-mode.txt`) [K27].
 
-   Anything else is a STOP.
-2. In the store, run `git apply --check -p1 <loop>/b-round-444/sketch-445.patch.txt`, then `git apply -p1 <loop>/b-round-444/sketch-445.patch.txt`. Do not hand-edit the sketch.
-3. **Doc 288** (`docs/implementation/2026/quarter-IV/288-sys-3-stage-1-ime-composition.md` [K10]), granted lines only:
-   - l.4 becomes exactly `**სტატუსი:** Completed (C round 445 PASS)` [K10].
-   - In the test-title list, the IME6 bullet (today the old title, ×1 [K28]) becomes the new title verbatim (copy it from the test file), followed by ` (round 443; round 445-ში editor-ებად დაიყო)`.
-4. **Doc 289**, granted lines only:
-   - l.4 becomes exactly `**სტატუსი:** Completed (C round 445 PASS)` [K10].
-   - In l.13, `(Windows AltGr, macOS Option)` (×1 today [K28]) becomes `(Windows/Linux AltGr)`.
-   - Directly after the FT9 title bullet, add one sentence: FT9 proves AltGr only (a synthetic `AltGraph` modifier), and macOS Option+character in Chrome/Safari is not covered (GATE444-L1-MACOS-OPTION, deferred).
-5. **New doc 290:** `docs/implementation/2026/quarter-IV/290-sys-3-stage-2b-inline-editor-key-intent.md`, absent today [K10]. Write it in Georgian with English terms, using the `TEMPLATE.md` headings (L26). l.4 is exactly `**სტატუსი:** Completed (C round 445 PASS)`. Content:
-   - the site table above;
-   - the HEAD truth table and why it is kept (IME12; GATE443-L1 ruling);
-   - the held-Escape video fix with both browser lines (HEAD `NOT ALL OK (8 of 14 failing)`, sketch `ALL OK (14 cells)` / `FRESH ALL SAME (14 cells)`), and the note that FV-HELD is synthetic while the Chromium probe is the main evidence (tech-lead Info 2);
-   - gate-444 finding 3 (the Library repeat Escape is prevented and not stopped; harmless);
-   - the 12 mutant ids from `b-round-444/mutants/results.jsonl`;
-   - the test titles IME6 (new), IME11–IME15 and FV-HELD;
-   - the tech-lead keep note.
-
-   In TODO, list:
-   - GATE444-L1-MACOS-OPTION;
-   - A-R444-REVIEW-L1-ALTGRAPH-META;
-   - SIG-R444-COMPOSING-LIB-HELPER;
-   - TL-R445-I1;
-   - TLM-SYS3-IME-PLATFORMS (deadline RETRO 450).
-
-   Every test the doc names must exist (L26).
-6. **Grants:** exactly 13 paths, `b-round-444/grants-445.txt`. Any other changed path is a STOP.
-
-**A's checks (only these; the full suite is a gate row):**
-
-| # | Check | Pass |
+| Row | Action | Pass |
 |---|---|---|
-| A1 | `cmp` each path in `sketch-paths.txt` against `b-round-444/sketch-files/<path>` | 10/10 identical |
-| A2 | `npx vitest run $(cat <loop>/b-round-444/covering-files.txt)` | rc 0, 60 files, 1082 tests [K14] |
-| A3 | `npm run typecheck`; `npm run lint`; `npx biome check $(cat <loop>/b-round-444/sketch-paths.txt)` | rc 0; rc 0 with `Found 205 warnings` [K17]; rc 0 |
-| A4 | After all edits, run `bash b-round-444/claims-445.sh` and diff it against `b-round-444/claims-445-sketch-output.txt`. That file is the script's output on B's clone of `616729c` with the sketch applied and the three doc l.4 lines in their final state [K10]. It differs from the planning output only in K2 (`total 13 outside-grants 0`), K4 (`10/10`), K5 (`no`), K7, K8, K9, K10 and K28 | no diff |
-| A5 | `grep -c` in doc 290: each of the 12 mutant ids, `FV-HELD` and `GATE443-L1` | ≥ 1 each |
+| C1 SOURCE-SCOPE | `git status` | the 5 granted paths only; `root.tsx`, `AuthModal.tsx`, `ui/Modal.tsx` unchanged [K3] |
+| C2 PATCH-IDENTITY | cmp | 4/4 [K4] |
+| C3 CONTROL-HOME | `/`: scroll 55 %, wait ≤ 14 s | popup visible, `viewCount` 1, all 3 viewports. HEAD the same |
+| C4 EXCLUDED-TIMER | `/products/pulse-loop-kit`, `/cart`, `/checkout/success`, `/checkout/cancel`: scroll 55 %, wait 14 s | no popup, `viewCount` absent or 0, each page had scroll room > 0 (non-vacuous). HEAD control: popup on all 4 × 3 (B: `b-round-445/probe/head-1440.json`, `head-1280-375.json`, 12/12) |
+| C5 EXCLUDED-EXIT | product page: scroll, exit intent (`mouseleave` clientY 0) | no popup. HEAD: popup |
+| C6 JOURNEY (L54) | `/` scroll 55 %, click the first product card link before 8 s, wait 12 s | no popup on the product page. HEAD: popup (B 3/3) |
+| C7 BACK-HIDE | `/products/pulse-loop-kit` → client link to `/` → scroll → popup → `goBack()` | on the product page: no popup; `body` `overflow`/`position` empty; `scrollY` equal to the no-popup control `BACKCTL` (same steps, popup suppressed); `dismissed` false; `viewCount` 1. Then `goForward()`, scroll, wait: popup on the **offer** step, `viewCount` 2. HEAD control: popup still open after Back |
+| C8a FOCUS-AFTER-HIDE, no prior focus (L47) | same as C7, read `document.activeElement` after Back | equal to `BACKCTL` (the focus a plain Back navigation leaves) at each viewport; B's values in `b-round-445/probe/sketch-all.json` [K25] |
+| C8b FOCUS-AFTER-HIDE, header link focused (L47) | probe mode `ONLY=header`: focus the first visible header link on `/`, scroll, popup, Back | focus is on that same header link (tag A, same name, visible ring if keyboard-focused) and equal to `BACKHCTL`; B's values in `b-round-445/probe/sketch-header.json` [K25] |
+| C9 KEEP-LIST | home popup at 1440: offer → FREE DOWNLOAD → email step, then Close | record — not run on sketch: screenshot pair HEAD (:5178) / tree (:5173) of the offer and email steps, and `scrollY` after Close; expected no visible change (the popup markup is untouched); a difference is a finding |
+| C10 COVERING | the files in `b-round-445/covering-files.txt` | green; counts equal to `b-round-445/logs/covering-sketch.log` |
+| C11 MUTANTS | make a `git clone --shared` of the store at `4bfebd7`, apply A's diff there, then `python3 -I b-round-445/mutants/run-mutants.py <clone> c-round-446/mutants/results.jsonl c-round-446/mutants` (the script takes tree, output and log dir; it never writes into `b-round-445/`) | 14 lines; ids, rc and failedRows equal to `b-round-445/mutants/results.jsonl` |
+| C12 STUDIO-SMOKE + AUTH | `/studio-lab` Play → Playing, Stop → Stopped (1440×900, 1280×720); anonymous `/studio/middle-east` "Sign in required", 0 `audio[src]` | as HEAD; any row that truly needs the backend is BLOCKED "backend unavailable in cloud" |
+| C13 DOCS | doc 291 l.4 exact, TEMPLATE headings in order, 14 mutant ids, test titles named exist, no `pending` | all true |
+| C14 CLAIMS | `bash b-round-445/claims-446.sh` vs `b-round-445/claims-446-sketch-output.txt` | only K17 differs |
 
-- 13 files change, so A runs `code-reviewer` (3+ files rule) and passes its Architecture note to B. A Medium+ finding that `sketch-review.md` does not rule is a STOP (L11).
+Gate rows (full vitest, typecheck, build, Biome, verify): `gate`, not claimed by C.
+All L57 fields in `c-round-446.json`, an `origin` on every finding, `tools/l57-check.py` rc 0. `mutantRedOnSketch` = `b-round-445/mutants/results.jsonl`.
 
-## 3. C — verification (rows)
-Write `c-round-445/progress.json` after every row (L59). Run C5–C7 before any vitest (L38). Write all L57 fields and run `tools/l57-check.py` before hand-off.
+Neighbours that could break: the other `useScrollLock` callers (AuthModal, ui/Modal: default restore unchanged; SL1 and the dialog file's LM8 cover it); the popup's focus return; the 10-per-day count.
 
-| Row | What | Pass |
-|---|---|---|
-| C1 SOURCE-SCOPE | `git status` paths ⊆ `grants-445.txt`; K3 protected rc 0 | the 13 granted paths only |
-| C2 PATCH-IDENTITY | the 10 sketch paths vs `b-round-444/sketch-files/` | 10/10 identical |
-| C3 COVERING | `npx vitest run $(cat b-round-444/covering-files.txt)` | rc 0, 60 files, 1082/1082 |
-| C4 MUTANTS | `SCRATCH=<a directory containing store/: C's own git archive of HEAD + the sketch, with node_modules symlinked> OUT=c-round-445/mut python3 -I b-round-444/mutants/run-mutants.py` (OUT must start empty) | 12 lines; each `id`, `rc` and `failedRows` equals `b-round-444/mutants/results.jsonl` [K13] |
-| **C5 HELD-ESC-VIDEO** | `BASE=http://127.0.0.1:5173 node b-round-444/probe/held-escape-video.mjs ALL 1440x900,1280x720 > c-round-445/tree.json`. Then start HEAD on :5177 (`b-round-440/probe/head-server.sh start <dir> 5177`, own cacheDir; stop it by port), warm `/studio-lab` once, and run the same probe there → `c-round-445/head.json`. Then `python3 -I b-round-444/probe/compare-video.py c-round-445/tree.json c-round-445/head.json` and `python3 -I b-round-444/probe/compare-video.py c-round-445/head.json` | tree: `ALL OK (14 cells)` and `FRESH ALL SAME (14 cells)`; HEAD: `NOT ALL OK (8 of 14 failing)` with the same cells as `b-round-444/probe/compare-head.txt` [K16]. A cold-start `error` cell is environment-invalid: re-run it (max 2 replacements); it is never a FAIL. The GAIN and LIBSEARCH cells close GATE443-L1 |
-| C6 NEIGHBOURS | On :5173: `node b-round-441/probe/ime-sites.mjs` + `b-round-441/probe/compare.py`; `node b-round-442/probe/ime-held.mjs` + `compare-held.py`; `COMPOSE=so node b-round-443/probe/ime-stage2.mjs` + `b-round-443/probe/compare.py` (each with `ALL 1440x900,1280x720`, output under `c-round-445/`) | all three `ALL OK (18 cells)` [K21] |
-| C7 PLAIN HELD (no IME) | `node b-round-442/probe/plain-held.mjs ALL 1440x900,1280x720` on :5173 → `c-round-445/plain-tree.json` and on :5177 → `plain-head.json`; `python3 -I b-round-442/probe/compare-plain.py c-round-445/plain-tree.json c-round-445/plain-head.json` | `ALL SAME (18 cells)` [K21] |
-| C8 SMOKE + AUTH | anonymous `/studio-lab`: `auth_user` null; `/studio/middle-east` shows "Sign in required", 0 `audio[src]`, studio token 401; Play reaches Playing and Stop returns to Stopped at both viewports (as in `c-round-444/smoke.mjs`) | as round 444 |
-| C9 DOCS | doc 290: TEMPLATE headings in order, l.4 exact, the 12 mutant ids, both browser lines, `GATE443-L1`, the TODO ids, and every named test exists (L26). Docs 288 and 289: l.4 exact; the IME6 bullet equals the test title; l.13 says AltGr only; the FT9 sentence is present. `grep -rn 'C round [0-9]* pending' docs/implementation` returns 0 [K27] | all present |
-| C10 SOURCE-SCOPE-END | rerun C1 | unchanged |
-| C11 CLAIMS | run `bash b-round-444/claims-445.sh` and diff it against `b-round-444/claims-445-sketch-output.txt`; run the L29 tag grep over this task | no diff; every store fact is tagged |
-| gate | full vitest, typecheck, build, Biome, verify | `gate` (not claimed by C) |
-
-- **CZABA requirement:**
-  - A held key acts once. A held Escape that closes a dialog or an editor does not also collapse the expanded video.
-  - Every inline editor ignores composing keys and auto-repeat exactly as before, now through one rule.
-- **Ableton conformance:** not applicable (platform standard).
-- **Tech Lead manual (does not block):** TLM-SYS3-IME-PLATFORMS gains this step: on macOS Chrome and Safari, type Option+e or Option+2 in the Library search after focusing it by mouse, and record whether the ring appears (expected today: it does, GATE444-L1-MACOS-OPTION). Deadline RETRO 450.
-
-## Claims (`b-round-444/claims-445.sh`; planning output `b-round-444/claims-445-planning-output.txt`; expected after A `b-round-444/claims-445-sketch-output.txt`)
-
-| Tag | Claim | Expected at planning (HEAD `616729c`) |
-|---|---|---|
-| [K1] | HEAD and gate 444 | `616729c gate444 published 616729c` |
-| [K2] | clean tree | `total 0 outside-grants 0` |
-| [K3] | protected files | `rc 0 granted-protected 0` |
-| [K4] | tree vs sketch | `0/10` |
-| [K5] | sketch applies | `yes` |
-| [K6] | sketch sha | `07714283ff34c710` |
-| [K7] | composing-helper calls (`app/components/arrangement` Tempo, Marker, Group, Detail, Library) | `tempo 1 marker 1 group 1 detail 2 library 1` |
-| [K8] | intent helper absent; video Escape branch has no repeat guard (`StudioWorkspace.tsx`) | `intent-helper 0 video-escape-repeat-guard 0 video-escape-unguarded 1` |
-| [K9] | new rows absent | `IME11 0 IME12 0 IME13 0 IME14 0 IME15 0 FV-HELD 0 IME6-split 0` |
-| [K10] | docs | doc 288 l.4 `… stage 1 of 3; C round 443 PASS)`, doc 289 l.4 `… stage 2 of 3; C round 444 PASS)`, doc 290 absent (`0`) |
-| [K11] | archive | `archive444 present` |
-| [K12] | C round 444 | `PASS True 0` |
-| [K13] | mutants | `12 red 12` |
-| [K14] | covering on sketch | `files 60 1082 passed` |
-| [K15] | full suite on sketch | `277 files 4071 tests` |
-| [K16] | browser | sketch `ALL OK (14 cells)` / `FRESH ALL SAME (14 cells)`; head `NOT ALL OK (8 of 14 failing)` |
-| [K17] | typecheck / lint / scoped Biome on sketch | `typecheck-errors 0 lint 'Found 205 warnings' biome-errors 0` |
-| [K18] | artifacts | `22/22` |
-| [K19] | `tools/l58-check.py current-task.md` | `L58 OK` |
-| [K20] | probe server source = sketch | `10/10` |
-| [K21] | neighbour probes on B's sketch server | sites, held and stage2a `ALL OK (18 cells)`; plain `ALL SAME (18 cells)` |
-| [K22] | IME12/IME13 rows run on unmodified HEAD | `10 passed rc 0` |
-| [K23] | L50 focus-origin hits at HEAD | `62` |
-| [K24] | Workspace Escape branches (`event.key === 'Escape' &&`) | `1` |
-| [K25] | `regression-last.json` date | `2026-11-10` |
-| [K26] | Workspace typing-target returns (`isTypingTarget(event.target)`) | `4` |
-| [K27] | `pending` status lines in `docs/implementation` | `0` |
-| [K28] | doc facts A edits: doc 289 phrase `(Windows AltGr, macOS Option)`; doc 288 old IME6 title `IME6 held key after a composing key (%s): ` | `289-option-phrase 1 288-old-ime6 1` |
-
-Mutant red rows (`b-round-444/mutants/results.jsonl`):
-
-| Mutant | Red rows |
-|---|---|
-| M1-TEMPO-HELD | IME13, IME6 |
-| M2-TEMPO-COMPOSE | IME1, IME12, IME6, IME7 |
-| M3-MARKER-STOP | IME12, IME2 |
-| M4-GROUP-HELD | IME13 |
-| M5-RANGE-HELD | IME13 |
-| M6-GAIN-HELD | IME13, IME6 |
-| M7-GAIN-REVERT-VALUE | IME13, IME6, IME7 |
-| M8-HELPER-REPEAT-FIRST | IME11 |
-| M9-HELPER-KEYS | IME11, IME12 |
-| M10-VIDEO-HELD | FV-HELD |
-| M11-SCAN-INLINE-COMPOSING | IME14 |
-| M12-SCAN-INTENT-BYPASS | IME14 |
+## 4. Claims
+`b-round-445/claims-446.sh` (K1–K27). Planning output: `b-round-445/claims-446-planning-output.txt`. Sketch output: `b-round-445/claims-446-sketch-output.txt`.

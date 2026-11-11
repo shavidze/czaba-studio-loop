@@ -1,0 +1,6 @@
+B round 445->446 planning checkpoint: tasks/round-445.md archived (cmp equal). C445 PASS browserVerified; gate 445 published 4bfebd7. Candidate next: STORE-2b split, stage 2b-1 = LeadMagnet route exclusion (F4/Q3). Next: advisor, product-designer + reference, sketch.
+checkpoint: sketch-446 sha 8ee8fdab built (hook + new test LMR1-LMR8); mutants 9/9 red incl M0 HEAD; typecheck/lint OK; full suite running in bg. HEAD probe 1440: popup on all 4 excluded routes + journey. product-designer consult done (Q-a suppress, Q-b fresh, Q-c hide w/o dismiss, Q-d Saba list only; recordings/scenes -> Saba question). Next: sketch server probe, HEAD probe 1280/375, tech-lead review, claims, docs, backlog, task.
+checkpoint: v2 sketch (tech-lead M1 scroll restore option, M2 same-render mask, L3 error reset, L4 future flags) + LMR9-12, SL1-2; mutants rerun. Next: package v2 patch, full suite, typecheck/lint, sketch browser probe all widths, delta review.
+checkpoint: backlog updated (D-29z1582..1584); task written; claims outputs saved. Next: b-round-445.md, b-next.json, feature-status, final advisor.
+checkpoint: all artifacts written (task, b-round-445.md, b-next.json, backlog v432, feature-status, claims K1-K24 outputs). Final advisor check pending.
+checkpoint: v3 hand-off complete (D-29z1585); claims K1-K27 regenerated; servers stopped. DONE.
