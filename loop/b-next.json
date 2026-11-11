@@ -1,10 +1,11 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 450 (RETRO 450) PASS, 0 bugs, browserVerified/realVerified true; gate 450 skipped (no source change), baseline a8599a2 (D-29z1602). REGRESSION not due before 2026-11-13. Round 451 = SYS-R450-STORE-STYLE-SCAN (test-only), which owns the only loop-runnable open Medium A-R449-REVIEW-GT1-TSX plus 6 Lows (D-29z1603). No open Critical/High; other Mediums are manual/Saba/root-gated or scheduled. Not COMPLETE: STORE-2b-3b..d, 2b-4, STORE-2c..5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase-2 queues, STEM-LANES (awaiting Saba), SRW-21 (deferred_user), Tech Lead manual checks and deferred Lows remain. Not BLOCKED: every round-451 row runs in the cloud except the backend premium path.",
- "nextTask": "Round 451: SYS-R450-STORE-STYLE-SCAN on a8599a2 (D-29z1603/D-29z1604). A applies b-round-450/sketch-451.patch.txt v4 (sha a555d6e2..., tech-lead APPROVE after 3 reviews): new app/lib/__tests__/helpers/style-scan.ts; store-teal-sweep and store-gradient-text ported (new TS6, GT1b, GT4b, GT5b); NM2 var rename; runs typecheck/lint/3 covering files, golden G1 in a throwaway clone, code-reviewer, doc 295. C: source scope + manifest r451-tree-sha256.txt (1366), claims K1-K28, covering rows, golden equal, 53 mutants on A's tree = B's, HEAD control, no-weakening, doc 295, auth guard + Studio smoke at 1440/1280. Then REGRESSION-2026-11-13 if planned on/after 2026-11-13, else STORE-2b-3b.",
+ "reason": "C round 451 short FAIL (STOPPED, routed to B): A's code-reviewer Medium A-R451-REVIEW-M1-GT5-BARREL-SCOPE (origin B spec; sketch v4 widened GT5's barrel exclusion 3 -> 5), reproduced by C; C1-C3, C10-C12 passed, browserVerified/realVerified true; C4-C9 not C-verified. Gate 451 skipped, baseline a8599a2 (D-29z1605). B rules the Medium fixed, not accepted: sketch v5 delta, tech-lead review 4 APPROVE (D-29z1606, D-29z1607). REGRESSION not due before 2026-11-13. No open Critical/High; other open Mediums are manual/Saba/root-gated or scheduled. Not COMPLETE: STORE-REDESIGN stages, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase-2 queues, STEM-LANES (awaiting Saba), SRW-21 (deferred_user), Tech Lead manual checks and deferred Lows remain. Not BLOCKED: every round-452 row runs in the cloud except the backend premium path.",
+ "nextTask": "Round 452: SYS-R450-STORE-STYLE-SCAN re-dispatch on a8599a2 + A's round-451 v4 tree (D-29z1606). A checks v4 is in the tree (b-round-450/sketch-files-sha256.txt rc 0), git-applies b-round-451/sketch-452-delta-v4-v5.patch.txt (sha 2acc3672...; fallback full v5 patch on a clean tree), verifies b-round-451/sketch-files-sha256.txt, runs typecheck/lint/3 covering files, golden G1, mutants N11/N11b/N8h, code-reviewer, rewrites doc 295 l.4 to round 452 and adds the barrel-scope Problem -> Solution (editor tools only). C runs full C1-C12: scope + manifest r452-tree-sha256.txt (1366), claims K1-K33 equal claims-452-sketch-output.txt, covering, golden, 57 mutants on A's tree = B's, 37-line HEAD control (N11/N11b red), no-weakening, doc 295, auth guard + Studio smoke at 1440/1280, L57. Then REGRESSION-2026-11-13 if planned on/after 2026-11-13, else STORE-2b-3b.",
  "remaining": [
   "STORE-REDESIGN",
   "SYS-R450-STORE-STYLE-SCAN",
+  "A-R451-REVIEW-M1-GT5-BARREL-SCOPE",
   "STORE-2b-3b-GLOW-SHADOWS",
   "STORE-2b-3c-LIVE-TEAL-CSS",
   "STORE-2b-3d-DEAD-TOKENS",
@@ -50,6 +51,8 @@
   "ROOT-REQ-ENV-MOCK-API-HEALTH",
   "ROOT-REQ-GATE-L57-UNRULED-MEDIUM",
   "AGREE-STEM-LANES",
-  "TL-R451-L1..L4 (deferred_low_polish)"
+  "TL-R451-L1..L4 (deferred_low_polish)",
+  "A-R451-REVIEW-L1..L3 (deferred_low_polish)",
+  "RETRO465-B-EXCLUSION-LIST-AS-STRONGER (retro input)"
  ]
 }

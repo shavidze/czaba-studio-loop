@@ -1,0 +1,40 @@
+diff --git a/app/lib/__tests__/store-gradient-text.test.ts b/app/lib/__tests__/store-gradient-text.test.ts
+index 4f37c72..5b5c8b4 100644
+--- a/app/lib/__tests__/store-gradient-text.test.ts
++++ b/app/lib/__tests__/store-gradient-text.test.ts
+@@ -22,8 +22,6 @@ const BARREL_FILES: ReadonlyArray<string> = [
+   'components/home/index.ts',
+   'components/loading/index.ts',
+   'components/common/index.ts',
+-  'components/audio/index.ts',
+-  'components/index.ts',
+ ];
+ 
+ const RETIRED_CLASS_PATTERN = /(?<![\w-])(?:text-glow|hero-title-glow)(?![\w-])/g;
+@@ -85,6 +83,10 @@ const DEAD_MODULES: ReadonlyArray<DeadModule> = [
+   { file: 'lib/email.server.ts', module: 'lib/email.server', barrels: [], exportName: '' },
+ ];
+ 
++function deadModuleBarrelFiles(dead: DeadModule): ReadonlyArray<string> {
++  return dead.barrels.map((barrel) => `${barrel}/index.ts`);
++}
++
+ function importsDeadModule(source: string, importer: string, dead: DeadModule): boolean {
+   return resolvedImports(source, importer).some(
+     (entry) =>
+@@ -224,12 +226,13 @@ describe('store gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)',
+     expect(importers).toEqual([]);
+   });
+ 
+-  it('GT5b: the allow-listed dead modules with common names are imported by no file outside their own file and the barrels', () => {
++  it('GT5b: the allow-listed dead modules with common names are imported by no file outside their own file and their own barrels', () => {
+     const sources = listFiles(APP_ROOT, SCRIPT_SOURCE_EXTENSIONS);
+     const importers = DEAD_MODULES.flatMap((dead) => {
+       expect(sources).toContain(dead.file);
++      const ownBarrels = deadModuleBarrelFiles(dead);
+       return sources
+-        .filter((path) => path !== dead.file && !BARREL_FILES.includes(path))
++        .filter((path) => path !== dead.file && !ownBarrels.includes(path))
+         .filter((path) => importsDeadModule(readApp(path), path, dead))
+         .map((path) => `${dead.file} <- ${path}`);
+     });

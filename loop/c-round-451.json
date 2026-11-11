@@ -1,0 +1,75 @@
+{
+ "taskStatus": "FAIL",
+ "bugs": [
+  {
+   "id": "A-R451-REVIEW-M1-GT5-BARREL-SCOPE",
+   "severity": "medium",
+   "origin": "B spec",
+   "steps": [
+    "git clone --shared store to /tmp/x-head (HEAD a8599a2) and /tmp/x-tree; copy A's 4 sketch files into x-tree",
+    "In each, append `export { ArtistBioSection as Bio } from './home';` to app/components/index.ts",
+    "npx vitest run app/lib/__tests__/store-gradient-text.test.ts -t 'GT5:'"
+   ],
+   "expected": "GT5 red on both HEAD and A's tree (L4: port preserves HEAD)",
+   "actual": "HEAD: GT5 red (1 failed). A's tree: GT5 green (1 passed). Sketch adds components/audio/index.ts and components/index.ts to the shared BARREL_FILES, so GT5's name scan skips 2 files HEAD scanned.",
+   "evidence": "c-round-451/mutant-gt5.txt; a-round-451/mutant-gt5-root-barrel.txt; a-round-451.md STOP detail"
+  }
+ ],
+ "passed": [
+  "C1-SOURCE-SCOPE",
+  "C2-CLAIMS",
+  "C3-APPLY",
+  "C10-G451-AUTH",
+  "C11-STUDIO-SMOKE",
+  "C12-L57",
+  "STOP-NAMED-CHECK-REPRODUCED"
+ ],
+ "blocked": [
+  "G451-AUTH fake-bearer premium path: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full verify / typecheck / build / lint (gates/gate-round-451.json)"
+ ],
+ "notRun": [
+  "C4 covering, C5 golden, C6 mutants on tree, C7 HEAD control, C8 expect counts, C9 doc review: not re-run per L22 (A STOP on unruled Medium = short FAIL STOPPED \u2014 routed to B); A's own results for C4/C5/C8 are not C-verified"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-11T10:02:11.3862120Z",
+  "round": 451,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": 1366,
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": null,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": "b-round-450/mutants.txt and b-round-450/head-mutants/mutants.txt (B's; the GT5 root-barrel mutant is not among them, which is the gap)",
+ "mutantRedOnTree": null,
+ "gateChecksNamed": [
+  "verify",
+  "typecheck",
+  "build",
+  "lint"
+ ],
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "store-teal-sweep",
+  "store-gradient-text",
+  "studio-naming"
+ ],
+ "affectedChecksRunOnSketch": null,
+ "notes": {
+  "routing": "STOPPED \u2014 routed to B. B must rule: keep GT5 on HEAD's 3 barrels and give GT5b its own exclusion list (re-issue sketch-files-sha256, expect-counts, mutants incl. a GT5 root-barrel mutant), or accept the Medium. Do not publish.",
+  "auth": "c-round-451/auth-smoke.json: authUser null, workspace opens, /studio/middle-east Sign in required, 0 audio[src], token API 401 at both viewports",
+  "smoke": "Enter adds 1 clip, Play 00:00.000->~00:01.46, Stop holds position (two reads equal), Export opens and Esc closes, both viewports",
+  "claims": "claims-c.txt differs from sketch output only at K2 (a8599a2) and K21 (doc-next 1 last 295-...), empty stderr",
+  "lowsSeen": "A's reviewer Lows L1-L3 (A-R451-REVIEW-*) not independently verified",
+  "firstRunNote": "first auth-smoke run timed out on cold dev server; rerun after warm-up passed"
+ },
+ "evidence": "c-round-451.md; c-round-451/"
+}
