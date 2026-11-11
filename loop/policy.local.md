@@ -657,3 +657,32 @@ Reference: Ableton, Logic Pro, Splice all show their splash for at least 1–2 s
 
 **Priority:** Medium — fits in STORE-2b or STORE-3 (hero section).
 **Where:** Check the root layout or entry route for the splash component.
+
+## Design philosophy acceptance gate (Saba, 2026-11-11)
+
+**Rule:** After every major visual block (STORE-2b, STORE-3, STORE-4, STORE-5, STUDIO-VIS, ARCH-SPLIT), root runs a **design-philosopher + product-designer** acceptance review.
+
+### Process
+1. Root runs `design-philosopher` agent on the changed pages — scores against Star Brand + Perceived Value Theory
+2. Root runs `product-designer` agent — checks every state, label, icon, spacing against the "10/10 intentional" standard
+3. Both agents produce findings with severity
+4. Any finding below 10/10 → new task in the loop
+5. Repeat until both agents give 10/10
+
+### Saba's mandate
+"რამდენად აკმაყოფილებს ჩვენი პროდუქტი მაგ პრინციპებს, თუ არ აკმაყოფილებს ავიყვანოთ იქამდე სანამ 10/10 არ იქნება"
+
+### Scoring criteria (design-philosopher)
+- **Perceived Value:** does the user feel this is premium, worth paying for?
+- **Emotional coherence:** does every element feel like ONE product, ONE vision?
+- **Detail obsession:** every word, icon, spacing, color — intentional, not default
+- **Calm confidence:** no clutter, no noise, no unnecessary elements
+- **Brand consistency:** Obsidian & Brass throughout, no leftover teal/blue/generic
+
+### Schedule
+- After STORE-2b completes → first review
+- After STORE-5 completes → full Store review
+- After STUDIO-VIS completes → full Studio review
+- After ARCH-SPLIT → regression review (split didn't break the feel)
+
+This is NOT optional — it's a quality gate, like C's browser verification.
