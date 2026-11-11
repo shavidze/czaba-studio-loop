@@ -686,3 +686,11 @@ Reference: Ableton, Logic Pro, Splice all show their splash for at least 1–2 s
 - After ARCH-SPLIT → regression review (split didn't break the feel)
 
 This is NOT optional — it's a quality gate, like C's browser verification.
+
+## Saba feedback, 2026-11-11: Store audio player seek thumb desyncs from progress bar
+
+The white circle (seek thumb) on the Store's audio player jumps ahead of the brass progress bar line during playback. They should move together — the thumb leading the bar looks like a rendering bug and breaks the polished feel.
+
+**Where:** Store audio player component (likely `app/components/ui/AudioPlayer.tsx` or `AudioPreviewButton.tsx`)
+**Fix:** Ensure thumb position and progress bar width update in the same animation frame. This is likely a CSS transition timing mismatch — the thumb uses no transition while the bar uses a CSS transition with a delay.
+**Priority:** Medium — visible on every product page.
