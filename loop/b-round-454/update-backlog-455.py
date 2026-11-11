@@ -1,0 +1,60 @@
+# B round 454 -> 455 backlog edit: close round 454 from C/gate evidence, record Saba 2026-11-11 items, dispatch round 455 (SABA-B-14). Idempotent via marker.
+import json, os, sys
+L = '/home/runner/czaba-project/tmp/studio-real-loop'
+mark = os.path.join(L, 'b-round-454', 'update-backlog-455.done')
+if os.path.exists(mark):
+    sys.exit('already applied')
+p = os.path.join(L, 'backlog.json')
+b = json.load(open(p, encoding='utf-8'))
+assert b['version'] == 446, b['version']
+BY = '2026-11-11 B round 454 -> 455 planning'
+b['version'] = 447
+ids = {f.get('id') for f in b['open_findings']} | {f.get('id') for f in b['deferred_low_polish']}
+for new in ['SABA-B-13', 'SABA-B-14', 'A-R454-REVIEW-M-DEAD-UNCHECKED']:
+    assert new not in ids, new
+
+# 1. close round 454 (C round 454 PASS, browserVerified/realVerified true; gate 454 published 2e26962)
+r454 = [r for r in b['rounds'] if r.get('round') == 454][0]
+r454['status'] = 'c_pass_published'
+r454['result'] = 'C round 454 PASS (c-round-454.json: C1-C10 passed, browserVerified/realVerified true, 0 bugs; blocked: fake-bearer premium path + signed-in legacy ExportDialog (backend unavailable in cloud), Firefox/Safari scrollbar (TLM-R454-FIREFOX-SAFARI-SCROLLBAR, deadline RETRO 465)); gate 454 published 2e26962 (review COMMIT OK 9/10, verify green) (D-29z1615)'
+q = [q for q in b['post_current_stage_queue'] if q['id'] == 'STORE-REDESIGN'][0]
+s2 = [s for s in q['stages'] if s['id'] == 'STORE-2'][0]
+sp = s2['split_2b_d29z1583']
+sp['STORE-2b-3c-1'] = 'done (D-29z1615): C round 454 PASS browserVerified true, gate 454 published 2e26962 | ' + sp['STORE-2b-3c-1']
+sp['STORE-2b-3c-2'] = 'not_started, planned round 456 (D-29z1617; moved one round for SABA-B-14). Scope adds A-R454-REVIEW-M-DEAD-UNCHECKED (reachability check for every allow-listed dead class) and considers SIG-R454-HITSBYRULE / SIG-R454-ALLOWLIST-PINS | ' + sp['STORE-2b-3c-2']
+sp['STORE-2b-ENTRANCE'] = 'not_started (D-29z1616): SABA-B-13 entrance minimum display time; after 2b-3c-2, before 2b-3d; needs product-designer consult + reference section (Splice/Logic splash practice as cited by Saba) + B probe of production build timing'
+sp['SABA-B-14-insert'] = 'round 455 (D-29z1617): Store AudioPlayer seek thumb on the fill edge; inserted before 2b-3c-2 (Saba Medium on a mounted screen)'
+q['status'] = 'in_progress (D-29z1617): round 455 = SABA-B-14 (Store seek thumb); then 2b-3c-2 (456, unless REGRESSION-2026-11-13 is due), SABA-B-13 entrance, 2b-3d, 2b-4, STORE-2c..5 | ' + q['status']
+
+# 2. Saba 2026-11-11 items (L42)
+b['open_findings'].append({'id': 'SABA-B-14', 'severity': 'medium', 'origin': 'Saba 2026-11-11 (policy section "Store audio player seek thumb desyncs from progress bar")', 'status': 'in_progress (D-29z1617): round 455', 'title': 'Store AudioPlayer: the white seek thumb runs ahead of the brass progress fill during playback', 'evidence': 'b-round-454/probe/seek-5173-{1440,1280}.txt (HEAD max |thumb - fill| 7 px; value snaps to whole seconds); sketch b-round-454/probe/seek-5181-*.txt 0 px', 'root_cause': '(1) progress <input type=range> has no step -> default 1 -> thumb snaps to whole seconds while the fill uses fractional currentTime; (2) 12 px thumb centre travels 6px..W-6px while the fill stop runs 0..100%. Not a CSS transition (root hypothesis rejected by measurement).', 'why_we_missed_it': 'STORE-1b (round 187) fixed the fill colour only; C rows were colour rows on a still screenshot. Lesson: L61 clause "Painted range fill".'})
+b['open_findings'].append({'id': 'SABA-B-13', 'severity': 'medium', 'origin': 'Saba 2026-11-11 (policy section "Store first-load animation too fast")', 'status': 'scheduled (D-29z1616): STORE-2b-ENTRANCE, after 2b-3c-2', 'title': 'Store entrance animation flashes instead of playing through; needs a minimum display duration (Saba: e.g. 1.2-1.5 s)', 'evidence': 'b-round-454/probe/entrance-head-1440.txt (dev server, fresh tab: FCP 496 ms, entrance overlay mounts at 1522 ms, i.e. after the page content painted; same-tab reload: no entrance at all, czaba_entrance_seen in sessionStorage); SpotlightLoader.tsx SPOTLIGHT_ENTRANCE_TOTAL_MS = 1150, logo visible ~650 ms', 'b_facts': 'timer-driven (content speed does not shorten it); mounts in useEffect after hydration, so SSR content paints first and the black overlay drops over it; once per tab session (spec D10 / R61). Production-build timing not yet measured (planning of the stage).', 'ruling_d29z1616': 'Saba\'s minimum supersedes spec D10 "<= 1.2 s" for the display time; once-per-session stays (Saba did not ask to change it) -> question SABA-Q-ENTRANCE-RELOAD'})
+b.setdefault('saba_questions_b', []).append({'id': 'SABA-Q-ENTRANCE-RELOAD', 'added': BY, 'status': 'awaiting_user', 'question': 'The entrance plays once per browser tab (spec D10). A reload (also Ctrl+F5) in the same tab shows no entrance at all. Keep once per tab, or play it on every hard reload?', 'default_if_no_answer': 'keep once per tab session (D10); SABA-B-13 fixes the display time and the content flash only', 'file': 'user-review/questions-saba-b-13.md', 'blocking': False})
+b['design_philosophy_gate'] = {'id': 'DP-GATE', 'added': BY, 'source': 'Saba 2026-11-11 policy section "Design philosophy acceptance gate"', 'who': 'root runs design-philosopher + product-designer; findings below 10/10 become loop tasks', 'when': ['after STORE-2b completes (first review)', 'after STORE-5 (full Store)', 'after STUDIO-VIS completes (full Studio)', 'after ARCH-SPLIT (regression review)'], 'status': 'recorded, not tasked by B (root step) (D-29z1616)'}
+
+# 3. round-454 findings (A reviewer, gate reviewer)
+b['open_findings'].append({'id': 'A-R454-REVIEW-M-DEAD-UNCHECKED', 'severity': 'medium', 'origin': 'A code-reviewer round 454', 'status': 'scheduled (D-29z1615): owner STORE-2b-3c-2 (round 456), else 2b-3d', 'title': 'store-live-teal LT3/LT5/LT6 trust the "dead" label of allow-listed rules; nothing asserts that those classes have no mounted consumer', 'evidence': 'a-round-454.md code-reviewer findings; audio-preview-inline-button / waveform-bar / track-row-waveform / loading-brand appear in TSX of components that are unmounted today', 'note': 'test-strength gap, no behaviour defect (C round 454); confirmedBy gate 454 review suggestion 6'})
+lows = [
+ ('A-R454-REVIEW-L1', 'LT1 pins .code-4 { color: var(--color-text-primary) }; the token is undefined repo-wide (pre-existing)', 'confirmedBy GATE454-S3 (gates/round-454/review.md suggestion 3): fix with var(--color-foreground) and the LT1 literal together in 2b-3c-2 or 2b-3d'),
+ ('A-R454-REVIEW-L2', 'LT1 pins motion values (scale, transition: all) that STORE-2c/2d will change -> test churn', ''),
+ ('A-R454-REVIEW-L3', 'LT1 header counts only exact top-level lines; a brass glow in an @media copy passes (LT5 catches teal only)', ''),
+ ('A-R454-REVIEW-L4', 'LT5 header bucket never resets on "}"; @theme is one 6-hit bucket (mitigated by LT6)', 'related TL-R454-L-BRACE-PREFIX-HEADER'),
+ ('A-R454-REVIEW-L5', 'CRLF checkout turns LT1/LT2 red (fails safe)', ''),
+ ('A-R454-REVIEW-L6', 'color-mix / in srgb gradient have no fallback; old browsers drop the decorative layer', ''),
+ ('GATE454-S1-PLAY-FOCUS', '.audio-player-button-play lost its glow; reviewer did not confirm a :focus-visible ring on it (global focus ring expected from SABA-B-4)', 'C round 454 C6b measured the thumb focus ring only; check the play button ring in STORE-2c'),
+]
+for lid, title, note in lows:
+    b['deferred_low_polish'].append({'id': lid, 'severity': 'low', 'origin': 'gate reviewer round 454' if lid.startswith('GATE') else 'A code-reviewer round 454', 'status': 'deferred_low_polish (D-29z1615); 2b-3c-2 may fix it at low cost because it owns store-live-teal.test.ts' if lid.startswith('A-') else 'deferred_low_polish (D-29z1615); owner STORE-2c', 'title': title, 'evidence': 'a-round-454.md' if lid.startswith('A-') else 'gates/round-454/review.md suggestion 1', 'note': note})
+b['architecture_signals'].append({'id': 'SIG-R454-HITSBYRULE', 'added': BY, 'source': 'A round-454 code-reviewer Architecture note', 'note': 'hitsByEnclosingRule in store-live-teal.test.ts is a second line-regex CSS parser; keep for now; move enclosing-rule attribution onto helpers/style-scan.ts brace-aware walker in 2b-3c-2 (with SIG-R453-CSSRULEBODIES). Signal, not a task.'})
+b['architecture_signals'].append({'id': 'SIG-R454-ALLOWLIST-PINS', 'added': BY, 'source': 'gate 454 reviewer Architecture note', 'note': 'count-pinned allow-lists in store-live-teal.test.ts are edited every stage (signal 3); keep; if 2b-3c-2/2b-3d keep churning them, one bounded task moves the allow-lists into one shared data file used by GS tests and store-live-teal. Signal, not a task.'})
+b['tech_lead_manual_checks'].append({'id': 'TLM-R455-FIREFOX-SEEK-THUMB', 'added': BY, 'status': 'open (after round 455 C PASS)', 'deadline': 'RETRO 465', 'steps': 'Firefox desktop: play a preview on /products/<any>; the white thumb sits on the end of the brass fill at start, middle and end; ArrowRight/Left move 1 s', 'why': 'no Firefox on the cloud runner; tech-lead reasoned (not measured) that moz-range-thumb travel is inset like Chromium'})
+
+# 4. decisions + round 455
+b['decisions_log_b'].append({'id': 'D-29z1615', 'date': '2026-11-11', 'by': BY, 'decision': 'Round 454 closed from evidence: C round 454 PASS (C1-C10, browserVerified/realVerified true, 0 bugs) + gate 454 published 2e26962 -> STORE-2b-3c-1 done; new baseline 2e26962. Blocked rows stay open evidence (backend; Firefox/Safari TLM, deadline RETRO 465). A-R454-REVIEW-M-DEAD-UNCHECKED stays an open Medium owned by 2b-3c-2 (not deferred). A-R454-REVIEW-L1..L6 and GATE454-S1 -> deferred_low_polish (L1 confirmedBy gate suggestion 3). Architecture notes -> architecture_signals SIG-R454-HITSBYRULE, SIG-R454-ALLOWLIST-PINS (no task).'})
+b['decisions_log_b'].append({'id': 'D-29z1616', 'date': '2026-11-11', 'by': BY, 'decision': 'Saba 2026-11-11 items recorded (L42): SABA-B-13 entrance minimum display time (Medium, stage STORE-2b-ENTRANCE after 2b-3c-2; minimum supersedes spec D10 "<= 1.2 s"; once-per-session kept, question SABA-Q-ENTRANCE-RELOAD non-blocking); SABA-B-14 seek thumb (Medium, round 455); DP-GATE design-philosophy acceptance gate recorded as a root step (after STORE-2b, STORE-5, STUDIO-VIS, ARCH-SPLIT), not tasked by B. B probe: entrance overlay mounts after hydration (fresh tab FCP 496 ms, overlay 1522 ms on the dev server) and is absent on same-tab reload.'})
+b['decisions_log_b'].append({'id': 'D-29z1617', 'date': '2026-11-11', 'by': BY, 'decision': 'Round 455 = SABA-B-14 before STORE-2b-3c-2 (Saba Medium on a mounted screen outranks a test-only helper round; 2b-3c-2 -> round 456; nothing dropped). B measured two causes at HEAD in Chromium (no step -> whole-second snap; 12 px thumb inset), max lead 7 px both viewports; sketch: step="any", fill edge calc(6px + f*(100% - 12px)) via audioPlayerRangeFill (also volume), arrow keys pinned to +/-1 s from the exact time (clamped; modifiers/Page/Home/End native), aria-valuetext "m:ss of m:ss"; 0 px at 10 samples both viewports; tests ST1-ST8 (+ST3b, ST3c); 13 mutants red; full suite on the sketch 284/4146, build rc 0; tech-lead APPROVE. Root hypothesis (CSS transition delay) rejected by measurement. recordings/* ranges out of scope (own step + accent-brand native fill). Lesson L61 gains the painted-range-fill clause (60 lines kept).'})
+b['rounds'].append({'round': 455, 'task': 'current-task.md', 'decision': 'D-29z1617', 'type': 'SABA-B-14 Store seek thumb on the fill edge', 'status': 'dispatched', 'note': 'baseline 2e26962 (gate 454 published); sketch b-round-454/sketch-455.patch.txt sha edf2c59b; grants b-round-454/grants-455.txt (3); claims b-round-454/claims-455.sh K1-K12; covering b-round-454/covering-455.txt (6 files / 73 tests); mutants 14 lines (13 red)'})
+b['current_task'] = 'Round 455: SABA-B-14 Store seek thumb on the fill edge (current-task.md, D-29z1617)'
+json.dump(b, open(p, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+open(mark, 'w').write('ok\n')
+print('applied 455')

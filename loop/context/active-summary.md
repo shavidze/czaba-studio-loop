@@ -1,14 +1,14 @@
-# Active loop summary (2026-11-11T12:19:53.137Z)
+# Active loop summary (2026-11-11T13:52:23.139Z)
 
-- backlog.json 3260 KB -> active view 290 KB
-- status: G_ROOT_GATE round 453
-- servers: `{"checkedUtc":"2026-11-11T12:08:09.5021723Z","round":453,"attempt":1,"store":200}`
-- last publication: db641ec99c243d0fb5e3de5aa4237a3247164c83 (rounds 453-453)
-- last root gate: round 453 published - commit db641ec99c243d0fb5e3de5aa4237a3247164c83 pushed
+- backlog.json 3270 KB -> active view 291 KB
+- status: G_ROOT_GATE round 454
+- servers: `{"checkedUtc":"2026-11-11T13:38:05.1480834Z","round":454,"attempt":1,"store":200}`
+- last publication: 2e2696204822d6e7475888e6786dca14ebc57f9a (rounds 454-454)
+- last root gate: round 454 published - commit 2e2696204822d6e7475888e6786dca14ebc57f9a pushed
 
 ## Current items: -
 
-## Open findings: 957 (7 Critical/High/Medium)
+## Open findings: 958 (7 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the cloud runner (same class as GATE97-S2); Tech Lead manual check, does not block T12 per the 2026-10-23 rule / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
@@ -16,4 +16,4 @@
 - **GATE304-M1-PERF-LIB-NOT-IN-GATE** / medium / open_root (D-29z800): = ROOT-REQ-VITEST-PERF-INCLUDE (vitest.config.ts is outside loop grants); non-blocking for the loop (as the 2026-10-23 root clarification for root/manual-only Mediums); until root lands it, every PERF task cites the scratch-config command for perf/lib tests as an A and C row / vitest.config.ts includes app/** only, so perf/lib/report.test.ts and zoom-probe.test.ts (ZP1-ZP6) never run in the gate; only scratch-confi
 - **STUDIO-VIS-5** / medium / scheduled (D-29z1512): REVIEW-RECOMMENDATIONS (Saba: defer) / Detail panel spacing (gap-0.5 -> gap-1, px-3 -> px-4)
 - **SABA-B-12** / medium / in_progress (D-29z1515, D-29z1521, D-29z1523, D-29z1527, D-29z1532, D-29z1536, D-29z1538): stages 1, 2a, 2b, 3, 3b passed C and are published (5a30894, 1197dcb, 1a417fb, 0c22ac9, 8233840); stage 4 (selects, STUDIO-VIS-3) in REVIEW-RECOMMENDATIONS / Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cance
-- ... and 950 Low/info (see backlog.json)
+- ... and 951 Low/info (see backlog.json)

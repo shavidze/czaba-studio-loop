@@ -1,0 +1,48 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a454-src[39m
+
+ [31m❯[39m app/lib/__tests__/store-live-teal.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 60[2mms[22m[39m
+     [32m✓[39m LT1: every live player, 404, palette and scrollbar rule is the teal-free block, exactly once[32m 16[2mms[22m[39m
+     [32m✓[39m LT2: the teal card light layer is gone and the card light keeps only neutral stops[32m 1[2mms[22m[39m
+     [32m✓[39m LT3: teal stays only in the allow-listed dead or frozen CSS, each file at its exact count[32m 10[2mms[22m[39m
+[31m     [31m×[31m LT5: every remaining teal line sits inside an allow-listed dead or frozen rule[39m[32m 16[2mms[22m[39m
+     [32m✓[39m LT6: no CSS reads a teal token outside the dead allow-list and no teal hex hides behind an alpha suffix[32m 11[2mms[22m[39m
+     [32m✓[39m LT4: the scan is non-vacuous and the teal matcher sees the CSS forms this stage removed[32m 5[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-live-teal.test.ts[2m > [22mstore live teal CSS (STORE-2b-3c-1)[2m > [22mLT5: every remaining teal line sits inside an allow-listed dead or frozen rule
+[31m[1mAssertionError[22m: expected { …(2) } to deeply equal { unexpected: [], drifted: [] }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "drifted": [],[39m
+[32m-   "unexpected": [],[39m
+[31m+   "drifted": [[39m
+[31m+     "styles/app.css .about-image-overlay {: 0 != 1",[39m
+[31m+   ],[39m
+[31m+   "unexpected": [[39m
+[31m+     "styles/app.css .code-4:hover { text-shadow: 0 0 6px rgba(19, 217, 204, 0.1); }",[39m
+[31m+   ],[39m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/__tests__/store-live-teal.test.ts:[2m369:61[22m[39m
+    [90m367| [39m      ...tealHitsByEnclosingRule(UTILITIES_CSS_PATH, readApp(UTILITIES…
+    [90m368| [39m    }[33m;[39m
+    [90m369| [39m    [34mexpect[39m([34mallowListViolations[39m(hits[33m,[39m [33mTEAL_RULE_ALLOW_LIST[39m))[33m.[39m[34mtoEqual[39m({
+    [90m   | [39m                                                            [31m^[39m
+    [90m370| [39m      unexpected[33m:[39m [][33m,[39m
+    [90m371| [39m      drifted[33m:[39m [][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 13:27:29
+[2m   Duration [22m 304ms[2m (transform 69ms, setup 0ms, import 82ms, tests 60ms, environment 0ms)[22m
+
+
+::error file=/tmp/a454-src/app/lib/__tests__/store-live-teal.test.ts,title=app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT5%3A every remaining teal line sits inside an allow-listed dead or frozen rule,line=369,column=61::AssertionError: expected { …(2) } to deeply equal { unexpected: [], drifted: [] }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "drifted": [],%0A-   "unexpected": [],%0A+   "drifted": [%0A+     "styles/app.css .about-image-overlay {: 0 != 1",%0A+   ],%0A+   "unexpected": [%0A+     "styles/app.css .code-4:hover { text-shadow: 0 0 6px rgba(19, 217, 204, 0.1); }",%0A+   ],%0A  }%0A%0A ❯ app/lib/__tests__/store-live-teal.test.ts:369:61%0A%0A

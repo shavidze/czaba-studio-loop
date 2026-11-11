@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Claims for round 455 (SABA-B-14). Run from anywhere; prints one line per claim. At planning, every line is expected as written in current-task.md §Claims.
+S=${S:-/home/runner/czaba-project/store}; L=/home/runner/czaba-project/tmp/studio-real-loop; B=$L/b-round-454
+echo "K1 $(python3 -I -c "import json;g=json.load(open('$L/gates/gate-round-454.json'));print(g['status'],g['commit'][:7])")"
+echo "K2 $(git -C $S rev-parse --short=7 HEAD) dirty=$(git -C $S status --short --untracked-files=all | wc -l)"
+echo "K3 $(grep -c 'step=' $S/app/components/audio/AudioPlayer.tsx) $(grep -n 'step=' $S/app/components/audio/AudioPlayer.tsx | cut -d: -f2- | tr -s ' ' | tr '\n' '|')"
+echo "K4 $(grep -c 'progressPercentage' $S/app/components/audio/AudioPlayer.tsx) $(grep -c 'onKeyDown\|aria-valuetext' $S/app/components/audio/AudioPlayer.tsx)"
+echo "K5 $(for sel in '.audio-player-progress::-webkit-slider-thumb {' '.audio-player-progress::-moz-range-thumb {' '.audio-player-volume-slider::-webkit-slider-thumb {' '.audio-player-volume-slider::-moz-range-thumb {'; do awk -v s="$sel" '$0==s{f=1;next} f&&/^}/{f=0} f&&/width:/{gsub(/ /,"");printf "%s ",$0}' $S/app/styles/app.css; done)"
+echo "K6 $(grep -c "var(--color-brand) 25%" $S/app/lib/__tests__/audio-preview-player.test.tsx)"
+echo "K7 $(cd $B && sha256sum -c sketch-455.sha256 2>&1 | tail -1) $(test -f $B/sketch-review.md && echo review) $(wc -l < $B/mutants/mutants.txt) $(grep -c RED $B/mutants/mutants.txt)"
+echo "K8 $(ls $S/docs/implementation/2026/quarter-IV | grep -c '^298-')"
+echo "K9 $(grep -o 'SPOTLIGHT_ENTRANCE_TOTAL_MS = [0-9]*' $S/app/components/loading/SpotlightLoader.tsx) $(grep -c "czaba_entrance_seen" $S/app/components/loading/SpotlightLoader.tsx)"
+echo "K10 $(for f in probe/seek-probe.mjs probe/key-probe.mjs probe/extra-probe.mjs probe/altleft-probe.mjs probe/seek-5173-1440.txt probe/seek-5173-1280.txt probe/seek-5181-1440.txt probe/seek-5181-1280.txt probe/key-head.txt probe/key-sketch.txt probe/extra-5173-1440.txt probe/extra-5173-1280.txt probe/extra-5181-1440.txt probe/extra-5181-1280.txt probe/altleft-5173.txt probe/altleft-5181.txt probe/entrance-head-1440.txt grants-455.txt covering-455.txt run-mutants.sh precheck-covering.log precheck-full-raw.log sketch-review.md; do test -f $B/$f && printf 1 || printf "0($f)"; done)"
+echo "K11 $(grep -h MAX_ABS_LEAD_PX $B/probe/seek-5173-1440.txt $B/probe/seek-5173-1280.txt $B/probe/seek-5181-1440.txt $B/probe/seek-5181-1280.txt | tr '\n' ' ')"
+echo "K12 $(for f in $(grep -rl 'type="range"' $S/app/components/recordings | sort); do printf '%s:r%s,s%s,a%s,g%s ' $(basename $f .tsx) $(grep -c 'type="range"' $f) $(grep -c 'step=' $f) $(grep -c 'accent-' $f) $(grep -c 'linear-gradient' $f); done)root=$(grep -c 'recordings/' $S/app/root.tsx)"
+echo "K13 $(grep -rln 'linear-gradient(to right' $S/app/components $S/app/routes --include=*.tsx | grep -v -E 'arrangement/|studio/' | sed "s#$S/##" | tr '\n' ' ')$(grep -c 'linear-gradient(to right' $S/app/components/audio/AudioPlayer.tsx)"
+echo "K14 $(grep -h -o -E '(VOLUME_MAX_ABS_LEAD_PX [0-9.]+|"leadPx":-?[0-9.]+,"thumbWidthPx":14)' $B/probe/extra-5173-1440.txt $B/probe/extra-5181-1440.txt | tr '\n' ' ')"
+echo "K15 $(cat $B/probe/altleft-5173.txt $B/probe/altleft-5181.txt | tr '\n' ' ')"
+echo "K16 $(grep -o '"Alt+ArrowRight":{"ct":[0-9.]*' $B/probe/extra-5173-1440.txt $B/probe/extra-5181-1440.txt | sed 's#.*/##' | tr '\n' ' ')"
+echo "K17 $(cd $L && python3 -I tools/l58-check.py current-task.md | tail -1) $(grep -c "$(cut -c1-64 $B/sketch-455.sha256)" $B/sketch-review.md)"
+echo "K18 $(cd $S && npx biome check app/components/audio/AudioPlayer.tsx app/lib/__tests__/audio-preview-player.test.tsx 2>&1 | grep -oE 'lint/[a-zA-Z0-9/]+' | sort | uniq -c | tr -s ' ' | tr '\n' ' ')$(cd $S && npx biome check app/components/audio/AudioPlayer.tsx app/lib/__tests__/audio-preview-player.test.tsx 2>&1 | grep -c 'format')"

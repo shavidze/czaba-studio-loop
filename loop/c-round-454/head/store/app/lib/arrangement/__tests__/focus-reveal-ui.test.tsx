@@ -1,0 +1,279 @@
+import { act, fireEvent, render } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+import { ArrangementProvider } from '~/contexts/ArrangementContext';
+import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+import { createArrangement } from '../model';
+import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';
+
+vi.mock('@remix-run/react', () => ({
+  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+    <a href={to} className={className}>
+      {children}
+    </a>
+  ),
+}));
+
+const {
+  fakeClock,
+  FakeAudioContext,
+  FakeOfflineAudioContext,
+  FakeAudioBuffer,
+  FakeResizeObserver,
+} = createWorkspaceTestEnvironment();
+
+const SCROLLED_TOP = 46;
+const SCROLLED_LEFT = 120;
+const CHROME_BOTTOM = 313;
+const HIDDEN_TARGET_TOP = 267;
+
+const focusRevealCollection: WorkspaceCollection = {
+  id: 'focus-reveal',
+  label: 'focus-reveal',
+  origin: 'demo',
+  sources: [
+    {
+      id: 'song',
+      title: 'Song',
+      collectionLabel: 'focus-reveal',
+      kind: 'music',
+      origin: 'demo',
+    },
+  ],
+  loadSource: async () => new AudioBuffer({ length: 3000, numberOfChannels: 1, sampleRate: 100 }),
+};
+
+function focusRevealArrangement(): Arrangement {
+  const base = createArrangement([
+    { id: 'video', kind: 'video', name: 'Video' },
+    { id: 'music', kind: 'audio', name: 'Music' },
+  ]);
+  return {
+    ...base,
+    markers: [{ id: 'm1', time: 2, name: 'Cue' }],
+    clips: [
+      { id: 'a1', trackId: 'music', sourceId: 'song', start: 0, sourceOffset: 0, duration: 10 },
+    ],
+  };
+}
+
+interface ScrollerStub {
+  scroller: HTMLElement;
+  topWrites: number[];
+  leftWrites: number[];
+  readTop: () => number;
+}
+
+function stubScroller(scroller: HTMLElement): ScrollerStub {
+  let top = SCROLLED_TOP;
+  let left = SCROLLED_LEFT;
+  const topWrites: number[] = [];
+  const leftWrites: number[] = [];
+  Object.defineProperty(scroller, 'scrollTop', {
+    configurable: true,
+    get: () => top,
+    set: (value: number) => {
+      topWrites.push(value);
+      top = value;
+    },
+  });
+  Object.defineProperty(scroller, 'scrollLeft', {
+    configurable: true,
+    get: () => left,
+    set: (value: number) => {
+      leftWrites.push(value);
+      left = value;
+    },
+  });
+  return { scroller, topWrites, leftWrites, readTop: () => top };
+}
+
+function stubRectTop(element: Element, top: number, height = 20) {
+  vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, top, 20, height));
+}
+
+function stubChromeBottom(chrome: Element, bottom: number) {
+  vi.spyOn(chrome, 'getBoundingClientRect').mockReturnValue(
+    new DOMRect(0, bottom - 120, 1000, 120),
+  );
+}
+
+async function mountFocusRevealWorkspace() {
+  const view = render(
+    <ArrangementProvider
+      collection={focusRevealCollection}
+      initialArrangement={focusRevealArrangement()}
+    >
+      <StudioWorkspace />
+    </ArrangementProvider>,
+  );
+  for (let tick = 0; tick < 10; tick++) {
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+  }
+  const scroller = view.getByTestId('arrangement-timeline-scroller');
+  const chrome = view.getByTestId('arrangement-timeline-chrome');
+  stubChromeBottom(chrome, CHROME_BOTTOM);
+  const stub = stubScroller(scroller);
+  const videoHeaderButton = () => {
+    const button = scroller.querySelector<HTMLButtonElement>(
+      '[data-track-id="video"] [data-testid="arrangement-track-fold"]',
+    );
+    if (!button) {
+      throw new Error('video lane header button missing');
+    }
+    return button;
+  };
+  const musicHeaderButton = () => {
+    const button = scroller.querySelector<HTMLButtonElement>(
+      '[data-track-id="music"] [data-testid="arrangement-track-fold"]',
+    );
+    if (!button) {
+      throw new Error('music lane header button missing');
+    }
+    return button;
+  };
+  return { view, chrome, stub, videoHeaderButton, musicHeaderButton };
+}
+
+function setFocusSource(kind: 'keyboard' | 'pointer' | null) {
+  if (kind === null) {
+    delete document.documentElement.dataset.focusSource;
+    return;
+  }
+  document.documentElement.dataset.focusSource = kind;
+}
+
+function focusElement(element: HTMLElement) {
+  act(() => {
+    element.focus();
+  });
+}
+
+beforeEach(() => {
+  fakeClock.base = Date.now() / 1000;
+  vi.stubGlobal('AudioContext', FakeAudioContext);
+  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+  vi.stubGlobal('requestAnimationFrame', () => 1);
+  vi.stubGlobal('cancelAnimationFrame', () => undefined);
+});
+
+afterEach(() => {
+  setFocusSource(null);
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
+
+describe('C-R196-02 / R91: keyboard focus inside the timeline is revealed below the sticky chrome', () => {
+  it('FR-a: keyboard focus on a Video lane header control under the chrome scrolls it into view', async () => {
+    const { chrome, stub, videoHeaderButton } = await mountFocusRevealWorkspace();
+    const target = videoHeaderButton();
+    expect(chrome.contains(target)).toBe(false);
+    stubRectTop(target, HIDDEN_TARGET_TOP);
+    setFocusSource('keyboard');
+    focusElement(target);
+    expect(document.activeElement).toBe(target);
+    expect(stub.readTop()).toBe(0);
+    expect(stub.topWrites).toEqual([0]);
+    expect(stub.leftWrites).toEqual([]);
+  });
+
+  it('FR-b: pointer focus, or no focus source at all, never scrolls', async () => {
+    const { stub, videoHeaderButton, musicHeaderButton } = await mountFocusRevealWorkspace();
+    const target = videoHeaderButton();
+    stubRectTop(target, HIDDEN_TARGET_TOP);
+    setFocusSource('pointer');
+    focusElement(target);
+    expect(stub.readTop()).toBe(SCROLLED_TOP);
+
+    const second = musicHeaderButton();
+    stubRectTop(second, HIDDEN_TARGET_TOP);
+    setFocusSource(null);
+    focusElement(second);
+    expect(stub.readTop()).toBe(SCROLLED_TOP);
+    expect(stub.topWrites).toEqual([]);
+    expect(stub.leftWrites).toEqual([]);
+  });
+
+  it('FR-c: keyboard focus on chrome controls (Snap, add marker) never scrolls', async () => {
+    const { view, chrome, stub } = await mountFocusRevealWorkspace();
+    const snap = view.getByTestId('arrangement-snap-toggle');
+    const addMarker = view.getByTestId('arrangement-marker-add');
+    expect(chrome.contains(snap)).toBe(true);
+    expect(chrome.contains(addMarker)).toBe(true);
+    stubRectTop(snap, CHROME_BOTTOM - 80);
+    stubRectTop(addMarker, CHROME_BOTTOM - 100);
+    setFocusSource('keyboard');
+    focusElement(snap);
+    expect(document.activeElement).toBe(snap);
+    expect(stub.readTop()).toBe(SCROLLED_TOP);
+    focusElement(addMarker);
+    expect(document.activeElement).toBe(addMarker);
+    expect(stub.readTop()).toBe(SCROLLED_TOP);
+    expect(stub.topWrites).toEqual([]);
+    expect(stub.leftWrites).toEqual([]);
+  });
+
+  it('FR-d: keyboard focus on a lane control at or below the chrome bottom never scrolls', async () => {
+    const { stub, videoHeaderButton, musicHeaderButton } = await mountFocusRevealWorkspace();
+    const atEdge = videoHeaderButton();
+    stubRectTop(atEdge, CHROME_BOTTOM);
+    setFocusSource('keyboard');
+    focusElement(atEdge);
+    expect(stub.readTop()).toBe(SCROLLED_TOP);
+    const below = musicHeaderButton();
+    stubRectTop(below, CHROME_BOTTOM + 87);
+    focusElement(below);
+    expect(stub.readTop()).toBe(SCROLLED_TOP);
+    expect(stub.topWrites).toEqual([]);
+    expect(stub.leftWrites).toEqual([]);
+  });
+
+  it('FR-e: the reveal keeps an open marker menu open and leaves follow mode unchanged', async () => {
+    const { view, stub, videoHeaderButton } = await mountFocusRevealWorkspace();
+    const follow = view.getByTestId('arrangement-follow');
+    const followBefore = follow.getAttribute('data-follow-mode');
+    const flag = view.getByTestId('arrangement-marker');
+    act(() => {
+      fireEvent.scroll(stub.scroller);
+    });
+    act(() => {
+      fireEvent.contextMenu(flag, { button: 2, clientX: 300, clientY: 40 });
+    });
+    expect(view.queryByTestId('arrangement-marker-menu')).not.toBeNull();
+    const target = videoHeaderButton();
+    stubRectTop(target, HIDDEN_TARGET_TOP);
+    setFocusSource('keyboard');
+    focusElement(target);
+    expect(stub.readTop()).toBe(0);
+    expect(stub.topWrites).toEqual([0]);
+    act(() => {
+      fireEvent.scroll(stub.scroller);
+    });
+    expect(view.queryByTestId('arrangement-marker-menu')).not.toBeNull();
+    expect(follow.getAttribute('data-follow-mode')).toBe(followBefore);
+    expect(stub.leftWrites).toEqual([]);
+  });
+
+  it('FR-f: a marker menu opened by keyboard (Shift+F10) is portaled chrome UI and never scrolls', async () => {
+    const { view, stub } = await mountFocusRevealWorkspace();
+    const flag = view.getByTestId('arrangement-marker');
+    setFocusSource('keyboard');
+    focusElement(flag);
+    act(() => {
+      fireEvent.keyDown(flag, { key: 'F10', code: 'F10', shiftKey: true });
+    });
+    const menu = view.queryByTestId('arrangement-marker-menu');
+    expect(menu).not.toBeNull();
+    expect(stub.scroller.contains(menu)).toBe(false);
+    expect(menu?.contains(document.activeElement)).toBe(true);
+    expect(stub.readTop()).toBe(SCROLLED_TOP);
+    expect(stub.topWrites).toEqual([]);
+    expect(stub.leftWrites).toEqual([]);
+  });
+});

@@ -1,264 +1,188 @@
-# Round 454: STORE-2b-3c-1 — the last live teal leaves the Store CSS: the global player, the card light, the 404 page, the palette selection and the store scrollbar
+# Round 455: SABA-B-14 — the Store player's seek thumb stays on the brass fill edge
 
-**Planned by:** B, at the round 453 → 454 planning, 2026-11-11 (`b-round-453.md`).
-- The advisor was available and was consulted after orientation, before writing.
-- The round-453 task is archived as `tasks/round-453.md` (a byte-identical copy made before this file was rewritten).
-- **Baseline:** gate 453 is `published`, commit `db641ec` [K1]. The store tree is at `db641ec` and clean at planning [K2, K12]. (`context/head-sha.txt` still says `ee7cf7c`; the gate file wins.)
-- **Regression:** not due (last 2026-11-10, round 425; due on or after 2026-11-13). **Next RETRO:** round 465.
+**Planned by:** B, at the round 454 → 455 planning, 2026-11-11 (`b-round-454.md`).
+- **Advisor:** available, and consulted after orientation and before writing.
+- **Archive:** the round-454 task is saved as `tasks/round-454.md`, a byte-identical copy made before this file was rewritten.
+- **Baseline:** gate 454 is `published` with commit `2e26962` [K1]. The store tree is at `2e26962` and clean at planning [K2].
+- **Regression:** not due. The last ran 2026-11-10, round 425; the next is due on or after 2026-11-13.
+- **Next RETRO:** round 465.
 
 ## Why this round
-- **Round 453 closed.** C round 453 PASS (C1–C13 + C4b, `browserVerified`/`realVerified` true, 0 bugs). Gate 453 published `db641ec`. STORE-2b-3b is done (D-29z1611).
-- **STORE-2b-3c is the next STORE-REDESIGN stage** (spec row STORE-2: "Replace the hardcoded teal … remove … glow"). B split it at this planning (D-29z1612):
-  - **2b-3c-1 (this round):** every teal or glow CSS rule that a mounted Store screen still paints.
-  - **2b-3c-2 (next):** the test-only `helpers/style-scan.ts` fail-open forms (A-R451-REVIEW-L2-ZERO-OFFSET-UNITS, INFO-TL-R451-GLOW-CALC) and A-R453-REVIEW-L-GS-TEST-GAPS. That round needs a golden test and is kept separate from a restyle.
-- **Inventory** (`b-round-453/inv/`). It was rebuilt after the advisor showed the first scan had holes.
-  - It covers every tracked `app/**/*.css` file, multi-line selectors, keyframes resolved to the rules that animate them, and every class of a compound selector.
-  - Module reachability runs from the routes, `root.tsx` and the entries, and resolves barrels (`reach.py`, 259 of 349 files reachable).
-  - Live teal remains in 5 groups, all measured at HEAD in Chromium (`probe/head-1440.json`, `head-1280.json`):
+- **Round 454 is closed.** C round 454 returned PASS on C1–C10, with `browserVerified` and `realVerified` true and 0 bugs. Gate 454 published `2e26962`, so STORE-2b-3c-1 is done (D-29z1615).
+- **Saba reported two Store bugs on 2026-11-11.** Both are Medium because Saba saw them himself (bug gate 2026-10-23). They are recorded at this planning (L42, D-29z1616):
+  - **SABA-B-14**, the subject of this round: the white seek thumb on the Store audio player runs ahead of the brass progress fill.
+  - **SABA-B-13**: the Store entrance animation needs a minimum display time. It is the next STORE-2b stage after 2b-3c-2, because it needs a design consult and a reference section first.
+- **This round goes before STORE-2b-3c-2** (D-29z1617). 2b-3c-2 is a test-only helper round, and a Medium bug that Saba saw on a mounted screen comes first. 2b-3c-2 becomes round 456. Nothing is dropped.
 
-    | Group | What paints teal at HEAD |
-    |---|---|
-    | Global sticky AudioPlayer (`root.tsx` → `AudioPlayer.tsx`) | artwork glow (rest and hover); play button `0 0 20px`/`40px` teal (rest) and `25px`/`50px` (hover); progress thumb hover `0 0 12px` teal |
-    | ProductCard light (home "Latest releases") | `.light-flicker-effect::after` teal radial; `::before` has a teal stop at 40 % |
-    | 404 page (`routes/$.tsx`) | grid lines; `.code-4` text glow; `.code-0` outer and inset glow |
-    | Ctrl+K palette | selected row background `rgba(19,217,204,.1)` |
-    | `.styled-scrollbar` (cart list, cart ConfirmDialog via ui/Modal, frozen legacy ExportDialog) | thumb teal; pixels decode to `15,94,87` (`probe/sb-head-*.json`) |
-- **Not live, and not touched in this round:**
-  - **Dead (no reachable consumer), for 2b-3d:**
-    - the `@theme` teal tokens (`--color-glow-primary`, `--color-video-sync`, `--gradient-primary`, `--gradient-hero`, `--gradient-glow`);
-    - `.hover-glow`, `.interactive-card`, `.product-detail-add-to-cart`, `.newsletter-button-large`, `.testimonial-card`, `.track-card-play-button`, `.waveform-bar`, `.track-row-waveform*`, `.loading-brand`, `.piano-key`, `.pack-card-3d`, `.about-image-overlay`, `.value-card`, `.glass-card`, `.premium-card-*`;
-    - `glow-pulse` (animates only the dead `.hero-*-dot`) and `playButtonPulse` (only `.is-playing`, which no TSX sets);
-    - `.audio-preview-inline-button` and its `audioPlayingPulse`. Every caller passes `variant="overlay"` [K7], so the inline markup never renders.
-  - **Frozen legacy Studio:** `.stems-loader-list` (StemsLoadingAnimation, imported only by the protected `studio.$productId.tsx` [K8]) and `slider-thumb-teal` in the read-only `styles/studio.css` and `styles/pages/studio.css`. These stay until the legacy Studio is removed (D-29z1604 precedent).
+## What B measured at HEAD (real Chromium, `/products/pulse-loop-kit`, the mock API, a 150 s preview, track 464 px)
+- **Probe:** `b-round-454/probe/seek-probe.mjs`. It wraps `window.Audio` to reach the preview element, which is not in the DOM (INFO-B454-PREVIEW-AUDIO-ELEMENT).
+- **Method:** pause at 10 times between 0.4 s and 149.6 s. For each one:
+  - The **thumb centre** is the middle of the white pixels on the track row.
+  - The **fill edge** is the last brass pixel, read with the thumb hidden by an injected style.
+- **HEAD result:** the thumb leads the fill by 4–7 px early in the track and lags it by 4–5 px near the end. The largest gap is 7 px at both viewports [K11]. The files are `probe/seek-5173-1440.txt` and `probe/seek-5173-1280.txt`.
+- **Two causes, both measured:**
+  1. **Whole-second snapping.** The progress `<input type="range">` has no `step` [K3], so it uses the default step of 1. Its value, and so the thumb, snaps to whole seconds: at currentTime 3.6 the value is 4. The gradient fill uses the exact fractional time (`progressPercentage` [K4]).
+  2. **Thumb inset.** The 12 px thumb [K5] has its centre travel from 6 px to width − 6 px, while the fill stop runs from 0 to 100 % of the width.
+- **Root's guess ("a CSS transition delay") is not the cause.** The fill is an inline gradient with no transition, and the thumb and the fill update in the same render.
+- **The volume slider** in the same player has the same inset, but not the snapping (it has `step="0.01"` [K3]). It gets the same fill.
+- **Other Store ranges are out of scope.** The four `recordings/*` files with `type="range"` each have at least as many `step=` attributes as ranges, use `accent-*` classes, and have no `linear-gradient` [K12]. Their fill is the browser's own accent fill, which the browser keeps under the thumb. Only `AudioPlayer.tsx` paints its own fill gradient (`linear-gradient(to right` outside the Studio folders: that file only, 2 hits) [K13].
+- **Studio sliders are not touched.** They are separate Arrangement components.
 
 ## What changes (user-visible)
-- **Global player:**
-  - The artwork keeps its dark drop shadow without the teal halo.
-  - The play button has no shadow; hover changes only the fill, brass `#C9A46A` → `#D9B87F` (the round-453 primary-button rule).
-  - The progress thumb hover keeps its dark shadow only.
-  - Every scale and transition stays as it is (motion belongs to STORE-2c/2d).
-- **Card light:**
-  - The teal `::after` layer is deleted, along with the `::after` half of its stagger selectors. Those selectors are dead: `light-flicker-stagger` has 0 TSX users [K6].
-  - The white `::before` light and its one-shot animation stay. Its 40 % stop becomes neutral ink, `color-mix(in srgb, var(--color-foreground) 6%, transparent)`, so the falloff stays monotonic. The gradient becomes `180deg in srgb`, so the interpolation stays sRGB as at HEAD (B's pixel check: max 1/255 difference, `probe/gradient-interpolation-check.txt`).
-  - The stale comment `/* Glow რადიალური ეფექტი */` is deleted.
-- **404:**
-  - Grid lines are foreground ink at the same 0.03 alpha, via `color-mix(in srgb, var(--color-foreground) 3%, transparent)` (no raw colour literal; `tech-lead` L3).
-  - The "4" digits lose their glow.
-  - The ring-shaped "0" keeps its 4px brass border without the outer and inset glow. The `pulse404` motion is untouched.
-- **Palette:** the selected row becomes `rgba(var(--color-brand-rgb), .12)`, about `#2B251D` on the panel. Title contrast is 12.2:1 (HEAD 12.39).
-- **Store scrollbar:** the thumb is `var(--color-outline-strong)` (`#736B60`, about 3.7:1 on the page), and `var(--color-muted)` on WebKit thumb hover. Chromium paints `scrollbar-color` (pixels `115,107,96`).
-- **Nothing moves.** Every measured box equals HEAD's.
-- **`/studio-lab`:** the computed-style digest equals HEAD at both viewports.
+- **The fill follows the thumb.** While a preview plays, the brass fill ends exactly at the centre of the white thumb, at every point in the track, at both viewports, and the thumb moves smoothly instead of in 1 s jumps. The volume slider's fill also ends at its thumb centre.
+- **The keyboard stays as it was.** Every arrow key, with or without Shift, Alt, Ctrl or Meta, still seeks ±1 s, now from the exact time. For example, 10.4 → 11.4, where HEAD rounded first and went 10.4 → 11.
+  - **At HEAD,** B measured that every modified ArrowRight goes +1 s [K16], and that Alt+ArrowLeft seeks −1 s without navigating back [K15]. Both are the native range behaviour with step 1.
+  - **The sketch keeps that:** it gives +1.0 s and −1 s, and stays on the page.
+  - **The seek is clamped** to 0 and to the duration.
+  - **PageUp/PageDown (10 %), Home and End stay native.**
+- **Screen readers.** The position is announced as `m:ss of m:ss` (`aria-valuetext`). Without it, a fractional value would be read out as, for example, "10.4".
+- **Nothing else moves.** The player's layout, colours, sizes and every other control are unchanged. No new persistent element is added, so the screen budget (L39) does not apply.
 
 ## Reference
-- **Spec:**
-  - `store-redesign-spec.md` rule 1: one brass accent; teal leaves the store.
-  - Row STORE-2: replace the hardcoded teal; remove the glow.
-  - Rule 2 (keep-list): untouched here.
-- **Direction A** (`direction-decision.md`): Obsidian & Brass, no glow.
-- **`product-designer` consult (this planning),** chosen option for each question, with the rejected one:
-  - **Q1, player:** drop only the teal layers and keep the dark offset shadows; the play button hover is fill-only. Rejected: a brass shadow ("a brass glow is still a glow").
-  - **Q2, card light:** delete `::after`. Rejected: a brass radial (decoration that spends the one accent).
-  - The `::before` teal stop was missed by the consult and by B's first inventory; B found it in the sketch browser run (`tealRows: ['cardBefore']`). B chose a neutral ink stop, by the consult's own reasoning (no accent on decoration). This is sketch v2 (v3 adds the `tech-lead` fixes); v1 is in `b-round-453/v1-superseded/`.
-  - **Q3, 404:** foreground grid, no digit glow, and the ring keeps only its brass border. Rejected: a brass grid (two accents on one screen).
-  - **Q4, palette:** brass at 0.12. Rejected: a neutral surface token (indistinguishable from hover).
-    - B measured that hovering a row moves the selection (`selectedIndex` follows the mouse, HEAD and sketch alike), so hover and selected never show together. The combined `:hover, .selected` rule stays as at HEAD.
-  - **Q5, scrollbar:** the neutral `outline-strong`, with `muted` on hover. Rejected: brass at 0.4 (about 2.3:1, below 3:1).
-- **Ableton:** does not apply (Store marketing UI).
+- **There is no Ableton reference.** This is the Store player, not the Studio.
+- **WAI-ARIA APG, "Media Seek Slider Example"** (`https://www.w3.org/WAI/ARIA/apg/patterns/slider/examples/slider-seek/`, read 2026-11-11):
+  - The arrows move one step and Page Up/Down move larger steps.
+  - Home and End go to the minimum and maximum.
+  - `aria-valuetext` gives a user-friendly time instead of the raw number.
 
-**Deviations:** none from the spec. **Screen budget:** no element is added or moved. One decorative layer (`::after`) is removed.
+  **Deviation:** APG's Page step is 15 steps; ours stays the native 10 % (the HEAD behaviour, unchanged). The reason: this round fixes a visual desync and does not redesign keyboard steps.
+- **Established practice:** the fill ends under the thumb centre. That is the visual contract Saba asked for ("they should move together"). **No other source was fetched;** B does not claim any other product's exact geometry.
+- **`product-designer` is not consulted.** This is a fix-up, not a new feature.
+- **`tech-lead` reviewed the sketch:** APPROVE (`b-round-454/sketch-review.md`).
 
-**Docs warning (A-R453-REVIEW-L-DESIGN-DOCS-STALE, D-29z1611):** `.claude/primitives/DESIGN_TOKENS.md:89` and the design docs still recommend glow and teal. They are stale; STORE-5 updates them. Do not follow them in this round, and do not edit them (`.claude/**` is forbidden).
+## Why we missed it (Saba-found issue rule)
+- **Which phase should have caught it:** the B spec of STORE-1b (round 187). That round fixed the fill colour (the undefined `--color-primary`) and C checked that the fill was visible. No row compared the fill edge with the thumb, and nobody looked at the range's `step`.
+- **Why it was missed:** the rows were colour rows taken from a still screenshot at one position. The 1 s snapping only shows while playing, and the inset only shows away from the middle.
+- **Rule:** L61 gains a "painted range fill" clause in this planning (no new line; the lessons file stays at 60 lines). C checks that the clause exists (row C8).
 
 ## Ruling lines (L4)
-- **`app/styles/**` is `global_forbidden` [K11].** B grants two files narrowly, with the same precedent as rounds 192, 196, 201, 316, 449 and 453. A may change only the hunks in `sketch-454.patch.txt`:
-  - **`app/styles/app.css`:**
-    - the 6 player hunks;
-    - delete the `.light-flicker-effect::after` block;
-    - the 6 stagger selector lines;
-    - the `::before` 40 % stop;
-    - the `.not-found-grid`, `.code-4` and `.code-0` hunks;
-    - the standalone `.command-palette-item.selected` background.
-  - **`app/styles/base/utilities.css`:** the `.styled-scrollbar` comment, `scrollbar-color` and the 2 thumb backgrounds.
-  - The obsidian block stays byte-identical [K3: `e9afeed85faec382`].
-- **Frozen legacy Studio vs the shared `.styled-scrollbar`:** the shared-rule change wins, as round 453 ruled for the shared token. The legacy ExportDialog stem list gets the neutral thumb. No file under `app/components/studio/**` changes. Its signed-in path is not openable in the cloud; the class and the computed value are the same as on the cart rows.
-- **Legacy-only CSS is not touched:** `.stems-loader-list` and `slider-thumb-teal`. LT3 and LT5 allow-list them with exact counts.
-  - The frozen legacy Studio therefore shows mixed scrollbars until the legacy Studio is removed: the neutral `.styled-scrollbar` in ExportDialog, and the teal `.stems-loader-list` in its loader. This is accepted (`tech-lead` L4).
-- **Studio `/studio-lab`:** Studio dialogs drop `styled-scrollbar` (DS2 in `studio-dialog-scrollbar.test.tsx`, which pins only the class name and stays green). The C digest row proves no Studio style moved.
-- **Protected `account.downloads.tsx` renders ProductCard** (K6 lists every consumer). The card-light change reaches it through CSS only; that file does not change.
-- **Motion is not this round's:** the play `scale(1.08)`, artwork `scale(1.03)`, thumb `scale(1.3)`, card hover scale and `pulse404` belong to STORE-2c/2d.
-- **No third CSS parser.**
-  - LT1/LT2 pin exact block literals plus each pinned header's line count, the same strength as ST5.
-  - LT3 uses the helper's `countTealHits` per file. LT5 keys each teal line to its enclosing top-level header line (a line scan, not a rule parser).
-  - LT6 uses two local regexes (teal token reads and alpha-suffixed teal hex) and leaves the shared helper unchanged.
-  - Consolidating the parsers, and fixing the helper's own fail-open forms, is 2b-3c-2's question (SIG-R453-CSSRULEBODIES).
-- **Test pins (L23):** K14 lists the one other test that names a changed selector, `studio-dialog-scrollbar.test.tsx` (class presence only). It is in the covering set. No assertion is removed anywhere.
+- **`step="any"` versus the arrow step:** the key handler wins for ArrowLeft, ArrowRight, ArrowUp and ArrowDown with any modifier. Every other key is native.
+  - **Why modifiers are included:** with `step="any"`, a native arrow moves 1 % of the range. B's first sketch excluded Alt, Ctrl and Meta and measured +1.5 s for them, a regression against HEAD's +1 s (`probe/extra-5181-*` before the fix, recorded in `sketch-review.md`).
+- **Fill helper:** the volume slider uses the same helper. Its rendered fill moves by up to 6 px, by design, so that it also ends at its thumb centre. That is the only visual change outside the progress bar.
+- **The changed assertion in `audio-preview-player.test.tsx`:** the K1 `_REGRESSION` row "draws the played and set parts with var(--color-brand)" changes its two `toContain` strings from `var(--color-brand) 25%` / `70%` to the calc form. Its intent (the brand token, the fraction) stays, and no assertion is lost.
+- **Non-finite durations:** previews are finite files. With an infinite duration, `aria-valuetext` would read "… of 0:00", the fill would stay at 0 and `max` would fall back to the native default, the same as at HEAD (this is `tech-lead`'s reasoning, not measured). This is not a row.
 
-## 1. Changes (A applies `b-round-453/sketch-454.patch.txt` (v4), sha256 `9f6fcb40f189e845b8fc1881c0120d1a1dae1a05ad57eb306fa13fc2c43955bc`; per-file hashes `b-round-453/sketch-files-sha256.txt`)
+## 1. Changes
+A applies `b-round-454/sketch-455.patch.txt` with sha256 `c3feb71895df31ec00d1d17cc6483129d04d00d12f789ca30d40173bc25a28c3`. `tech-lead` reviewed this exact sha (`sketch-review.md`, review 2) [K17]. The per-file hashes are in `b-round-454/sketch-files-sha256.txt`.
+- **`app/components/audio/AudioPlayer.tsx`:**
+  - adds `AUDIO_PLAYER_THUMB_PX = 12` and `AUDIO_PLAYER_KEY_STEP_SECONDS`;
+  - exports `audioPlayerRangeFill(fraction)`, which clamps to 0..1, prints a non-finite value as 0, and sets the edge to `calc(6px + f * (100% - 12px))`;
+  - replaces `progressPercentage` with `progressFraction`;
+  - adds `handleProgressKeyDown`;
+  - on the progress input, adds `step="any"`, `onKeyDown` and `aria-valuetext`;
+  - makes both inputs use the helper.
+- **`app/lib/__tests__/audio-preview-player.test.tsx`:**
+  - the K1 assertion moves to the calc form;
+  - a new describe "the seek thumb stays on the brass fill edge (SABA-B-14)" adds ST1, ST2, ST3, ST3b, ST3c, ST4, ST5, ST6, ST7 and ST8. ST5: Alt/Ctrl/Meta+ArrowRight seek +1 s; PageUp, PageDown, Home and End are not handled.
+- **`docs/implementation/2026/quarter-IV/298-saba-b-14-store-seek-thumb.md`** (new): written by A, in Georgian, with the `docs/implementation/TEMPLATE.md` headings in order.
+  - l.3 is exactly `**თარიღი:** 2026-11-11`.
+  - l.4 is exactly `**სტატუსი:** In Progress (SABA-B-14, round 455)`.
+  - The word `pending` appears nowhere (L28).
 
-| # | File | Change |
-|---|---|---|
-| 1 | `app/styles/app.css` (narrow grant) | the hunks named in the ruling lines, plus deleting the stale card comment; nothing else |
-| 2 | `app/styles/base/utilities.css` (narrow grant) | the `.styled-scrollbar` comment, `scrollbar-color` and thumb backgrounds |
-| 3 | NEW `app/lib/__tests__/store-live-teal.test.ts` (node) | LT1–LT6; reuses `helpers/style-scan.ts` unchanged |
-| 4 | NEW doc `docs/implementation/2026/quarter-IV/297-store-2b-3c-1-live-teal-css.md` [K10] | see A step 4 |
+  The doc must contain:
+  - the two measured causes, with the HEAD numbers from this task;
+  - the keyboard ruling and the volume-fill ruling;
+  - the `aria-valuetext` reason;
+  - the ST ids;
+  - the Firefox Tech Lead row (TLM-R455-FIREFOX-SEEK-THUMB);
+  - the "Why we missed it" line.
 
-**Tests and mutants** (`b-round-453/run-mutants.sh`, `mutants.py`, `mutants/mutants.txt`, 27 lines; HEAD control `head-control.log`: LT1, LT2, LT3 and LT5 red, LT4 and LT6 green):
-
-| Row | Checks | Mutant → red |
-|---|---|---|
-| LT1 | each of the 12 live blocks appears exactly once as the teal-free literal (0 teal, 0 zero-offset glow); each pinned header line appears exactly as often as at the sketch (`.command-palette-item.selected {` 2, the others 1) | M1 artwork teal → LT1 LT3 LT5; M2 brass glow on play → LT1; M3 play hover glow → LT1 LT3 LT5; M4 brass thumb glow → LT1; M6 brass grid → LT1; M7 brass digit glow → LT1; M8 ring border 2px → LT1; M9 palette teal → LT1 LT3 LT5; M10 hover split from selected → LT1; M11 scrollbar teal → LT1 LT3 LT5; M12 thumb hover teal → LT1 LT3 LT5; M20 second `.audio-player-button-play:hover` rule → LT1 |
-| LT2 | no `.light-flicker-effect::after` anywhere; the `::before` block is the neutral literal with its `light-flicker-on` animation | M5 brass `::after` back → LT2; M16 `::before` teal stop back → LT2 LT3 LT5 |
-| LT3 | teal only in the allow-listed files, at exact per-line counts: `app.css` 37, `utilities.css` 6, `studio.css` 4, `pages/studio.css` 4 | M13 new teal elsewhere → LT3 LT5; M14 a dead teal line removed without updating the list → LT3 LT5; M15 a new CSS file with teal → LT3 |
-| LT5 | every teal line in `app.css` and `utilities.css` sits under an allow-listed dead or frozen top-level rule header, at its exact count (23 headers). The key is the whole top-level selector, comma-continuation lines included; a one-line rule or a header with a trailing comment is its own key | M19 count-neutral swap (a dead line removed, a teal line added to the unpinned live `.command-palette`) → LT5; M21 a live selector added to a dead teal comma list → LT5; M22 one-line teal rule after a dead rule → LT5; M23 header with a trailing comment → LT5 |
-| LT6 | `var(--color-glow-primary\|--color-video-sync\|--gradient-primary\|--gradient-hero\|--gradient-glow)` is read only by the 2 dead rules (per file and per enclosing rule: `.product-detail-add-to-cart {`, `.newsletter-button-large {`); no alpha-suffixed teal hex in any CSS; self-tests for both patterns and for the LT5 header logic | M17 a teal token read in `.command-palette` → LT6; M18 `#13d9cc1a` in `.code-4` → LT1 LT6; M24 a dead token read moved into a live rule → LT6 |
-| LT4 | non-vacuous (every allow-listed file is scanned); matcher self-tests for the removed forms (`hsl(175 … / .4)`, `rgba(19, 217, 204, …)`, `0 0 12px`, text-shadow) and a brass negative | — |
-| — | controls | BASE, C1 (comment-only edit) and C2 (an offset drop shadow) → none |
+**Grants:** exactly `b-round-454/grants-455.txt` (the 3 paths above). No other file. `app/styles/app.css` is **not** granted: the thumb CSS stays as it is (12 px wide [K5]), and ST8 pins that width.
 
 ## 2. A: steps
-1. **Read first:** `lessons.md` (L1, L4, L11–L15, L23, L26, L28, L58, L60, L61) and the primitives `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md` (stale glow lines: see the warning above), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, and `docs/implementation/TEMPLATE.md`.
-2. **Claims, before editing.** Run `bash b-round-453/claims-454.sh`.
-   - The output must equal `b-round-453/claims-454-planning-output.txt`, with stderr empty.
-   - Otherwise STOP (L11).
-3. **Apply.**
-   - Check the patch sha256 against `b-round-453/sketch-454.sha256`.
-   - Run `git apply b-round-453/sketch-454.patch.txt`.
-   - Run `sha256sum -c b-round-453/sketch-files-sha256.txt`; it must give rc 0 (3 OK).
-   - If the patch does not apply cleanly, STOP. Do not hand-port, and make no hand edits to code.
-4. **Doc 297**, in Georgian with English technical terms, edited with the editor tools only (L60).
-   - **Format:**
-     - l.3 is `**თარიღი:** 2026-11-11`.
-     - l.4 is exactly `**სტატუსი:** In Progress (stage 2b-3c-1 of STORE-2b; C round 454 PASS)` (L28).
-     - The 7 TEMPLATE headings appear in order (L26), with no `pending`.
-   - **Content:**
-     - the 5 live groups with their HEAD measurements;
-     - the `product-designer` choices, plus the `::before` stop found in the sketch run;
-     - the dead and frozen ruling, including the inline preview variant and the legacy-only CSS;
-     - the palette hover-moves-selection observation;
-     - the scrollbar pixels;
-     - LT1–LT6, and the `tech-lead` review (M1/M2 closed by LT5/LT6).
-
-     Say that the mutants, probes and inventory are loop artifacts, not in the repo (GATE452-L4).
-   - **TODO:** 2b-3c-2 (helper fail-open forms and the GS test gaps), 2b-3d (the dead tokens and rules listed above, CinemaCurtainLoader, the dead allow-lists), 2b-4, STORE-2c/2d motion (the scales listed in the ruling lines), STORE-5 docs, legacy Studio removal (`.stems-loader-list`, `slider-thumb-teal`).
-   - Cite only test ids that exist.
-5. **Checks** (speed rules; no full suite):
-   - `npx vitest run $(cat b-round-453/covering-454.txt)`: 14 files green. B's run: 14 files / 134 tests.
+1. Read `lessons.md` (the A part), the primitives `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`, and `.claude/prompts/new-test.md`.
+2. Run `bash b-round-454/claims-455.sh > a-round-455/claims-before.txt 2> a-round-455/claims-before.err`. It must equal `b-round-454/claims-455-planning-output.txt`, and stderr must be empty. On a mismatch, STOP and report it.
+3. Check and apply the patch. Make **no hand edits** to the 2 code files (C3 pins their hashes).
+   - Run `sha256sum -c b-round-454/sketch-455.sha256`.
+   - In the store, run `git apply <loop>/b-round-454/sketch-455.patch.txt`.
+   - Then run `sha256sum -c b-round-454/sketch-files-sha256.txt` from the store root: 2 OK.
+4. Write doc 298 as in §1.
+5. Run the checks for the changed code only (speed rules):
    - `npm run typecheck`: rc 0.
-   - `npm run lint`: rc 0, with 205 warnings, the same as HEAD.
-   - `npx biome check app/lib/__tests__/store-live-teal.test.ts`: rc 0, no diagnostics. Biome does not check CSS here.
-   - **Mutants**, on a scratch clone, never in the store tree:
-     1. `git clone --shared` the store at `db641ec` into `/tmp/a454-src`.
-     2. Apply the patch, symlink `node_modules` and add it to `.git/info/exclude`, then **commit**.
-     3. Run `SRC=/tmp/a454-src OUT=<abs a-round-454 dir>/mutants bash b-round-453/run-mutants.sh`. OUT must be absolute.
-
-     The result must equal `b-round-453/mutants/mutants.txt` (27 lines).
-   - **code-reviewer** (3+ files with the doc). Pass its Architecture note to B.
-6. **Browser** (dev server `:5173` on A's tree, mock API on `:5199`, warm-up first, L38). Run on A's tree:
-   - `node b-round-453/probe/teal-probe.cjs http://127.0.0.1:5173 <a-round-454>/tree-<W>.json <W> <H> <shots>` at 1440×900 and 1280×720.
-   - Then `python3 -I b-round-453/probe/compare-teal.py b-round-453/probe/head-<W>.json <a-round-454>/tree-<W>.json`. It must end `ROWS 19 ALL_OK True` at both viewports.
-   - `scrollbar-pixels.cjs` on the tree: `tealPx` 0 and `thumbGreyPx` > 0 at both viewports.
-   - `extras-probe.cjs` on the tree at both viewports, then `compare-extras.py b-round-453/probe/extras-head-<W>.json <tree>`: `ROWS 8 ALL_OK True`.
-7. **Claims, after editing.** Run `bash b-round-453/claims-454.sh`.
-   - Every K equals `b-round-453/claims-454-sketch-output.txt`, except K10 (`1 files`) and K12 (`outside 0 inside 4`). B dry-ran this on a clone with the patch and a placeholder doc 297: only those two differ.
-8. **`git status`** shows only the 4 paths in `b-round-453/grants-454.txt`.
+   - `npm run lint`: rc 0, with the warning count equal to HEAD's.
+   - `npx biome check app/components/audio/AudioPlayer.tsx app/lib/__tests__/audio-preview-player.test.tsx`: 5 warnings, all the pre-existing `useButtonType`, the same as HEAD [K18]; no format diff.
+   - `npx vitest run $(cat <loop>/b-round-454/covering-455.txt)`: 6 files / 73 tests green.
+   - **Mutants:**
+     - Make a scratch with `git clone --shared` at `2e26962`, apply the patch, **commit it in the scratch only**, and symlink `node_modules`.
+     - Run `bash b-round-454/run-mutants.sh <scratch> a-round-455/mutants/mutants.txt`.
+     - The output must equal `b-round-454/mutants/mutants.txt` (14 lines: BASE green, M1–M13 red). The script also writes one log per mutant, `mutant-<id>.log`, next to the output.
+   - The code-reviewer is only needed for 3 or more changed files. 3 paths are changed, so run it, and pass its Architecture note to B without acting on it.
+6. **Browser (A's own check, not C's rows):**
+   - Use the tree's dev server `:5173` and the mock API `:5199` (start it detached with `setsid node <loop>/mock-api/server.mjs` if it is down).
+   - Warm the server twice.
+   - Run `node <loop>/b-round-454/probe/seek-probe.mjs http://127.0.0.1:5173 <w> <h> a-round-455/seek-<w>.json a-round-455/shots` at 1440 900 and 1280 720. Each run must print `MAX_ABS_LEAD_PX` ≤ 1.00. B measured 0.00.
+   - Run `key-probe.mjs http://127.0.0.1:5173 none`. Its output must equal `b-round-454/probe/key-sketch.txt` in every key and value.
+7. Run `claims-455.sh` again. Its output must equal `b-round-454/claims-455-sketch-output.txt`. That file is the script's own output on a clone with the sketch applied and a doc 298 present. It differs from the planning output only in K2, K3, K4, K6, K8 and K13. stderr must be empty.
+8. `git status --short --untracked-files=all` must show only the 3 grants.
+9. Write `a-round-455.md`: the changed files, each step with its real result and log path, the reviewer's findings with ids, and the known gaps.
 
 ## 3. C: acceptance rows
 **Setup:**
-- Real Chromium (Playwright). Copy `b-round-453/probe/*.cjs`, `compare-teal.py` and the `head-*.json`, `sb-*.json` files into `c-round-454/` before changing anything (L60).
+- Real Chromium (Playwright).
+- Copy `b-round-454/probe/*.mjs` into `c-round-455/` before changing anything (L60).
 - **Servers:**
-  - The tree: dev server `:5173`.
-  - Mock API: `:5199` (`node tmp/studio-real-loop/mock-api/server.mjs`, started detached with `setsid` if it is not up).
-  - HEAD control: `bash b-round-448/probe/serve-tree.sh start <c-round-454>/head 5182 /home/runner/czaba-project/store db641ec`. If B's `:5182` is still up, stop it first.
-- Warm each server with `node b-round-448/probe/warm.cjs <base> /studio-lab /studio/middle-east / /store /cart /no-such-page` twice before its first probe. A first `/studio-lab` load during a Vite dependency reload is environment-invalid; B saw one on a cold server. Run probes one at a time, never during a vitest run (L38).
+  - The tree: dev `:5173`.
+  - The mock API: `:5199`.
+  - The HEAD control: `bash b-round-448/probe/serve-tree.sh start <c-round-455>/head 5182 /home/runner/czaba-project/store 2e26962`. Stop it afterwards.
+- Warm each server twice with `node b-round-448/probe/warm.cjs <base> / /products/pulse-loop-kit /studio-lab /studio/middle-east`.
+- Run probes one at a time, never during a vitest run (L38).
 
 | Row | Action | Pass |
 |---|---|---|
-| C1 SOURCE-SCOPE | `git status --untracked-files=all` | only the 4 `grants-454.txt` paths. Unchanged: `app/root.tsx`, `app/components/**` (studio, audio, product, search), `routes/$.tsx`, `routes/cart.tsx`, `ui/Modal.tsx`, `app/styles/` other than the 2 granted files, `helpers/style-scan.ts`, the protected routes |
-| C2 CLAIMS | `claims-454.sh` on the tree vs `claims-454-sketch-output.txt` (v3; equal to v2's) | equal except K10 (`1 files`) and K12 (`outside 0 inside 4`); K3 obsidian sha `e9afeed85faec382`; K4 `app.css` 37, `utilities.css` 6, `studio.css` 4, `pages/studio.css` 4; K5 every live selector has `tealLines=0` and `.light-flicker-effect::after blocks=0` |
-| C3 APPLY | `sha256sum -c b-round-453/sketch-files-sha256.txt` on the tree | 3 OK; the diffs of `app.css` and `utilities.css` vs `db641ec` are exactly the sketch's hunks |
-| C4 LIVE-STATES (the change) | `teal-probe.cjs` on HEAD `:5182` and the tree `:5173` at 1440×900 and 1280×720; `compare-teal.py <head> <tree>` | `ROWS 19 ALL_OK True` at both viewports:<br>• the HEAD control shows teal in card, player, 404, palette and cart scrollbar (the script checks)<br>• the tree has no teal anywhere<br>• player artwork rest/hover dark shadow only; play button rest, hover and paused `none`, fill brass → `rgb(217,184,127)` on hover<br>• labels "Pause preview"/"Pause" while playing, "Play" when paused, equal to HEAD<br>• keyboard ring on play equal to HEAD; thumb-hover rule dark only<br>• card `::after` gone; `::before` neutral (`color(srgb 0.92549 0.901961 0.854902 / 0.06) 40%`) and animated as at HEAD<br>• 404 grid ink (2 × `color(srgb 0.92549 0.901961 0.854902 / 0.03) 1px`), digits no shadow, ring 4px brass and box equal<br>• palette selected `rgba(201,164,106,.12)`, contrast ≥ 4.5 (B: 12.2), selection-follows-hover and ArrowDown equal to HEAD<br>• cart list and ConfirmDialog `scrollbar-color` `rgb(115,107,96)`, overflow and box equal<br>• `/studio-lab` digest sha and element count equal to HEAD<br>• 0 page errors<br>Keep the player, 404, palette and cart crops of both trees |
-| C5 CONTROL | `compare-teal.py <head> <head>` | fails (`ALL_OK False`), as B's `compare-head-self-CONTROL.txt` |
-| C6 SCROLLBAR-PIXELS (L61) | `scrollbar-pixels.cjs` on HEAD and the tree at both viewports (real scrollbars, stubbed cart) | HEAD `tealPx` > 0 (B: 1046 / 524, colour `15,94,87`); tree `tealPx` 0 and `thumbGreyPx` > 0 (B: `115,107,96`); `geo` equal to HEAD |
-| C6b EXTRA STATES + LIVE-TEAL SWEEP | `extras-probe.cjs` on HEAD and the tree at both viewports; `compare-extras.py <head> <tree>` | `ROWS 8 ALL_OK True`:<br>• **CSSOM sweep:** every stylesheet rule whose non-custom-property declarations contain teal (pseudo parts stripped), and every element animated by a teal keyframes rule, matched against 8 live states (home, home + player, palette open, `/store`, `/products/middle-east`, 404, stubbed cart, cart + ConfirmDialog). HEAD > 0 on home, player, palette, 404, cart and dialog (B: 2/7/8/3/3/3); the tree is 0 in all 8<br>• card light under **default motion**: `light-flicker-on` runs, end opacity equal to HEAD, `::after` none<br>• progress thumb **keyboard focus**: `:focus-visible` ring equal to HEAD<br>• palette **longest title** selected (brass .12, no overflow) and **empty result** equal to HEAD<br>• ConfirmDialog scrollbar sampled **inside the dialog**<br>• 0 page errors<br>`compare-extras.py <head> <head>` must fail |
-| C7 COVERING + MUTANTS | `npx vitest run $(cat b-round-453/covering-454.txt)`; then `run-mutants.sh` on a C scratch (`git clone --shared` at `db641ec` + A's diff applied **and committed**; absolute OUT) | 14 files green; `mutants.txt` equals `b-round-453/mutants/mutants.txt` (27 lines) |
-| C8 STUDIO + PURCHASE PROTECTION | from inside `c-round-454/` (create `shots/` there): `node <copy of b-round-453/probe/c12-run/c12-from-c448.cjs> <base> <tag> > c12-<tag>.json` on HEAD and the tree | at 1440 and 1280: `/studio-lab` clips 1, Playing with `posPlay` > 0, Stopped, `stopHeld` true; anonymous `/studio/middle-east`: `audioSrc` 0, `media` 0, "Sign in required". Equal to HEAD in every field except `url` and the `posPlay` value (B: `probe/c12-run/c12-{head,sketch}.json`) |
-| C9 DOCS | doc 297 | l.4 exact; TEMPLATE headings in order; no `pending`; every LT id cited exists (LT1–LT6); the dead/frozen, inline-variant, `::before`, palette and scrollbar-pixel lines present |
-| C10 L57 | `python3 -I tools/l57-check.py c-round-454.json c-round-454/l57-check.txt` | rc 0 |
+| C1 SOURCE-SCOPE | `git status --untracked-files=all` | Only the 3 `grants-455.txt` paths. `app/styles/**`, `app/contexts/AudioContext.tsx`, `app/components/recordings/**`, `app/components/arrangement/**`, `app/root.tsx` and the protected routes are unchanged |
+| C2 CLAIMS | `S=<a git clone --shared at 2e26962, with the store `node_modules` symlinked> bash b-round-454/claims-455.sh`, then `bash b-round-454/claims-455.sh` on the tree | The clone equals `claims-455-planning-output.txt`; the tree equals `claims-455-sketch-output.txt`, which differs from the planning output only in K2/K3/K4/K6/K8/K13; stderr empty. Also run L29's grep over this task |
+| C3 APPLY | `sha256sum -c b-round-454/sketch-files-sha256.txt` in the store | 2 OK |
+| C4 THUMB-ON-FILL (the bug) | `seek-probe.mjs` on HEAD `:5182` and on the tree `:5173`, at 1440×900 and 1280×720 | **HEAD (control):** `MAX_ABS_LEAD_PX` ≥ 4 at both viewports (B: 7.00) and `value` integer while playing. **Tree:** \|lead\| ≤ 1 px at all 10 paused samples (0.4 s … 149.6 s) at both viewports (B: 0.00); while playing, `step` is `any` and `value` is fractional. Keep the crops of the 3.6 s and 149.6 s samples from both trees |
+| C4b PLAYING VISUAL | On the tree, let the preview play for 3 s at each viewport and take 6 crops of the player track about 0.5 s apart | In every crop, the brass fill ends under the thumb: no brass visible beyond the thumb's right edge, and no grey gap between the fill and the thumb's left edge. Attach the crops |
+| C5 KEYBOARD | `key-probe.mjs <base> none` and `altleft-probe.mjs <base>` on HEAD and on the tree | **Tree** `key-probe` equals `b-round-454/probe/key-sketch.txt`: arrows ±1.0 s from 10.4, clamped at 0 and at the end; PageUp/PageDown 10 %; Home 0; End = duration; valuetext `2:30 of 2:30`. **HEAD** equals `key-head.txt` (the control differs). **Alt+ArrowLeft:** both stay on `/products/pulse-loop-kit`; HEAD ct 9, tree ct 9.4 (B: `altleft-*.txt`) |
+| C5b VOLUME, HOVER, DRAG, MODIFIED ARROWS | `extra-probe.mjs <base> <w> <h> <out.json>` on HEAD and on the tree at 1440×900 and 1280×720 | **Volume** (clicks at 0.05/0.35/0.7/0.95): tree `VOLUME_MAX_ABS_LEAD_PX` ≤ 1 (B: 0.00), HEAD ≥ 4 (B: 5.00, control); `MUTE [0,0.7]` on both. **Hover** at 30.3 s: tree \|leadPx\| ≤ 1 with `thumbWidthPx` 14 (the hover scale; B: 0), HEAD 3. **Drag** 20 → 60 % while paused: tree `ctMinusValue` 0, `paused` true, \|leadPx\| ≤ 1 (B: 0, `ctFraction` 0.6026). **Modified arrows** (Shift, Alt, Control, Meta + ArrowRight from 10.4): tree ct 11.4 for all four, HEAD 11 for all four; the URL is unchanged. B: `probe/extra-{5173,5181}-*.txt` |
+| C6 COVERING + MUTANTS | `npx vitest run $(cat b-round-454/covering-455.txt)`; then `run-mutants.sh` on a C scratch (`git clone --shared` at `2e26962` + A's diff applied **and committed**; absolute OUT) | 6 files / 73 tests green; `mutants.txt` equals `b-round-454/mutants/mutants.txt` (14 lines) |
+| C7 STUDIO + PURCHASE PROTECTION | From inside `c-round-455/`: `node <copy of b-round-453/probe/c12-run/c12-from-c448.cjs> <base> <tag> > c12-<tag>.json` on HEAD and on the tree | At 1440 and 1280: `/studio-lab` has 1 clip, goes to Playing with `posPlay` > 0 and then Stopped, and `stopHeld` is true; anonymous `/studio/middle-east` shows "Sign in required" with `audioSrc` 0 and `media` 0. Equal to HEAD except `url` and `posPlay` |
+| C8 DOCS + LESSON | doc 298; `lessons.md` | Doc 298: l.4 exact; the TEMPLATE headings in order; no `pending`; ST1–ST8 (with ST3b and ST3c) cited and present in the test file; the two causes and the Firefox TLM row present. `lessons.md`: 60 lines or fewer, and line L61 matches `grep -ic "painted range fill"` (B: 1) |
+| C9 L57 | `python3 -I tools/l57-check.py c-round-455.json c-round-455/l57-check.txt` | rc 0 |
 
-- **Gate rows** (full vitest, typecheck, build, Biome, verify) are `gate` and are not claimed by C. B's full suite on the v3 sketch: 284 files / 4138 tests (`b-round-453/precheck-full-raw.log`); build rc 0 (`precheck-build.log`).
-- **BLOCKED (backend unavailable in cloud):** the fake-bearer premium path, and the signed-in legacy ExportDialog stem list.
-- **Not testable in the cloud:** Firefox `scrollbar-color` (ROOT-REQ-PLAYWRIGHT-FIREFOX) and the Safari WebKit thumb hover (`var(--color-muted)`; only Safari paints `::-webkit-scrollbar` when `scrollbar-color` is set). Both go in one Tech Lead row, TLM-R454-FIREFOX-SAFARI-SCROLLBAR, deadline RETRO 465.
-
-**`product-designer` states checklist → rows:**
-
-| State | Row |
-|---|---|
-| player rest/hover (artwork, play, thumb) at 1440/1280 | C4 |
-| player playing vs paused | C4 PLAY-PAUSED-STATE |
-| keyboard ring on play | C4 |
-| keyboard ring on thumb | C6b |
-| zero teal | C4 + C6b sweep |
-| card first load, light still plays | C6b default motion |
-| card "staggered fade" | **not a row:** `light-flicker-stagger` has 0 TSX users at HEAD [K6], so no stagger plays today (dead → 2b-3d) |
-| card with no image | **not a row:** the home loader is SSR from the mock API and every mock product has an image. The changed layers are pseudo-elements of the container and do not depend on the `<img>` |
-| card reduced motion | C4 |
-| 404 ring reads as "0", grid faint | C4 + crops |
-| palette opens with row 1 selected; arrows move | C4 |
-| palette hover vs selected | C4: the hover moves the selection (HEAD behaviour), so both never show at once |
-| palette empty result and long title | C6b |
-| cart ConfirmDialog and long cart list | C4, C6, C6b |
-| scrollbar hover | Safari only (TLM row above) |
-| legacy ExportDialog | BLOCKED (signed-in, backend) |
-| `/studio-lab` unchanged | C4 digest + C8 |
-
-**INFO-B454-PREVIEW-AUDIO-ELEMENT (B observation, not a bug):** the probes read the DOM `<audio>` as paused at 0 s after a preview click. That element is HeroSection's hero music (`HeroSection.tsx:95`). The preview plays through `new Audio()` in `AudioContext.tsx:146`, which is not in the DOM, and the button and player labels show the playing state. This is the same at HEAD. Not a row in this round.
-- **`c-round-454.json`:** write all L57 fields. Every finding has an `origin`. Fill these fields:
-  - `mutantRedOnSketch` = `b-round-453/mutants/mutants.txt`;
-  - `affectedChecksRunOnSketch` = `b-round-453/precheck-full-raw.log` and `b-round-453/probe/compare-1440.txt`, `compare-1280.txt`.
+**Notes for C:**
+- **Gate rows** (full vitest, typecheck, build, Biome, verify) are marked `gate` and are not claimed by C. B's run on the dispatched sketch gave 284 files / 4148 tests, rc 0 (`b-round-454/precheck-full-raw.log`). Build rc 0 on the first sketch (`precheck-build.log`); the delta is TS logic and tests only.
+- **Not testable in the cloud:** Firefox `step="any"` and the moz-range-thumb inset (reasoned by `tech-lead`, not measured). This is Tech Lead row TLM-R455-FIREFOX-SEEK-THUMB, deadline RETRO 465.
+- **BLOCKED (backend unavailable in the cloud):** none expected. The Store player runs on the mock API.
+- **`c-round-455.json`:** write all the L57 fields, and give every finding an `origin`. Set `mutantRedOnSketch` = `b-round-454/mutants/mutants.txt` and `affectedChecksRunOnSketch` = `b-round-454/precheck-covering.log`, `b-round-454/probe/seek-5181-*.txt` and `b-round-454/probe/extra-5181-*.txt`.
 
 **Neighbours that could break:**
-- Every page with the sticky player: C4 runs it on home.
-- The home cards and the protected downloads page (same CSS; C4 card rows).
-- The 404 page.
-- The header palette.
-- The cart list and every ui/Modal default dialog (C4/C6).
-- `/studio-lab` (C4 digest, C8).
-- Tests that read `app.css` or `utilities.css`: the covering set + B's full-suite precheck.
+- **Every page with the sticky player.** C4 runs on the product page, the buyer's journey: product → play → player.
+- **The player's other buttons:** C5b covers mute.
+- **Track skip at the end.** ArrowRight at the end seeks to the duration and fires `ended`, the same as HEAD. C5's End row reads the value only.
+- **The Studio and purchase protection:** C8.
 
 ## 4. Claims
-- **Script:** `b-round-453/claims-454.sh` (K1–K14; K4 runs the real helper through `vite-node`, `k4-css-teal.ts`).
-  - Planning output: `claims-454-planning-output.txt`.
-  - Sketch output (`STORE_ROOT=/tmp/b454-scratch`): `claims-454-sketch-output.txt`.
-  - Both stderr files are empty.
-- **Inventory:** `b-round-453/inv/`:
-  - `teal-inventory2.py` + `.txt/.json` (HEAD), `sketch-inv.*` (sketch);
-  - `reach.py` + `reachable.json`;
-  - the v1 scan `teal-inventory.*`, kept for the record (it missed multi-line forms).
-- **Probes** (`b-round-453/probe/`):
+Run `bash b-round-454/claims-455.sh` (it also runs `tools/l58-check.py`). The planning output is `b-round-454/claims-455-planning-output.txt`. The output on a clone with the sketch applied is `b-round-454/claims-455-sketch-output.txt` (run with `S=/tmp/b455-claims`). Both stderr files are empty.
 
-  | Script | Outputs |
-  |---|---|
-  | `teal-probe.cjs` + `compare-teal.py` | `head-{1440,1280}.json`, `sketch-{1440,1280}.json`, `compare-{1440,1280}.txt`, `compare-head-self-CONTROL.txt` (fails, as it must) |
-  | `scrollbar-pixels.cjs` | `sb-{head,sketch}-{1440,1280}.json` |
-  | `c12-run/c12-from-c448.cjs` | `c12-head.json`, `c12-sketch.json` |
-  | `extras-probe.cjs` + `compare-extras.py` | `extras-{head,sketch}-{1440,1280}.json`, `compare-extras-{1440,1280}.txt`, `compare-extras-head-self-CONTROL.txt` (fails, as it must) |
-  | `teal-states-probe.cjs` | the first reachability probe |
-
-  Screenshots are in `shots-head/` and `shots-sketch/`.
-- **Pre-check (v4):**
-  - `precheck-covering.log` 14 / 134;
-  - `precheck-typecheck.log` rc 0;
-  - `precheck-lint.log` 205 warnings;
-  - `precheck-biome-scoped.log` clean;
-  - `precheck-full-raw.log` 284 / 4138;
-  - `precheck-build.log` rc 0.
-- **Reviews:** `b-round-453/sketch-review.md`. Three `tech-lead` passes:
-  - **v2:** APPROVE-WITH-CHANGES (M1, M2, L1–L4), all fixed in v3.
-  - **v3 delta:** APPROVE-WITH-CHANGES (P1 Medium; P2, P3 and P5 Low; the gradient interpolation), all fixed in v4 with mutants M21–M24.
-  - **v4 delta:** recorded in the review file.
-  
-  Superseded artifacts are in `v1-`, `v2-` and `v3-superseded/`.
+| Tag | Claim | Expected at planning |
+|---|---|---|
+| K1 | gate 454 status and commit | `published 2e26962` |
+| K2 | store HEAD, dirty count | `2e26962 dirty=0` |
+| K3 | `step=` in AudioPlayer.tsx | `1  step="0.01"\|` (volume only; the progress range has none) |
+| K4 | `progressPercentage` count; `onKeyDown`/`aria-valuetext` count | `2 0` |
+| K5 | width of the 4 player thumb rules in app.css | `width:12px;` × 4 |
+| K6 | old assertion `var(--color-brand) 25%` in the test | `1` |
+| K7 | patch sha OK; review exists; mutant lines; red lines | `…: OK review 14 13` |
+| K8 | doc 298 exists | `0` |
+| K9 | SpotlightLoader total and session key (for SABA-B-13, not this round) | `SPOTLIGHT_ENTRANCE_TOTAL_MS = 1150 1` |
+| K10 | cited `b-round-454/` files exist (23) | `11111111111111111111111` |
+| K11 | max lead per probe file (HEAD 1440, HEAD 1280, sketch 1440, sketch 1280) | `7.00 7.00 0.00 0.00` |
+| K12 | per `recordings/` file with `type="range"`: ranges, `step=`, `accent-`, `linear-gradient` counts; root imports from recordings | `RecordingCatalogRow:r1,s1,a1,g0 SfxQuickEdit:r3,s5,a4,g0 SfxSceneBuilder:r4,s8,a5,g0 SfxVideoSync:r1,s2,a3,g0 root=0` |
+| K13 | `.tsx` files painting `linear-gradient(to right` outside `arrangement/` and `studio/`; hits in AudioPlayer.tsx | `app/components/audio/AudioPlayer.tsx 2` |
+| K14 | HEAD vs sketch volume max lead and hover lead (1440) | `5.00`, hover `3` / `0.00`, hover `0` |
+| K15 | Alt+ArrowLeft with history, HEAD then sketch | both stay on `/products/pulse-loop-kit`; ct `9` / `9.4` |
+| K16 | Alt+ArrowRight from 10.4, HEAD then sketch | `11` / `11.4` |
+| K17 | L58 check; dispatched sha named in `sketch-review.md` | `L58 OK 3` |
+| K18 | Biome diagnostics on the 2 code files (rule counts; `format` lines) | ` 5 lint/a11y/useButtonType 0` |
 
 ## 5. After this round
-- **Round 455:** REGRESSION-2026-11-13 if it is planned on or after 2026-11-13; otherwise STORE-2b-3c-2 (the style-scan helper fail-open forms, with a golden test).
-- **Then:** 2b-3d (dead tokens, rules and files), 2b-4, STORE-2c…5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, and phase 2 under the skip rule.
+- **Round 456:** STORE-2b-3c-2. It covers the style-scan helper's fail-open forms with a golden test, A-R454-REVIEW-M-DEAD-UNCHECKED (the reachability check for the "dead" CSS allow-list), and the related Lows.
+- **REGRESSION-2026-11-13:** it takes precedence if round 456 is planned on or after 2026-11-13.
+- **Then:**
+  1. **SABA-B-13** (the entrance minimum display time; `product-designer` consult and reference section first);
+  2. **2b-3d**, then **2b-4** and **STORE-2c…5**;
+  3. the **design-philosophy acceptance gate** (root, after STORE-2b);
+  4. **ARCH-SPLIT**, **REVIEW-RECOMMENDATIONS** and **T12-ADVANCED**;
+  5. **phase 2**, under the skip rule.

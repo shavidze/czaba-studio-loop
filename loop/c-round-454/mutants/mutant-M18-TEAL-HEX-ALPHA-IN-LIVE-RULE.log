@@ -1,0 +1,63 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c454-src[39m
+
+ [31m❯[39m app/lib/__tests__/store-live-teal.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 51[2mms[22m[39m
+[31m     [31m×[31m LT1: every live player, 404, palette and scrollbar rule is the teal-free block, exactly once[39m[32m 13[2mms[22m[39m
+     [32m✓[39m LT2: the teal card light layer is gone and the card light keeps only neutral stops[32m 1[2mms[22m[39m
+     [32m✓[39m LT3: teal stays only in the allow-listed dead or frozen CSS, each file at its exact count[32m 10[2mms[22m[39m
+     [32m✓[39m LT5: every remaining teal line sits inside an allow-listed dead or frozen rule[32m 9[2mms[22m[39m
+[31m     [31m×[31m LT6: no CSS reads a teal token outside the dead allow-list and no teal hex hides behind an alpha suffix[39m[32m 12[2mms[22m[39m
+     [32m✓[39m LT4: the scan is non-vacuous and the teal matcher sees the CSS forms this stage removed[32m 4[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-live-teal.test.ts[2m > [22mstore live teal CSS (STORE-2b-3c-1)[2m > [22mLT1: every live player, 404, palette and scrollbar rule is the teal-free block, exactly once
+[31m[1mAssertionError[22m: .code-4 {: expected +0 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/__tests__/store-live-teal.test.ts:[2m320:56[22m[39m
+    [90m318| [39m    [35mfor[39m ([35mconst[39m [path[33m,[39m block] [35mof[39m [33mLIVE_RULE_BLOCKS[39m) {
+    [90m319| [39m      [35mconst[39m label [33m=[39m block[33m.[39m[34msplit[39m([32m'\n'[39m)[[34m0[39m] [33m??[39m path[33m;[39m
+    [90m320| [39m      [34mexpect[39m([34moccurrences[39m([34mreadApp[39m(path)[33m,[39m block)[33m,[39m label)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                                       [31m^[39m
+    [90m321| [39m      [34mexpect[39m([34mcountTealHits[39m(block)[33m,[39m label)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m322| [39m      [34mexpect[39m([34mcountZeroOffsetGlowHits[39m(block)[33m,[39m label)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-live-teal.test.ts[2m > [22mstore live teal CSS (STORE-2b-3c-1)[2m > [22mLT6: no CSS reads a teal token outside the dead allow-list and no teal hex hides behind an alpha suffix
+[31m[1mAssertionError[22m: expected { 'styles/app.css': 1 } to deeply equal {}[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {}[39m
+[31m+ {[39m
+[31m+   "styles/app.css": 1,[39m
+[31m+ }[39m
+
+[36m [2m❯[22m app/lib/__tests__/store-live-teal.test.ts:[2m394:7[22m[39m
+    [90m392| [39m    [34mexpect[39m(
+    [90m393| [39m      hitsByFile(APP_ROOT, STYLE_SOURCE_EXTENSIONS, countMatches(TEAL_…
+    [90m394| [39m    )[33m.[39m[34mtoEqual[39m({})[33m;[39m
+    [90m   | [39m      [31m^[39m
+    [90m395| [39m    [34mexpect[39m(
+    [90m396| [39m      countMatches(TEAL_TOKEN_READ_PATTERN)('box-shadow: 0 0 20px var(…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 13:45:32
+[2m   Duration [22m 359ms[2m (transform 68ms, setup 0ms, import 83ms, tests 51ms, environment 0ms)[22m
+
+
+::error file=/tmp/c454-src/app/lib/__tests__/store-live-teal.test.ts,title=app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT1%3A every live player%2C 404%2C palette and scrollbar rule is the teal-free block%2C exactly once,line=320,column=56::AssertionError: .code-4 {: expected +0 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/__tests__/store-live-teal.test.ts:320:56%0A%0A
+
+::error file=/tmp/c454-src/app/lib/__tests__/store-live-teal.test.ts,title=app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT6%3A no CSS reads a teal token outside the dead allow-list and no teal hex hides behind an alpha suffix,line=394,column=7::AssertionError: expected { 'styles/app.css': 1 } to deeply equal {}%0A%0A- Expected%0A+ Received%0A%0A- {}%0A+ {%0A+   "styles/app.css": 1,%0A+ }%0A%0A ❯ app/lib/__tests__/store-live-teal.test.ts:394:7%0A%0A
