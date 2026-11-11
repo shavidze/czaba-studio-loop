@@ -1,0 +1,1 @@
+Usage: copy into <scratch>/app/lib/__tests__/ of a git clone --shared at db95f40 + sketch-456 applied (never the store tree), run npx vitest run app/lib/__tests__/zz-flip-probe.test.ts, then delete it.

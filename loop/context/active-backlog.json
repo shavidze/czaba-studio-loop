@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-11T22:27:21.322Z",
-  "current_task": "Round 455: SABA-B-14 Store seek thumb on the fill edge (current-task.md, D-29z1617)",
+  "_generatedUtc": "2026-11-11T23:17:29.940Z",
+  "current_task": "Round 456: STORE-2b-3c-2a shared CSS rule reader + dead-consumer check (current-task.md, D-29z1619)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6657,7 +6657,7 @@
     {
       "id": "INFO-TL-R451-GLOW-CALC",
       "severity": "info",
-      "status": "owner STORE-2b-3c (D-29z1609): re-checked by tech-lead at ro",
+      "status": "owner STORE-2b-3c-2b (D-29z1619), after SABA-B-13 | owner ST",
       "title": "zero-offset glow scan misses 0 0 calc(...) and concatenated values; const backgroundClip = 'text' co"
     },
     {
@@ -6703,20 +6703,10 @@
       "title": "brand-tinted box-shadow rules (app.css ~2269-2275) and glow-pulse keyframes remain"
     },
     {
-      "id": "SABA-B-14",
-      "severity": "medium",
-      "origin": "Saba 2026-11-11 (policy section \"Store audio player seek thumb desyncs from progress bar\")",
-      "status": "in_progress (D-29z1617): round 455",
-      "title": "Store AudioPlayer: the white seek thumb runs ahead of the brass progress fill during playback",
-      "evidence": "b-round-454/probe/seek-5173-{1440,1280}.txt (HEAD max |thumb - fill| 7 px; value snaps to whole seconds); sketch b-round-454/probe/seek-5181-*.txt 0 px; volume/hover/drag/modified arrows b-round-454/probe/extra-*.txt, altleft-*.txt",
-      "root_cause": "(1) progress <input type=range> has no step -> default 1 -> thumb snaps to whole seconds while the fill uses fractional currentTime; (2) 12 px thumb centre travels 6px..W-6px while the fill stop runs 0..100%. Not a CSS transition (root hypothesis rejected by measurement).",
-      "why_we_missed_it": "STORE-1b (round 187) fixed the fill colour only; C rows were colour rows on a still screenshot. Lesson: L61 clause \"Painted range fill\"."
-    },
-    {
       "id": "SABA-B-13",
       "severity": "medium",
       "origin": "Saba 2026-11-11 (policy section \"Store first-load animation too fast\")",
-      "status": "scheduled (D-29z1616): STORE-2b-ENTRANCE, after 2b-3c-2",
+      "status": "scheduled (D-29z1619): STORE-2b-ENTRANCE right after round 456 (REGRESSION-2026-11-13 first if planned on/after 11-13) | scheduled (D-29z1616): STORE-2b-ENTRANCE, after 2b-3c-2",
       "title": "Store entrance animation flashes instead of playing through; needs a minimum display duration (Saba: e.g. 1.2-1.5 s)",
       "evidence": "b-round-454/probe/entrance-head-1440.txt (dev server, fresh tab: FCP 496 ms, entrance overlay mounts at 1522 ms, i.e. after the page content painted; same-tab reload: no entrance at all, czaba_entrance_seen in sessionStorage); SpotlightLoader.tsx SPOTLIGHT_ENTRANCE_TOTAL_MS = 1150, logo visible ~650 …[see backlog.json]",
       "b_facts": "timer-driven (content speed does not shorten it); mounts in useEffect after hydration, so SSR content paints first and the black overlay drops over it; once per tab session (spec D10 / R61). Production-build timing not yet measured (planning of the stage).",
@@ -6726,7 +6716,7 @@
       "id": "A-R454-REVIEW-M-DEAD-UNCHECKED",
       "severity": "medium",
       "origin": "A code-reviewer round 454",
-      "status": "scheduled (D-29z1615): owner STORE-2b-3c-2 (round 456), else 2b-3d",
+      "status": "in_progress (D-29z1619): round 456 LT7 (token consumers + name-precise mount walker) and LT8 (walker self-test) | scheduled (D-29z1615): owner STORE-2b-3c-2 (round 456), else 2b-3d",
       "title": "store-live-teal LT3/LT5/LT6 trust the \"dead\" label of allow-listed rules; nothing asserts that those classes have no mounted consumer",
       "evidence": "a-round-454.md code-reviewer findings; audio-preview-inline-button / waveform-bar / track-row-waveform / loading-brand appear in TSX of components that are unmounted today",
       "note": "test-strength gap, no behaviour defect (C round 454); confirmedBy gate 454 review suggestion 6"
@@ -6736,17 +6726,33 @@
       "severity": "info",
       "status": "awaiting_user (D-29z1616): non-blocking; default (a) keep on",
       "title": "The entrance plays once per browser tab (spec D10). A reload (also Ctrl+F5) in the same tab shows no"
+    },
+    {
+      "id": "INFO-A-R455-ALTLEFT-UNIT",
+      "severity": "info",
+      "status": "logged (D-29z1618)",
+      "title": "Alt+ArrowLeft no-navigation covered only by the browser probe (C5), not a unit test"
+    },
+    {
+      "id": "INFO-A-R455-RECORD-LOOKUP",
+      "severity": "info",
+      "status": "logged (D-29z1618)",
+      "title": "Record<string, number> key lookup with === undefined; a switch or ReadonlyMap would type it honestly"
+    },
+    {
+      "id": "INFO-A-R455-RGBA-TOKEN",
+      "severity": "info",
+      "status": "logged (D-29z1618)",
+      "title": "rgba(255, 255, 255, 0.1) track colour in AudioPlayer is hardcoded (pre-existing, moved); token candi"
+    },
+    {
+      "id": "INFO-B455-ALTLEFT-PROBE-LABELS",
+      "severity": "info",
+      "status": "logged (D-29z1618)",
+      "title": "b-round-454/probe altleft-5173/5181 files are named for the opposite trees; the task text matched wh"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 446,
-      "task": "current-task.md",
-      "decision": "D-29z1584",
-      "type": "STORE-2b-1 (LeadMagnet route exclusion, PD-REVIEW F4 / Saba Q3)",
-      "status": "done (D-29z1586): C PASS browserVerified true, gate 446 published 5df7717",
-      "note": "baseline 4bfebd7 (gate 445 published); sketch b-round-445/sketch-446.patch.txt v3 sha 685089e3 (v2 e068c5c2 + test row LMR13); claims b-round-445/claims-446.sh K1-K27; grants b-round-445/grants-446.txt"
-    },
     {
       "round": 447,
       "task": "current-task.md",
@@ -6820,8 +6826,17 @@
       "task": "current-task.md",
       "decision": "D-29z1617",
       "type": "SABA-B-14 Store seek thumb on the fill edge",
+      "status": "c_pass_published",
+      "note": "baseline 2e26962 (gate 454 published); sketch b-round-454/sketch-455.patch.txt sha c3feb718 (reviewed = dispatched); grants b-round-454/grants-455.txt (3); claims b-round-454/claims-455.sh K1-K18 (planning + sketch outputs saved); covering b-round-454/covering-455.txt (6 files / 73 tests); mutants 14 lines (13 red)",
+      "result": "C round 455 PASS (c-round-455.json: C1-C9 passed, browserVerified/realVerified true, 0 bugs; blocked: TLM-R455-FIREFOX-SEEK-THUMB (Firefox not in cloud, deadline RETRO 465)); gate 455 published db95f40 (review COMMIT OK 9/10, verify 284 files / 4148 tests green, build ok) (D-29z1618)"
+    },
+    {
+      "round": 456,
+      "task": "current-task.md",
+      "decision": "D-29z1619",
+      "type": "STORE-2b-3c-2a shared CSS rule reader + dead-consumer check (test-only)",
       "status": "dispatched",
-      "note": "baseline 2e26962 (gate 454 published); sketch b-round-454/sketch-455.patch.txt sha c3feb718 (reviewed = dispatched); grants b-round-454/grants-455.txt (3); claims b-round-454/claims-455.sh K1-K18 (planning + sketch outputs saved); covering b-round-454/covering-455.txt (6 files / 73 tests); mutants 14 lines (13 red)"
+      "note": "baseline db95f40 (gate 455 published); sketch b-round-455/sketch-456.patch.txt; grants b-round-455/grants-456.txt (5: 3 test files, doc 298 l.4, new doc 299); claims b-round-455/claims-456.sh; covering b-round-455/covering-456.txt (4 files); mutants b-round-455/mutants/mutants.txt"
     }
   ],
   "other_keys": [

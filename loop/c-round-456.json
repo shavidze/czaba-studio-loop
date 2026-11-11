@@ -1,0 +1,77 @@
+{
+ "taskStatus": "FAIL",
+ "bugs": [
+  {
+   "id": "A-R456-REVIEW-M1",
+   "severity": "medium",
+   "origin": "B spec",
+   "steps": [
+    "git clone --shared store at db95f40 into /tmp scratch, git apply b-round-455/sketch-456.patch.txt (style-scan.ts sha b28854d1\u2026 OK)",
+    "copy a-round-456/probe/zz-flip-probe.test.ts into scratch app/lib/__tests__/, npx vitest run it",
+    "compare reachableScripts on raw vs comment-stripped sources"
+   ],
+   "expected": "reachableScripts marks every file that routes/_index.tsx imports through a barrel as reachable (LT7 'unmounted' verdicts need a sound walker)",
+   "actual": "raw=288 stripped=289: components/animations/ScrollReveal.tsx is reported UNREACHABLE although routes/_index.tsx:39 imports { ScrollReveal } from '~/components/animations'. Cause: IMPORT_STATEMENT only allows [\\w$*\\s{},] inside braces, so the '// Variants for custom use' comment in app/components/animations/index.ts l.7-20 drops the whole re-export. Unsafe direction: a mounted dead-class consumer behind such a barrel would pass as 'unmounted'. Today's effect: none (ScrollReveal holds no DEAD_RULE_TOKENS token; the four unmounted consumers stay false when comments are stripped). Doc 299 / task claim of the walker following export\u2026from is overstated.",
+   "evidence": "c-round-456/flip-probe-c.log; a-round-456/probe/scrollreveal-probe.txt. Fix needs style-scan.ts (sketch-pinned) + LT8 commented-barrel fixture; B must rule."
+  }
+ ],
+ "passed": [
+  "C1 SOURCE-SCOPE",
+  "C2 CLAIMS",
+  "C3 APPLY",
+  "C4 COVERING (4 files/26 tests, LT1-LT8 and GS1-GS4 each passed, run in scratch with sketch)",
+  "C6 EXPECT-COUNTS (live-teal 55, glow-shadow 21 = B's saved counts; per-pair assert map not written)",
+  "C7 STUDIO+PURCHASE PROTECTION",
+  "C8 DOCS (doc 298 l.4, doc 299 l.3-4, 7 headings, 0 pending)",
+  "C9 L57"
+ ],
+ "blocked": [
+  "C5 MUTANTS not run: short FAIL route per lesson L22 (STOP naming an unruled Medium)",
+  "C6 per-pair assert-map.md not written (counts only)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-11T23:14:58.3203683Z",
+  "round": 456,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": 5,
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": 3,
+ "assertsSpecified": true,
+ "mutantsRecorded": 22,
+ "mutantRedOnSketch": "b-round-455/mutants/mutants.txt",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": "b-round-455/precheck-full-raw.log",
+ "chainHeadGateRunGreen": true,
+ "affectedChecksNamed": [
+  "covering-456 (4 files/26 tests)",
+  "STOP flip probe",
+  "c12 studio+purchase",
+  "claims HEAD+tree"
+ ],
+ "affectedChecksRunOnSketch": "b-round-455/precheck-covering.log",
+ "notes": [
+  "STOPPED, routed to B: A stopped at Medium M1; C independently reproduced it.",
+  "C5 mutants not run (short route). Not claimed as passed.",
+  "c12 tree result equals c-round-455/c12-tree.json except url/posPlay: 1 clip, Playing posPlay 00:01.471, Stopped, stopHeld true at 1440 and 1280; anonymous /studio/middle-east shows Sign in required, audioSrc 0, media 0 (premium not bypassed in a fresh context).",
+  "Only the C7 rows needed the browser; the test-only round changes no app code."
+ ],
+ "evidence": "c-round-456/ (c1-status.txt, claims-head/tree.txt, flip-probe-c.log, covering.log, c12-tree.json)"
+}

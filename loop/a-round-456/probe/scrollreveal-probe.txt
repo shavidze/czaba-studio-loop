@@ -1,0 +1,7 @@
+Probe (A, round 456) on scratch /tmp/a456-scratch = db95f40 + sketch-456 (sha OK), temporary test file removed afterwards:
+  reachableScripts(appScriptSources()) -> size 288
+  components/animations/ScrollReveal.tsx reachable: false   (mounted: routes/_index.tsx:39 imports { ScrollReveal } from '~/components/animations')
+  components/animations/PageTransition.tsx reachable: true
+Cause: style-scan.ts:79-80 IMPORT_STATEMENT brace class [\w$*\s{},] stops at the '// Variants for custom use' comment inside
+components/animations/index.ts l.7-20 `export { ... } from './ScrollReveal'`; isReExportBarrel strips comments, so the file still counts as a barrel
+and the walker follows it by name only through the recorded statements -> ScrollReveal export never recorded.

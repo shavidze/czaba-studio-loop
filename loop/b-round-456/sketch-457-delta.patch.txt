@@ -1,0 +1,285 @@
+diff --git a/app/lib/__tests__/helpers/style-scan.ts b/app/lib/__tests__/helpers/style-scan.ts
+index 58b0a45..0b6f607 100644
+--- a/app/lib/__tests__/helpers/style-scan.ts
++++ b/app/lib/__tests__/helpers/style-scan.ts
+@@ -80,11 +80,12 @@ const IMPORT_STATEMENT =
+   /\b(?:import|export)\s+(?:type\s+)?([\w$*\s{},]*?)\s*from\s*['"]([^'"\n]+)['"]|\bimport\s*\(\s*['"]([^'"\n]+)['"]\s*\)/g;
+ 
+ function resolveSpecifier(importer: string, specifier: string): string | null {
++  const path = specifier.replace(/[?#].*$/, '').replace(/(.)\/+$/, '$1');
+   let target: string;
+-  if (specifier.startsWith('~/')) {
+-    target = specifier.slice(2);
+-  } else if (specifier.startsWith('.')) {
+-    target = posix.join(posix.dirname(importer), specifier);
++  if (path.startsWith('~/')) {
++    target = path.slice(2);
++  } else if (path.startsWith('.')) {
++    target = posix.join(posix.dirname(importer), path);
+   } else {
+     return null;
+   }
+@@ -343,6 +344,71 @@ export function isReExportBarrel(source: string): boolean {
+   );
+ }
+ 
++const SIDE_EFFECT_IMPORT = /\bimport\s*['"]([^'"\n]+)['"]/g;
++const IMPORT_META_URL_MODULE =
++  /\bnew\s+URL\s*\(\s*['"]([^'"\n]+)['"]\s*,\s*import\.meta\.url\s*\)/g;
++const NAMESPACE_RE_EXPORT =
++  /\bexport\s+(?:type\s+)?\*\s*as\s+([\w$]+)\s+from\s*['"]([^'"\n]+)['"]/g;
++const LOCAL_SPECIFIER_LITERAL = /['"`]((?:~\/|\.\.?\/)[^'"`\n]+)['"`]/g;
++const NON_SCRIPT_MODULE =
++  /\.(?:css|json|svg|png|jpe?g|gif|webp|avif|ico|woff2?|ttf|otf|mp3|wav|ogg|mp4|webm|txt|md)$/i;
++
++function wholeModuleImports(source: string, importer: string, pattern: RegExp): ResolvedImport[] {
++  const imports: ResolvedImport[] = [];
++  for (const match of source.matchAll(pattern)) {
++    const target = resolveSpecifier(importer, match[1] ?? '');
++    if (target !== null) {
++      imports.push({ target, names: [], bindings: [], namespace: true });
++    }
++  }
++  return imports;
++}
++
++function namespaceReExports(source: string, importer: string): ResolvedImport[] {
++  const imports: ResolvedImport[] = [];
++  for (const match of source.matchAll(NAMESPACE_RE_EXPORT)) {
++    const target = resolveSpecifier(importer, match[2] ?? '');
++    if (target !== null) {
++      imports.push({
++        target,
++        names: ['*'],
++        bindings: [{ imported: '*', exported: match[1] ?? '' }],
++        namespace: false,
++      });
++    }
++  }
++  return imports;
++}
++
++export function mountGraphImports(source: string, importer: string): ResolvedImport[] {
++  const stripped = withoutComments(source);
++  return [
++    ...resolvedImports(source, importer),
++    ...resolvedImports(stripped, importer),
++    ...namespaceReExports(stripped, importer),
++    ...wholeModuleImports(source, importer, SIDE_EFFECT_IMPORT),
++    ...wholeModuleImports(source, importer, IMPORT_META_URL_MODULE),
++  ];
++}
++
++export function unfollowedLocalSpecifiers(
++  source: string,
++  importer: string,
++  sources: ReadonlyMap<string, string>,
++): string[] {
++  const targets = new Set(mountGraphImports(source, importer).map((entry) => entry.target));
++  return [...source.matchAll(LOCAL_SPECIFIER_LITERAL)]
++    .map((match) => match[1] ?? '')
++    .filter((specifier) => {
++      const target = resolveSpecifier(importer, specifier);
++      return (
++        target === null ||
++        !targets.has(target) ||
++        (scriptFileFor(target, sources) === null && !NON_SCRIPT_MODULE.test(target))
++      );
++    });
++}
++
+ function scriptFileFor(target: string, sources: ReadonlyMap<string, string>): string | null {
+   for (const candidate of [
+     `${target}.ts`,
+@@ -372,7 +438,7 @@ export function reachableScripts(sources: ReadonlyMap<string, string>): Set<stri
+     reached.add(next.file);
+     const source = sources.get(next.file) ?? '';
+     const barrelNames = isReExportBarrel(source) ? next.names : null;
+-    for (const entry of resolvedImports(source, next.file)) {
++    for (const entry of mountGraphImports(source, next.file)) {
+       const file = scriptFileFor(entry.target, sources);
+       if (file === null) {
+         continue;
+@@ -381,12 +447,14 @@ export function reachableScripts(sources: ReadonlyMap<string, string>): Set<stri
+         const forwarded = entry.bindings
+           .filter((binding) => barrelNames.includes(binding.exported))
+           .map((binding) => binding.imported);
+-        if (forwarded.length > 0) {
++        if (forwarded.includes('*')) {
++          pending.push({ file, names: null });
++        } else if (forwarded.length > 0) {
+           pending.push({ file, names: forwarded });
+         }
+         continue;
+       }
+-      const names = entry.namespace ? barrelNames : entry.names;
++      const names = entry.namespace || entry.names.includes('*') ? barrelNames : entry.names;
+       pending.push({ file, names: isReExportBarrel(sources.get(file) ?? '') ? names : null });
+     }
+   }
+diff --git a/app/lib/__tests__/store-gradient-text.test.ts b/app/lib/__tests__/store-gradient-text.test.ts
+index 5b5c8b4..889989a 100644
+--- a/app/lib/__tests__/store-gradient-text.test.ts
++++ b/app/lib/__tests__/store-gradient-text.test.ts
+@@ -9,8 +9,8 @@ import {
+   hitsByFile,
+   hitsByRootedFile,
+   listFiles,
++  mountGraphImports,
+   readApp,
+-  resolvedImports,
+   SCRIPT_SCAN_ROOTS,
+   SCRIPT_SOURCE_EXTENSIONS,
+   STYLE_SOURCE_EXTENSIONS,
+@@ -88,7 +88,7 @@ function deadModuleBarrelFiles(dead: DeadModule): ReadonlyArray<string> {
+ }
+ 
+ function importsDeadModule(source: string, importer: string, dead: DeadModule): boolean {
+-  return resolvedImports(source, importer).some(
++  return mountGraphImports(source, importer).some(
+     (entry) =>
+       entry.target === dead.module ||
+       (dead.barrels.includes(entry.target) &&
+@@ -243,6 +243,9 @@ describe('store gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)',
+       ["import { Timeline } from '~/components/audio';", 'routes/x.tsx'],
+       ["import {\n  WaveForm,\n  Timeline as T,\n} from '~/components/audio';", 'routes/x.tsx'],
+       ["import * as Audio from '~/components/audio';", 'routes/x.tsx'],
++      ["export * as Aud from '~/components/audio';", 'routes/x.tsx'],
++      ["import {\n  // note\n  Timeline,\n} from '~/components/audio';", 'routes/x.tsx'],
++      ["import '~/lib/email.server';", 'routes/x.tsx'],
+       ["import { Timeline } from '~/components/audio/Timeline';", 'routes/x.tsx'],
+       ["import { Timeline } from '~/components/audio/index';", 'routes/x.tsx'],
+       ["import { Timeline } from '../audio/Timeline';", 'components/product/X.tsx'],
+diff --git a/app/lib/__tests__/store-live-teal.test.ts b/app/lib/__tests__/store-live-teal.test.ts
+index 05e2f05..7b143f6 100644
+--- a/app/lib/__tests__/store-live-teal.test.ts
++++ b/app/lib/__tests__/store-live-teal.test.ts
+@@ -17,6 +17,7 @@ import {
+   readApp,
+   STYLE_SOURCE_EXTENSIONS,
+   type StyleScanAllowList,
++  unfollowedLocalSpecifiers,
+ } from './helpers/style-scan';
+ 
+ const STORE_CSS_PATH = 'styles/app.css';
+@@ -414,6 +415,8 @@ function tealHitsByEnclosingRule(path: string, source: string): Record<string, n
+   return hitsByCssRule(path, source, countTealHits);
+ }
+ 
++const UNFOLLOWED_SPECIFIER_ALLOW_LIST: Readonly<Record<string, string>> = {};
++
+ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+   it('LT1: every live player, 404, palette and scrollbar rule is the teal-free block, exactly once', () => {
+     for (const [path, block] of LIVE_RULE_BLOCKS) {
+@@ -699,6 +702,38 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+       ['components/al/A.tsx', 'export const A = 1;'],
+       ['components/al/D.tsx', 'export default 1;'],
+       ['components/al/Skip.tsx', 'export const Skip = 1;'],
++      ['routes/d.tsx', "import { Cm } from '~/components/cm';"],
++      [
++        'components/cm/index.ts',
++        "export {\n  // the live part\n  Cm,\n  /* kept */\n} from './Cm';\nexport { Off } from './Off';",
++      ],
++      ['components/cm/Cm.tsx', 'export const Cm = 1;'],
++      ['components/cm/Off.tsx', 'export const Off = 1;'],
++      [
++        'routes/e.tsx',
++        "const glob = './**/*.tsx';\nconst open = '/*';\nimport { Hz } from '~/components/hz';\nconst close = '*/';",
++      ],
++      ['components/hz.tsx', 'export const Hz = 1;'],
++      [
++        'routes/f.ts',
++        "import '../lib/side';\nconst w = new Worker(new URL('../lib/w.worker.ts', import.meta.url));",
++      ],
++      ['lib/side.ts', 'export const side = 1;'],
++      ['lib/w.worker.ts', "import { Wk } from './wk';"],
++      ['lib/wk.ts', 'export const Wk = 1;'],
++      ['routes/g.tsx', "import { Anim } from '~/components/nsx';"],
++      [
++        'components/nsx/index.ts',
++        "export * as Anim from './anim';\nexport * as Other from './other';",
++      ],
++      ['routes/h.tsx', "import { Bv } from '~/components/both';"],
++      ['components/both/index.ts', "export * from './inner';\nexport * as Inner from './inner';"],
++      ['components/both/inner/index.ts', "export { Bv } from './Bv';"],
++      ['components/both/inner/Bv.tsx', 'export const Bv = 1;'],
++      ['components/nsx/anim/index.ts', "export { Rv } from './Rv';"],
++      ['components/nsx/anim/Rv.tsx', 'export const Rv = 1;'],
++      ['components/nsx/other/index.ts', "export { Ot } from './Ot';"],
++      ['components/nsx/other/Ot.tsx', 'export const Ot = 1;'],
+     ]);
+     expect([...reachableScripts(files)].sort()).toEqual(
+       [
+@@ -719,6 +754,24 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+         'components/al/Row.tsx',
+         'components/al/A.tsx',
+         'components/al/D.tsx',
++        'routes/d.tsx',
++        'components/cm/index.ts',
++        'components/cm/Cm.tsx',
++        'routes/e.tsx',
++        'components/hz.tsx',
++        'routes/f.ts',
++        'lib/side.ts',
++        'lib/w.worker.ts',
++        'lib/wk.ts',
++        'routes/g.tsx',
++        'components/nsx/index.ts',
++        'components/nsx/anim/index.ts',
++        'components/nsx/anim/Rv.tsx',
++        'components/nsx/other/index.ts',
++        'routes/h.tsx',
++        'components/both/index.ts',
++        'components/both/inner/index.ts',
++        'components/both/inner/Bv.tsx',
+       ].sort(),
+     );
+     expect(tokenPattern('video-sync').test("from '~/lib/arrangement/video-sync';")).toBe(false);
+@@ -731,4 +784,47 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+       elementTags('<AudioPreviewButton\n  track={t}\n  variant="inline"\n/>', 'AudioPreviewButton'),
+     ).toEqual(['<AudioPreviewButton\n  track={t}\n  variant="inline"\n/>']);
+   });
++
++  it('LT9: the mount walker follows every local module specifier in app source to a file (A-R456-REVIEW-M1)', () => {
++    const sources = appScriptSources();
++    const unfollowed = [...sources.entries()].flatMap(([file, source]) =>
++      unfollowedLocalSpecifiers(source, file, sources).map((specifier) => `${file} ${specifier}`),
++    );
++    expect(
++      unfollowed.filter((entry) => !Object.hasOwn(UNFOLLOWED_SPECIFIER_ALLOW_LIST, entry)),
++    ).toEqual([]);
++    expect(
++      Object.keys(UNFOLLOWED_SPECIFIER_ALLOW_LIST).filter((entry) => !unfollowed.includes(entry)),
++    ).toEqual([]);
++    const reachable = reachableScripts(sources);
++    expect(reachable.has('components/animations/ScrollReveal.tsx')).toBe(true);
++    expect(reachable.has('workers/audio-encoder.worker.ts')).toBe(true);
++    const fixtures = new Map<string, string>([
++      ['routes/a.tsx', ''],
++      ['routes/q.tsx', ''],
++      ['lib/w.worker.ts', ''],
++      ['routes/dir/index.ts', ''],
++    ]);
++    expect(
++      unfollowedLocalSpecifiers(
++        "import { A } from './a';\nconst t = import(`./tpl`);\nconst u = require('./req');",
++        'routes/x.tsx',
++        fixtures,
++      ),
++    ).toEqual(['./tpl', './req']);
++    expect(
++      unfollowedLocalSpecifiers(
++        "const accept = 'audio/*';\nimport {\n  // c\n  Q,\n} from './q';\nconst end = '*/';",
++        'routes/x.tsx',
++        fixtures,
++      ),
++    ).toEqual(['./q']);
++    expect(
++      unfollowedLocalSpecifiers(
++        "import W from '../lib/w.worker?worker';\nimport M from './missing';\nimport s from './s.css?url';\nimport D from './dir/';\nimport h from './h.css#x';",
++        'routes/x.tsx',
++        fixtures,
++      ),
++    ).toEqual(['./missing']);
++  });
+ });
