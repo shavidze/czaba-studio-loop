@@ -1,0 +1,69 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b451-mut-6510[39m
+
+ [31m❯[39m app/lib/__tests__/store-gradient-text.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 125[2mms[22m[39m
+     [32m✓[39m GT1: no app CSS rule paints text with a background clip, except the allow-listed dead rule at its exact count[32m 19[2mms[22m[39m
+     [32m✓[39m GT1b: no app or perf script clips text to a background (className or inline style), except the allow-listed dead loader at its exact count[32m 16[2mms[22m[39m
+     [32m✓[39m GT2: the --gradient-text token is neither defined nor read anywhere in app[32m 13[2mms[22m[39m
+     [32m✓[39m GT3: only the allow-listed dead files name the retired text-glow or hero-title-glow class, each at its exact count[32m 14[2mms[22m[39m
+[31m     [31m×[31m GT4: the CSS scan is non-vacuous and its parser handles case, lists, comments, quotes and alpha-zero fills[39m[32m 11[2mms[22m[39m
+[31m     [31m×[31m GT4b: the script scan finds every gradient-text spelling and is non-vacuous[39m[32m 2[2mms[22m[39m
+     [32m✓[39m GT5: the allow-listed dead components stay unmounted (no importer outside their own file and the barrels)[32m 47[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-teal-sweep.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 203[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT4: the CSS scan is non-vacuous and its parser handles case, lists, comments, quotes and alpha-zero fills
+[31m[1mAssertionError[22m: expected [ '.r' ] to deeply equal [ '.r', '.s', '.t' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    ".r",[22m
+[32m-   ".s",[39m
+[32m-   ".t",[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m153:47[22m[39m
+
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT4b: the script scan finds every gradient-text spelling and is non-vacuous
+[31m[1mAssertionError[22m: expected [ 1, 1, 1, 1, 1, 1, +0, 1 ] to deeply equal [ 1, 1, 1, 1, 1, 1, 1, 1 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -3,8 +3,8 @@[39m
+[2m    1,[22m
+[2m    1,[22m
+[2m    1,[22m
+[2m    1,[22m
+[2m    1,[22m
+[32m-   1,[39m
+[31m+   0,[39m
+[2m    1,[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m168:53[22m[39m
+    [90m166| [39m      [32m'<h1 className="[-webkit-text-fill-color:transparent]">'[39m[33m,[39m
+    [90m167| [39m    ][33m;[39m
+    [90m168| [39m    expect(spellings.map(countTsxGradientTextHits)).toEqual([1, 1, 1, …
+    [90m   | [39m                                                    [31m^[39m
+    [90m169| [39m    [35mconst[39m misses [33m=[39m [
+    [90m170| [39m      [32m'<p className="bg-clip-padding text-transparent">'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m11 passed[39m[22m[90m (13)[39m
+[2m   Start at [22m 09:13:22
+[2m   Duration [22m 440ms[2m (transform 109ms, setup 0ms, import 137ms, tests 329ms, environment 0ms)[22m
+
+
+::error file=/tmp/b451-mut-6510/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT4%3A the CSS scan is non-vacuous and its parser handles case%2C lists%2C comments%2C quotes and alpha-zero fills,line=153,column=47::AssertionError: expected [ '.r' ] to deeply equal [ '.r', '.s', '.t' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    ".r",%0A-   ".s",%0A-   ".t",%0A  ]%0A%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:153:47%0A%0A
+
+::error file=/tmp/b451-mut-6510/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT4b%3A the script scan finds every gradient-text spelling and is non-vacuous,line=168,column=53::AssertionError: expected [ 1, 1, 1, 1, 1, 1, +0, 1 ] to deeply equal [ 1, 1, 1, 1, 1, 1, 1, 1 ]%0A%0A- Expected%0A+ Received%0A%0A@@ -3,8 +3,8 @@%0A    1,%0A    1,%0A    1,%0A    1,%0A    1,%0A-   1,%0A+   0,%0A    1,%0A  ]%0A%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:168:53%0A%0A

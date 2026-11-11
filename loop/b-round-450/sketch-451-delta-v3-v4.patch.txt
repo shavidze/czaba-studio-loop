@@ -1,0 +1,252 @@
+diff --git a/app/lib/__tests__/helpers/style-scan.ts b/app/lib/__tests__/helpers/style-scan.ts
+index b8156ec..1a1130c 100644
+--- a/app/lib/__tests__/helpers/style-scan.ts
++++ b/app/lib/__tests__/helpers/style-scan.ts
+@@ -1,5 +1,5 @@
+ import { readdirSync, readFileSync, statSync } from 'node:fs';
+-import { join, relative, resolve } from 'node:path';
++import { join, posix, relative, resolve } from 'node:path';
+ 
+ export const APP_ROOT = resolve(__dirname, '../../..');
+ export const PERF_ROOT = resolve(APP_ROOT, '../perf');
+@@ -46,19 +46,74 @@ const CSS_GRADIENT_TEXT_PATTERN_SOURCE = [
+ const SCRIPT_GRADIENT_TEXT_PATTERN_SOURCE = [
+   /\[(?:-webkit-)?background-clip:_*text\]/.source,
+   `\\[-webkit-text-fill-color:_*(?:${TRANSPARENT_FILL})\\]`,
+-  /(?:\b|['"])(?:WebkitBackgroundClip|backgroundClip)['"]?\s*:[^,}\n]*['"`]text['"`]/.source,
+-  `(?:\\b|['"])WebkitTextFillColor['"]?\\s*:[^,}\\n]*?['"\`]\\s*(?:${TRANSPARENT_FILL})\\s*['"\`]`,
++  /(?:\b|['"])(?:WebkitBackgroundClip|backgroundClip)['"]?\s*[:=][^,};]{0,200}?['"`]text['"`]/
++    .source,
++  `(?:\\b|['"])WebkitTextFillColor['"]?\\s*[:=][^,};]{0,200}?['"\`]\\s*(?:${TRANSPARENT_FILL})\\s*['"\`]`,
++  /setProperty\(\s*['"](?:-webkit-)?background-clip['"]\s*,\s*['"]text['"]/.source,
+   CSS_GRADIENT_TEXT_PATTERN_SOURCE,
+ ].join('|');
+ 
++const LAYER_START = /(?<=(?:^|[:'"`,[]|inset)[\s_]*)/.source;
++const GLOW_BLUR = /(?:[1-9]|0?\.\d*[1-9]|var\(|\$\{)/.source;
++const SHADOW_VALUE_SPAN = /(?:[^;},]|,(?!\s*['"]?[\w-]+['"]?\s*:)){0,300}?/.source;
++
+ const ZERO_OFFSET_GLOW_PATTERN_SOURCE = [
+-  /(?:drop-|text-)?shadow-\[[^\]]*?(?<=(?:^|[:'"`,([]|inset)[\s_]*)0(?:px)?_0(?:px)?_[1-9]/.source,
+-  /\[(?:box|text)-shadow:[^\]]*?(?<=(?:^|[:'"`,([]|inset)[\s_]*)0(?:px)?_0(?:px)?_[1-9]/.source,
+-  /drop-shadow\(\s*0(?:px)?\s+0(?:px)?\s+[1-9]/.source,
+-  /(?:box-?shadow|text-?shadow)['"]?\s*:[^;}]*?(?<=(?:^|[:'"`,([]|inset)[\s_]*)0(?:px)?\s+0(?:px)?\s+[1-9]/
+-    .source,
++  `(?:drop-|text-)?shadow-\\[[^\\]]{0,300}?${LAYER_START}0(?:px)?_0(?:px)?_${GLOW_BLUR}`,
++  `\\[(?:box|text)-shadow:[^\\]]{0,300}?${LAYER_START}0(?:px)?_0(?:px)?_${GLOW_BLUR}`,
++  `drop-shadow\\([\\s_]*0(?:px)?[\\s_]+0(?:px)?[\\s_]+${GLOW_BLUR}`,
++  `(?:box-?shadow|text-?shadow)['"]?\\s*:${SHADOW_VALUE_SPAN}${LAYER_START}0(?:px)?\\s+0(?:px)?\\s+${GLOW_BLUR}`,
+ ].join('|');
+ 
++export interface ResolvedImport {
++  target: string;
++  names: string[];
++  namespace: boolean;
++}
++
++const IMPORT_STATEMENT =
++  /\b(?:import|export)\s+(?:type\s+)?([\w$*\s{},]*?)\s*from\s*['"]([^'"\n]+)['"]|\bimport\s*\(\s*['"]([^'"\n]+)['"]\s*\)/g;
++
++function resolveSpecifier(importer: string, specifier: string): string | null {
++  let target: string;
++  if (specifier.startsWith('~/')) {
++    target = specifier.slice(2);
++  } else if (specifier.startsWith('.')) {
++    target = posix.join(posix.dirname(importer), specifier);
++  } else {
++    return null;
++  }
++  return target.replace(/\.(ts|tsx|js|jsx)$/, '').replace(/\/index$/, '');
++}
++
++export function resolvedImports(source: string, importer: string): ResolvedImport[] {
++  const imports: ResolvedImport[] = [];
++  for (const match of source.matchAll(IMPORT_STATEMENT)) {
++    const clause = match[1] ?? '';
++    const specifier = match[2] ?? match[3] ?? '';
++    const target = resolveSpecifier(importer, specifier);
++    if (target === null) {
++      continue;
++    }
++    const braced = /\{([^}]*)\}/.exec(clause)?.[1] ?? '';
++    const names = braced
++      .split(',')
++      .map((part) =>
++        part
++          .trim()
++          .replace(/^type\s+/, '')
++          .split(/\s+as\s+/)[0]
++          .trim(),
++      )
++      .filter((name) => name.length > 0);
++    imports.push({
++      target,
++      names,
++      namespace: match[3] !== undefined || /\*/.test(clause) || clause.trim() === '',
++    });
++  }
++  return imports;
++}
++
+ export function listFiles(root: string, extensions: RegExp): string[] {
+   const files: string[] = [];
+   const walk = (directory: string) => {
+diff --git a/app/lib/__tests__/store-gradient-text.test.ts b/app/lib/__tests__/store-gradient-text.test.ts
+index 7e2fa1d..4f37c72 100644
+--- a/app/lib/__tests__/store-gradient-text.test.ts
++++ b/app/lib/__tests__/store-gradient-text.test.ts
+@@ -10,6 +10,7 @@ import {
+   hitsByRootedFile,
+   listFiles,
+   readApp,
++  resolvedImports,
+   SCRIPT_SCAN_ROOTS,
+   SCRIPT_SOURCE_EXTENSIONS,
+   STYLE_SOURCE_EXTENSIONS,
+@@ -22,6 +23,7 @@ const BARREL_FILES: ReadonlyArray<string> = [
+   'components/loading/index.ts',
+   'components/common/index.ts',
+   'components/audio/index.ts',
++  'components/index.ts',
+ ];
+ 
+ const RETIRED_CLASS_PATTERN = /(?<![\w-])(?:text-glow|hero-title-glow)(?![\w-])/g;
+@@ -66,12 +68,31 @@ const DEAD_COMPONENTS: Readonly<Record<string, string>> = {
+   CinemaCurtainLoader: 'components/loading/CinemaCurtainLoader.tsx',
+ };
+ 
+-const DEAD_MODULE_IMPORTS: Readonly<Record<string, RegExp>> = {
+-  'components/audio/Timeline.tsx':
+-    /['"][^'"\n]*components\/audio\/Timeline['"]|['"]\.\/Timeline['"]|import\s*(?:type\s*)?\{[^}]*\bTimeline\b[^}]*\}\s*from\s*['"][^'"\n]*components\/audio['"]/,
+-  'lib/email.server.ts':
+-    /['"](?:~\/|\.\.?\/[^'"\n]*)?lib\/email\.server['"]|['"]\.\/email\.server['"]/,
+-};
++interface DeadModule {
++  file: string;
++  module: string;
++  barrels: ReadonlyArray<string>;
++  exportName: string;
++}
++
++const DEAD_MODULES: ReadonlyArray<DeadModule> = [
++  {
++    file: 'components/audio/Timeline.tsx',
++    module: 'components/audio/Timeline',
++    barrels: ['components/audio', 'components'],
++    exportName: 'Timeline',
++  },
++  { file: 'lib/email.server.ts', module: 'lib/email.server', barrels: [], exportName: '' },
++];
++
++function importsDeadModule(source: string, importer: string, dead: DeadModule): boolean {
++  return resolvedImports(source, importer).some(
++    (entry) =>
++      entry.target === dead.module ||
++      (dead.barrels.includes(entry.target) &&
++        (entry.namespace || entry.names.includes(dead.exportName))),
++  );
++}
+ 
+ function storeCssFiles(): string[] {
+   return listFiles(APP_ROOT, STYLE_SOURCE_EXTENSIONS);
+@@ -172,6 +193,9 @@ describe('store gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)',
+       "style={{ WebkitTextFillColor: 'rgba(0,0,0,0)' }}",
+       '<style>{`.title { -webkit-background-clip: text; }`}</style>',
+       'const html = "<h1 style=\\"-webkit-text-fill-color: transparent\\">";',
++      "style={{\n  backgroundClip:\n    'text',\n}}",
++      "element.style.webkitBackgroundClip = 'text';",
++      "element.style.setProperty('-webkit-background-clip', 'text');",
+     ];
+     expect(spellings.map(countScriptGradientTextHits)).toEqual(spellings.map(() => 1));
+     const misses = [
+@@ -202,29 +226,43 @@ describe('store gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)',
+ 
+   it('GT5b: the allow-listed dead modules with common names are imported by no file outside their own file and the barrels', () => {
+     const sources = listFiles(APP_ROOT, SCRIPT_SOURCE_EXTENSIONS);
+-    const importers = Object.entries(DEAD_MODULE_IMPORTS).flatMap(([ownFile, specifier]) => {
+-      expect(sources).toContain(ownFile);
++    const importers = DEAD_MODULES.flatMap((dead) => {
++      expect(sources).toContain(dead.file);
+       return sources
+-        .filter((path) => path !== ownFile && !BARREL_FILES.includes(path))
+-        .filter((path) => specifier.test(readApp(path)))
+-        .map((path) => `${ownFile} <- ${path}`);
++        .filter((path) => path !== dead.file && !BARREL_FILES.includes(path))
++        .filter((path) => importsDeadModule(readApp(path), path, dead))
++        .map((path) => `${dead.file} <- ${path}`);
+     });
+     expect(importers).toEqual([]);
+-    expect(
+-      [
+-        "import { Timeline } from '~/components/audio';",
+-        "import { WaveForm, Timeline } from '~/components/audio';",
+-        "import { Timeline } from '~/components/audio/Timeline';",
+-        "import { sendOrderEmail } from '~/lib/email.server';",
+-        "import { sendOrderEmail } from '../../lib/email.server';",
+-      ].map((line) => Object.values(DEAD_MODULE_IMPORTS).some((pattern) => pattern.test(line))),
+-    ).toEqual([true, true, true, true, true]);
+-    expect(
++    const usesDead = (line: string, importer: string) =>
++      DEAD_MODULES.some((dead) => importsDeadModule(line, importer, dead));
++    const positive: ReadonlyArray<readonly [string, string]> = [
++      ["import { Timeline } from '~/components/audio';", 'routes/x.tsx'],
++      ["import {\n  WaveForm,\n  Timeline as T,\n} from '~/components/audio';", 'routes/x.tsx'],
++      ["import * as Audio from '~/components/audio';", 'routes/x.tsx'],
++      ["import { Timeline } from '~/components/audio/Timeline';", 'routes/x.tsx'],
++      ["import { Timeline } from '~/components/audio/index';", 'routes/x.tsx'],
++      ["import { Timeline } from '../audio/Timeline';", 'components/product/X.tsx'],
++      ["import { Timeline } from '../audio';", 'components/product/X.tsx'],
++      ["import { Timeline } from '~/components';", 'routes/x.tsx'],
++      ["const lazy = import('./Timeline');", 'components/audio/X.tsx'],
++      ["import { sendOrderEmail } from '~/lib/email.server';", 'routes/x.tsx'],
++      ["import { sendOrderEmail } from '../email.server';", 'lib/utils/x.ts'],
++    ];
++    expect(positive.map(([line, importer]) => usesDead(line, importer))).toEqual(
++      positive.map(() => true),
++    );
++    const negative: ReadonlyArray<readonly [string, string]> = [
++      ["import { WaveForm } from '~/components/audio';", 'routes/x.tsx'],
+       [
+-        "import { WaveForm } from '~/components/audio';",
+         "import { buildHireUsInquiryEmailHtml } from '~/lib/hire-us-inquiry-email.server';",
+-        "import { Timeline } from '~/components/arrangement/Timeline';",
+-      ].map((line) => Object.values(DEAD_MODULE_IMPORTS).some((pattern) => pattern.test(line))),
+-    ).toEqual([false, false, false]);
++        'routes/x.tsx',
++      ],
++      ["import { Timeline } from './Timeline';", 'components/arrangement/X.tsx'],
++      ["import { Timeline } from '~/components/arrangement/Timeline';", 'routes/x.tsx'],
++    ];
++    expect(negative.map(([line, importer]) => usesDead(line, importer))).toEqual(
++      negative.map(() => false),
++    );
+   });
+ });
+diff --git a/app/lib/__tests__/store-teal-sweep.test.ts b/app/lib/__tests__/store-teal-sweep.test.ts
+index 853661a..9d793d7 100644
+--- a/app/lib/__tests__/store-teal-sweep.test.ts
++++ b/app/lib/__tests__/store-teal-sweep.test.ts
+@@ -111,6 +111,12 @@ describe('store teal sweep (STORE-2b-2a, STORE-2b-2b)', () => {
+       "textShadow: 'inset 0 0 8px red'",
+       '.x { box-shadow: 0 0 12px red; }',
+       '.y { text-shadow: 0 0 10px red; }',
++      "boxShadow: '0 0 .5rem red'",
++      "boxShadow: '0 0 0.5px red'",
++      "boxShadow: '0 0 var(--glow) red'",
++      ['boxShadow: `0 0 $', '{radius}px red`'].join(''),
++      "filter: 'drop-shadow(0 0 0.5rem red)'",
++      'className="[filter:drop-shadow(0_0_8px_red)]"',
+     ];
+     expect(glows.map(countZeroOffsetGlowHits)).toEqual(glows.map(() => 1));
+     const offsets = [
+@@ -119,7 +125,9 @@ describe('store teal sweep (STORE-2b-2a, STORE-2b-2b)', () => {
+       'className="shadow-[0_2px_8px_black] shadow-lg"',
+       "boxShadow: '0 0 0 1px red'",
+       'className="shadow-[0_0_0_1px_red]"',
++      "boxShadow: 'none',\n  margin: '0 0 12px',",
++      "boxShadow: '0 4px 8px rgb(0 0 20 / 0.5)'",
+     ];
+-    expect(offsets.map(countZeroOffsetGlowHits)).toEqual([0, 0, 0, 0, 0]);
++    expect(offsets.map(countZeroOffsetGlowHits)).toEqual(offsets.map(() => 0));
+   });
+ });

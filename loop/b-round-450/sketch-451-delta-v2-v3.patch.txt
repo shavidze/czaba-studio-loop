@@ -1,0 +1,329 @@
+diff --git a/app/lib/__tests__/helpers/style-scan.ts b/app/lib/__tests__/helpers/style-scan.ts
+index 2775745..b8156ec 100644
+--- a/app/lib/__tests__/helpers/style-scan.ts
++++ b/app/lib/__tests__/helpers/style-scan.ts
+@@ -8,6 +8,16 @@ export const SCRIPT_SOURCE_EXTENSIONS = /\.(ts|tsx)$/;
+ export const STYLE_SOURCE_EXTENSIONS = /\.css$/;
+ export const ANY_STYLED_SOURCE_EXTENSIONS = /\.(css|ts|tsx)$/;
+ 
++export interface StyleScanRoot {
++  prefix: string;
++  root: string;
++}
++
++export const SCRIPT_SCAN_ROOTS: ReadonlyArray<StyleScanRoot> = [
++  { prefix: 'app', root: APP_ROOT },
++  { prefix: 'perf', root: PERF_ROOT },
++];
++
+ export interface StyleScanAllowListEntry {
+   hits: number;
+   reason: string;
+@@ -24,14 +34,30 @@ const TEAL_PATTERN_SOURCE =
+   'teal-[0-9]+|cyan-[0-9]+|emerald-[0-9]+|#(13d9cc|14b8a6|0d9488|2dd4bf|5eead4|0f766e)\\b|rgba?\\( ?(19|20|45|13)[ ,]+(217|184|212|148)[ ,]+(204|166|191|136)[^)]*\\)|hsla?\\( ?17[0-9][ ,][^)]*\\)';
+ 
+ const TRANSPARENT_FILL =
+-  'transparent|#0000(?:0000)?\\b|rgba?\\(\\s*0+\\s*[,\\s]\\s*0+\\s*[,\\s]\\s*0+\\s*[,/]\\s*0*\\.?0*%?\\s*\\)';
+-
+-const CSS_GRADIENT_TEXT_PATTERN_SOURCE = `(?:-webkit-)?background-clip\\s*:[^;}]*\\btext\\b|-webkit-text-fill-color\\s*:\\s*(?:${TRANSPARENT_FILL})`;
+-
+-const TSX_GRADIENT_TEXT_PATTERN_SOURCE = `(?<![\\w-])bg-clip-text(?![\\w-])|\\[(?:-webkit-)?background-clip:text\\]|\\b(?:WebkitBackgroundClip|backgroundClip)\\s*:\\s*['"\`]text['"\`]|\\bWebkitTextFillColor\\s*:\\s*['"\`](?:${TRANSPARENT_FILL})['"\`]|\\[-webkit-text-fill-color:(?:transparent|#0000(?:0000)?)\\]`;
+-
+-const ZERO_OFFSET_GLOW_PATTERN_SOURCE =
+-  '(?:drop-)?shadow-\\[0(?:px)?_0(?:px)?_|drop-shadow\\(\\s*0(?:px)?\\s+0(?:px)?\\s|\\bboxShadow\\s*:\\s*[\'"`]\\s*0(?:px)?\\s+0(?:px)?\\s|box-shadow\\s*:\\s*0(?:px)?\\s+0(?:px)?\\s';
++  /transparent|#[0-9a-f]{3}0(?![0-9a-f])|#[0-9a-f]{6}00(?![0-9a-f])|rgba?\([\s_]*[^,/)\s_]+(?:[\s_]*,[\s_]*|[\s_]+)[^,/)\s_]+(?:[\s_]*,[\s_]*|[\s_]+)[^,/)\s_]+[\s_]*[,/][\s_]*0*\.?0+%?[\s_]*\)/
++    .source;
++
++const CSS_GRADIENT_TEXT_PATTERN_SOURCE = [
++  /(?:-webkit-)?background-clip\s*:[^;}]*\btext\b/.source,
++  `-webkit-text-fill-color\\s*:\\s*(?:${TRANSPARENT_FILL})`,
++  /(?<![\w-])bg-clip-text(?![\w-])/.source,
++].join('|');
++
++const SCRIPT_GRADIENT_TEXT_PATTERN_SOURCE = [
++  /\[(?:-webkit-)?background-clip:_*text\]/.source,
++  `\\[-webkit-text-fill-color:_*(?:${TRANSPARENT_FILL})\\]`,
++  /(?:\b|['"])(?:WebkitBackgroundClip|backgroundClip)['"]?\s*:[^,}\n]*['"`]text['"`]/.source,
++  `(?:\\b|['"])WebkitTextFillColor['"]?\\s*:[^,}\\n]*?['"\`]\\s*(?:${TRANSPARENT_FILL})\\s*['"\`]`,
++  CSS_GRADIENT_TEXT_PATTERN_SOURCE,
++].join('|');
++
++const ZERO_OFFSET_GLOW_PATTERN_SOURCE = [
++  /(?:drop-|text-)?shadow-\[[^\]]*?(?<=(?:^|[:'"`,([]|inset)[\s_]*)0(?:px)?_0(?:px)?_[1-9]/.source,
++  /\[(?:box|text)-shadow:[^\]]*?(?<=(?:^|[:'"`,([]|inset)[\s_]*)0(?:px)?_0(?:px)?_[1-9]/.source,
++  /drop-shadow\(\s*0(?:px)?\s+0(?:px)?\s+[1-9]/.source,
++  /(?:box-?shadow|text-?shadow)['"]?\s*:[^;}]*?(?<=(?:^|[:'"`,([]|inset)[\s_]*)0(?:px)?\s+0(?:px)?\s+[1-9]/
++    .source,
++].join('|');
+ 
+ export function listFiles(root: string, extensions: RegExp): string[] {
+   const files: string[] = [];
+@@ -65,16 +91,20 @@ function countPerLine(source: string, patternSource: string): number {
+     .reduce((sum, line) => sum + [...line.matchAll(new RegExp(patternSource, 'gi'))].length, 0);
+ }
+ 
++function countWhole(source: string, patternSource: string): number {
++  return [...source.matchAll(new RegExp(patternSource, 'gi'))].length;
++}
++
+ export function countTealHits(source: string): number {
+   return countPerLine(source, TEAL_PATTERN_SOURCE);
+ }
+ 
+ export function countZeroOffsetGlowHits(source: string): number {
+-  return countPerLine(source, ZERO_OFFSET_GLOW_PATTERN_SOURCE);
++  return countWhole(source, ZERO_OFFSET_GLOW_PATTERN_SOURCE);
+ }
+ 
+-export function countTsxGradientTextHits(source: string): number {
+-  return [...source.matchAll(new RegExp(TSX_GRADIENT_TEXT_PATTERN_SOURCE, 'gi'))].length;
++export function countScriptGradientTextHits(source: string): number {
++  return countWhole(source, SCRIPT_GRADIENT_TEXT_PATTERN_SOURCE);
+ }
+ 
+ export function hitsByFile(
+@@ -92,18 +122,28 @@ export function hitsByFile(
+   return hits;
+ }
+ 
+-function blankComments(css: string): string {
+-  return css.replace(/\/\*[\s\S]*?\*\//g, (comment) => comment.replace(/[^\n]/g, ' '));
++export function hitsByRootedFile(
++  roots: ReadonlyArray<StyleScanRoot>,
++  extensions: RegExp,
++  count: (source: string) => number,
++): Record<string, number> {
++  const hits: Record<string, number> = {};
++  for (const { prefix, root } of roots) {
++    for (const [path, found] of Object.entries(hitsByFile(root, extensions, count))) {
++      hits[`${prefix}/${path}`] = found;
++    }
++  }
++  return hits;
+ }
+ 
+-function blankQuotedStrings(css: string): string {
+-  return css.replace(/"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g, (quoted) =>
+-    quoted.replace(/[{};]/g, ' '),
++function blankCommentsAndQuotedDelimiters(css: string): string {
++  return css.replace(/\/\*[\s\S]*?\*\/|"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g, (token) =>
++    token.startsWith('/*') ? token.replace(/[^\n]/g, ' ') : token.replace(/[{};]/g, ' '),
+   );
+ }
+ 
+ export function cssGradientTextHits(css: string): CssDeclarationHit[] {
+-  const source = blankQuotedStrings(blankComments(css));
++  const source = blankCommentsAndQuotedDelimiters(css);
+   const pattern = new RegExp(CSS_GRADIENT_TEXT_PATTERN_SOURCE, 'gi');
+   const hits: CssDeclarationHit[] = [];
+   const selectors: string[] = [];
+diff --git a/app/lib/__tests__/store-gradient-text.test.ts b/app/lib/__tests__/store-gradient-text.test.ts
+index c2a6fee..7e2fa1d 100644
+--- a/app/lib/__tests__/store-gradient-text.test.ts
++++ b/app/lib/__tests__/store-gradient-text.test.ts
+@@ -4,12 +4,13 @@ import {
+   ANY_STYLED_SOURCE_EXTENSIONS,
+   APP_ROOT,
+   allowListViolations,
+-  countTsxGradientTextHits,
++  countScriptGradientTextHits,
+   cssGradientTextHits,
+   hitsByFile,
++  hitsByRootedFile,
+   listFiles,
+-  PERF_ROOT,
+   readApp,
++  SCRIPT_SCAN_ROOTS,
+   SCRIPT_SOURCE_EXTENSIONS,
+   STYLE_SOURCE_EXTENSIONS,
+   type StyleScanAllowList,
+@@ -20,6 +21,7 @@ const BARREL_FILES: ReadonlyArray<string> = [
+   'components/home/index.ts',
+   'components/loading/index.ts',
+   'components/common/index.ts',
++  'components/audio/index.ts',
+ ];
+ 
+ const RETIRED_CLASS_PATTERN = /(?<![\w-])(?:text-glow|hero-title-glow)(?![\w-])/g;
+@@ -48,7 +50,7 @@ const GRADIENT_TEXT_ALLOW_LIST: StyleScanAllowList = {
+   },
+ };
+ 
+-const TSX_GRADIENT_TEXT_ALLOW_LIST: StyleScanAllowList = {
++const SCRIPT_GRADIENT_TEXT_ALLOW_LIST: StyleScanAllowList = {
+   'app/components/loading/CinemaCurtainLoader.tsx': {
+     hits: 3,
+     reason:
+@@ -64,6 +66,13 @@ const DEAD_COMPONENTS: Readonly<Record<string, string>> = {
+   CinemaCurtainLoader: 'components/loading/CinemaCurtainLoader.tsx',
+ };
+ 
++const DEAD_MODULE_IMPORTS: Readonly<Record<string, RegExp>> = {
++  'components/audio/Timeline.tsx':
++    /['"][^'"\n]*components\/audio\/Timeline['"]|['"]\.\/Timeline['"]|import\s*(?:type\s*)?\{[^}]*\bTimeline\b[^}]*\}\s*from\s*['"][^'"\n]*components\/audio['"]/,
++  'lib/email.server.ts':
++    /['"](?:~\/|\.\.?\/[^'"\n]*)?lib\/email\.server['"]|['"]\.\/email\.server['"]/,
++};
++
+ function storeCssFiles(): string[] {
+   return listFiles(APP_ROOT, STYLE_SOURCE_EXTENSIONS);
+ }
+@@ -79,19 +88,8 @@ function hitsByFileAndSelector(): Record<string, number> {
+   return counts;
+ }
+ 
+-function tsxGradientTextHitsByFile(): Record<string, number> {
+-  const counts: Record<string, number> = {};
+-  for (const [prefix, root] of [
+-    ['app', APP_ROOT],
+-    ['perf', PERF_ROOT],
+-  ] as const) {
+-    for (const [path, hits] of Object.entries(
+-      hitsByFile(root, SCRIPT_SOURCE_EXTENSIONS, countTsxGradientTextHits),
+-    )) {
+-      counts[`${prefix}/${path}`] = hits;
+-    }
+-  }
+-  return counts;
++function scriptGradientTextHitsByFile(): Record<string, number> {
++  return hitsByRootedFile(SCRIPT_SCAN_ROOTS, SCRIPT_SOURCE_EXTENSIONS, countScriptGradientTextHits);
+ }
+ 
+ describe('store gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)', () => {
+@@ -104,10 +102,10 @@ describe('store gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)',
+     expect(drifted).toEqual([]);
+   });
+ 
+-  it('GT1b: no app or perf script clips text to a background (className or inline style), except the allow-listed dead loader at its exact count', () => {
++  it('GT1b: no app or perf script clips text to a background (class, inline style or CSS text), except the allow-listed dead loader at its exact count', () => {
+     const { unexpected, drifted } = allowListViolations(
+-      tsxGradientTextHitsByFile(),
+-      TSX_GRADIENT_TEXT_ALLOW_LIST,
++      scriptGradientTextHitsByFile(),
++      SCRIPT_GRADIENT_TEXT_ALLOW_LIST,
+     );
+     expect(unexpected).toEqual([]);
+     expect(drifted).toEqual([]);
+@@ -148,9 +146,13 @@ describe('store gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)',
+     );
+     expect(probe.map((hit) => hit.selector)).toEqual(['.b', '.b', '.d', '.d', '.d']);
+     const quoted = cssGradientTextHits(
+-      '.q::before { content: "{;}"; }\n.r { background-clip: text; }\n.s { content: \'a;b{\'; -webkit-text-fill-color: rgb(0 0 0 / 0); }\n.t { -webkit-text-fill-color: rgba(0,0,0,0); }\n.u { -webkit-text-fill-color: rgb(0 0 0); }',
++      '.q::before { content: "{;}"; }\n.r { background-clip: text; }\n.s { content: \'a;b{\'; -webkit-text-fill-color: rgb(0 0 0 / 0); }\n.t { -webkit-text-fill-color: rgba(255, 255, 255, 0); }\n.u { -webkit-text-fill-color: rgb(0 0 0); }\n.v { -webkit-text-fill-color: rgba(0,0,0,0.5); }\n.w { -webkit-text-fill-color: #fff0; }\n.x { @apply bg-clip-text; }',
++    );
++    expect(quoted.map((hit) => hit.selector)).toEqual(['.r', '.s', '.t', '.w', '.x']);
++    const commentInString = cssGradientTextHits(
++      '.a { content: "/*"; }\n.b { background-clip: text; }\n.c { content: "*/"; }',
+     );
+-    expect(quoted.map((hit) => hit.selector)).toEqual(['.r', '.s', '.t']);
++    expect(commentInString.map((hit) => hit.selector)).toEqual(['.b']);
+     expect(allowListViolations({ toString: 1 }, {}).unexpected).toEqual(['toString']);
+   });
+ 
+@@ -158,23 +160,31 @@ describe('store gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)',
+     const spellings = [
+       '<h1 className="bg-clip-text text-transparent">',
+       '<h1 className="[background-clip:text] text-transparent">',
++      '<h1 className="[background-clip:_text]">',
+       '<h1 className="[-webkit-background-clip:text]">',
++      '<h1 className="[-webkit-text-fill-color:transparent]">',
++      '<h1 className="[-webkit-text-fill-color:rgba(0,0,0,0)]">',
+       "style={{ WebkitBackgroundClip: 'text' }}",
+       'style={{ backgroundClip: "text" }}',
++      "style={{ 'WebkitBackgroundClip': 'text' }}",
++      "style={{ backgroundClip: wide ? 'text' : 'border-box' }}",
+       "style={{ WebkitTextFillColor: 'transparent' }}",
+       "style={{ WebkitTextFillColor: 'rgba(0,0,0,0)' }}",
+-      '<h1 className="[-webkit-text-fill-color:transparent]">',
++      '<style>{`.title { -webkit-background-clip: text; }`}</style>',
++      'const html = "<h1 style=\\"-webkit-text-fill-color: transparent\\">";',
+     ];
+-    expect(spellings.map(countTsxGradientTextHits)).toEqual([1, 1, 1, 1, 1, 1, 1, 1]);
++    expect(spellings.map(countScriptGradientTextHits)).toEqual(spellings.map(() => 1));
+     const misses = [
+       '<p className="bg-clip-padding text-transparent">',
+       "style={{ backgroundClip: 'padding-box' }}",
+       "style={{ WebkitTextFillColor: 'rgb(0 0 0)' }}",
++      "style={{ WebkitTextFillColor: 'rgba(0,0,0,0.5)' }}",
+     ];
+-    expect(misses.map(countTsxGradientTextHits)).toEqual([0, 0, 0]);
+-    expect(Object.keys(tsxGradientTextHitsByFile())).toContain(
++    expect(misses.map(countScriptGradientTextHits)).toEqual([0, 0, 0, 0]);
++    expect(Object.keys(scriptGradientTextHitsByFile())).toContain(
+       'app/components/loading/CinemaCurtainLoader.tsx',
+     );
++    expect(SCRIPT_SCAN_ROOTS.map((root) => root.prefix)).toEqual(['app', 'perf']);
+   });
+ 
+   it('GT5: the allow-listed dead components stay unmounted (no importer outside their own file and the barrels)', () => {
+@@ -189,4 +199,32 @@ describe('store gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)',
+     });
+     expect(importers).toEqual([]);
+   });
++
++  it('GT5b: the allow-listed dead modules with common names are imported by no file outside their own file and the barrels', () => {
++    const sources = listFiles(APP_ROOT, SCRIPT_SOURCE_EXTENSIONS);
++    const importers = Object.entries(DEAD_MODULE_IMPORTS).flatMap(([ownFile, specifier]) => {
++      expect(sources).toContain(ownFile);
++      return sources
++        .filter((path) => path !== ownFile && !BARREL_FILES.includes(path))
++        .filter((path) => specifier.test(readApp(path)))
++        .map((path) => `${ownFile} <- ${path}`);
++    });
++    expect(importers).toEqual([]);
++    expect(
++      [
++        "import { Timeline } from '~/components/audio';",
++        "import { WaveForm, Timeline } from '~/components/audio';",
++        "import { Timeline } from '~/components/audio/Timeline';",
++        "import { sendOrderEmail } from '~/lib/email.server';",
++        "import { sendOrderEmail } from '../../lib/email.server';",
++      ].map((line) => Object.values(DEAD_MODULE_IMPORTS).some((pattern) => pattern.test(line))),
++    ).toEqual([true, true, true, true, true]);
++    expect(
++      [
++        "import { WaveForm } from '~/components/audio';",
++        "import { buildHireUsInquiryEmailHtml } from '~/lib/hire-us-inquiry-email.server';",
++        "import { Timeline } from '~/components/arrangement/Timeline';",
++      ].map((line) => Object.values(DEAD_MODULE_IMPORTS).some((pattern) => pattern.test(line))),
++    ).toEqual([false, false, false]);
++  });
+ });
+diff --git a/app/lib/__tests__/store-teal-sweep.test.ts b/app/lib/__tests__/store-teal-sweep.test.ts
+index b3f8477..853661a 100644
+--- a/app/lib/__tests__/store-teal-sweep.test.ts
++++ b/app/lib/__tests__/store-teal-sweep.test.ts
+@@ -96,21 +96,30 @@ describe('store teal sweep (STORE-2b-2a, STORE-2b-2b)', () => {
+     expect(offenders).toEqual([]);
+   });
+ 
+-  it('TS6: the zero-offset glow scanner finds every spelling and skips offset shadows', () => {
++  it('TS6: the zero-offset glow scanner finds every spelling and skips offset shadows and rings', () => {
+     const glows = [
+       'className="shadow-[0_0_20px_rgba(1,2,3,0.3)]"',
+       'className="drop-shadow-[0_0_8px_#fff]"',
++      'className="shadow-[0_2px_4px_black,0_0_30px_red]"',
++      'className="[box-shadow:inset_0_0_12px_red]"',
++      'className="[text-shadow:0_0_6px_red]"',
+       "filter: 'drop-shadow(0 0 60px red)'",
+       "boxShadow: '0 0 40px red'",
+       'boxShadow: `0px 0px 40px red`',
++      "boxShadow:\n  '0 2px 4px black, 0 0 30px red'",
++      "boxShadow: hovered ? '0 0 40px red' : 'none'",
++      "textShadow: 'inset 0 0 8px red'",
+       '.x { box-shadow: 0 0 12px red; }',
++      '.y { text-shadow: 0 0 10px red; }',
+     ];
+-    expect(glows.map(countZeroOffsetGlowHits)).toEqual([1, 1, 1, 1, 1, 1]);
++    expect(glows.map(countZeroOffsetGlowHits)).toEqual(glows.map(() => 1));
+     const offsets = [
+       "boxShadow: '0 8px 32px rgba(0,0,0,0.25)'",
+       "boxShadow: '10px 0 60px rgba(0,0,0,0.8)'",
+       'className="shadow-[0_2px_8px_black] shadow-lg"',
++      "boxShadow: '0 0 0 1px red'",
++      'className="shadow-[0_0_0_1px_red]"',
+     ];
+-    expect(offsets.map(countZeroOffsetGlowHits)).toEqual([0, 0, 0]);
++    expect(offsets.map(countZeroOffsetGlowHits)).toEqual([0, 0, 0, 0, 0]);
+   });
+ });

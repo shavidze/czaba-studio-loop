@@ -1,0 +1,70 @@
+import { createRequire } from 'node:module';
+import { writeFileSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const out = '/home/runner/czaba-project/tmp/studio-real-loop/c-round-450';
+const base = 'http://127.0.0.1:5173';
+const res = {};
+const browser = await chromium.launch();
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const k = `${w}x${h}`;
+  const r = (res[k] = {});
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/studio-lab`, { waitUntil: 'networkidle', timeout: 120000 });
+  await page.waitForSelector('[data-testid="arrangement-timeline-scroller"]', { timeout: 120000 });
+  await page.getByText('Demo collection ready').first().waitFor({ timeout: 120000 }).catch(() => { r.readyTimeout = true; });
+  await page.waitForTimeout(1200);
+  r.authUser = await page.evaluate(() => localStorage.getItem('auth_user'));
+  r.workspaceOpen = await page.getByTestId('arrangement-timeline-scroller').isVisible();
+  // smoke
+  await page.getByRole('button', { name: 'All' }).first().click().catch(() => {});
+  await page.getByTestId('arrangement-library-list').getByRole('option').first().click();
+  await page.waitForTimeout(250);
+  const before = await page.locator('[data-clip-id]').count();
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(900);
+  r.clipsBefore = before;
+  r.clipsAfter = await page.locator('[data-clip-id]').count();
+  const pos = async () => (await page.getByTestId('arrangement-position').textContent().catch(() => ''))?.trim();
+  r.pos0 = await pos();
+  await page.getByRole('button', { name: /^Play/ }).first().click();
+  await page.waitForTimeout(1500);
+  r.posPlaying = await pos();
+  await page.getByRole('button', { name: /^Stop/ }).first().click();
+  await page.waitForTimeout(500);
+  r.posStopped1 = await pos();
+  await page.waitForTimeout(800);
+  r.posStopped2 = await pos();
+  await page.getByRole('button', { name: /^Export/ }).first().click();
+  await page.waitForTimeout(800);
+  r.dialogOpen = await page.getByRole('dialog').first().isVisible().catch(() => false);
+  r.dialogText = (await page.getByRole('dialog').first().innerText().catch(() => '')).replace(/\s+/g, ' ').slice(0, 300);
+  await page.screenshot({ path: `${out}/smoke-export-${k}.png` });
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(500);
+  r.dialogClosedEsc = !(await page.getByRole('dialog').first().isVisible().catch(() => false));
+  if (!r.dialogClosedEsc) {
+    await page.getByRole('button', { name: /Cancel|Close|Done/ }).first().click().catch(() => {});
+    await page.waitForTimeout(400);
+    r.dialogClosedButton = !(await page.getByRole('dialog').first().isVisible().catch(() => false));
+  }
+  await page.screenshot({ path: `${out}/smoke-after-${k}.png` });
+  // auth guard
+  const t0 = Date.now();
+  await page.goto(`${base}/studio/middle-east`, { waitUntil: 'networkidle', timeout: 120000 }).catch(() => {});
+  await page.goto(`${base}/studio/middle-east`, { waitUntil: 'networkidle', timeout: 120000 }).catch(() => {});
+  await page.waitForTimeout(2000);
+  r.studioUrl = page.url();
+  r.signInRequired = await page.getByText(/Sign in required/i).first().isVisible().catch(() => false);
+  r.audioSrcCount = await page.locator('audio[src]').count();
+  r.authUserAfter = await page.evaluate(() => localStorage.getItem('auth_user'));
+  await page.screenshot({ path: `${out}/auth-studio-${k}.png` });
+  const api = await ctx.request.get(`${base}/api/studio-token?product=middle-east&file=stem.mp3`, { failOnStatusCode: false });
+  r.tokenStatus = api.status();
+  r.tokenBody = (await api.text()).slice(0, 120);
+  await ctx.close();
+}
+await browser.close();
+writeFileSync(`${out}/auth-smoke.json`, JSON.stringify(res, null, 1));
+console.log(JSON.stringify(res, null, 1));

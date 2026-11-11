@@ -1,0 +1,12 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const b = await chromium.launch(); const p = await (await b.newContext({viewport:{width:1280,height:720}})).newPage();
+await p.goto('http://127.0.0.1:5173/studio-lab',{waitUntil:'networkidle'});
+await p.getByText('Demo collection ready').first().waitFor({timeout:120000});
+const btn = p.getByRole('button',{name:/Collapse|Expand/}).first();
+console.log('before', (await btn.textContent()).trim());
+await btn.click(); await p.waitForTimeout(600);
+console.log('after', (await btn.textContent()).trim());
+await p.screenshot({path:'/home/runner/czaba-project/tmp/studio-real-loop/c-round-450/sr1-expand-1280.png', clip:{x:900,y:560,width:380,height:160}});
+await b.close();
