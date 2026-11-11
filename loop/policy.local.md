@@ -646,3 +646,14 @@ B also checks during ARCH-SPLIT planning:
 - If no imports and no route references: mark for removal in the next ARCH-SPLIT or cleanup round
 - Dead exports inside living files: remove when touching that file (zero-cost cleanup)
 - Unused dependencies in package.json: remove in a PERF or SYS round
+
+## Saba feedback, 2026-11-11: Store first-load animation too fast
+
+The Store's opening animation/splash now completes too quickly even on a hard refresh (Ctrl+F5, empty cache). The content loads faster than the animation's runtime, so the "grand entrance" moment is lost — it flashes instead of playing through.
+
+**Fix:** The splash/loading animation must have a **minimum display duration** (e.g., 1.2–1.5 seconds) regardless of how fast the content loads. This is intentional perceived-value design — premium products have a confident entrance, not an instant flash.
+
+Reference: Ableton, Logic Pro, Splice all show their splash for at least 1–2 seconds even when content is ready.
+
+**Priority:** Medium — fits in STORE-2b or STORE-3 (hero section).
+**Where:** Check the root layout or entry route for the splash component.
