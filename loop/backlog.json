@@ -1,10 +1,10 @@
 {
-  "version": 430,
+  "version": 431,
   "updated": "2026-11-11",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 444: SYS-3 stage 2a (IME composition in Library search, shortcut-sheet search and focus-source; closes A-R203-REVIEW-M1/I1 on C PASS; sketch b-round-443/sketch-444.patch.txt sha 567728df) on 1eefb4c (current-task.md)",
-  "advisor_used_by_B": "round 442 -> 443 planning: advisor available and consulted (after orientation, before writing)",
+  "current_task": "Round 445: SYS-3 stage 2b (inlineEditorKeyIntent for the five inline editors, IME11-IME15, FV-HELD; closes TL-R443-G3, A-R443-REVIEW-L1/L2, GATE443-L1, A-R444-REVIEW-I1, SIG-R442 on C PASS; sketch b-round-444/sketch-445.patch.txt sha 07714283) on 616729c (current-task.md)",
+  "advisor_used_by_B": "round 444 -> 445 planning: advisor available and consulted after orientation and before hand-off",
   "baseline": {
     "tsc_errors": 0,
     "vitest_files": 32,
@@ -12350,8 +12350,16 @@
       "task": "current-task.md",
       "decision": "D-29z1577",
       "type": "SYS-3 stage 2a (IME composition: focus-source, Library search, shortcut-sheet search)",
-      "status": "dispatched",
+      "status": "done (D-29z1579): C PASS browserVerified true, gate 444 published 616729c",
       "note": "baseline 1eefb4c (gate 443 published); sketch b-round-443/sketch-444.patch.txt sha 567728df; claims b-round-443/claims-444.sh; tech-lead approve-with-changes 0 Medium+"
+    },
+    {
+      "round": 445,
+      "task": "current-task.md",
+      "decision": "D-29z1580",
+      "type": "SYS-3 stage 2b (shared inline-editor key intent; held Escape keeps the floating video)",
+      "status": "dispatched",
+      "note": "baseline 616729c (gate 444 published); sketch b-round-444/sketch-445.patch.txt sha 07714283; claims b-round-444/claims-445.sh"
     }
   ],
   "post_current_stage_queue": [
@@ -23114,20 +23122,22 @@
     {
       "id": "A-R203-REVIEW-M1",
       "severity": "low",
-      "status": "dispatched round 444 (D-29z1577): SYS-3 stage 2a; closes on C PASS | queued (D-29z1571): SYS-3 stage 2 | ruled (D-29z169): folded into SYS-3 (see systemic_tasks SYS-3.also_fixes_d29z169); reviewer rated Medium, B rates Low: fail-safe (extra ring only), not reproducible in the cloud browser; Android device check on the Tech Lead list",
+      "status": "closed (D-29z1579): SYS-3 stage 2a, C round 444 PASS (c-round-444.json browserVerified/realVerified true; C5 ALL OK 18 cells, HEAD control 14 of 18 failing), gate 444 published 616729c; real Android device half stays on TLM-SYS3-IME-PLATFORMS | dispatched round 444 (D-29z1577): SYS-3 stage 2a; closes on C PASS | queued (D-29z1571): SYS-3 stage 2 | ruled (D-29z169): folded into SYS-3 (see systemic_tasks SYS-3.also_fixes_d29z169); reviewer rated Medium, B rates Low: fail-safe (extra ring only), not reproducible in the cloud browser; Android device check on the Tech Lead list",
       "title": "Android soft keyboard key=Unidentified / IME isComposing keydowns flip focus-source to keyboard (ring mid-typing on Android)",
       "evidence": "a-round-203.md code review M1; c-round-203.md 'Not verified'",
       "origin": "A (code-reviewer)",
-      "added": "2026-10-27 B round 203 -> 204 planning (D-29z169)"
+      "added": "2026-10-27 B round 203 -> 204 planning (D-29z169)",
+      "closed_round": 444
     },
     {
       "id": "A-R203-REVIEW-I1",
       "severity": "info",
-      "status": "dispatched round 444 (D-29z1577): SYS-3 stage 2a; closes on C PASS | queued (D-29z1571): SYS-3 stage 2 | ruled (D-29z169): folded into SYS-3 with M1 (AltGraph printable keys count as editing)",
+      "status": "closed_altgr_half (D-29z1579): Windows/Linux AltGr (getModifierState AltGraph) closed at contract level by C round 444 PASS (jsdom FT9 + mutant M3; Playwright cannot set AltGraph, b-round-443/probe/altgraph-check-sketch.json), gate 444 published 616729c. The macOS Option half is NOT fixed (gates/round-444/review.md finding 1: Chrome/Safari do not report AltGraph for Option+char, so it still flips to keyboard, same as before) -> split to GATE444-L1-MACOS-OPTION (Low, deferred_low_polish + TLM step) | dispatched round 444 (D-29z1577): SYS-3 stage 2a; closes on C PASS | queued (D-29z1571): SYS-3 stage 2 | ruled (D-29z169): folded into SYS-3 with M1 (AltGraph printable keys count as editing)",
       "title": "AltGr (Ctrl+Alt) / macOS Option typing switches focus-source to keyboard",
       "evidence": "a-round-203.md I1; accessibility-auditor note in c-round-203.md",
       "origin": "A (code-reviewer)",
-      "added": "2026-10-27 B round 203 -> 204 planning (D-29z169)"
+      "added": "2026-10-27 B round 203 -> 204 planning (D-29z169)",
+      "closed_round": 444
     },
     {
       "id": "B-R203-AUTH-USER-CLIENT-TRUST",
@@ -28206,38 +28216,10 @@
       "added": "2026-11-10 B round 436 -> 437 planning"
     },
     {
-      "id": "C-R442-M1-HELD-KEY-UNRULED",
-      "alias": "A-R442-REVIEW-M1",
-      "severity": "medium",
-      "origin": "A (code-reviewer); C recorded as unverified",
-      "status": "closed (D-29z1576): C round 443 PASS (c-round-443.json, browserVerified true; C5 held-IME ALL OK 18 cells, HEAD control 8 of 18 failing); published 1eefb4c | scheduled round 443 (D-29z1574): accepted Medium, contract level; B pre-check real Chromium on 4aa3c82 (b-round-442/probe/compare-head.txt NOT ALL OK 8 of 18 failing; synthetic CDP autoRepeat sequence); real-IME delivery unconfirmed -> TLM-SYS3-IME-PLATFORMS held-key step",
-      "title": "after a guarded composing Enter/Escape, auto-repeat keydowns (repeat true, not composing) commit/cancel Tempo (Enter, Escape), Marker Escape, Clip Gain Escape",
-      "evidence": "a-round-442.md A-R442-REVIEW-M1; c-round-442.json bugs[0]; b-round-442/probe/held-head.json",
-      "added": "2026-11-11 B round 442 -> 443 planning"
-    },
-    {
-      "id": "A-R442-REVIEW-L1-NO-PLAIN-ESCAPE",
-      "severity": "low",
-      "origin": "A (code-reviewer)",
-      "status": "closed (D-29z1576): C round 443 PASS (c-round-443.json, browserVerified true; C5 held-IME ALL OK 18 cells, HEAD control 8 of 18 failing); published 1eefb4c | scheduled round 443 (D-29z1574): IME7",
-      "title": "no test sends a plain Escape after a composing key",
-      "evidence": "a-round-442.md",
-      "added": "2026-11-11 B round 442 -> 443 planning"
-    },
-    {
-      "id": "A-R442-REVIEW-L2-IME1-WEAK-FINAL",
-      "severity": "low",
-      "origin": "A (code-reviewer)",
-      "status": "closed (D-29z1576): C round 443 PASS (c-round-443.json, browserVerified true; C5 held-IME ALL OK 18 cells, HEAD control 8 of 18 failing); published 1eefb4c | scheduled round 443 (D-29z1574): IME1 asserts tempoStatusMessage(96)",
-      "title": "IME1 final assertion only checks statusSequence increased",
-      "evidence": "a-round-442.md",
-      "added": "2026-11-11 B round 442 -> 443 planning"
-    },
-    {
       "id": "A-R443-REVIEW-L1-IME6-WEAK-GAIN",
       "severity": "low",
       "origin": "B spec (sketch-443 test text; found by A code-reviewer)",
-      "status": "queued SYS-3 stage 2b (D-29z1576): same file as TL-R443-G3; else deferred_low_polish",
+      "status": "in_progress (D-29z1580): SYS-3 stage 2b, round 445; closes on C PASS | queued SYS-3 stage 2b (D-29z1576): same file as TL-R443-G3; else deferred_low_polish",
       "title": "IME6 Clip Gain asserts gain.value !== '-3' instead of toBe(shown)",
       "evidence": "a-round-443.md Code review L1",
       "repro": "ime-composition-ui.test.tsx IME6 Clip Gain branch at 1eefb4c",
@@ -28247,7 +28229,7 @@
       "id": "A-R443-REVIEW-L2-IME6-ONE-IT",
       "severity": "low",
       "origin": "B spec (sketch-443 test text; found by A code-reviewer)",
-      "status": "queued SYS-3 stage 2b (D-29z1576)",
+      "status": "in_progress (D-29z1580): SYS-3 stage 2b, round 445; closes on C PASS | queued SYS-3 stage 2b (D-29z1576)",
       "title": "IME6 covers three editors in one it(); an early failure hides later ones",
       "evidence": "a-round-443.md Code review L2",
       "repro": "ime-composition-ui.test.tsx IME6 at 1eefb4c",
@@ -28275,11 +28257,22 @@
       "id": "GATE443-L1-REPEAT-ESCAPE-BUBBLES",
       "severity": "low",
       "origin": "gate reviewer",
-      "status": "queued SYS-3 stage 2b (D-29z1576): same handlers as the shared settle-key helper; jsdom row first",
+      "status": "ruled_no_user_effect (D-29z1580; tech-lead R1 confirmed): the only window Escape listener returns for typing targets (StudioWorkspace isTypingTarget), Tempo blurs on the fresh press so its repeats target body (now handled by A-R444-REVIEW-I1); B probe: Clip Gain and Library search held Escape leave the video expanded at HEAD (b-round-444/probe/head.json GAIN/LIBSEARCH cells). HEAD propagation kept cell for cell (IME12). Closes when C round 445 re-runs those probe cells | queued SYS-3 stage 2b (D-29z1576): same handlers as the shared settle-key helper; jsdom row first",
       "title": "Tempo and Clip Gain Escape branches preventDefault a repeat but do not stopPropagation, so held Escape repeats still reach ancestor/global Escape handlers (same as HEAD; marker editor stops propagation)",
       "evidence": "gates/round-443/review.md finding 1",
       "repro": "ArrangementTempoRow.tsx and ArrangementDetailPanel.tsx Escape branches at 1eefb4c",
       "added": "2026-11-11 B round 443 -> 444 planning"
+    },
+    {
+      "id": "A-R444-REVIEW-I1-HELD-ESC-VIDEO",
+      "severity": "low",
+      "origin": "pre-existing (found by A code-reviewer round 444; reproduced by B)",
+      "status": "in_progress (D-29z1580): SYS-3 stage 2b, round 445; closes on C PASS",
+      "title": "a held Escape that closes the shortcut sheet, the Export dialog, the BPM edit or the marker editor also collapses the expanded floating video through its auto-repeat keydowns (Workspace window Escape branch has no event.repeat check)",
+      "evidence": "a-round-444.md code-reviewer I1 (rated Info); B real-Chromium probe b-round-444/probe/compare-head.txt NOT ALL OK (8 of 14 failing) at 616729c; severity raised to Low with this evidence (user-visible, no data loss)",
+      "repro": "BASE=http://127.0.0.1:5173 node b-round-444/probe/held-escape-video.mjs ALL 1440x900,1280x720",
+      "added": "2026-11-11 B round 444 -> 445 planning",
+      "systemic_task": "SYS-3"
     }
   ],
   "tech_lead_notes": [
@@ -28729,7 +28722,7 @@
       "decision": "D-29z1571",
       "deadline": "RETRO 450 (L46)",
       "status": "open (stage 1 C round 442 PASS; held-key step after round 443)",
-      "what": "On macOS (Japanese/Chinese IME, Safari and Chrome) and Windows (Microsoft IME): in /studio-lab type in the BPM field, marker name, group name, Detail From and Clip Gain with an IME, confirm a candidate with Enter, cancel one with Escape. Expected: the composition commits/cancels inside the field and the field stays open and focused; a second Enter commits the editor. Android soft keyboard: a plain Enter in the BPM field still commits (keyCode 229 risk). | D-29z1574 added step: hold Enter (and separately Escape) while confirming/cancelling a candidate (auto-repeat after the composing key) in the BPM field, marker name and Clip Gain; expected: the editor stays open/focused until a fresh key. | D-29z1577 added step (round 444): macOS Chrome with Japanese IME and Windows Chrome with MS-IME: compose in the Studio Library search and the shortcut-sheet search, cancel with Escape: the query stays and the sheet stays open (TL-R444-L1); Android: typing in the Library search shows no focus ring; Windows AltGr @ in a Studio text field shows no ring.",
+      "what": "On macOS (Japanese/Chinese IME, Safari and Chrome) and Windows (Microsoft IME): in /studio-lab type in the BPM field, marker name, group name, Detail From and Clip Gain with an IME, confirm a candidate with Enter, cancel one with Escape. Expected: the composition commits/cancels inside the field and the field stays open and focused; a second Enter commits the editor. Android soft keyboard: a plain Enter in the BPM field still commits (keyCode 229 risk). | D-29z1574 added step: hold Enter (and separately Escape) while confirming/cancelling a candidate (auto-repeat after the composing key) in the BPM field, marker name and Clip Gain; expected: the editor stays open/focused until a fresh key. | D-29z1577 added step (round 444): macOS Chrome with Japanese IME and Windows Chrome with MS-IME: compose in the Studio Library search and the shortcut-sheet search, cancel with Escape: the query stays and the sheet stays open (TL-R444-L1); Android: typing in the Library search shows no focus ring; Windows AltGr @ in a Studio text field shows no ring. | D-29z1579 added step (round 445 planning): macOS Chrome and Safari: focus the Library search by mouse and type Option+e / Option+2; record whether the focus ring appears (expected today: it does, GATE444-L1-MACOS-OPTION, deferred).",
       "reason": "SYS-3 stage 1 (D-29z1571): the cloud runner has Chromium only and no OS IME; CDP Input.imeSetComposition proves the Chromium half (b-round-441/probe/compare-sketch.txt), real IMEs, Safari keyCode 229 and Android soft keys need a person"
     }
   ],
@@ -31497,11 +31490,27 @@
       "decision": "D-29z1573",
       "source": "a-round-442.md Architecture note; gates/round-442/review.md Architecture note; b-round-442/sketch-review.md R5",
       "signal": "inline-editor key safety (IME guard, repeat check) is copied per onKeyDown with drifting order (cause of C-R442-M1); proposals: one shared helper in studio-repeat-safe.ts (e.g. isSettleableEditorKey) + HS1-style scan for inline copies; later an InlineNameEditor key helper for marker/group editors",
-      "status": "signal only; helper + scan decided at SYS-3 stage 2 planning (tech-lead: stage 2, not round 443); not an automatic refactor",
+      "status": "in_progress (D-29z1580): implemented as inlineEditorKeyIntent + IME14/IME15 scan in round 445 (tech-lead: keep the helper in studio-ime-composition.ts; do not extract a flag-driven handleInlineEditorKey) | signal only; helper + scan decided at SYS-3 stage 2 planning (tech-lead: stage 2, not round 443); not an automatic refactor",
       "confirmedBy": [
         "a-round-443.md Architecture note (inlineEditorKeyIntent helper next to studio-ime-composition.ts; 5 handlers)",
         "gates/round-443/review.md Architecture note (pure helper returning ignore|swallow|settle; keep per-handler commit code; at end of stage 2) -> SYS-3 stage 2b"
       ]
+    },
+    {
+      "id": "SIG-R444-COMPOSING-LIB-HELPER",
+      "added": "2026-11-11 B round 444 -> 445 planning",
+      "decision": "D-29z1579",
+      "source": "gates/round-444/review.md Architecture note",
+      "signal": "focus-source.ts and studio-ime-composition.ts both decide \"is this an IME/composing key\" (isComposing || keyCode 229; focus-source adds Unidentified). Proposal: one lib/ helper for isComposing || 229 after SYS-3, Unidentified stays in focus-source; done when IME8, FT7, FT8 pass. Cost low, risk low",
+      "status": "signal only; candidate for the next focus-source stage with GATE444-L1-MACOS-OPTION and A-R444-REVIEW-L1; not scheduled"
+    },
+    {
+      "id": "TL-R445-I1-SCAN-NESTED-DESTRUCTURING",
+      "added": "2026-11-11 B round 444 -> 445 planning",
+      "decision": "D-29z1580",
+      "source": "b-round-444/sketch-review.md pass 2 Info",
+      "signal": "IME14 scan misses nested destructuring ({ nativeEvent: { isComposing } } = event) and bracket access (e[\"isComposing\"]); neither exists today; the scan is a guardrail",
+      "status": "signal only; not scheduled"
     }
   ],
   "vitest_floor_round64": 1574,
@@ -40809,7 +40818,7 @@
       "id": "TL-R443-G3-PLAIN-HELD-ROWS",
       "severity": "low",
       "origin": "B pre-check (tech-lead sketch review)",
-      "status": "queued SYS-3 stage 2 (D-29z1574): with the shared settle-key helper",
+      "status": "in_progress (D-29z1580): SYS-3 stage 2b, round 445 (IME13 rows for all five editors); closes on C PASS | queued SYS-3 stage 2 (D-29z1574): with the shared settle-key helper",
       "title": "no jsdom row holds a plain (non-IME) Enter/Escape on the Tempo, marker and Clip Gain editors; includes the tempo plain Escape after held repeat keys (tech-lead v2 delta Low gap)",
       "evidence": "b-round-442/sketch-review.md R4; b-round-442/sketch-review.md delta section",
       "repro": "grep repeat: true in ime-composition-ui / tempo-ui / markers-ui",
@@ -40824,7 +40833,48 @@
       "title": "ui/Modal.tsx (l.72-76), AuthModal, CommandPalette and StemsPlayerModal close on a composing or repeated Escape",
       "evidence": "b-round-443/sketch-review.md TL-R444-L2",
       "repro": "open any of those dialogs, compose with an IME in a field and press Escape to cancel the candidate",
-      "added": "2026-11-11 B round 443 -> 444 planning"
+      "added": "2026-11-11 B round 443 -> 444 planning",
+      "confirmedBy": [
+        "a-round-444.md Architecture note: a Modal shouldCloseOnEscape predicate is the alternative for this deferred Modal round once the protected ExportDialog question allows it"
+      ]
+    },
+    {
+      "id": "GATE444-L1-MACOS-OPTION",
+      "severity": "low",
+      "origin": "gate reviewer (B spec claim)",
+      "status": "deferred_low_polish (D-29z1579): owned by the next focus-source stage; no macOS heuristic chosen without a real Mac (cannot be run in the cloud); TLM-SYS3-IME-PLATFORMS step added",
+      "title": "macOS Option+character in a Studio text field still switches focus-source to keyboard in Chrome/Safari (altKey true, AltGraph false); FT9 title and doc 289 claimed \"AltGr or Option\"",
+      "evidence": "gates/round-444/review.md finding 1; app/lib/focus-source.ts at 616729c",
+      "repro": "macOS Chrome: focus the Library search by mouse, type Option+e / Option+2; data-focus-source becomes keyboard",
+      "fix": "reword FT9 title to AltGr only (doc 289 prose is corrected in round 445); optionally treat key.length===1 && altKey && !ctrlKey && !metaKey as a character on macOS after a real-Mac check",
+      "added": "2026-11-11 B round 444 -> 445 planning",
+      "confirmedBy": [
+        "A-R203-REVIEW-I1 (Option half)"
+      ],
+      "systemic_task": "SYS-3"
+    },
+    {
+      "id": "A-R444-REVIEW-L1-ALTGRAPH-META",
+      "severity": "low",
+      "origin": "B spec (sketch-444; found by A code-reviewer)",
+      "status": "deferred_low_polish (D-29z1579): focus-source.ts and its test are not owned by stage 2b (tech-lead R3); same future focus-source stage as GATE444-L1-MACOS-OPTION",
+      "title": "isFocusSourceAltGraphCharacter runs before the modifier return and ignores metaKey: Cmd+Option+char (Firefox-mac reports Option as AltGraph) stays pointer",
+      "evidence": "a-round-444.md code-reviewer L1",
+      "repro": "focus-source.ts:53-54,70 at 616729c",
+      "fix": "require !event.metaKey in isFocusSourceAltGraphCharacter + one FT9 row",
+      "added": "2026-11-11 B round 444 -> 445 planning",
+      "systemic_task": "SYS-3"
+    },
+    {
+      "id": "TL-R445-R4-LEADMAGNET-INLINE-COMPOSING",
+      "severity": "low",
+      "origin": "B pre-check (tech-lead sketch review R4)",
+      "status": "deferred_low_polish (D-29z1580): store-side; out of the Studio scan scope",
+      "title": "LeadMagnetPopup.tsx reads e.nativeEvent.isComposing inline (and no keyCode 229) instead of the shared composition helper",
+      "evidence": "b-round-444/sketch-review.md R4",
+      "repro": "grep -n isComposing app/components/marketing/LeadMagnetPopup.tsx at 616729c",
+      "fix": "move to isNativeImeCompositionKeyDown (or a lib helper, SIG-R444-COMPOSING-LIB-HELPER) when the store polish pass touches the popup",
+      "added": "2026-11-11 B round 444 -> 445 planning"
     }
   ],
   "regression_rounds": [
@@ -42053,7 +42103,7 @@
       "evidence": "grep isComposing in app = 0 hits at 5b1a2bb",
       "size": "1 round",
       "optional_attach": "GATE75-S5-ARIA-EXPANDED, GATE110-S3-TOGGLE-ARIA-EXPANDED only if dispatch keeps the same owner files",
-      "status": "in_progress (D-29z1577): stage 1 + fix-up done (C rounds 442, 443; published 4aa3c82, 1eefb4c); stage 2a dispatched round 444 (sketch b-round-443/sketch-444.patch.txt sha 567728df); stage 2b next | in_progress (D-29z1574): stage 1 C round 442 PASS (gate 442 4aa3c82); stage-1 fix-up C-R442-M1 dispatched round 443 (b-round-442/sketch-443.patch.txt v2 sha 6b68ac9e); stage 2 next (+ shared settle-key helper/scan SIG-R442, TL-R443-G3) | in_progress (D-29z1571): stage 1 dispatched round 442 (sketch b-round-441/sketch-442.patch.txt sha 0715fbdf; closes ROOT-R65-L5, A-R165-IME-ENTER and the unfiled range/Clip Gain/group sites on C PASS); stage 2 next | queued (after SABA-B-4 stage 2, before STORE-2b; policy \"queued right after the current stage\") | 2026-10-27 B round 203 -> 204 planning (D-29z169): after round 205 (LeadMagnet focus), order SYS-1, SYS-2, SYS-3 | 2026-10-28: not yet run; order moved behind STUDIO-PERFORMANCE by Saba (D-29z172); unchanged",
+      "status": "in_progress (D-29z1580): stage 2a done (C round 444 PASS, published 616729c); stage 2b dispatched round 445 (sketch b-round-444/sketch-445.patch.txt sha 07714283); SYS-3 complete on its C PASS | in_progress (D-29z1577): stage 1 + fix-up done (C rounds 442, 443; published 4aa3c82, 1eefb4c); stage 2a dispatched round 444 (sketch b-round-443/sketch-444.patch.txt sha 567728df); stage 2b next | in_progress (D-29z1574): stage 1 C round 442 PASS (gate 442 4aa3c82); stage-1 fix-up C-R442-M1 dispatched round 443 (b-round-442/sketch-443.patch.txt v2 sha 6b68ac9e); stage 2 next (+ shared settle-key helper/scan SIG-R442, TL-R443-G3) | in_progress (D-29z1571): stage 1 dispatched round 442 (sketch b-round-441/sketch-442.patch.txt sha 0715fbdf; closes ROOT-R65-L5, A-R165-IME-ENTER and the unfiled range/Clip Gain/group sites on C PASS); stage 2 next | queued (after SABA-B-4 stage 2, before STORE-2b; policy \"queued right after the current stage\") | 2026-10-27 B round 203 -> 204 planning (D-29z169): after round 205 (LeadMagnet focus), order SYS-1, SYS-2, SYS-3 | 2026-10-28: not yet run; order moved behind STUDIO-PERFORMANCE by Saba (D-29z172); unchanged",
       "added": "2026-10-27 B round 199 -> 200 planning (D-29z165)",
       "vetoable": "root or Saba may reorder without a B round",
       "also_fixes_unfiled_count": "3 sites in 2 files (C-R200-02)",
@@ -42114,19 +42164,23 @@
             "A-R203-REVIEW-I1"
           ],
           "browser_evidence_head": "b-round-443/probe/compare-head.txt NOT ALL OK (14 of 18 failing); sketch b-round-443/probe/compare-sketch.txt ALL OK (18 cells)",
-          "status": "dispatched (D-29z1577): round 444",
+          "status": "done (D-29z1579): C round 444 PASS browserVerified true; gate 444 published 616729c",
           "note_altgraph": "AltGraph half: jsdom FT9 + mutant M3 only; Playwright/CDP cannot set getModifierState(AltGraph) in this Chromium (b-round-443/probe/altgraph-check-sketch.json); A-R203-REVIEW-I1 closes at contract level, platform half on TLM-SYS3-IME-PLATFORMS"
         },
         {
           "id": "SYS-3-stage-2b",
-          "scope": "shared settle-key helper next to studio-ime-composition.ts / studio-repeat-safe.ts used by the five inline-editor handlers + HS1-style scan for inline copies (SIG-R442-INLINE-EDITOR-KEYS); TL-R443-G3 plain held-key jsdom rows; A-R443-REVIEW-L1/L2 (IME6 split + toBe); final stage: doc 288 and 289 l.4 -> Completed (L28)",
+          "scope": "inlineEditorKeyIntent (other|composing|held|settle) in studio-ime-composition.ts used by the five inline-editor handlers (HEAD truth table kept cell for cell, IME12); IME14/IME15 source scan; IME6 split per editor + Clip Gain toBe(shown); IME13 plain held-key rows; Workspace floating-video Escape ignores repeats (A-R444-REVIEW-I1, FV-HELD); docs 288/289 l.4 -> Completed, doc 289 FT9 prose AltGr only, new doc 290",
           "closes": [
             "TL-R443-G3-PLAIN-HELD-ROWS",
             "A-R443-REVIEW-L1-IME6-WEAK-GAIN",
             "A-R443-REVIEW-L2-IME6-ONE-IT",
-            "GATE443-L1-REPEAT-ESCAPE-BUBBLES"
+            "GATE443-L1-REPEAT-ESCAPE-BUBBLES",
+            "A-R444-REVIEW-I1-HELD-ESC-VIDEO",
+            "SIG-R442-INLINE-EDITOR-KEYS"
           ],
-          "status": "queued (D-29z1578): after round 444 C PASS"
+          "status": "dispatched (D-29z1580): round 445",
+          "round": 445,
+          "browser_evidence_head": "b-round-444/probe/compare-head.txt NOT ALL OK (8 of 14 failing); sketch b-round-444/probe/compare-sketch.txt ALL OK (14 cells), FRESH ALL SAME (14 cells)"
         }
       ]
     },
@@ -43208,24 +43262,6 @@
   },
   "decisions_log_b": [
     {
-      "id": "D-29z1526",
-      "date": "2026-11-10",
-      "by": "2026-11-10 B round 431 -> 432 planning",
-      "decision": "Close-review follow-ups (advisor): (1) Reference corrected from primary source: Live 12 manual 5.1.3.5 \"a progress bar appears in the dialog\" and 5.1.3.4 \"the progress bar in the dialog resets for each individual pass\" (WebFetch 2026-11-10). Our per-phase reset therefore matches Live's export behaviour; the \"12.4.5b11 stem separation overall progress\" claim came from a search summary only (release-notes page too large to fetch) and is withdrawn. SABA-Q-EXPORT-PROGRESS-OVERALL is withdrawn before reaching Saba (status wontask). (2) Row 4b now has its own script b-round-431/probe/compare-neighbours.py (load-phase samples: label == aria-valuetext == HEAD label, aria-label == HEAD, box +-1 px of HEAD); B run sketch vs head-final NEIGHBOURS OK (compare-neighbours.txt); render/wav-phase label == aria-valuetext stays unit row FV1. (3) Optimizer check: optimize-backlog.py l.41-55 reads only the top-level status; archive scan for other open-keyword statuses not in open_findings = 0 (b-round-431/archive-open-scan.txt). (4) REGRESSION-2026-11-13 scope addition REG-SABA-B-12-PROGRESS. (5) Timeout STOP limited to the two files whose rows change; render-budget R11-P1e (2006 ms / 5 s default in B covering run) is a record row."
-    },
-    {
-      "id": "D-29z1527",
-      "date": "2026-11-10",
-      "by": "2026-11-10 B round 432 -> 433 planning",
-      "decision": "Round 432 accepted from C evidence: c-round-432.json PASS, 0 bugs, browserVerified/realVerified true (fake-bearer backend row and Firefox/Safari/High Contrast BLOCKED in the cloud; gate rows listed as gate). B re-runs: tools/l57-check.py L57 OK (b-round-432/l57-check-c432.txt); C probe JSON re-judged with compare-progress.py -> ALL OK (2 cells, 4 states each) and compare-neighbours.py -> NEIGHBOURS OK (b-round-432/recompare/); c-round-432/mutants/summary.txt identical to b-round-431/mutants/summary.txt; c-round-432/auth/g428-auth.json pass true (warm-up attempt false = cold-server, expected). Gate 432 published 1a417fb on both remotes (gate head field and context/head-sha.txt name 1197dcb, stale); gates/round-432/review.md COMMIT OK, 9/10, suggestions only. SABA-B-12 stage 2b is complete."
-    },
-    {
-      "id": "D-29z1528",
-      "date": "2026-11-10",
-      "by": "2026-11-10 B round 432 -> 433 planning",
-      "decision": "Round 432 Lows (merged with the gate review where they overlap): A-R432-REVIEW-RV432-1 (indeterminate two stacked foreground/30 layers; Firefox single layer ~2.5:1) = gate suggestion 1 -> deferred_low_polish and in the TLM-SABA-B-12-FIREFOX-SAFARI scope; RV432-2 (pulse low point ~1.5:1) = gate suggestion 2 -> deferred_low_polish; RV432-3 (track vs surface 1.29:1, outline invisible at value 0) -> deferred_low_polish as an explicit product-designer ruling to revisit at the polish pass; RV432-4 (brassLabelTokens still exempts accent-foreground, no user) -> deferred_low_polish; RV432-5 (PG2 passes with a later {...spread} or style= on the tag; misses createElement/.ts wrappers/subdirectories) -> deferred_low_polish. Gate suggestion 3 (forced colours emulation only) = TLM row; gate 4 (PG2 [^<] fails loud) and 5 (labelStatusTokens exists) info, no entry. Records: R11-P1e render-budget 2,299 ms of 5 s (46 %, rising 2,006 -> 2,142 -> 2,299) carried as a record row; SfxSceneExport.tsx <progress> joins SABA-B-12-RECORDINGS-NUMBER (STORE-REDESIGN acceptance, apply STUDIO_PROGRESS_CLASS there and widen PG2 only if that acceptance wants it). Architecture note: none (A and gate)."
-    },
-    {
       "id": "D-29z1529",
       "date": "2026-11-10",
       "by": "2026-11-10 B round 432 -> 433 planning",
@@ -43524,6 +43560,24 @@
       "date": "2026-11-11",
       "by": "2026-11-11 B round 443 -> 444 planning",
       "decision": "Order after round 444: SYS-3 stage 2b; REGRESSION-2026-11-13 at the first planning on or after 2026-11-13 (first if due); STORE-REDESIGN 2b..5; ARCH-SPLIT (root frontend-architect checkpoint first); REVIEW-RECOMMENDATIONS; T12-ADVANCED; phase 2 under the skip rule. Next RETRO round 450. No architecture checkpoint request now: SYS-3 is not at a feature boundary; SIG-R442 is scheduled as stage 2b."
+    },
+    {
+      "id": "D-29z1579",
+      "date": "2026-11-11",
+      "by": "2026-11-11 B round 444 -> 445 planning",
+      "decision": "Round 444 accepted from C evidence: c-round-444.json PASS, browserVerified/realVerified true, 0 bugs (C5 ALL OK 18 cells, HEAD control 14 of 18 failing; C6 ALL OK; C7 ALL SAME); gate 444 published 616729c on both remotes. A-R203-REVIEW-M1 closed. A-R203-REVIEW-I1 closed for the AltGr half only; the macOS Option half -> GATE444-L1-MACOS-OPTION (Low, deferred, TLM step). A-R444-REVIEW-L1 -> deferred (focus-source not owned by stage 2b). A-R444-REVIEW-I1 reproduced in real Chromium (8 of 14 cells) -> Low, in stage 2b. Gate-444 finding 2 needs no fix, findings 3/4 info (finding 3 noted in doc 290). Gate Architecture note -> SIG-R444-COMPOSING-LIB-HELPER (signal). A Architecture note -> confirmedBy on TL-R444-L2."
+    },
+    {
+      "id": "D-29z1580",
+      "date": "2026-11-11",
+      "by": "2026-11-11 B round 444 -> 445 planning",
+      "decision": "Dispatch round 445 = SYS-3 stage 2b (final SYS-3 stage) on 616729c: sketch b-round-444/sketch-445.patch.txt sha 07714283 (tech-lead v1 approve-with-changes, L1-L3 applied; v2 delta approve). HEAD truth table pinned (IME12, run on HEAD 10/10). GATE443-L1 ruled no user-visible effect (probe). B pre-check: typecheck 0, lint 205 = HEAD, covering 60/1082, full 277/4071 rc 0, 12/12 mutants red, real Chromium video probe sketch ALL OK 14 / HEAD 8 of 14 failing, stage-1/2a probes ALL OK, plain held ALL SAME. A-R444-REVIEW-I1 is a new Low fixed now (2026-10-23 rule exception: same held-key class as TL-R443-G3, the round owns the code, one guarded line, HEAD red in 8 browser cells)."
+    },
+    {
+      "id": "D-29z1581",
+      "date": "2026-11-11",
+      "by": "2026-11-11 B round 444 -> 445 planning",
+      "decision": "Order after round 445: REGRESSION-2026-11-13 at the first planning on or after 2026-11-13 (first if due); STORE-REDESIGN 2b..5 (direction decision exists); ARCH-SPLIT (root frontend-architect checkpoint first); REVIEW-RECOMMENDATIONS; T12-ADVANCED; phase 2 under the skip rule. Next RETRO round 450. SYS-3 completes on round 445 C PASS: its open signals (SIG-R444-COMPOSING-LIB-HELPER, TL-R445-I1) stay signals; focus-source Lows (GATE444-L1-MACOS-OPTION, A-R444-REVIEW-L1-ALTGRAPH-META) go to the deferred polish pass. No new architecture checkpoint request: SYS-3 adds one small pure helper (tech-lead keep), and ARCH-SPLIT already has its root checkpoint step."
     }
   ],
   "retro_candidates": [

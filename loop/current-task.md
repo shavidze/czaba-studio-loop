@@ -1,173 +1,208 @@
-# Round 444: SYS-3 stage 2a — IME composition in the Library search, the shortcut-sheet search and focus-source
+# Round 445: SYS-3 stage 2b (last) — one key-intent helper for the five inline editors, and a held Escape no longer collapses the floating video
 
-**Planned by:** B, at the round 443 → 444 planning, 2026-11-11 (`b-round-443.md`).
-- The advisor was available and was consulted after orientation and before writing.
-- The round-443 task is archived as `tasks/round-443.md` (byte-identical copy, [K12]).
-- **Runtime change:** while an IME composes, our handlers in the Library search and the shortcut-sheet search no longer clear the query, move focus or close the sheet, and typing with an IME, Android or AltGr no longer turns the focus ring on. The query value under a composing Escape belongs to the IME and the browser (see the element rulings). A held Escape after a swallowed composing Escape clears or closes nothing. Visible UI does not change for non-IME users. 4 source files, 2 test files, doc 288 l.4 [K11] and new doc 289 change (8 paths, `b-round-443/grants-444.txt`).
-- **What does not apply, and why:** reference-first, `product-designer` and the screen budget. This is a bug-fix round with no visible change. There is no Ableton reference; the behaviour is the platform text-input standard (W3C UI Events `KeyboardEvent.isComposing`, `KeyboardEvent.repeat`, `getModifierState('AltGraph')`). Recorded as "no Ableton reference; platform standard".
-- **Baseline:** gate 443 is `published`, commit `1eefb4c` [K1]. The store tree is clean at `1eefb4c` [K2].
-- **Regression:** not due. `regression-last.json` is 2026-11-10 (round 425); the next is due on or after 2026-11-13.
+**Planned by:** B, at the round 444 → 445 planning, 2026-11-11 (`b-round-444.md`).
+- The advisor was available and was consulted after orientation and before hand-off.
+- The round-444 task is archived as `tasks/round-444.md` (byte-identical copy made before this file was rewritten) [K11].
+- **Runtime change, one user-visible behaviour:** with the floating video expanded, a held Escape that closes the shortcut sheet, the Export dialog, the BPM edit or the marker editor no longer collapses the video through its auto-repeat keydowns. A fresh Escape still returns the video as before. The five inline-editor handlers move onto one helper with **no** behaviour change (HEAD truth table pinned, IME12). 6 source files, 4 test files and 3 docs change (13 paths, `b-round-444/grants-445.txt`).
+- **What does not apply, and why:** reference-first, `product-designer` and the screen budget. This is a bug-fix and refactor round with nothing added to the screen. There is no Ableton reference for IME or auto-repeat handling; the rule is the platform text-input standard (W3C UI Events `KeyboardEvent.isComposing`, `KeyboardEvent.repeat`) and the loop's "a held key acts once" rule (L4 ruling from round 443). Recorded as "no Ableton reference; platform standard".
+- **Baseline:** gate 444 is `published`, commit `616729c` [K1]. The store tree is clean [K2].
+- **Regression:** not due. `regression-last.json` is 2026-11-10 [K25]; the next one is due on or after 2026-11-13.
 
-## Decisions (`backlog.json` v429 → v430, `decisions_log_b`)
-- **D-29z1576: round 443 accepted.** `c-round-443.json` is PASS with `browserVerified` true [K13]; gate 443 published `1eefb4c`.
-  - Closed: C-R442-M1-HELD-KEY-UNRULED, A-R442-REVIEW-L1 and A-R442-REVIEW-L2.
-  - A's review Lows A-R443-REVIEW-L1/L2 (origin B spec) are queued for stage 2b.
-  - A's Architecture note is recorded as `confirmedBy` on SIG-R442-INLINE-EDITOR-KEYS (L7).
-  - Gate-443 review (`gates/round-443/review.md`): GATE443-L1 (Tempo and Clip Gain repeat Escape is prevented but not stopped, so it bubbles; HEAD did the same) is a Low queued for stage 2b, which owns those handlers. Finding 2 needs no fix and finding 3 is covered by TLM-SYS3-IME-PLATFORMS. The gate's Architecture note is `confirmedBy` on SIG-R442 (stage 2b).
-  - `docs/technical/store-redesign/direction-decision.md` exists, so STORE-2b…5 are not gated on Saba. They wait only for their place in the queue.
-- **D-29z1577: SYS-3 stage 2 is split, and the stage-2a ruling.**
-  - **2a (this round):** focus-source (A-R203-REVIEW-M1, A-R203-REVIEW-I1), Library search and the shortcut-sheet search. These are three bugs of one class.
-  - **2b (next round):** the shared settle-key helper plus scan (SIG-R442-INLINE-EDITOR-KEYS), TL-R443-G3-PLAIN-HELD-ROWS and A-R443-REVIEW-L1/L2.
-  - **Stage numbering (L28):** SYS-3 now has 3 stages. Doc 288 l.4 (today `… stage 1 of 2 …` [K11]) becomes `In Progress (stage 1 of 3; C round 443 PASS)`. New doc 289 l.4 reads `In Progress (stage 2 of 3; C round 444 PASS)`. Stage 2b grants both l.4 lines to `Completed`.
-  - **Sheet-local guard, not `ui/Modal.tsx`** (tech-lead Q1). Modal has 3 importers: the two Studio dialogs and the protected legacy `app/components/studio/ExportDialog.tsx` [K25]. B's question to tech-lead said ~22; that was the count of all `~/components/ui` importers. The corrected count does not change the ruling, because a Modal change would still alter a protected file's behaviour with no loop evidence (`sketch-review.md` note). Modal and the other store dialogs → TL-R444-L2, `deferred_low_polish`.
-  - **No `preventDefault` on composing keys** (tech-lead Q2, same rule as stage 1). The IME owns the key.
-  - Tech-lead findings are ruled in `b-round-443/sketch-review.md`. L1 is a new TLM step. L2 goes to `deferred_low_polish`. L3, I1 and I2 are intended behaviour.
-- **D-29z1578: order.**
-  1. This round.
-  2. SYS-3 stage 2b.
-  3. REGRESSION-2026-11-13, at the first planning on or after 2026-11-13. It goes first if it is due.
-  4. STORE-REDESIGN 2b…5.
-  5. ARCH-SPLIT (root's frontend-architect checkpoint first).
-  6. REVIEW-RECOMMENDATIONS.
-  7. T12-ADVANCED.
-  8. Phase 2 under the skip rule.
+## Decisions (`backlog.json` v430 → v431, `decisions_log_b`)
+- **D-29z1579: round 444 accepted** from C evidence: `c-round-444.json` PASS, `browserVerified` true, 0 bugs [K12]; gate 444 published `616729c`.
+  - A-R203-REVIEW-M1 is closed.
+  - A-R203-REVIEW-I1 is closed for the **AltGr half only**. Gate-444 finding 1: Chrome and Safari on macOS do not report AltGraph for Option+character, so that path is unchanged. It is split out as **GATE444-L1-MACOS-OPTION** (Low, `deferred_low_polish`, plus a TLM step). No macOS heuristic is chosen without a real Mac.
+  - A-R444-REVIEW-L1 (Cmd+Option and `metaKey`) → **A-R444-REVIEW-L1-ALTGRAPH-META**, `deferred_low_polish`. `focus-source.ts` is not owned by this stage (tech-lead R3).
+  - A-R444-REVIEW-I1 (rated Info by A's reviewer) is **reproduced in real Chromium by B** and raised to Low: **A-R444-REVIEW-I1-HELD-ESC-VIDEO**, fixed in this round.
+  - Gate-444 finding 2 needs no fix. Finding 3 (the Library repeat Escape does not stop propagation) is noted in doc 290. Finding 4 is info.
+  - Gate Architecture note → SIG-R444-COMPOSING-LIB-HELPER (signal only). A's Architecture note → `confirmedBy` on TL-R444-L2.
+- **D-29z1580: round 445 = SYS-3 stage 2b.**
+  - **Why a Low is fixed now:** under the 2026-10-23 rule, a new Low is fixed early only when the round owns the code and the cost is small. A-R444-REVIEW-I1 qualifies: it is the same held-key class as TL-R443-G3, the fix is one guarded line, and HEAD is red in 8 browser cells.
+  - Closes on C PASS: TL-R443-G3-PLAIN-HELD-ROWS, A-R443-REVIEW-L1/L2, A-R444-REVIEW-I1-HELD-ESC-VIDEO, and SIG-R442-INLINE-EDITOR-KEYS (implemented).
+  - **GATE443-L1 is ruled "no user-visible effect"** (tech-lead R1 confirmed). The Workspace window handler returns for typing targets [K26]. Tempo blurs on the fresh press, so its repeats target the body and are handled by this round's fix. B's probe shows Clip Gain and Library-search held Escape leave the video expanded at HEAD (`b-round-444/probe/head.json`, GAIN and LIBSEARCH cells). Propagation stays as at HEAD (IME12). The finding closes when C's run of the same cells passes.
+  - New items: TL-R445-R4-LEADMAGNET-INLINE-COMPOSING (store-side Low, deferred) and TL-R445-I1-SCAN-NESTED-DESTRUCTURING (signal only).
+- **D-29z1581: order after this round.**
+  1. REGRESSION-2026-11-13, at the first planning on or after 2026-11-13. It goes first if due.
+  2. STORE-REDESIGN 2b…5.
+  3. ARCH-SPLIT (root's frontend-architect checkpoint first).
+  4. REVIEW-RECOMMENDATIONS.
+  5. T12-ADVANCED.
+  6. Phase 2 under the skip rule.
 
-  The next RETRO is round 450.
+  The next RETRO is round 450. SYS-3 is complete on this round's C PASS.
 
 ## Read first
-Read `lessons.md`. These apply most: L4 (one element, one rule), L11 (STOP), L23 (the full suite ran on the sketch: 275 files / 4053 tests, rc 0 [K20]), L26, L28, L38 (no vitest during a browser probe), L47 (focus target), L50 (focus origins [K23]) and L56/L58 (every asserted number below comes from B's run on the dispatched sketch).
+Read `lessons.md`. These apply most:
+- L4: one element, one rule. The "held key acts once" clause wins over "Esc returns the video" for repeat keydowns.
+- L11: STOP.
+- L23 and L58: every asserted number below comes from B's run on the dispatched sketch.
+- L26 and L28: docs.
+- L31: timeout headroom is checked; the files that gain rows peak at 807 ms against the 5 s default (`b-round-444/logs/l31-headroom.txt`).
+- L38: no vitest during a browser probe.
+- L47: focus targets.
+- L49: kept side effects.
+- L50: focus origins.
 
 ## 1. What changes
-- Sketch: `b-round-443/sketch-444.patch.txt`; sha256 in `b-round-443/sketch-444.sha256` [K6].
-- 6 paths are listed in `b-round-443/sketch-paths.txt`, with copies in `b-round-443/sketch-files/`.
-- Review: `b-round-443/sketch-review.md` (tech-lead approve-with-changes, 0 Medium+, follow-ups only; reviewed sha = dispatched sha).
+- Sketch: `b-round-444/sketch-445.patch.txt`, sha256 in `b-round-444/sketch-445.sha256` [K6].
+- 10 paths are listed in `b-round-444/sketch-paths.txt`, with copies in `b-round-444/sketch-files/`.
+- Review: `b-round-444/sketch-review.md`. tech-lead gave v1 approve-with-changes with 0 Medium+; L1–L3 and Info 1 are applied in v2; the v2 delta was approved. The reviewed sha equals the dispatched sha.
 
-| Site | HEAD (`1eefb4c`) [K7][K8][K10] | After |
+| Site | HEAD (`616729c`) [K7][K8] | After |
 |---|---|---|
-| `isFocusSourceFieldEditingKey` (focus-source) | First returns false on Ctrl/Meta/Alt or a non-string key. A composing, `Unidentified` (keyCode 229) or AltGraph character key in a text field switches the source to keyboard | (1) Return false only for a non-string key. (2) Return false for a non-text target, as before. (3) In a text field, `isComposing`, `key === 'Unidentified'`, keyCode 229, or a 1-char key with `getModifierState('AltGraph')` count as editing and keep `pointer`. (4) Then the Ctrl/Meta/Alt return, then the old key sets |
-| Library search, `handleSearchKeyDown` | ArrowDown: `preventDefault` and focus the first result. Escape: `preventDefault` and clear | A composing key (`isImeCompositionKeyDown`) returns first: no `preventDefault`, no clear, no move. A repeat Escape still calls `preventDefault` but does not clear |
-| Shortcut sheet, capture `keydown` on `window` | Escape: `preventDefault`. The Modal `document` listener then closes the sheet | A composing Escape (`isNativeImeCompositionKeyDown`): `stopPropagation`, no `preventDefault`, sheet stays open. A repeat Escape: `preventDefault` + `stopPropagation`, sheet stays open. A plain Escape is unchanged |
-| `studio-ime-composition.ts` | `isImeCompositionKeyDown` (React event) | Adds `isNativeImeCompositionKeyDown` (native event: `isComposing` or keyCode 229). The React helper delegates to it |
+| `studio-ime-composition.ts` | `isImeCompositionKeyDown`, `isNativeImeCompositionKeyDown` | Adds `InlineEditorSettleKey` (`'Enter' \| 'Escape'`), `INLINE_EDITOR_SETTLE_KEYS`, `INLINE_EDITOR_ENTER_ONLY_KEYS` and `inlineEditorKeyIntent(event, keys)`. It returns `other` (the key is not in the list), then `composing` (`isComposing` or keyCode 229), then `held` (`repeat`), else `settle`. It is pure and has no side effects |
+| BPM `handleTempoKeyDown` | inline composing check, then Enter / Escape branches with their own repeat checks | `other`/`composing` → return; else `preventDefault`; `held` → return; Escape → skip commit + drop the draft; then `blur()` |
+| Marker and group name editors | Enter/Escape: `stopPropagation` first, then the composing return, `preventDefault` and the repeat check | Same order through the intent: `other` → return; `stopPropagation`; `composing` → return; `preventDefault`; `settle` → `settleEditor` |
+| Detail From/To `handleRangeInputKeyDown` | composing return; Enter → `preventDefault`, apply when not repeated | `INLINE_EDITOR_ENTER_ONLY_KEYS`; `other`/`composing` → return; `preventDefault`; `settle` → apply |
+| Clip Gain `handleClipGainKeyDown` | composing return; Enter or Escape → `preventDefault`, act when not repeated | `other`/`composing` → return; `preventDefault`; `held` → return; Enter → commit; `else if` Escape → revert the text |
+| `StudioWorkspace` window Escape branch, video expanded | `preventDefault` + `returnFloatingVideo()` for every Escape, repeats included [K24] | `preventDefault` always; `returnFloatingVideo()` only when `!event.repeat`. No later Escape branch exists in that handler (tech-lead R2) |
 
-- **Focus targets (L47):** a swallowed key leaves focus in the same field; nothing unmounts.
-  - A fresh plain Escape in the Library search clears it and focus stays in the search.
-  - A plain ArrowDown focuses the first result option, through the existing `requestAnimationFrame` [K31].
-  - A plain Escape in the sheet closes it and focus returns to the opener. From the body this is the footer button "Keyboard shortcuts (?)", the same as HEAD (SS2).
-- **Focus origins (L50):** the regex over the 4 granted source files finds 30 hits [K23] (`b-round-443/logs/l50-focus-origins.txt`). One class ruling covers them all: the sketch changes none of those lines. It only adds early returns that keep focus where it is, so no hit gets a new origin.
-- **Inventory (L1):** 19 `input`/`textarea`/`contentEditable` sites in `app/components/arrangement` [K22] (`b-round-443/logs/inventory-inputs.txt`).
-  - Stage 1 covers Tempo, marker, group, Detail From/To and Clip Gain.
-  - This round covers the Library and sheet search.
-  - The rest are `range`, `radio` and `file` inputs, plus the read-only narrow-screen link field. None has a text key handler, so they are out of scope.
-  - Three window/document `keydown` listeners [K22] (`logs/inventory-global-keydown.txt`). The Workspace handler returns early for typing targets (`isTypingTarget(event.target)` [K30]).
+- **Kept side effects (L49):** every handler keeps its HEAD `preventDefault`, `stopPropagation`, blur, commit, cancel and revert calls, in HEAD order, for every key × {composing, held, plain} cell. IME12 pins the HEAD table (`defaultPrevented`, reached `document`); B ran it unchanged on a clean `616729c` copy: 10 passed, rc 0 [K22] (`b-round-444/logs/headrun-truth-table.log`). The only removed effect is the video return on a repeat Escape, which is the fix.
+- **Focus targets (L47):** a swallowed held key leaves focus where the fresh press put it. In the browser, measured by B (`b-round-444/probe/head.json` vs `sketch-merged.json` `afterFresh`, `FRESH ALL SAME (14 cells)` [K16]):
+
+  | Fresh Escape on | Focus after it |
+  |---|---|
+  | Sheet | the footer button "Keyboard shortcuts (?)" |
+  | Export | its opener, the toolbar button "Export" (`b-round-444/probe/export-focus-head.json`, both viewports) |
+  | Tempo | focus leaves the field, through the HEAD `blur()` (round 443 wording). This round neither changes nor rules that target; it is pre-existing and out of scope here |
+  | Marker editor | `arrangement-marker-add` |
+  | Clip Gain | stays in the field |
+  | Library search | stays in the field |
+
+  Nothing new unmounts.
+- **Focus origins (L50):** `grep -nE 'onPointerDown(Capture)?|onBlur|settleEditor\(|\.focus\(|^\s*\{[^}]*(\.map\(|&&|\?)'` over the 6 granted source files finds 62 hits at HEAD [K23] (`b-round-444/logs/l50-focus-origins.txt`). The sketch changes one source line that matches: the group editor's `settleEditor(...)`, which is re-indented under `intent === 'settle'`, the same guard as HEAD's `!event.repeat` after the composing return (`b-round-444/logs/l50-changed-lines.txt`). One class ruling: no hit gets a new origin.
 - **Element rulings (L4):**
-  - Library search and sheet search with a composing Escape: the "IME owns the key" clause wins over "Escape clears". **Measured fact** (B, sketch server): under the synthetic CDP sequence the query still empties, through the browser's default action of that keydown. A page capture listener that calls `preventDefault` on it keeps the query (`drso`, `plso`) [K28]. **Inference** (tech-lead Q2, not measured): a real IME takes the key first, so the default never runs. **Ruling:** we do not call `preventDefault` on composing keys, the query value is recorded and not asserted, and the real-IME check is a TLM step (TL-R444-L1).
-  - AltGraph: **measured fact**, Playwright's `keyboard.down('AltGraph')` and CDP modifiers do not set `getModifierState('AltGraph')` in this Chromium [K29]. So the AltGraph half has no browser row: it is proved by jsdom FT9 and mutant M3, and the platform half (Windows AltGr, macOS Option) is a TLM step. A-R203-REVIEW-I1 closes at contract level on C PASS; its platform half stays on TLM-SYS3-IME-PLATFORMS.
-  - Sheet with a repeat Escape: the "held key acts once" clause wins over "Esc closes the sheet". Only a fresh press closes it (TL-R444-I2).
+  - Held Escape with the video expanded: "held key acts once" wins. Only a fresh Escape returns the video.
+  - GATE443-L1: HEAD propagation is kept and not unified (tech-lead: `stopPropagation` legitimately differs per editor).
 - **Tests:**
-  - `focus-source-typing.test.tsx` gains:
-    - **FT7:** composing Enter, Escape, ArrowDown, Tab and Ctrl+K in text, search and textarea keep pointer; a button and the body still switch.
-    - **FT8:** `Unidentified` and keyCode 229 keep pointer in a text field; a range input and a plain Escape still switch.
-    - **FT9:** AltGraph `@`, `€` and `{` keep pointer, even with Ctrl+Alt. Ctrl+Alt without AltGraph, AltGraph+ArrowLeft and a button still switch.
-  - New `ime-composition-stage2-ui.test.tsx`:
-    - **IME8:** helper truth table.
-    - **IME9** (×2 forms): Library search. The composing Escape keeps the query; the composing ArrowDown keeps focus and queues no focus frame; 3 held Escape repeats are prevented and clear nothing; the snapshot stays equal; a plain Escape clears; a plain ArrowDown queues one frame that focuses the "Hit" option.
-    - **IME10** (×2 forms): sheet. The composing Escape does not reach a `document` listener; the sheet stays open with focus and query; the held repeats are prevented and keep it open; a plain Escape closes it and focus moves to the footer button.
-- **Neighbours that could break:** `shortcut-sheet-ui` (SS2, SC4–SC6 Escape and Clear), the library suites (`library-row-strings-ui` Escape clears, `library-focus-handoff`, `library-video-return-focus`), `focus-source.test.tsx`, `store-focus-ring`, `studio-focus-ring`, and stage-1 `ime-composition-ui`.
-  - All are in the 25-file covering set, which passes on the sketch with 440 tests [K15].
-  - focus-source is store-wide. The full suite passes on the sketch [K20].
+  - **`ime-composition-ui.test.tsx`: IME6 is split** into 3 editors × 2 forms, titled `IME6 held key after a composing key, %s editor (%s): …`. Clip Gain's final assertion becomes `toBe(shown)` (A-R443-REVIEW-L1/L2).
+  - **New `ime-composition-stage2b-ui.test.tsx`:**
+    - **IME11:** helper table.
+    - **IME12** (×5 editors): HEAD truth table.
+    - **IME13** (5 rows, TL-R443-G3): a plain held Enter/Escape (repeat only, no IME) on BPM, marker, group, From and Clip Gain changes nothing; then a fresh key acts once.
+  - **New `ime-composition-source-scan.test.ts`:**
+    - **IME14:** no inline `isComposing`, keyCode/which 229 or destructured `isComposing` in `app/components/arrangement` outside the helper [K9]. The 4 editor files call `inlineEditorKeyIntent`; only Library and the shortcut sheet call the composition helper directly.
+    - **IME15:** pattern self-test.
+  - **`floating-video.test.tsx`: FV-HELD.** Three repeat Escapes on `window` are prevented and keep the video floating; a fresh Escape returns it.
+- **Neighbours that could break:** the stage-1/2a IME suites, `floating-video`, the tempo, marker, group, Detail and Clip Gain suites, and `held-enter-*`. All are in the 60-file covering set, which passes on the sketch with 1082 tests [K14]. The full suite passes on the sketch: 277 files, 4071 tests, rc 0 [K15].
 
 ## 2. A — implementation (Claude Opus 5.5)
-1. Precondition: `bash b-round-443/claims-444.sh | grep -E '^K(1|2|5|6) '` prints:
-   - `K1 head 1eefb4c gate443 published 1eefb4c`
+1. **Precondition:** run `bash b-round-444/claims-445.sh | grep -E '^K(1|2|5|6) '`. It must print:
+   - `K1 head 616729c gate444 published 616729c`
    - `K2 status total 0 outside-grants 0`
    - `K5 sketch-applies yes`
-   - `K6 sketch-sha 567728dfdf67dafd expected 567728dfdf67dafd`
+   - `K6 sketch-sha 07714283ff34c710 expected 07714283ff34c710`
 
    Anything else is a STOP.
-2. In the store, run `git apply --check -p1 <loop>/b-round-443/sketch-444.patch.txt`, then `git apply -p1 <loop>/b-round-443/sketch-444.patch.txt`. Do not hand-edit the sketch.
-3. Doc 288 [K11]: change l.4 only, to exactly `**სტატუსი:** In Progress (stage 1 of 3; C round 443 PASS)`.
-4. Create `docs/implementation/2026/quarter-IV/289-sys-3-stage-2a-ime-search-fields.md` (absent today [K11]). Write it in Georgian with English technical terms, following `docs/implementation/TEMPLATE.md` (L26 headings).
-   - l.4 is exactly `**სტატუსი:** In Progress (stage 2 of 3; C round 444 PASS)`.
-   - Content:
-     - the 4-site table;
-     - the sheet-local vs Modal decision (TL-R444-L2);
-     - the IME-owns-the-key rule and the recorded native search clear (TL-R444-L1);
-     - **A5:** a sentence saying that focus-source counting `Unidentified` while the native helper does not is intended (TL-R444-I1);
-     - the composing Tab ruling (TL-R444-L3);
-     - the 8 mutant ids from `b-round-443/mutants/results.jsonl`;
-     - the browser lines (HEAD `NOT ALL OK (14 of 18 failing)`, sketch `ALL OK (18 cells)`);
-     - FT7–FT9 and IME8–IME10.
-   - In TODO, list stage 2b (shared settle-key helper + scan, TL-R443-G3, A-R443-REVIEW-L1/L2) and TLM-SYS3-IME-PLATFORMS with the new search-field step. Every test the doc names must exist (L26).
-5. **Grants:** exactly 8 paths, `b-round-443/grants-444.txt`. Any other changed path is a STOP.
+2. In the store, run `git apply --check -p1 <loop>/b-round-444/sketch-445.patch.txt`, then `git apply -p1 <loop>/b-round-444/sketch-445.patch.txt`. Do not hand-edit the sketch.
+3. **Doc 288** (`docs/implementation/2026/quarter-IV/288-sys-3-stage-1-ime-composition.md` [K10]), granted lines only:
+   - l.4 becomes exactly `**სტატუსი:** Completed (C round 445 PASS)` [K10].
+   - In the test-title list, the IME6 bullet (today the old title, ×1 [K28]) becomes the new title verbatim (copy it from the test file), followed by ` (round 443; round 445-ში editor-ებად დაიყო)`.
+4. **Doc 289**, granted lines only:
+   - l.4 becomes exactly `**სტატუსი:** Completed (C round 445 PASS)` [K10].
+   - In l.13, `(Windows AltGr, macOS Option)` (×1 today [K28]) becomes `(Windows/Linux AltGr)`.
+   - Directly after the FT9 title bullet, add one sentence: FT9 proves AltGr only (a synthetic `AltGraph` modifier), and macOS Option+character in Chrome/Safari is not covered (GATE444-L1-MACOS-OPTION, deferred).
+5. **New doc 290:** `docs/implementation/2026/quarter-IV/290-sys-3-stage-2b-inline-editor-key-intent.md`, absent today [K10]. Write it in Georgian with English terms, using the `TEMPLATE.md` headings (L26). l.4 is exactly `**სტატუსი:** Completed (C round 445 PASS)`. Content:
+   - the site table above;
+   - the HEAD truth table and why it is kept (IME12; GATE443-L1 ruling);
+   - the held-Escape video fix with both browser lines (HEAD `NOT ALL OK (8 of 14 failing)`, sketch `ALL OK (14 cells)` / `FRESH ALL SAME (14 cells)`), and the note that FV-HELD is synthetic while the Chromium probe is the main evidence (tech-lead Info 2);
+   - gate-444 finding 3 (the Library repeat Escape is prevented and not stopped; harmless);
+   - the 12 mutant ids from `b-round-444/mutants/results.jsonl`;
+   - the test titles IME6 (new), IME11–IME15 and FV-HELD;
+   - the tech-lead keep note.
+
+   In TODO, list:
+   - GATE444-L1-MACOS-OPTION;
+   - A-R444-REVIEW-L1-ALTGRAPH-META;
+   - SIG-R444-COMPOSING-LIB-HELPER;
+   - TL-R445-I1;
+   - TLM-SYS3-IME-PLATFORMS (deadline RETRO 450).
+
+   Every test the doc names must exist (L26).
+6. **Grants:** exactly 13 paths, `b-round-444/grants-445.txt`. Any other changed path is a STOP.
 
 **A's checks (only these; the full suite is a gate row):**
 
 | # | Check | Pass |
 |---|---|---|
-| A1 | `cmp` each path in `sketch-paths.txt` against `b-round-443/sketch-files/<path>` | 6/6 identical |
-| A2 | `npx vitest run $(cat <loop>/b-round-443/covering-files.txt)` | rc 0, 25 files, 440 tests [K15] |
-| A3 | `npm run typecheck`; `npm run lint`; `npx biome check $(cat <loop>/b-round-443/sketch-paths.txt)` | rc 0; rc 0 with `Found 205 warnings.` (HEAD and sketch both 205 [K17]); rc 0 |
-| A4 | `bash b-round-443/claims-444.sh` after the change, diffed against `b-round-443/claims-444-sketch-output.txt`. That file is the script's output on B's clone of `1eefb4c` with the sketch applied and both doc l.4 lines in their final state. Against the planning output it differs only in K2 (`total 8 outside-grants 0`), K4 (`6/6`), K5 (`no`), K8, K9, K10 (`0`) and K11 | no diff (identical) |
-| A5 | doc 289 contains `TL-R444-I1` and the 8 mutant ids | grep 1 each |
+| A1 | `cmp` each path in `sketch-paths.txt` against `b-round-444/sketch-files/<path>` | 10/10 identical |
+| A2 | `npx vitest run $(cat <loop>/b-round-444/covering-files.txt)` | rc 0, 60 files, 1082 tests [K14] |
+| A3 | `npm run typecheck`; `npm run lint`; `npx biome check $(cat <loop>/b-round-444/sketch-paths.txt)` | rc 0; rc 0 with `Found 205 warnings` [K17]; rc 0 |
+| A4 | After all edits, run `bash b-round-444/claims-445.sh` and diff it against `b-round-444/claims-445-sketch-output.txt`. That file is the script's output on B's clone of `616729c` with the sketch applied and the three doc l.4 lines in their final state [K10]. It differs from the planning output only in K2 (`total 13 outside-grants 0`), K4 (`10/10`), K5 (`no`), K7, K8, K9, K10 and K28 | no diff |
+| A5 | `grep -c` in doc 290: each of the 12 mutant ids, `FV-HELD` and `GATE443-L1` | ≥ 1 each |
 
-- 8 files change, so A runs `code-reviewer` (3+ files rule) and passes its Architecture note to B. A Medium+ finding that `sketch-review.md` does not rule is a STOP (L11).
+- 13 files change, so A runs `code-reviewer` (3+ files rule) and passes its Architecture note to B. A Medium+ finding that `sketch-review.md` does not rule is a STOP (L11).
 
 ## 3. C — verification (rows)
-Write `c-round-444/progress.json` after every row (L59). Run C5–C6 before any vitest (L38). Write all L57 fields and run `tools/l57-check.py` before hand-off.
+Write `c-round-445/progress.json` after every row (L59). Run C5–C7 before any vitest (L38). Write all L57 fields and run `tools/l57-check.py` before hand-off.
 
 | Row | What | Pass |
 |---|---|---|
-| C1 SOURCE-SCOPE | `git status` paths ⊆ `grants-444.txt`; K3 protected rc 0 | the 8 granted paths only |
-| C2 PATCH-IDENTITY | the 6 sketch paths vs `b-round-443/sketch-files/` | 6/6 identical |
-| C3 COVERING | `npx vitest run $(cat b-round-443/covering-files.txt)` | rc 0, 25 files, 440/440 |
-| C4 MUTANTS | `SCRATCH=<a directory that contains store/: C's own git archive of HEAD + sketch, node_modules symlinked> OUT=c-round-444/mut python3 -I b-round-443/mutants/run-mutants.py` (OUT must start empty) | 8 lines; each `id`, `rc` and `failedRows` equal `b-round-443/mutants/results.jsonl` [K24] |
-| **C5 IME-SEARCH-BROWSER** | `BASE=http://127.0.0.1:5173 COMPOSE=so node b-round-443/probe/ime-stage2.mjs ALL 1440x900,1280x720 > c-round-444/tree.json`; `python3 -I b-round-443/probe/compare.py c-round-444/tree.json` | `ALL OK (18 cells)` [K16]. A cold-start `error` cell is environment-invalid: re-run it (max 2 replacements); it is never a FAIL. The LIB-ESC query value is recorded only (synthetic native clear, tech-lead Q2). This row proves the handler contract; real IME platforms stay TLM |
-| C5-HEAD control | Start HEAD on :5177 (`b-round-440/probe/head-server.sh start <dir> 5177`, own cacheDir; stop by port), warm `/studio-lab` once in a browser, then run the same probe and compare | `NOT ALL OK (14 of 18 failing)`, with the same failing cells as `b-round-443/probe/compare-head.txt` |
-| C6 NEIGHBOURS | `BASE=http://127.0.0.1:5173 node b-round-441/probe/ime-sites.mjs ALL 1440x900,1280x720 > c-round-444/sites.json` + `python3 -I b-round-441/probe/compare.py c-round-444/sites.json`; `BASE=… node b-round-442/probe/ime-held.mjs ALL 1440x900,1280x720 > c-round-444/held.json` + `python3 -I b-round-442/probe/compare-held.py c-round-444/held.json` | both `ALL OK (18 cells)`, as on B's sketch server [K26] |
-| C7 FOCUS TARGETS (L47) | `SHOTS=c-round-444 BASE=http://127.0.0.1:5173 node b-round-443/probe/focus-targets.mjs > c-round-444/c7-tree.json`, and the same on C's HEAD server :5177 → `c-round-444/c7-head.json`; `python3 -I b-round-443/probe/compare-c7.py c-round-444/c7-tree.json c-round-444/c7-head.json`. Steps: (a) Library search, type `dr`, plain Escape; (b) plain ArrowDown from the search; (c) `?` then plain Escape. "Ring" = the focused element's computed `outline-style` is not `none` and `outline-width` > 0, or `box-shadow` is not `none` | `ALL SAME (6 cells)` with the ring true in each (B's sketch vs HEAD [K27]): (a) search focused, value `''`; (b) an `option`; (c) "Keyboard shortcuts (?)". Screenshots `c7a/b/c-<width>.png` |
-| C8 SMOKE + AUTH | anonymous `/studio-lab`: `auth_user` null; `/studio/middle-east` shows "Sign in required", 0 `audio[src]`, studio token 401; Play reaches Playing and Stop returns to Stopped at both viewports | as round 443 |
-| C9 DOCS | doc 289: TEMPLATE headings in order, l.4 exact, 8 mutant ids, both browser lines, TL-R444-I1/L3 rulings, the TLM step; every named test exists (L26). doc 288 l.4 exact. `grep -rn 'C round [0-9]* pending' docs/implementation` = 0 [K32] | all present |
+| C1 SOURCE-SCOPE | `git status` paths ⊆ `grants-445.txt`; K3 protected rc 0 | the 13 granted paths only |
+| C2 PATCH-IDENTITY | the 10 sketch paths vs `b-round-444/sketch-files/` | 10/10 identical |
+| C3 COVERING | `npx vitest run $(cat b-round-444/covering-files.txt)` | rc 0, 60 files, 1082/1082 |
+| C4 MUTANTS | `SCRATCH=<a directory containing store/: C's own git archive of HEAD + the sketch, with node_modules symlinked> OUT=c-round-445/mut python3 -I b-round-444/mutants/run-mutants.py` (OUT must start empty) | 12 lines; each `id`, `rc` and `failedRows` equals `b-round-444/mutants/results.jsonl` [K13] |
+| **C5 HELD-ESC-VIDEO** | `BASE=http://127.0.0.1:5173 node b-round-444/probe/held-escape-video.mjs ALL 1440x900,1280x720 > c-round-445/tree.json`. Then start HEAD on :5177 (`b-round-440/probe/head-server.sh start <dir> 5177`, own cacheDir; stop it by port), warm `/studio-lab` once, and run the same probe there → `c-round-445/head.json`. Then `python3 -I b-round-444/probe/compare-video.py c-round-445/tree.json c-round-445/head.json` and `python3 -I b-round-444/probe/compare-video.py c-round-445/head.json` | tree: `ALL OK (14 cells)` and `FRESH ALL SAME (14 cells)`; HEAD: `NOT ALL OK (8 of 14 failing)` with the same cells as `b-round-444/probe/compare-head.txt` [K16]. A cold-start `error` cell is environment-invalid: re-run it (max 2 replacements); it is never a FAIL. The GAIN and LIBSEARCH cells close GATE443-L1 |
+| C6 NEIGHBOURS | On :5173: `node b-round-441/probe/ime-sites.mjs` + `b-round-441/probe/compare.py`; `node b-round-442/probe/ime-held.mjs` + `compare-held.py`; `COMPOSE=so node b-round-443/probe/ime-stage2.mjs` + `b-round-443/probe/compare.py` (each with `ALL 1440x900,1280x720`, output under `c-round-445/`) | all three `ALL OK (18 cells)` [K21] |
+| C7 PLAIN HELD (no IME) | `node b-round-442/probe/plain-held.mjs ALL 1440x900,1280x720` on :5173 → `c-round-445/plain-tree.json` and on :5177 → `plain-head.json`; `python3 -I b-round-442/probe/compare-plain.py c-round-445/plain-tree.json c-round-445/plain-head.json` | `ALL SAME (18 cells)` [K21] |
+| C8 SMOKE + AUTH | anonymous `/studio-lab`: `auth_user` null; `/studio/middle-east` shows "Sign in required", 0 `audio[src]`, studio token 401; Play reaches Playing and Stop returns to Stopped at both viewports (as in `c-round-444/smoke.mjs`) | as round 444 |
+| C9 DOCS | doc 290: TEMPLATE headings in order, l.4 exact, the 12 mutant ids, both browser lines, `GATE443-L1`, the TODO ids, and every named test exists (L26). Docs 288 and 289: l.4 exact; the IME6 bullet equals the test title; l.13 says AltGr only; the FT9 sentence is present. `grep -rn 'C round [0-9]* pending' docs/implementation` returns 0 [K27] | all present |
 | C10 SOURCE-SCOPE-END | rerun C1 | unchanged |
-| C11 CLAIMS | run `bash b-round-443/claims-444.sh` and diff against `b-round-443/claims-444-sketch-output.txt`; run the L29 tag grep over this task | no diff; every store fact is tagged |
+| C11 CLAIMS | run `bash b-round-444/claims-445.sh` and diff it against `b-round-444/claims-445-sketch-output.txt`; run the L29 tag grep over this task | no diff; every store fact is tagged |
 | gate | full vitest, typecheck, build, Biome, verify | `gate` (not claimed by C) |
 
-- **CZABA requirement:** while an IME user composes in either Studio search field, CZABA's own handlers do not clear the query, move the focus or close the sheet (the query under a real IME's Escape is the TLM half). Typing with an IME, Android or AltGr does not turn the focus ring on mid-word.
+- **CZABA requirement:**
+  - A held key acts once. A held Escape that closes a dialog or an editor does not also collapse the expanded video.
+  - Every inline editor ignores composing keys and auto-repeat exactly as before, now through one rule.
 - **Ableton conformance:** not applicable (platform standard).
-- **Tech Lead manual (does not block):** TLM-SYS3-IME-PLATFORMS gains this step: on macOS Chrome with the Japanese IME and Windows Chrome with MS-IME, a composing Escape in the Library search and the sheet search keeps the query, and the sheet stays open (TL-R444-L1). Android: no focus ring while typing in the Library search. Windows AltGr `@`: no ring. Deadline RETRO 450.
+- **Tech Lead manual (does not block):** TLM-SYS3-IME-PLATFORMS gains this step: on macOS Chrome and Safari, type Option+e or Option+2 in the Library search after focusing it by mouse, and record whether the ring appears (expected today: it does, GATE444-L1-MACOS-OPTION). Deadline RETRO 450.
 
-## Claims (`b-round-443/claims-444.sh`; planning output `b-round-443/claims-444-planning-output.txt`; sketch output `b-round-443/claims-444-sketch-output.txt`)
+## Claims (`b-round-444/claims-445.sh`; planning output `b-round-444/claims-445-planning-output.txt`; expected after A `b-round-444/claims-445-sketch-output.txt`)
 
-| Tag | Claim | Expected at planning (HEAD `1eefb4c`) |
+| Tag | Claim | Expected at planning (HEAD `616729c`) |
 |---|---|---|
-| [K1] | HEAD and gate 443 | `1eefb4c gate443 published 1eefb4c` |
+| [K1] | HEAD and gate 444 | `616729c gate444 published 616729c` |
 | [K2] | clean tree | `total 0 outside-grants 0` |
 | [K3] | protected files | `rc 0 granted-protected 0` |
-| [K4] | tree vs sketch | `0/6` |
+| [K4] | tree vs sketch | `0/10` |
 | [K5] | sketch applies | `yes` |
-| [K6] | sketch sha | `567728dfdf67dafd` |
-| [K7] | the handlers (`app/components/arrangement` Library/Sheet, `app/lib/focus-source.ts`, `app/components/ui/Modal.tsx`) | `library-search 1 sheet-capture 1 fs-predicate 1 modal-escape 1 search-types 1/1` |
-| [K8] | IME guards absent | `library 0 sheet 0 focus-source 0 native-helper 0` |
-| [K9] | new rows absent | `FT7 0 FT8 0 FT9 0 stage2-file absent` |
-| [K10] | modifier early return first | `1` |
-| [K11] | docs | doc 288 l.4 `… stage 1 of 2; C round 443 PASS)`, doc289 absent |
-| [K12] | archive | `current-is-new archive443 present` |
-| [K13] | C round 443 | `PASS True 0` |
-| [K14] | mutants | `8 red 8` |
-| [K15] | covering on sketch | `25`, `440 passed`, `rc 0` |
-| [K16] | browser | sketch `ALL OK (18 cells)` / head `NOT ALL OK (14 of 18 failing)` |
-| [K17] | typecheck / Biome / lint on sketch | `rc 0` / `rc 0` / `Found 205 warnings` both |
-| [K18] | artifacts | `checked` |
+| [K6] | sketch sha | `07714283ff34c710` |
+| [K7] | composing-helper calls (`app/components/arrangement` Tempo, Marker, Group, Detail, Library) | `tempo 1 marker 1 group 1 detail 2 library 1` |
+| [K8] | intent helper absent; video Escape branch has no repeat guard (`StudioWorkspace.tsx`) | `intent-helper 0 video-escape-repeat-guard 0 video-escape-unguarded 1` |
+| [K9] | new rows absent | `IME11 0 IME12 0 IME13 0 IME14 0 IME15 0 FV-HELD 0 IME6-split 0` |
+| [K10] | docs | doc 288 l.4 `… stage 1 of 3; C round 443 PASS)`, doc 289 l.4 `… stage 2 of 3; C round 444 PASS)`, doc 290 absent (`0`) |
+| [K11] | archive | `archive444 present` |
+| [K12] | C round 444 | `PASS True 0` |
+| [K13] | mutants | `12 red 12` |
+| [K14] | covering on sketch | `files 60 1082 passed` |
+| [K15] | full suite on sketch | `277 files 4071 tests` |
+| [K16] | browser | sketch `ALL OK (14 cells)` / `FRESH ALL SAME (14 cells)`; head `NOT ALL OK (8 of 14 failing)` |
+| [K17] | typecheck / lint / scoped Biome on sketch | `typecheck-errors 0 lint 'Found 205 warnings' biome-errors 0` |
+| [K18] | artifacts | `22/22` |
 | [K19] | `tools/l58-check.py current-task.md` | `L58 OK` |
-| [K20] | full suite on sketch | `275 passed files 4053 passed tests rc 0` |
-| [K21] | probe server source = sketch | `4/4` |
-| [K22] | inventory | `inputs 19 global-keydown 3` |
-| [K23] | L50 focus-origin hits | `30` |
-| [K26] | stage-1 probes on B's full-sketch server | `sites 'ALL OK (18 cells)' held 'ALL OK (18 cells)'` |
-| [K27] | C7 on B's sketch vs HEAD | `'ALL SAME (6 cells)'` |
-| [K28] | native-clear experiment (sketch, 1440) | `prevent drso/plso control ''/''` |
-| [K29] | AltGraph in Playwright Chromium | `altGraph-true 0 of 3 keydowns` |
-| [K30] | Workspace typing-target checks (`StudioWorkspace.tsx`) | `4` |
-| [K31] | Library option focus through rAF (`ArrangementLibrary.tsx`) | `1` |
-| [K32] | `pending` status lines in `docs/implementation` | `0` |
-| [K25] | Modal importers (`app/**/*.tsx`, excluding `__tests__`) | `3 protected 1` |
-| [K24] | mutant red rows | `M1-FS-COMPOSE=FT7/FT8 M2-FS-MODIFIER-ORDER=FT7/FT9 M3-FS-ALTGRAPH=FT9 M4-LIB-GUARD=IME9 M5-LIB-REPEAT=IME9 M6-SHEET-GUARD=IME10 M7-SHEET-REPEAT=IME10 M8-NATIVE-229=IME10/IME8/IME9` |
+| [K20] | probe server source = sketch | `10/10` |
+| [K21] | neighbour probes on B's sketch server | sites, held and stage2a `ALL OK (18 cells)`; plain `ALL SAME (18 cells)` |
+| [K22] | IME12/IME13 rows run on unmodified HEAD | `10 passed rc 0` |
+| [K23] | L50 focus-origin hits at HEAD | `62` |
+| [K24] | Workspace Escape branches (`event.key === 'Escape' &&`) | `1` |
+| [K25] | `regression-last.json` date | `2026-11-10` |
+| [K26] | Workspace typing-target returns (`isTypingTarget(event.target)`) | `4` |
+| [K27] | `pending` status lines in `docs/implementation` | `0` |
+| [K28] | doc facts A edits: doc 289 phrase `(Windows AltGr, macOS Option)`; doc 288 old IME6 title `IME6 held key after a composing key (%s): ` | `289-option-phrase 1 288-old-ime6 1` |
+
+Mutant red rows (`b-round-444/mutants/results.jsonl`):
+
+| Mutant | Red rows |
+|---|---|
+| M1-TEMPO-HELD | IME13, IME6 |
+| M2-TEMPO-COMPOSE | IME1, IME12, IME6, IME7 |
+| M3-MARKER-STOP | IME12, IME2 |
+| M4-GROUP-HELD | IME13 |
+| M5-RANGE-HELD | IME13 |
+| M6-GAIN-HELD | IME13, IME6 |
+| M7-GAIN-REVERT-VALUE | IME13, IME6, IME7 |
+| M8-HELPER-REPEAT-FIRST | IME11 |
+| M9-HELPER-KEYS | IME11, IME12 |
+| M10-VIDEO-HELD | FV-HELD |
+| M11-SCAN-INLINE-COMPOSING | IME14 |
+| M12-SCAN-INTENT-BYPASS | IME14 |

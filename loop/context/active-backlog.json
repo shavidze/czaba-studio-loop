@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-11T01:20:37.386Z",
-  "current_task": "Round 443: SYS-3 stage 1 fix-up (C-R442-M1 held Enter/Escape after IME composition on Tempo, Marker, Clip Gain; A-R442-REVIEW-L1/L2; sketch b-round-442/sketch-443.patch.txt v2 sha 6b68ac9e) on 4aa3c82 (current-task.md)",
+  "_generatedUtc": "2026-11-11T02:27:28.616Z",
+  "current_task": "Round 444: SYS-3 stage 2a (IME composition in Library search, shortcut-sheet search and focus-source; closes A-R203-REVIEW-M1/I1 on C PASS; sketch b-round-443/sketch-444.patch.txt sha 567728df) on 1eefb4c (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -3556,13 +3556,13 @@
     {
       "id": "A-R203-REVIEW-M1",
       "severity": "low",
-      "status": "queued (D-29z1571): SYS-3 stage 2 | ruled (D-29z169): folded",
+      "status": "dispatched round 444 (D-29z1577): SYS-3 stage 2a; closes on ",
       "title": "Android soft keyboard key=Unidentified / IME isComposing keydowns flip focus-source to keyboard (rin"
     },
     {
       "id": "A-R203-REVIEW-I1",
       "severity": "info",
-      "status": "queued (D-29z1571): SYS-3 stage 2 | ruled (D-29z169): folded",
+      "status": "dispatched round 444 (D-29z1577): SYS-3 stage 2a; closes on ",
       "title": "AltGr (Ctrl+Alt) / macOS Option typing switches focus-source to keyboard"
     },
     {
@@ -6517,37 +6517,37 @@
       "title": "lane/detail hover hairline ~2.1:1 vs the border pixel, below doc 144 3:1 hover rule; the Saba overri"
     },
     {
-      "id": "C-R442-M1-HELD-KEY-UNRULED",
-      "alias": "A-R442-REVIEW-M1",
-      "severity": "medium",
-      "origin": "A (code-reviewer); C recorded as unverified",
-      "status": "scheduled round 443 (D-29z1574): accepted Medium, contract level; B pre-check real Chromium on 4aa3c82 (b-round-442/probe/compare-head.txt NOT ALL OK 8 of 18 failing; synthetic CDP autoRepeat sequence); real-IME delivery unconfirmed -> TLM-SYS3-IME-PLATFORMS held-key step",
-      "title": "after a guarded composing Enter/Escape, auto-repeat keydowns (repeat true, not composing) commit/cancel Tempo (Enter, Escape), Marker Escape, Clip Gain Escape",
-      "evidence": "a-round-442.md A-R442-REVIEW-M1; c-round-442.json bugs[0]; b-round-442/probe/held-head.json",
-      "added": "2026-11-11 B round 442 -> 443 planning"
+      "id": "A-R443-REVIEW-L1-IME6-WEAK-GAIN",
+      "severity": "low",
+      "status": "queued SYS-3 stage 2b (D-29z1576): same file as TL-R443-G3; ",
+      "title": "IME6 Clip Gain asserts gain.value !== '-3' instead of toBe(shown)"
     },
     {
-      "id": "A-R442-REVIEW-L1-NO-PLAIN-ESCAPE",
+      "id": "A-R443-REVIEW-L2-IME6-ONE-IT",
       "severity": "low",
-      "status": "scheduled round 443 (D-29z1574): IME7",
-      "title": "no test sends a plain Escape after a composing key"
+      "status": "queued SYS-3 stage 2b (D-29z1576)",
+      "title": "IME6 covers three editors in one it(); an early failure hides later ones"
     },
     {
-      "id": "A-R442-REVIEW-L2-IME1-WEAK-FINAL",
+      "id": "TL-R444-L1-REAL-IME-SEARCH-CLEAR",
       "severity": "low",
-      "status": "scheduled round 443 (D-29z1574): IME1 asserts tempoStatusMes",
-      "title": "IME1 final assertion only checks statusSequence increased"
+      "status": "open_tech_lead_manual (D-29z1577): step added to TLM-SYS3-IM",
+      "title": "the claim that Chromium's type=search native clear on a composing Escape happens only under syntheti"
+    },
+    {
+      "id": "TL-R444-L3-COMPOSING-TAB",
+      "severity": "low",
+      "status": "ruled intended (D-29z1577): a composing Tab goes to the IME;",
+      "title": "FT7 asserts that a composing Tab keeps focus-source on pointer"
+    },
+    {
+      "id": "GATE443-L1-REPEAT-ESCAPE-BUBBLES",
+      "severity": "low",
+      "status": "queued SYS-3 stage 2b (D-29z1576): same handlers as the shar",
+      "title": "Tempo and Clip Gain Escape branches preventDefault a repeat but do not stopPropagation, so held Esca"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 434,
-      "task": "current-task.md",
-      "decision": "D-29z1536",
-      "type": "SABA-B-12 stage 3b (Studio dialog scrollbar)",
-      "status": "dispatched",
-      "note": "baseline 0c22ac9 clean; sketch b-round-433/sketch-434.patch.txt; claims b-round-433/claims-434.sh"
-    },
     {
       "round": 435,
       "task": "tasks/round-435.md",
@@ -6616,8 +6616,16 @@
       "task": "current-task.md",
       "decision": "D-29z1574",
       "type": "SYS-3 stage 1 fix-up (C-R442-M1 held key after IME composition)",
-      "status": "dispatched",
+      "status": "c_pass_published (D-29z1576): c-round-443.json PASS browserVerified/realVerified true; gate 443 published 1eefb4c",
       "note": "baseline 4aa3c82 (gate 442 published); sketch b-round-442/sketch-443.patch.txt v2 sha 6b68ac9e; claims b-round-442/claims-443.sh"
+    },
+    {
+      "round": 444,
+      "task": "current-task.md",
+      "decision": "D-29z1577",
+      "type": "SYS-3 stage 2a (IME composition: focus-source, Library search, shortcut-sheet search)",
+      "status": "dispatched",
+      "note": "baseline 1eefb4c (gate 443 published); sketch b-round-443/sketch-444.patch.txt sha 567728df; claims b-round-443/claims-444.sh; tech-lead approve-with-changes 0 Medium+"
     }
   ],
   "other_keys": [

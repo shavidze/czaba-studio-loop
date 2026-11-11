@@ -1,0 +1,130 @@
+diff --git a/sketch-445-v1.patch.txt b/sketch-445.patch.txt
+index 3177faf..a3bf98e 100644
+--- a/sketch-445-v1.patch.txt
++++ b/sketch-445.patch.txt
+@@ -1,5 +1,5 @@
+ diff --git a/app/components/arrangement/ArrangementDetailPanel.tsx b/app/components/arrangement/ArrangementDetailPanel.tsx
+-index 8cd33f4..ddba54e 100644
++index 8cd33f4..1a0fec1 100644
+ --- a/app/components/arrangement/ArrangementDetailPanel.tsx
+ +++ b/app/components/arrangement/ArrangementDetailPanel.tsx
+ @@ -56,7 +56,11 @@ import type { Arrangement, ArrangementClip, TimeRange } from '~/types/arrangemen
+@@ -8,7 +8,7 @@ index 8cd33f4..ddba54e 100644
+  import { STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
+ -import { isImeCompositionKeyDown } from './studio-ime-composition';
+ +import {
+-+  INLINE_EDITOR_ENTER_KEY,
+++  INLINE_EDITOR_ENTER_ONLY_KEYS,
+ +  INLINE_EDITOR_SETTLE_KEYS,
+ +  inlineEditorKeyIntent,
+ +} from './studio-ime-composition';
+@@ -20,7 +20,7 @@ index 8cd33f4..ddba54e 100644
+  
+    const handleRangeInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+ -    if (isImeCompositionKeyDown(event)) {
+-+    const intent = inlineEditorKeyIntent(event, INLINE_EDITOR_ENTER_KEY);
+++    const intent = inlineEditorKeyIntent(event, INLINE_EDITOR_ENTER_ONLY_KEYS);
+ +    if (intent === 'other' || intent === 'composing') {
+        return;
+      }
+@@ -53,13 +53,12 @@ index 8cd33f4..ddba54e 100644
+ -      if (!event.repeat) {
+ -        commitClipGain('enter');
+ -      }
+--    } else if (event.key === 'Escape') {
+++      commitClipGain('enter');
++     } else if (event.key === 'Escape') {
+ -      event.preventDefault();
+ -      if (!event.repeat) {
+ -        setClipGainText(displayedClipGainText);
+ -      }
+-+      commitClipGain('enter');
+-+    } else {
+ +      setClipGainText(displayedClipGainText);
+      }
+    });
+@@ -203,10 +202,10 @@ index 6a81c44..e4a777d 100644
+        }
+        if (
+ diff --git a/app/components/arrangement/studio-ime-composition.ts b/app/components/arrangement/studio-ime-composition.ts
+-index 52eab26..acc51dd 100644
++index 52eab26..90ae98a 100644
+ --- a/app/components/arrangement/studio-ime-composition.ts
+ +++ b/app/components/arrangement/studio-ime-composition.ts
+-@@ -15,3 +15,27 @@ export function isImeCompositionKeyDown(event: ImeCompositionKeyEvent): boolean
++@@ -15,3 +15,29 @@ export function isImeCompositionKeyDown(event: ImeCompositionKeyEvent): boolean
+      keyCode: event.keyCode,
+    });
+  }
+@@ -218,15 +217,17 @@ index 52eab26..acc51dd 100644
+ +
+ +export type InlineEditorKeyIntent = 'other' | 'composing' | 'held' | 'settle';
+ +
+-+export const INLINE_EDITOR_SETTLE_KEYS: readonly string[] = ['Enter', 'Escape'];
+++export type InlineEditorSettleKey = 'Enter' | 'Escape';
+++
+++export const INLINE_EDITOR_SETTLE_KEYS: readonly InlineEditorSettleKey[] = ['Enter', 'Escape'];
+ +
+-+export const INLINE_EDITOR_ENTER_KEY: readonly string[] = ['Enter'];
+++export const INLINE_EDITOR_ENTER_ONLY_KEYS: readonly InlineEditorSettleKey[] = ['Enter'];
+ +
+ +export function inlineEditorKeyIntent(
+ +  event: InlineEditorKeyEvent,
+-+  settleKeys: readonly string[],
+++  settleKeys: readonly InlineEditorSettleKey[],
+ +): InlineEditorKeyIntent {
+-+  if (!settleKeys.includes(event.key)) {
+++  if (!settleKeys.some((settleKey) => settleKey === event.key)) {
+ +    return 'other';
+ +  }
+ +  if (isImeCompositionKeyDown(event)) {
+@@ -267,17 +268,17 @@ index 841dbf1..3fd8e84 100644
+      fireEvent.click(expand());
+ diff --git a/app/lib/arrangement/__tests__/ime-composition-source-scan.test.ts b/app/lib/arrangement/__tests__/ime-composition-source-scan.test.ts
+ new file mode 100644
+-index 0000000..c142512
++index 0000000..b64eb8c
+ --- /dev/null
+ +++ b/app/lib/arrangement/__tests__/ime-composition-source-scan.test.ts
+-@@ -0,0 +1,54 @@
++@@ -0,0 +1,59 @@
+ +// @vitest-environment node
+ +import { describe, expect, it } from 'vitest';
+ +import { ARRANGEMENT_COMPONENTS_DIR, readSourceFiles } from './helpers/source-scan';
+ +
+ +const HELPER_FILE = 'studio-ime-composition.ts';
+ +const COMPOSING_READ_PATTERN =
+-+  /\.isComposing\b|\bkeyCode\s*={2,3}\s*229\b|\b229\s*={2,3}\s*[\w.?]*\bkeyCode\b/g;
+++  /\.isComposing\b|\b(?:keyCode|which)\s*[!=]==?\s*229\b|\b229\s*[!=]==?\s*[\w.?]*\b(?:keyCode|which)\b|\{[^}]*\bisComposing\b[^}]*\}\s*=(?!=)/g;
+ +const HELPER_CALL_PATTERN = /\b(isImeCompositionKeyDown|isNativeImeCompositionKeyDown)\s*\(/;
+ +const INTENT_CALL_PATTERN = /\binlineEditorKeyIntent\s*\(/;
+ +
+@@ -293,7 +294,7 @@ index 0000000..c142512
+ +}
+ +
+ +describe('IME and held-key rule has one home (SYS-3 stage 2b)', () => {
+-+  it('IME14: no Studio component reads isComposing or keyCode 229 inline; the inline editors call inlineEditorKeyIntent and only the two search fields call the composition helper directly', () => {
+++  it('IME14: no Studio component reads isComposing or keyCode 229 inline; the inline editors call inlineEditorKeyIntent and only the two search fields call the composition helper directly (a new legitimate caller updates these lists on purpose)', () => {
+ +    const inlineReads = arrangementSources().flatMap(({ path, text }) =>
+ +      path === HELPER_FILE
+ +        ? []
+@@ -315,13 +316,18 @@ index 0000000..c142512
+ +    ]);
+ +  });
+ +
+-+  it('IME15: the inline-read pattern matches React and native forms and both operand orders of 229, and ignores object keys', () => {
+++  it('IME15: the inline-read pattern matches React and native forms, both operand orders and != of 229, which, and destructuring, and ignores object keys', () => {
+ +    const count = (text: string) => (text.match(COMPOSING_READ_PATTERN) ?? []).length;
+ +    expect(count('if (event.nativeEvent.isComposing) {')).toBe(1);
+ +    expect(count('if (e.isComposing || e.keyCode === 229) {')).toBe(2);
+ +    expect(count('if (229 === event.keyCode) {')).toBe(1);
+ +    expect(count('if (event.keyCode==229) {')).toBe(1);
+++    expect(count('if (event.keyCode !== 229) {')).toBe(1);
+++    expect(count('if (event.which === 229) {')).toBe(1);
+++    expect(count('const { isComposing } = event.nativeEvent;')).toBe(1);
+++    expect(count('const { key, isComposing: composing } = event;')).toBe(1);
+ +    expect(count('{ key, code: key, isComposing: true }')).toBe(0);
+++    expect(count('if (options === { isComposing: true }) {')).toBe(0);
+ +    expect(count('if (event.keyCode === 2290) {')).toBe(0);
+ +  });
+ +});

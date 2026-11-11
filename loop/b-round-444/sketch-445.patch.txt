@@ -1,0 +1,809 @@
+diff --git a/app/components/arrangement/ArrangementDetailPanel.tsx b/app/components/arrangement/ArrangementDetailPanel.tsx
+index 8cd33f4..1a0fec1 100644
+--- a/app/components/arrangement/ArrangementDetailPanel.tsx
++++ b/app/components/arrangement/ArrangementDetailPanel.tsx
+@@ -56,7 +56,11 @@ import type { Arrangement, ArrangementClip, TimeRange } from '~/types/arrangemen
+ import { ArrangementPeakPath } from './ArrangementClip';
+ import { STUDIO_LEVEL_FADER_CLASS, studioLevelFaderFillStyle } from './studio-fader';
+ import { STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
+-import { isImeCompositionKeyDown } from './studio-ime-composition';
++import {
++  INLINE_EDITOR_ENTER_ONLY_KEYS,
++  INLINE_EDITOR_SETTLE_KEYS,
++  inlineEditorKeyIntent,
++} from './studio-ime-composition';
+ import { STUDIO_NUMBER_FIELD_CLASS } from './studio-number-field';
+ import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ import { STUDIO_SCROLLBAR_CLASS } from './studio-scrollbar';
+@@ -670,14 +674,13 @@ function ArrangementDetailContentInner({
+   };
+ 
+   const handleRangeInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+-    if (isImeCompositionKeyDown(event)) {
++    const intent = inlineEditorKeyIntent(event, INLINE_EDITOR_ENTER_ONLY_KEYS);
++    if (intent === 'other' || intent === 'composing') {
+       return;
+     }
+-    if (event.key === 'Enter') {
+-      event.preventDefault();
+-      if (!event.repeat) {
+-        applyDetailRange();
+-      }
++    event.preventDefault();
++    if (intent === 'settle') {
++      applyDetailRange();
+     }
+   };
+ 
+@@ -765,19 +768,18 @@ function ArrangementDetailContentInner({
+   };
+ 
+   const handleClipGainKeyDown = useStableHandler((event: KeyboardEvent<HTMLInputElement>) => {
+-    if (isImeCompositionKeyDown(event)) {
++    const intent = inlineEditorKeyIntent(event, INLINE_EDITOR_SETTLE_KEYS);
++    if (intent === 'other' || intent === 'composing') {
++      return;
++    }
++    event.preventDefault();
++    if (intent === 'held') {
+       return;
+     }
+     if (event.key === 'Enter') {
+-      event.preventDefault();
+-      if (!event.repeat) {
+-        commitClipGain('enter');
+-      }
++      commitClipGain('enter');
+     } else if (event.key === 'Escape') {
+-      event.preventDefault();
+-      if (!event.repeat) {
+-        setClipGainText(displayedClipGainText);
+-      }
++      setClipGainText(displayedClipGainText);
+     }
+   });
+ 
+diff --git a/app/components/arrangement/ArrangementGroupHeader.tsx b/app/components/arrangement/ArrangementGroupHeader.tsx
+index 6c6f88b..ebc2de0 100644
+--- a/app/components/arrangement/ArrangementGroupHeader.tsx
++++ b/app/components/arrangement/ArrangementGroupHeader.tsx
+@@ -35,7 +35,7 @@ import {
+ import { ArrangementMixFader } from './ArrangementMixFader';
+ import { STUDIO_LEVEL_FADER_CLASS } from './studio-fader';
+ import { STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
+-import { isImeCompositionKeyDown } from './studio-ime-composition';
++import { INLINE_EDITOR_SETTLE_KEYS, inlineEditorKeyIntent } from './studio-ime-composition';
+ import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ 
+ export const TRACK_GROUP_ROW_HEIGHT_PX = 28;
+@@ -295,15 +295,17 @@ export function ArrangementGroupHeader({
+             value={draft}
+             onChange={(event) => setDraft(event.target.value)}
+             onKeyDown={(event) => {
+-              if (event.key === 'Enter' || event.key === 'Escape') {
+-                event.stopPropagation();
+-                if (isImeCompositionKeyDown(event)) {
+-                  return;
+-                }
+-                event.preventDefault();
+-                if (!event.repeat) {
+-                  settleEditor(event.key === 'Enter' ? 'enter' : 'escape');
+-                }
++              const intent = inlineEditorKeyIntent(event, INLINE_EDITOR_SETTLE_KEYS);
++              if (intent === 'other') {
++                return;
++              }
++              event.stopPropagation();
++              if (intent === 'composing') {
++                return;
++              }
++              event.preventDefault();
++              if (intent === 'settle') {
++                settleEditor(event.key === 'Enter' ? 'enter' : 'escape');
+               }
+             }}
+             onBlur={() => settleEditor('blur')}
+diff --git a/app/components/arrangement/ArrangementMarkerRow.tsx b/app/components/arrangement/ArrangementMarkerRow.tsx
+index 498ae5b..e757bfc 100644
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -47,7 +47,7 @@ import {
+   type MarkerMenuCloseReason,
+ } from './ArrangementMarkerMenu';
+ import { STUDIO_FOCUS_RING_EDGE_CLASS, STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
+-import { isImeCompositionKeyDown } from './studio-ime-composition';
++import { INLINE_EDITOR_SETTLE_KEYS, inlineEditorKeyIntent } from './studio-ime-composition';
+ import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ 
+ const MARKER_LABEL_MAX_PX = 160;
+@@ -973,15 +973,16 @@ function ArrangementMarkerRowViewInner({
+               setEditor((current) => (current ? { ...current, draft } : current));
+             }}
+             onKeyDown={(event) => {
+-              if (event.key === 'Enter' || event.key === 'Escape') {
+-                event.stopPropagation();
+-                if (isImeCompositionKeyDown(event)) {
+-                  return;
+-                }
+-                event.preventDefault();
+-                if (event.repeat) {
+-                  return;
+-                }
++              const intent = inlineEditorKeyIntent(event, INLINE_EDITOR_SETTLE_KEYS);
++              if (intent === 'other') {
++                return;
++              }
++              event.stopPropagation();
++              if (intent === 'composing') {
++                return;
++              }
++              event.preventDefault();
++              if (intent === 'settle') {
+                 settleEditor(event.key === 'Enter' ? 'enter' : 'escape');
+               }
+             }}
+diff --git a/app/components/arrangement/ArrangementTempoRow.tsx b/app/components/arrangement/ArrangementTempoRow.tsx
+index 0933480..c4d450a 100644
+--- a/app/components/arrangement/ArrangementTempoRow.tsx
++++ b/app/components/arrangement/ArrangementTempoRow.tsx
+@@ -33,7 +33,7 @@ import {
+ import { cn } from '~/lib/utils';
+ import { ARRANGEMENT_HEADER_WIDTH_PX } from './ArrangementLane';
+ import { STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
+-import { isImeCompositionKeyDown } from './studio-ime-composition';
++import { INLINE_EDITOR_SETTLE_KEYS, inlineEditorKeyIntent } from './studio-ime-composition';
+ import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ import { guardSoftDisabledClick } from './studio-soft-disabled';
+ 
+@@ -254,25 +254,19 @@ export function ArrangementTempoRow({
+   };
+ 
+   const handleTempoKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+-    if (isImeCompositionKeyDown(event)) {
++    const intent = inlineEditorKeyIntent(event, INLINE_EDITOR_SETTLE_KEYS);
++    if (intent === 'other' || intent === 'composing') {
+       return;
+     }
+-    if (event.key === 'Enter') {
+-      event.preventDefault();
+-      if (!event.repeat) {
+-        event.currentTarget.blur();
+-      }
++    event.preventDefault();
++    if (intent === 'held') {
+       return;
+     }
+     if (event.key === 'Escape') {
+-      event.preventDefault();
+-      if (event.repeat) {
+-        return;
+-      }
+       skipCommitRef.current = true;
+       setDraft(null);
+-      event.currentTarget.blur();
+     }
++    event.currentTarget.blur();
+   };
+ 
+   return (
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 6a81c44..e4a777d 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -2750,7 +2750,9 @@ export function StudioWorkspace() {
+         floatingVideoStateRef.current.isVideoExpanded
+       ) {
+         event.preventDefault();
+-        returnFloatingVideo();
++        if (!event.repeat) {
++          returnFloatingVideo();
++        }
+         return;
+       }
+       if (
+diff --git a/app/components/arrangement/studio-ime-composition.ts b/app/components/arrangement/studio-ime-composition.ts
+index 52eab26..90ae98a 100644
+--- a/app/components/arrangement/studio-ime-composition.ts
++++ b/app/components/arrangement/studio-ime-composition.ts
+@@ -15,3 +15,29 @@ export function isImeCompositionKeyDown(event: ImeCompositionKeyEvent): boolean
+     keyCode: event.keyCode,
+   });
+ }
++
++export interface InlineEditorKeyEvent extends ImeCompositionKeyEvent {
++  key: string;
++  repeat: boolean;
++}
++
++export type InlineEditorKeyIntent = 'other' | 'composing' | 'held' | 'settle';
++
++export type InlineEditorSettleKey = 'Enter' | 'Escape';
++
++export const INLINE_EDITOR_SETTLE_KEYS: readonly InlineEditorSettleKey[] = ['Enter', 'Escape'];
++
++export const INLINE_EDITOR_ENTER_ONLY_KEYS: readonly InlineEditorSettleKey[] = ['Enter'];
++
++export function inlineEditorKeyIntent(
++  event: InlineEditorKeyEvent,
++  settleKeys: readonly InlineEditorSettleKey[],
++): InlineEditorKeyIntent {
++  if (!settleKeys.some((settleKey) => settleKey === event.key)) {
++    return 'other';
++  }
++  if (isImeCompositionKeyDown(event)) {
++    return 'composing';
++  }
++  return event.repeat ? 'held' : 'settle';
++}
+diff --git a/app/lib/arrangement/__tests__/floating-video.test.tsx b/app/lib/arrangement/__tests__/floating-video.test.tsx
+index 841dbf1..3fd8e84 100644
+--- a/app/lib/arrangement/__tests__/floating-video.test.tsx
++++ b/app/lib/arrangement/__tests__/floating-video.test.tsx
+@@ -351,6 +351,26 @@ describe('floating expanded video (SRW-11B stage 3, D-29d, R13-U)', () => {
+     expect(box.dataset.videoFloating).toBe('true');
+   });
+ 
++  it('FV-HELD a held Esc (auto-repeat) that reaches the window keeps the video floating and is prevented; a fresh Esc then returns it (SYS-3 stage 2b, A-R444-REVIEW-I1)', async () => {
++    const { view, box, expand } = await mountFloatWorkspace();
++    fireEvent.click(expand());
++    for (let step = 0; step < 3; step += 1) {
++      const held = new KeyboardEvent('keydown', {
++        key: 'Escape',
++        bubbles: true,
++        cancelable: true,
++        repeat: true,
++      });
++      act(() => {
++        window.dispatchEvent(held);
++      });
++      expect(held.defaultPrevented).toBe(true);
++      expect(box.dataset.videoFloating).toBe('true');
++    }
++    expect(pressEscapeOnWindow({ prevent: false }).defaultPrevented).toBe(true);
++    expectCompact(view, box);
++  });
++
+   it('ignores Esc in a plain text field that does not handle Escape itself', async () => {
+     const { box, expand } = await mountFloatWorkspace();
+     fireEvent.click(expand());
+diff --git a/app/lib/arrangement/__tests__/ime-composition-source-scan.test.ts b/app/lib/arrangement/__tests__/ime-composition-source-scan.test.ts
+new file mode 100644
+index 0000000..b64eb8c
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/ime-composition-source-scan.test.ts
+@@ -0,0 +1,59 @@
++// @vitest-environment node
++import { describe, expect, it } from 'vitest';
++import { ARRANGEMENT_COMPONENTS_DIR, readSourceFiles } from './helpers/source-scan';
++
++const HELPER_FILE = 'studio-ime-composition.ts';
++const COMPOSING_READ_PATTERN =
++  /\.isComposing\b|\b(?:keyCode|which)\s*[!=]==?\s*229\b|\b229\s*[!=]==?\s*[\w.?]*\b(?:keyCode|which)\b|\{[^}]*\bisComposing\b[^}]*\}\s*=(?!=)/g;
++const HELPER_CALL_PATTERN = /\b(isImeCompositionKeyDown|isNativeImeCompositionKeyDown)\s*\(/;
++const INTENT_CALL_PATTERN = /\binlineEditorKeyIntent\s*\(/;
++
++function arrangementSources() {
++  return readSourceFiles(ARRANGEMENT_COMPONENTS_DIR, ['.ts', '.tsx']);
++}
++
++function filesMatching(pattern: RegExp): string[] {
++  return arrangementSources()
++    .filter(({ path, text }) => path !== HELPER_FILE && pattern.test(text))
++    .map(({ path }) => path)
++    .sort();
++}
++
++describe('IME and held-key rule has one home (SYS-3 stage 2b)', () => {
++  it('IME14: no Studio component reads isComposing or keyCode 229 inline; the inline editors call inlineEditorKeyIntent and only the two search fields call the composition helper directly (a new legitimate caller updates these lists on purpose)', () => {
++    const inlineReads = arrangementSources().flatMap(({ path, text }) =>
++      path === HELPER_FILE
++        ? []
++        : Array.from(
++            text.matchAll(COMPOSING_READ_PATTERN),
++            (match) => `${path}:${text.slice(0, match.index).split('\n').length}`,
++          ),
++    );
++    expect(inlineReads).toEqual([]);
++    expect(filesMatching(INTENT_CALL_PATTERN)).toEqual([
++      'ArrangementDetailPanel.tsx',
++      'ArrangementGroupHeader.tsx',
++      'ArrangementMarkerRow.tsx',
++      'ArrangementTempoRow.tsx',
++    ]);
++    expect(filesMatching(HELPER_CALL_PATTERN)).toEqual([
++      'ArrangementLibrary.tsx',
++      'ArrangementShortcutSheet.tsx',
++    ]);
++  });
++
++  it('IME15: the inline-read pattern matches React and native forms, both operand orders and != of 229, which, and destructuring, and ignores object keys', () => {
++    const count = (text: string) => (text.match(COMPOSING_READ_PATTERN) ?? []).length;
++    expect(count('if (event.nativeEvent.isComposing) {')).toBe(1);
++    expect(count('if (e.isComposing || e.keyCode === 229) {')).toBe(2);
++    expect(count('if (229 === event.keyCode) {')).toBe(1);
++    expect(count('if (event.keyCode==229) {')).toBe(1);
++    expect(count('if (event.keyCode !== 229) {')).toBe(1);
++    expect(count('if (event.which === 229) {')).toBe(1);
++    expect(count('const { isComposing } = event.nativeEvent;')).toBe(1);
++    expect(count('const { key, isComposing: composing } = event;')).toBe(1);
++    expect(count('{ key, code: key, isComposing: true }')).toBe(0);
++    expect(count('if (options === { isComposing: true }) {')).toBe(0);
++    expect(count('if (event.keyCode === 2290) {')).toBe(0);
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/ime-composition-stage2b-ui.test.tsx b/app/lib/arrangement/__tests__/ime-composition-stage2b-ui.test.tsx
+new file mode 100644
+index 0000000..d8faee7
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/ime-composition-stage2b-ui.test.tsx
+@@ -0,0 +1,362 @@
++import { act, fireEvent, render } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
++import {
++  type InlineEditorKeyEvent,
++  type InlineEditorKeyIntent,
++  inlineEditorKeyIntent,
++} from '~/components/arrangement/studio-ime-composition';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
++import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
++import { createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
++import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';
++
++vi.mock('@remix-run/react', () => ({
++  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
++    <a href={to} className={className}>
++      {children}
++    </a>
++  ),
++}));
++
++const {
++  fakeClock,
++  FakeAudioContext,
++  FakeOfflineAudioContext,
++  FakeAudioBuffer,
++  FakeResizeObserver,
++} = createWorkspaceTestEnvironment();
++
++const imeCollection: WorkspaceCollection = {
++  id: 'ime-composition',
++  label: 'ime-composition',
++  origin: 'demo',
++  notice: 'Synthetic demo stems.',
++  sources: [{ id: 'hit', title: 'Hit', collectionLabel: 'ime', kind: 'sfx', origin: 'demo' }],
++  loadSource: async () => new AudioBuffer({ length: 1600, numberOfChannels: 1, sampleRate: 100 }),
++};
++
++function imeArrangement(): Arrangement {
++  const base = createArrangement([
++    { id: 'video', kind: 'video', name: 'Video' },
++    { id: 'music', kind: 'audio', name: 'Music' },
++    { id: 'sfx', kind: 'audio', name: 'SFX' },
++  ]);
++  return {
++    ...base,
++    tracks: base.tracks.map((track) =>
++      track.id === 'music' || track.id === 'sfx' ? { ...track, groupId: 'stems' } : track,
++    ),
++    groups: [{ id: 'stems', name: 'Stems', parentId: null }],
++    clips: [{ id: 'h1', trackId: 'sfx', sourceId: 'hit', start: 0, sourceOffset: 0, duration: 16 }],
++  };
++}
++
++interface ImeApiRef {
++  current: WorkspaceProbeValue | null;
++}
++
++function ImeProbe({ api }: { api: ImeApiRef }) {
++  api.current = useWorkspaceProbe();
++  return null;
++}
++
++function live(api: ImeApiRef): WorkspaceProbeValue {
++  if (!api.current) {
++    throw new Error('provider not mounted');
++  }
++  return api.current;
++}
++
++beforeEach(() => {
++  fakeClock.base = Date.now() / 1000;
++  vi.stubGlobal('AudioContext', FakeAudioContext);
++  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
++  vi.stubGlobal('requestAnimationFrame', () => 1);
++  vi.stubGlobal('cancelAnimationFrame', () => undefined);
++  vi.stubGlobal('innerWidth', 1440);
++  vi.stubGlobal('innerHeight', 900);
++  localStorage.clear();
++  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
++  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
++});
++
++afterEach(() => {
++  vi.unstubAllGlobals();
++  vi.restoreAllMocks();
++});
++
++async function mountImeWorkspace() {
++  const api: ImeApiRef = { current: null };
++  const view = render(
++    <ArrangementProvider collection={imeCollection} initialArrangement={imeArrangement()}>
++      <StudioWorkspace />
++      <ImeProbe api={api} />
++    </ArrangementProvider>,
++  );
++  await act(async () => {
++    await Promise.resolve();
++    await Promise.resolve();
++  });
++  const snapshot = () => ({
++    arrangement: JSON.stringify(live(api).getArrangement()),
++    undo: live(api).undoLabel,
++    status: live(api).status,
++    statusSequence: live(api).statusSequence,
++  });
++  return { api, view, snapshot };
++}
++
++type EditorKey = 'Enter' | 'Escape';
++type EditorId = 'tempo' | 'marker' | 'group' | 'range' | 'gain';
++type KeyForm = 'composing' | 'held' | 'plain';
++type ApiValue = Awaited<ReturnType<typeof mountImeWorkspace>>;
++
++interface KeyCell {
++  prevented: boolean;
++  documentSaw: boolean;
++}
++
++const EDITORS: readonly EditorId[] = ['tempo', 'marker', 'group', 'range', 'gain'];
++
++function inputById(view: ApiValue['view'], testId: string): HTMLInputElement {
++  const element = view.getByTestId(testId);
++  if (!(element instanceof HTMLInputElement)) {
++    throw new Error(`${testId} is not an input`);
++  }
++  return element;
++}
++
++function openEditor(mounted: ApiValue, editor: EditorId): HTMLInputElement {
++  const { api, view } = mounted;
++  if (editor === 'tempo') {
++    const tempo = inputById(view, 'arrangement-tempo-input');
++    act(() => tempo.focus());
++    fireEvent.change(tempo, { target: { value: '96' } });
++    return tempo;
++  }
++  if (editor === 'marker') {
++    fireEvent.click(view.getByTestId('arrangement-marker-add'));
++    const marker = inputById(view, 'arrangement-marker-name-input');
++    fireEvent.change(marker, { target: { value: 'Hit' } });
++    return marker;
++  }
++  if (editor === 'group') {
++    const name = view.getByTestId('arrangement-group-name');
++    act(() => name.focus());
++    fireEvent.keyDown(name, { key: 'F2', code: 'F2' });
++    const group = inputById(view, 'arrangement-group-name-input');
++    fireEvent.change(group, { target: { value: 'Bed' } });
++    return group;
++  }
++  act(() => live(api).selectClip('h1'));
++  const field = inputById(
++    view,
++    editor === 'range' ? 'arrangement-detail-start' : 'arrangement-detail-clip-gain-input',
++  );
++  act(() => field.focus());
++  fireEvent.change(field, { target: { value: editor === 'range' ? '2' : '-3' } });
++  return field;
++}
++
++function pressCell(target: Element, key: EditorKey, form: KeyForm): KeyCell {
++  let documentSaw = false;
++  const listener = () => {
++    documentSaw = true;
++  };
++  document.addEventListener('keydown', listener);
++  const init =
++    form === 'composing'
++      ? { key, code: key, isComposing: true }
++      : form === 'held'
++        ? { key, code: key, repeat: true }
++        : { key, code: key };
++  const notPrevented = fireEvent.keyDown(target, init);
++  document.removeEventListener('keydown', listener);
++  return { prevented: !notPrevented, documentSaw };
++}
++
++const CELL_ORDER: readonly (readonly [EditorKey, KeyForm])[] = [
++  ['Enter', 'composing'],
++  ['Escape', 'composing'],
++  ['Enter', 'held'],
++  ['Escape', 'held'],
++  ['Escape', 'plain'],
++  ['Enter', 'plain'],
++];
++
++const SEEN_PREVENTED: KeyCell = { prevented: true, documentSaw: true };
++const SEEN_OPEN: KeyCell = { prevented: false, documentSaw: true };
++const STOPPED_PREVENTED: KeyCell = { prevented: true, documentSaw: false };
++const STOPPED_OPEN: KeyCell = { prevented: false, documentSaw: false };
++
++const HEAD_TRUTH_TABLE: Readonly<Record<EditorId, readonly KeyCell[]>> = {
++  tempo: [SEEN_OPEN, SEEN_OPEN, SEEN_PREVENTED, SEEN_PREVENTED, SEEN_PREVENTED, SEEN_PREVENTED],
++  marker: [
++    STOPPED_OPEN,
++    STOPPED_OPEN,
++    STOPPED_PREVENTED,
++    STOPPED_PREVENTED,
++    STOPPED_PREVENTED,
++    STOPPED_PREVENTED,
++  ],
++  group: [
++    STOPPED_OPEN,
++    STOPPED_OPEN,
++    STOPPED_PREVENTED,
++    STOPPED_PREVENTED,
++    STOPPED_PREVENTED,
++    STOPPED_PREVENTED,
++  ],
++  range: [SEEN_OPEN, SEEN_OPEN, SEEN_PREVENTED, SEEN_OPEN, SEEN_OPEN, SEEN_PREVENTED],
++  gain: [SEEN_OPEN, SEEN_OPEN, SEEN_PREVENTED, SEEN_PREVENTED, SEEN_PREVENTED, SEEN_PREVENTED],
++};
++
++function holdPlain(target: Element, key: EditorKey) {
++  for (let step = 0; step < 3; step += 1) {
++    fireEvent.keyDown(target, { key, code: key, repeat: true });
++  }
++}
++
++function gainDb(api: ApiValue['api']): number {
++  return (
++    live(api)
++      .getArrangement()
++      .clips.find((clip) => clip.id === 'h1')?.gainDb ?? 0
++  );
++}
++
++describe('inline editors share one settle-key rule (SYS-3 stage 2b)', () => {
++  it('IME11 inlineEditorKeyIntent: other keys pass, composing (isComposing or keyCode 229) wins over repeat, a repeat is held, a fresh press settles', () => {
++    const cases: readonly (readonly [InlineEditorKeyEvent, InlineEditorKeyIntent])[] = [
++      [{ key: 'a', repeat: false, keyCode: 65, nativeEvent: { isComposing: false } }, 'other'],
++      [{ key: 'a', repeat: false, keyCode: 229, nativeEvent: { isComposing: true } }, 'other'],
++      [
++        { key: 'Escape', repeat: false, keyCode: 27, nativeEvent: { isComposing: false } },
++        'settle',
++      ],
++      [{ key: 'Enter', repeat: false, keyCode: 13, nativeEvent: { isComposing: false } }, 'settle'],
++      [{ key: 'Enter', repeat: true, keyCode: 13, nativeEvent: { isComposing: false } }, 'held'],
++      [
++        { key: 'Enter', repeat: false, keyCode: 13, nativeEvent: { isComposing: true } },
++        'composing',
++      ],
++      [
++        { key: 'Enter', repeat: false, keyCode: 229, nativeEvent: { isComposing: false } },
++        'composing',
++      ],
++      [
++        { key: 'Escape', repeat: true, keyCode: 229, nativeEvent: { isComposing: true } },
++        'composing',
++      ],
++    ];
++    for (const [event, intent] of cases) {
++      expect(inlineEditorKeyIntent(event, ['Enter', 'Escape'])).toBe(intent);
++    }
++    expect(
++      inlineEditorKeyIntent(
++        { key: 'Escape', repeat: false, keyCode: 27, nativeEvent: { isComposing: false } },
++        ['Enter'],
++      ),
++    ).toBe('other');
++  });
++
++  it.each(
++    EDITORS,
++  )('IME12 %s editor: composing, held and plain Enter/Escape keep the HEAD 616729c truth table (defaultPrevented, reaches document)', async (editor) => {
++    const mounted = await mountImeWorkspace();
++    const seen: KeyCell[] = [];
++    let target = openEditor(mounted, editor);
++    for (const [key, form] of CELL_ORDER) {
++      if (!target.isConnected || document.activeElement !== target) {
++        target = openEditor(mounted, editor);
++      }
++      seen.push(pressCell(target, key, form));
++    }
++    expect(seen).toStrictEqual(HEAD_TRUTH_TABLE[editor]);
++  });
++
++  it('IME13 BPM field: plain held Enter or Escape (repeat only, no IME) keeps focus and the draft; a fresh Escape then drops the draft', async () => {
++    const mounted = await mountImeWorkspace();
++    const before = mounted.snapshot();
++    const tempo = openEditor(mounted, 'tempo');
++    holdPlain(tempo, 'Enter');
++    holdPlain(tempo, 'Escape');
++    expect(document.activeElement).toBe(tempo);
++    expect(tempo.value).toBe('96');
++    expect(mounted.snapshot()).toStrictEqual(before);
++    expect(fireEvent.keyDown(tempo, { key: 'Escape', code: 'Escape' })).toBe(false);
++    expect(document.activeElement).not.toBe(tempo);
++    expect(tempo.value).toBe('');
++    expect(mounted.snapshot()).toStrictEqual(before);
++  });
++
++  it('IME13 marker name editor: plain held Enter or Escape keeps the editor open and adds nothing; a fresh Enter then adds the marker once', async () => {
++    const mounted = await mountImeWorkspace();
++    const before = mounted.snapshot();
++    const marker = openEditor(mounted, 'marker');
++    holdPlain(marker, 'Enter');
++    holdPlain(marker, 'Escape');
++    expect(mounted.view.getByTestId('arrangement-marker-name-input')).toBe(marker);
++    expect(document.activeElement).toBe(marker);
++    expect(marker.value).toBe('Hit');
++    expect(mounted.snapshot()).toStrictEqual(before);
++    fireEvent.keyDown(marker, { key: 'Enter', code: 'Enter' });
++    expect(mounted.view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++    expect(
++      (live(mounted.api).getArrangement().markers ?? []).map((entry) => entry.name),
++    ).toStrictEqual(['Hit']);
++  });
++
++  it('IME13 group name editor: plain held Enter or Escape keeps the editor open and renames nothing; a fresh Enter then renames once', async () => {
++    const mounted = await mountImeWorkspace();
++    const before = mounted.snapshot();
++    const group = openEditor(mounted, 'group');
++    holdPlain(group, 'Enter');
++    holdPlain(group, 'Escape');
++    expect(mounted.view.getByTestId('arrangement-group-name-input')).toBe(group);
++    expect(document.activeElement).toBe(group);
++    expect(group.value).toBe('Bed');
++    expect(mounted.snapshot()).toStrictEqual(before);
++    fireEvent.keyDown(group, { key: 'Enter', code: 'Enter' });
++    expect(mounted.view.queryByTestId('arrangement-group-name-input')).toBeNull();
++    expect(live(mounted.api).undoLabel).toBe('Rename Group');
++    expect(
++      (live(mounted.api).getArrangement().groups ?? []).map((entry) => entry.name),
++    ).toStrictEqual(['Bed']);
++  });
++
++  it('IME13 Detail From field: plain held Enter applies no time selection; a fresh Enter then applies it', async () => {
++    const mounted = await mountImeWorkspace();
++    const start = openEditor(mounted, 'range');
++    const before = mounted.snapshot();
++    holdPlain(start, 'Enter');
++    expect(document.activeElement).toBe(start);
++    expect(start.value).toBe('2');
++    expect(mounted.snapshot()).toStrictEqual(before);
++    expect(fireEvent.keyDown(start, { key: 'Enter', code: 'Enter' })).toBe(false);
++    expect(mounted.snapshot().statusSequence).toBeGreaterThan(before.statusSequence);
++    expect(mounted.snapshot().status).toMatch(/^Time selection: 00:02\.000 — /);
++  });
++
++  it('IME13 Clip Gain field: plain held Enter or Escape applies and reverts nothing; a fresh Escape then shows the stored gain again', async () => {
++    const mounted = await mountImeWorkspace();
++    act(() => live(mounted.api).selectClip('h1'));
++    const shown = inputById(mounted.view, 'arrangement-detail-clip-gain-input').value;
++    const gain = openEditor(mounted, 'gain');
++    const before = mounted.snapshot();
++    holdPlain(gain, 'Enter');
++    holdPlain(gain, 'Escape');
++    expect(document.activeElement).toBe(gain);
++    expect(gain.value).toBe('-3');
++    expect(mounted.snapshot()).toStrictEqual(before);
++    expect(fireEvent.keyDown(gain, { key: 'Escape', code: 'Escape' })).toBe(false);
++    expect(gain.value).toBe(shown);
++    expect(gainDb(mounted.api)).toBe(0);
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/ime-composition-ui.test.tsx b/app/lib/arrangement/__tests__/ime-composition-ui.test.tsx
+index ddf43ad..0f23277 100644
+--- a/app/lib/arrangement/__tests__/ime-composition-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/ime-composition-ui.test.tsx
+@@ -114,6 +114,8 @@ type ImeForm = 'isComposing' | 'keyCode229';
+ 
+ const IME_FORMS: readonly ImeForm[] = ['isComposing', 'keyCode229'];
+ 
++type HeldEditor = 'BPM' | 'marker' | 'Clip Gain';
++
+ function pressComposingKey(target: Element, key: ImeKey, form: ImeForm): boolean {
+   return fireEvent.keyDown(
+     target,
+@@ -260,9 +262,14 @@ describe('IME composition never commits or cancels a Studio editor (SYS-3 stage
+     ).toBe(-3);
+   });
+ 
++  const HELD_EDITORS: readonly HeldEditor[] = ['BPM', 'marker', 'Clip Gain'];
++  const HELD_CASES: readonly (readonly [HeldEditor, ImeForm])[] = HELD_EDITORS.flatMap((editor) =>
++    IME_FORMS.map((form): readonly [HeldEditor, ImeForm] => [editor, form]),
++  );
++
+   it.each(
+-    IME_FORMS,
+-  )('IME6 held key after a composing key (%s): auto-repeat Enter or Escape (repeat: true, not composing) settles no editor; a fresh plain key then acts (BPM Enter commits 96, marker and Clip Gain Escape cancel)', async (form) => {
++    HELD_CASES,
++  )('IME6 held key after a composing key, %s editor (%s): auto-repeat Enter or Escape (repeat: true, not composing) settles nothing; a fresh plain key then acts (BPM Enter commits 96, marker Escape cancels, Clip Gain Escape shows the stored gain)', async (editor, form) => {
+     const { api, view, snapshot } = await mountImeWorkspace();
+     const holdAfterComposing = (target: Element, key: ImeKey) => {
+       expect(pressComposingKey(target, key, form)).toBe(true);
+@@ -271,36 +278,43 @@ describe('IME composition never commits or cancels a Studio editor (SYS-3 stage
+       }
+     };
+ 
+-    const tempo = inputById(view, 'arrangement-tempo-input');
+-    act(() => tempo.focus());
+-    fireEvent.change(tempo, { target: { value: '96' } });
+-    const beforeTempo = snapshot();
+-    holdAfterComposing(tempo, 'Enter');
+-    holdAfterComposing(tempo, 'Escape');
+-    expect(document.activeElement).toBe(tempo);
+-    expect(tempo.value).toBe('96');
+-    expect(snapshot()).toStrictEqual(beforeTempo);
+-    expect(fireEvent.keyDown(tempo, { key: 'Enter', code: 'Enter' })).toBe(false);
+-    expect(document.activeElement).not.toBe(tempo);
+-    expect(snapshot().status).toBe(tempoStatusMessage(96));
++    if (editor === 'BPM') {
++      const tempo = inputById(view, 'arrangement-tempo-input');
++      act(() => tempo.focus());
++      fireEvent.change(tempo, { target: { value: '96' } });
++      const beforeTempo = snapshot();
++      holdAfterComposing(tempo, 'Enter');
++      holdAfterComposing(tempo, 'Escape');
++      expect(document.activeElement).toBe(tempo);
++      expect(tempo.value).toBe('96');
++      expect(snapshot()).toStrictEqual(beforeTempo);
++      expect(fireEvent.keyDown(tempo, { key: 'Enter', code: 'Enter' })).toBe(false);
++      expect(document.activeElement).not.toBe(tempo);
++      expect(snapshot().status).toBe(tempoStatusMessage(96));
++      return;
++    }
+ 
+-    fireEvent.click(view.getByTestId('arrangement-marker-add'));
+-    const marker = inputById(view, 'arrangement-marker-name-input');
+-    fireEvent.change(marker, { target: { value: 'Hit' } });
+-    const beforeMarker = snapshot();
+-    holdAfterComposing(marker, 'Enter');
+-    holdAfterComposing(marker, 'Escape');
+-    expect(view.getByTestId('arrangement-marker-name-input')).toBe(marker);
+-    expect(document.activeElement).toBe(marker);
+-    expect(marker.value).toBe('Hit');
+-    expect(snapshot()).toStrictEqual(beforeMarker);
+-    fireEvent.keyDown(marker, { key: 'Escape', code: 'Escape' });
+-    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
+-    expect(live(api).getArrangement().markers ?? []).toStrictEqual([]);
++    if (editor === 'marker') {
++      fireEvent.click(view.getByTestId('arrangement-marker-add'));
++      const marker = inputById(view, 'arrangement-marker-name-input');
++      fireEvent.change(marker, { target: { value: 'Hit' } });
++      const beforeMarker = snapshot();
++      holdAfterComposing(marker, 'Enter');
++      holdAfterComposing(marker, 'Escape');
++      expect(view.getByTestId('arrangement-marker-name-input')).toBe(marker);
++      expect(document.activeElement).toBe(marker);
++      expect(marker.value).toBe('Hit');
++      expect(snapshot()).toStrictEqual(beforeMarker);
++      fireEvent.keyDown(marker, { key: 'Escape', code: 'Escape' });
++      expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++      expect(live(api).getArrangement().markers ?? []).toStrictEqual([]);
++      return;
++    }
+ 
+     act(() => live(api).selectClip('h1'));
+     const gain = inputById(view, 'arrangement-detail-clip-gain-input');
+     act(() => gain.focus());
++    const shown = gain.value;
+     fireEvent.change(gain, { target: { value: '-3' } });
+     const beforeGain = snapshot();
+     holdAfterComposing(gain, 'Enter');
+@@ -309,7 +323,7 @@ describe('IME composition never commits or cancels a Studio editor (SYS-3 stage
+     expect(gain.value).toBe('-3');
+     expect(snapshot()).toStrictEqual(beforeGain);
+     fireEvent.keyDown(gain, { key: 'Escape', code: 'Escape' });
+-    expect(gain.value).not.toBe('-3');
++    expect(gain.value).toBe(shown);
+     expect(
+       live(api)
+         .getArrangement()
