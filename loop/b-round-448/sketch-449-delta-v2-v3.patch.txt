@@ -1,0 +1,100 @@
+diff --git a/app/lib/__tests__/store-gradient-text.test.ts b/app/lib/__tests__/store-gradient-text.test.ts
+index 022cda5..e1da91a 100644
+--- a/app/lib/__tests__/store-gradient-text.test.ts
++++ b/app/lib/__tests__/store-gradient-text.test.ts
+@@ -5,10 +5,14 @@ import { describe, expect, it } from 'vitest';
+ 
+ const APP_ROOT = resolve(__dirname, '../..');
+ const MIN_SCANNED_SOURCES = 200;
+-const OBSIDIAN_BLOCK_MARKER = '[data-studio-theme="obsidian"],';
++const BARREL_FILES: ReadonlyArray<string> = [
++  'components/home/index.ts',
++  'components/loading/index.ts',
++  'components/common/index.ts',
++];
+ 
+ const GRADIENT_TEXT_PATTERN =
+-  /(?:-webkit-)?background-clip:\s*text|-webkit-text-fill-color:\s*transparent/g;
++  /(?:-webkit-)?background-clip\s*:[^;}]*\btext\b|-webkit-text-fill-color\s*:\s*(?:transparent|#0000(?:0000)?\b)/gi;
+ const RETIRED_CLASS_PATTERN = /(?<![\w-])(?:text-glow|hero-title-glow)(?![\w-])/g;
+ const RETIRED_TOKEN_PATTERN = /--gradient-text(?![\w-])/;
+ 
+@@ -45,6 +49,13 @@ const GRADIENT_TEXT_ALLOW_LIST: Readonly<Record<string, GradientTextAllowListEnt
+   },
+ };
+ 
++const DEAD_COMPONENTS: Readonly<Record<string, string>> = {
++  ArtistBioSection: 'components/home/ArtistBioSection.tsx',
++  TestimonialsSection: 'components/home/TestimonialsSection.tsx',
++  VideoShowcase: 'components/home/VideoShowcase.tsx',
++  PianoLoadingAnimation: 'components/loading/PianoLoadingAnimation.tsx',
++};
++
+ interface CssDeclarationHit {
+   selector: string;
+   declaration: string;
+@@ -72,12 +83,6 @@ function readApp(path: string): string {
+   return readFileSync(resolve(APP_ROOT, path), 'utf8');
+ }
+ 
+-function storeCss(path: string): string {
+-  const css = readApp(path);
+-  const obsidianStart = css.indexOf(OBSIDIAN_BLOCK_MARKER);
+-  return obsidianStart === -1 ? css : css.slice(0, obsidianStart);
+-}
+-
+ function stripComments(css: string): string {
+   return css.replace(/\/\*[\s\S]*?\*\//g, (comment) => comment.replace(/[^\n]/g, ' '));
+ }
+@@ -115,7 +120,7 @@ function storeCssFiles(): string[] {
+ function hitsBySelector(): Record<string, number> {
+   const counts: Record<string, number> = {};
+   for (const path of storeCssFiles()) {
+-    for (const hit of gradientTextHits(storeCss(path))) {
++    for (const hit of gradientTextHits(readApp(path))) {
+       counts[hit.selector] = (counts[hit.selector] ?? 0) + 1;
+     }
+   }
+@@ -162,14 +167,23 @@ describe('store gradient text removal (STORE-2b-3a)', () => {
+     expect(storeCssFiles()).toEqual(
+       expect.arrayContaining(['styles/app.css', 'styles/base/utilities.css']),
+     );
+-    expect(readApp('styles/app.css')).toContain(OBSIDIAN_BLOCK_MARKER);
+     expect(listFiles(APP_ROOT, /\.(ts|tsx)$/).length).toBeGreaterThanOrEqual(MIN_SCANNED_SOURCES);
+     const probe = gradientTextHits(
+-      '.a { color: red; }\n@media (x) { .b { -webkit-background-clip: text; -webkit-text-fill-color: transparent; } }\n/* .c { background-clip: text; } */',
++      '.a { color: red; }\n@media (x) { .b { -webkit-background-clip: text; -webkit-text-fill-color: transparent; } }\n/* .c { background-clip: text; } */\n.d { BACKGROUND-CLIP : text; background-clip: padding-box, text; -webkit-text-fill-color:#0000; }',
+     );
+-    expect(probe).toEqual([
+-      { selector: '.b', declaration: '-webkit-background-clip: text' },
+-      { selector: '.b', declaration: '-webkit-text-fill-color: transparent' },
+-    ]);
++    expect(probe.map((hit) => hit.selector)).toEqual(['.b', '.b', '.d', '.d', '.d']);
++  });
++
++  it('GT5: the allow-listed dead components stay unmounted (no importer outside their own file and the barrels)', () => {
++    const sources = listFiles(APP_ROOT, /\.(ts|tsx)$/);
++    const importers = Object.entries(DEAD_COMPONENTS).flatMap(([name, ownFile]) => {
++      expect(sources).toContain(ownFile);
++      const word = new RegExp(`(?<![\\w$])${name}(?![\\w$])`);
++      return sources
++        .filter((path) => path !== ownFile && !BARREL_FILES.includes(path))
++        .filter((path) => word.test(readApp(path)))
++        .map((path) => `${name} <- ${path}`);
++    });
++    expect(importers).toEqual([]);
+   });
+ });
+diff --git a/app/lib/__tests__/studio-naming.test.tsx b/app/lib/__tests__/studio-naming.test.tsx
+index f87debd..5027b2b 100644
+--- a/app/lib/__tests__/studio-naming.test.tsx
++++ b/app/lib/__tests__/studio-naming.test.tsx
+@@ -66,7 +66,7 @@ describe('NAME-AND-HINT-a one product name: CZABA Studio', () => {
+     expect(hits).toEqual([]);
+   });
+ 
+-  it('NM2 home showcase: the heading reads CZABA Studio with the glow on Studio, and the mockup title matches', () => {
++  it('NM2 home showcase: the heading reads CZABA Studio with the emphasised span on Studio, and the mockup title matches', () => {
+     const view = render(
+       <MemoryRouter>
+         <StudioShowcase />

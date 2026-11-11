@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-11T06:19:39.099Z",
-  "current_task": "Round 447: STORE-2b-2a (hardcoded teal leaves the reachable Store screens; 21 hits / 7 files) on 5df7717 (current-task.md)",
+  "_generatedUtc": "2026-11-11T07:10:18.624Z",
+  "current_task": "Round 448: STORE-2b-2b (hire-us inquiry e-mail leaves teal and gets its own dark background; teal-sweep exact counts + perf scan) on cce5eda (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -222,78 +222,7 @@
       "reference": "b-round-289/screens/stems-probe.json"
     }
   ],
-  "current_items_full": [
-    {
-      "id": "SRW-21",
-      "round": 16,
-      "title": "Purchased-library mount readiness + final regression",
-      "fb": [],
-      "type": "integration",
-      "depends_on": [
-        "SRW-20"
-      ],
-      "status": "deferred_user",
-      "blocked_reason": "app/routes/studio.$productId.tsx and studio-token flow are owned by the auth agent; mounting the workspace there is forbidden until released by Tech Lead",
-      "independent_progress": "WorkspaceCollection/loadSource adapter contract tests with a fake purchased adapter (no network/auth); docs for the future mount; full regression of SRW-01..SRW-20 by C",
-      "files": [
-        "app/lib/arrangement/collection.ts",
-        "app/lib/arrangement/__tests__/collection.test.ts",
-        "app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx",
-        "app/components/arrangement/StudioWorkspace.tsx (header only)",
-        "app/contexts/ArrangementContext.tsx (status + file names only)",
-        "docs/technical/arrangement-workspace.md",
-        "docs/implementation/2026/quarter-IV/080-studio-workspace-purchased-collection-readiness.md"
-      ],
-      "acceptance": [
-        {
-          "id": "R21-I1",
-          "action": "Unit test mounts StudioWorkspace logic with a fake purchased collection adapter",
-          "expected": "no workspace code change needed; adapter receives AbortSignal; errors surfaced",
-          "verify": "unit",
-          "expected_amended_D-29z57": "createPurchasedWorkspaceCollection contract (signal, credentials omit, no headers, errors without URL/token, validation) + workspace heading/badge/status/file names driven by collection.origin; /studio-lab demo output byte-identical (C DEMO-COPY, DEMO-LOAD, EXPORT-NAMES); purchased path unit-only un …[see backlog.json]",
-          "status": "pass_as_amended (D-29z57): C round 92 DEMO-COPY/DEMO-LOAD/EXPORT-NAMES browser PASS both viewports; PC1-PC10/PW1-PW6 + C mutations b/f red; purchased path unit-only"
-        },
-        {
-          "id": "R21-I2",
-          "action": "Full C regression on all prior acceptance IDs",
-          "expected": "all PASS or documented",
-          "verify": "C",
-          "status": "todo (after the Lows that touch shipped behaviour; regression round 2026-10-24+ covers part)"
-        }
-      ],
-      "b_finding_round92": "B source read 2026-10-22: R21-I1 expectation 'no workspace code change needed' is FALSE - StudioWorkspace.tsx l.2136/l.2141-2143 and ArrangementContext.tsx l.532/l.3013-3014/l.2722/l.2910/l.2916 hardcode demo copy and file names; a purchased mount would print 'demo - no sign-in needed'. R21-I1 amend …[see backlog.json]",
-      "stages": [
-        {
-          "stage": "1",
-          "round": 92,
-          "status": "c_pass_published",
-          "decision": "D-29z57",
-          "scope": "P1 collection.ts (workspaceCollectionCopy + createPurchasedWorkspaceCollection), W1 header, X1-X3 status/file names, PC1-PC9, PW1-PW6, mutations a-h, doc 079 l.4, doc 080, docs/technical/arrangement-workspace.md",
-          "c_ids": [
-            "DEMO-COPY",
-            "DEMO-LOAD",
-            "EXPORT-NAMES",
-            "PX-NET",
-            "REG-HYD",
-            "G92-3",
-            "PC-REVIEW",
-            "T92-TARGETED",
-            "SOURCE-UNCHANGED"
-          ],
-          "evidence": "c-round-92.md, c-round-92.json (PASS, browserVerified=true, realVerified=true, 0 bugs); gates/gate-round-92.json published 64e12d8 (verify 137/137, build OK, reviewer 9/10)",
-          "blocked": [
-            "G92-3 fake-Bearer 403 sub-check: backend unavailable in cloud"
-          ],
-          "not_browser_reachable": "purchased path (createPurchasedWorkspaceCollection, purchased copy, purchased file names): unit-only while the route mount is blocked"
-        }
-      ],
-      "status_before_2026_10_23": "blocked-partial (route mount: auth owner; stage 1 C PASS round 92 published 64e12d8; load-status hardening C PASS round 94 unit-proven, published 0513439, browser half at the mount; SRW-21-PREMOUNT bundle open; R21-I2 full regression open)",
-      "deferred_reason": "route mount on the protected studio.$productId.tsx waits for the auth work; not testable in the cloud (no backend)",
-      "user_decision_2026_10_23": "SRW-21 deferred by the user; finished stage 1 stays; counts as deferred for every gate; do not touch the protected files",
-      "visual_a_note_d29z116": "when the purchased mount is unblocked, the studio route needs the same font stylesheet links() as /studio-lab (V-2a, D-29z116 R3); do not touch protected files before then",
-      "pd_review_d29z692": "Saba 2026-10-31 Q1: first Studio product priority after STUDIO-PERFORMANCE; status stays deferred_user for the protected mount; SRW-21-PLAN (plan doc only) queued in PD-REVIEW-2026-10-31; STUDIO-LINK is the interim way in"
-    }
-  ],
+  "current_items_full": [],
   "other_open_items": [
     {
       "id": "T12-GAIN-VOLUME",
@@ -6616,17 +6545,67 @@
       "severity": "info",
       "status": "open_root (D-29z1587): request for root before STORE-4; not ",
       "title": "mock-api/server.mjs (root STORE-0 harness) has no product whose page renders \"Play Stems\" (0 of 6 ha"
+    },
+    {
+      "id": "B-R447-HIREUS-EMAIL-LIGHT-CLIENT",
+      "severity": "medium",
+      "origin": "pre-existing (found by B HEAD probe, round 448 planning)",
+      "title": "The /hire-us inquiry e-mail sets no background: in a light mail client 10 of 12 text elements fail WCAG contrast; submitted name, project type and budget are #fff on white (1:1), headings and the e-mail link teal 1.78:1; dark client: footer 3.26:1",
+      "status": "scheduled round 448 (D-29z1591, STORE-2b-2b): own dark wrapper background + Obsidian palette; C3 acceptance",
+      "evidence": "b-round-447/probe/contrast-head.json (K10), shot-head-light.png, shot-head-dark.png; sketch fix contrast-sketch.json (0 failing, min 7.06)",
+      "repro": "b-round-447/probe/capture-hire-us-email.ts (real action, fetch stubbed) + email-contrast.cjs",
+      "added": "2026-11-11 B round 447 -> 448 planning"
+    },
+    {
+      "id": "TLM-R448-HIREUS-EMAIL-CLIENTS",
+      "severity": "info",
+      "status": "open_tech_lead_manual (D-29z1591): deadline RETRO 465 (L46);",
+      "title": "Tech Lead manual: send one /hire-us inquiry through Brevo and check it in Gmail web (light and dark)"
+    },
+    {
+      "id": "INFO-C447-L57-ABSENT",
+      "severity": "info",
+      "status": "logged (D-29z1589): round 448 task names \"all L57 fields\" an",
+      "title": "c-round-447.json lacks all 12 L57 harness fields (tools/l57-check.py: L57 INCOMPLETE)"
+    },
+    {
+      "id": "INFO-C447-O3-HERO-PIXEL-DIFF",
+      "severity": "info",
+      "status": "carried as C10 O3-CONTROL in round 448 (record; HEAD-vs-HEAD",
+      "title": "home full-page pixel diff vs HEAD in the hero band (7 px at 1440, 75 px at 1280, y 430-620), unattri"
+    },
+    {
+      "id": "B-R447-AUTH-ROW-PREMISE",
+      "severity": "info",
+      "status": "ruled (D-29z1589): purchase-protection rows assert 0 audio[s",
+      "title": "Round 447 C14 asserted the anonymous /studio/middle-east \"Sign in required\" text; in the cloud the r"
+    },
+    {
+      "id": "SABA-PROP-DESIGN-TOKENS-PRIMITIVE-STALE",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1589): proposal only, project-level rule",
+      "title": ".claude/primitives/DESIGN_TOKENS.md still lists brand as #13D9CC teal and accent orange; app/styles/"
+    },
+    {
+      "id": "SABA-Q-HIREUS-EMAIL-THEME",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1592): the dark default ships; asked onc",
+      "title": "The Hire-Us inquiry e-mail Saba receives now paints the Store Obsidian background (light ink, brass "
+    },
+    {
+      "id": "B-R447-SKETCH-SERVER-PATCH-SILENT",
+      "severity": "info",
+      "status": "ruled (D-29z1592): C serves only none mode (HEAD); B served ",
+      "title": "sketch-server.sh patch mode: the served copy lives under the loop folder, a git checkout (czaba-stud"
+    },
+    {
+      "id": "BLOCKED-EVIDENCE-R447-ACCOUNT-DOWNLOADS-CARD",
+      "severity": "info",
+      "status": "open_evidence_backend (D-29z1592): keep for a backend-enable",
+      "title": "Round 447: the ProductCard browser half on the protected /account/downloads (signed-in, backend) was"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 438,
-      "task": "tasks/round-438.md",
-      "decision": "D-29z1558",
-      "type": "SYS-R435-SOURCE-SCAN-HELPER (test-only, TS-parser source-scan helper)",
-      "status": "C FAIL (C-R438-01 Medium, origin B spec); gate 438 skipped; A STOP on reviewer M1 (L11)",
-      "note": "baseline 142918b clean; sketch b-round-437/sketch-438.patch.txt (sha 1b88d0ec); claims b-round-437/claims-438.sh"
-    },
     {
       "round": 439,
       "task": "tasks/round-439.md",
@@ -6696,8 +6675,17 @@
       "task": "current-task.md",
       "decision": "D-29z1588",
       "type": "STORE-2b-2a (teal sweep, reachable Store screens: 21 hits / 7 files)",
+      "status": "c_pass_published",
+      "note": "baseline 5df7717 (gate 446 published); no B sketch (per-hit mapping table in task); claims b-round-446/claims-447.sh; grants b-round-446/grants-447.txt; HEAD probe b-round-446/probe/teal-head-1440.json; HEAD state probe b-round-446/probe/head-states.json (3 viewports)",
+      "result": "C round 447 PASS (c-round-447.json, browserVerified/realVerified true, C1-C15 PASS, 0 bugs, observations O1-O6), gate 447 published cce5eda (review COMMIT OK 9/10, verify green: 279 files / 4109 tests) (D-29z1589)"
+    },
+    {
+      "round": 448,
+      "task": "current-task.md",
+      "decision": "D-29z1591",
+      "type": "STORE-2b-2b (hire-us inquiry e-mail: teal -> Obsidian/Brass, own background; + A-R447-REVIEW-L1/L3)",
       "status": "dispatched",
-      "note": "baseline 5df7717 (gate 446 published); no B sketch (per-hit mapping table in task); claims b-round-446/claims-447.sh; grants b-round-446/grants-447.txt; HEAD probe b-round-446/probe/teal-head-1440.json; HEAD state probe b-round-446/probe/head-states.json (3 viewports)"
+      "note": "baseline cce5eda (gate 447 published); B sketch b-round-447/sketch-448.patch.txt (sha256 in sketch-review.md); claims b-round-447/claims-448.sh; grants b-round-447/grants-448.txt; covering b-round-447/covering-448.txt"
     }
   ],
   "other_keys": [

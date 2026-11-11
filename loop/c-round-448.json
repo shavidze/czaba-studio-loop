@@ -1,0 +1,63 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "C1-SOURCE-SCOPE",
+  "C2-CLAIMS",
+  "C3-EMAIL-CONTRAST",
+  "C4-EMAIL-STRUCTURE",
+  "C5-EMAIL-ESCAPE",
+  "C6-HIRE-US-PAGE",
+  "C8-COVERING",
+  "C9-MUTANTS",
+  "C10-O3-CONTROL(record)",
+  "C11-SHOWCASE-RECHECK",
+  "C12-STUDIO-PROTECTION",
+  "C13-DOCS"
+ ],
+ "blocked": [
+  "C7 SEND-BLOCKED: real Brevo send and real Gmail/Outlook/Apple Mail rendering need a Brevo key and mail clients; backend/mail unavailable in cloud (TLM-R448-HIREUS-EMAIL-CLIENTS)"
+ ],
+ "gate": [
+  "full vitest / typecheck / build / lint / verify (gates/gate-round-448.json)"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-11T06:55:21.1322265Z",
+  "round": 448,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": 6,
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": null,
+ "assertsSpecified": true,
+ "mutantsRecorded": 10,
+ "mutantRedOnSketch": "b-round-447/mutant-M1.log \u2026 mutant-M10.log; C reran all 10 on a scratch clone: each red on exactly K13's rows",
+ "gateChecksNamed": [
+  "verify",
+  "typecheck",
+  "build",
+  "lint"
+ ],
+ "gateChecksRunOnSketch": "A: typecheck, lint, build, covering vitest 71/71; C reran covering 71/71 (not the gate)",
+ "chainHeadGateRunGreen": "gate 447 published cce5eda",
+ "affectedChecksNamed": [
+  "covering-448.txt (6 files)"
+ ],
+ "affectedChecksRunOnSketch": "71/71 passed (C)",
+ "notes": {
+  "observations": [
+   "O1 HEAD e-mail reproduces K10: light client 10/12 failing, dark 1/12; tree 0/12 in both, 12 rows each, min ratio 7.06. Captures byte-identical to B's probe files.",
+   "O2 C10: 1280 HEAD-vs-HEAD 0 px and HEAD-vs-tree 0 px. 1440 HEAD-vs-HEAD differs 292111 px (y81-867, wider than the 430-620 hero band) and HEAD-vs-tree 9012 px (y151-833), same region: hero animation noise, not attributed to this diff (the diff touches no home file). Screenshots taken at default animations.",
+   "O3 C6 probe run with animations:'disabled' and 120 s screenshot timeout (the default 60 s timed out on the dev server); HEAD-vs-HEAD and HEAD-vs-tree 0 px at 1440/1280/375; empty submit -> 3 invalid fields, filled -> 'Server configuration error' on both.",
+   "O4 C12: anonymous /studio/middle-east shows 'Sign in required' on both trees in the second run (first HEAD run was blank): 0 audio[src], 0 media requests, premium not bypassed. Studio lab: 1 clip added, Play advances clock (~1.46s), Stop holds, at 1440 and 1280, same as HEAD.",
+   "O5 C11 Export Mix pixel ratio 5.66 (1280) / 5.68 (1440).",
+   "O6 A's M1 (no golden test of template vs HEAD) is covered here by C4 structure diff = B's 10-line expectation; recorded for B to rule on.",
+   "O7 Dev-server only; no mock API on :5199 was needed. This round is a Store e-mail, so no Studio audio-graph/export WAV measurement applied."
+  ]
+ },
+ "evidence": "c-round-448.md; c-round-448/ (email-*.html, contrast-*.json, structure-c.txt, esc.json, c6-page.json, c10.json, c11.json, c12-*.json, mutants-c.txt, covering.txt, shots/)"
+}

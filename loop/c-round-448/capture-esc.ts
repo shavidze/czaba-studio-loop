@@ -1,0 +1,20 @@
+import { writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+const storeRoot = process.env.STORE_ROOT ?? '';
+const out = process.argv[2] ?? 'hire-us-email.html';
+process.env.BREVO_API_KEY = 'probe-key';
+let captured = '';
+globalThis.fetch = (async (_url: unknown, init?: { body?: string }) => {
+  captured = JSON.parse(init?.body ?? '{}').htmlContent ?? '';
+  return new Response('{}', { status: 201 });
+}) as typeof fetch;
+const mod = await import(resolve(storeRoot, 'app/routes/hire-us.tsx'));
+const fd = new FormData();
+fd.set('name', '<img src=x onerror=alert(1)>');
+fd.set('email', 'nino@example.com');
+fd.set('projectType', 'zzunknown');
+fd.set('budget', '1000-5000');
+fd.set('message', '<img src=x onerror=alert(1)>');
+const res = await mod.action({ request: new Request('http://x/hire-us', { method: 'POST', body: fd }), params: {}, context: {} });
+writeFileSync(out, captured);
+console.log(JSON.stringify({ status: res.status, bytes: captured.length, out }));

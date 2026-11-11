@@ -1,0 +1,107 @@
+app/components/home/HeroSection.tsx:137:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    136 │       {/* Sound Toggle Button - Top right, visible on load */}
+  > 137 │       <button
+        │       ^^^^^^^
+  > 138 │         onClick={toggleMute}
+  > 139 │         className="absolute top-24 right-6 z-20 flex items-center gap-2 rounded-full bg-surface-glass px-4 py-2 text-sm text-foreground/80 backdrop-blur-sm transition-all hover:bg-muted-bg hover:text-foreground"
+  > 140 │         aria-label={isMuted ? 'Turn sound on' : 'Turn sound off'}
+  > 141 │       >
+        │       ^
+    142 │         {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+    143 │         <span className="hidden sm:inline">{isMuted ? 'Sound On' : 'Sound Off'}</span>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/home/VideoShowcase.tsx:97:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+     95 │             {!isPlaying && (
+     96 │               <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center">
+   > 97 │                 <button
+        │                 ^^^^^^^
+   > 98 │                   onClick={togglePlay}
+   > 99 │                   className="w-20 h-20 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:scale-110 transition-transform shadow-glow"
+  > 100 │                 >
+        │                 ^
+    101 │                   <Play className="h-10 w-10 ml-1" />
+    102 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/home/VideoShowcase.tsx:131:19 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    129 │                 <div className="flex items-center gap-2">
+    130 │                   {/* Play/Pause */}
+  > 131 │                   <button
+        │                   ^^^^^^^
+  > 132 │                     onClick={togglePlay}
+  > 133 │                     className="w-10 h-10 rounded-full bg-foreground/10 hover:bg-foreground/20 flex items-center justify-center transition-colors"
+  > 134 │                   >
+        │                   ^
+    135 │                     {isPlaying ? (
+    136 │                       <Pause className="h-5 w-5 text-foreground" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/home/VideoShowcase.tsx:144:21 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    142 │                   {/* Volume */}
+    143 │                   <div className="flex items-center gap-2">
+  > 144 │                     <button
+        │                     ^^^^^^^
+  > 145 │                       onClick={toggleMute}
+  > 146 │                       className="w-10 h-10 rounded-full bg-foreground/10 hover:bg-foreground/20 flex items-center justify-center transition-colors"
+  > 147 │                     >
+        │                     ^
+    148 │                       {isMuted || volume === 0 ? (
+    149 │                         <VolumeX className="h-5 w-5 text-foreground" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/$.tsx:80:18 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    78 │         {[...Array(5)].map((_, i) => (
+    79 │           <motion.div
+  > 80 │             key={i}
+       │                  ^
+    81 │             className="wave-bar"
+    82 │             animate={{
+  
+  i This is the source of the key value.
+  
+    76 │       {/* Floating sound wave decoration */}
+    77 │       <div className="not-found-waves">
+  > 78 │         {[...Array(5)].map((_, i) => (
+       │                                ^
+    79 │           <motion.div
+    80 │             key={i}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+Checked 11 files in 18ms. No fixes applied.
+Found 5 warnings.
