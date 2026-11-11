@@ -1,0 +1,127 @@
+diff --git a/app/lib/__tests__/store-live-teal.test.ts b/app/lib/__tests__/store-live-teal.test.ts
+index 5d33f34..db72839 100644
+--- a/app/lib/__tests__/store-live-teal.test.ts
++++ b/app/lib/__tests__/store-live-teal.test.ts
+@@ -240,10 +240,17 @@ const TEAL_TOKEN_READ_ALLOW_LIST: StyleScanAllowList = {
+   },
+ };
+ 
++const TEAL_TOKEN_READ_RULE_ALLOW_LIST: StyleScanAllowList = {
++  'styles/app.css .product-detail-add-to-cart {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .newsletter-button-large {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++};
++
+ const TEAL_HEX_WITH_ALPHA_PATTERN =
+   /#(?:13d9cc|14b8a6|0d9488|2dd4bf|5eead4|0f766e)[0-9a-f]{2}(?![0-9a-f])/gi;
+ 
+-const TOP_LEVEL_HEADER = /^\S.*\{\s*$/;
++const TOP_LEVEL_HEADER = /^[^\s}][^{]*\{/;
++
++const TOP_LEVEL_SELECTOR_CONTINUATION = /^[^\s}][^{]*,\s*$/;
+ 
+ const CSS_TEAL_ALLOW_LIST: StyleScanAllowList = {
+   'styles/app.css': {
+@@ -278,14 +285,22 @@ function lineCount(source: string, line: string): number {
+   return source.split('\n').filter((candidate) => candidate === line).length;
+ }
+ 
+-function tealHitsByEnclosingRule(path: string, source: string): Record<string, number> {
++function hitsByEnclosingRule(
++  path: string,
++  source: string,
++  count: (line: string) => number,
++): Record<string, number> {
+   const hits: Record<string, number> = {};
+   let header = '(file start)';
++  let pendingSelectors: string[] = [];
+   for (const line of source.split('\n')) {
+-    if (TOP_LEVEL_HEADER.test(line)) {
+-      header = line.trim();
++    if (TOP_LEVEL_SELECTOR_CONTINUATION.test(line)) {
++      pendingSelectors.push(line.trim());
++    } else if (TOP_LEVEL_HEADER.test(line)) {
++      header = [...pendingSelectors, line.trim()].join(' ');
++      pendingSelectors = [];
+     }
+-    const found = countTealHits(line);
++    const found = count(line);
+     if (found > 0) {
+       const key = `${path} ${header}`;
+       hits[key] = (hits[key] ?? 0) + found;
+@@ -294,6 +309,10 @@ function tealHitsByEnclosingRule(path: string, source: string): Record<string, n
+   return hits;
+ }
+ 
++function tealHitsByEnclosingRule(path: string, source: string): Record<string, number> {
++  return hitsByEnclosingRule(path, source, countTealHits);
++}
++
+ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+   it('LT1: every live player, 404, palette and scrollbar rule is the teal-free block, exactly once', () => {
+     for (const [path, block] of LIVE_RULE_BLOCKS) {
+@@ -320,7 +339,7 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+           '  position: absolute;',
+           '  inset: 0;',
+           '  background: linear-gradient(',
+-          '    180deg,',
++          '    180deg in srgb,',
+           '    rgba(255, 255, 255, 0.25) 0%,',
+           '    rgba(255, 255, 255, 0.1) 20%,',
+           '    color-mix(in srgb, var(--color-foreground) 6%, transparent) 40%,',
+@@ -360,6 +379,16 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+         TEAL_TOKEN_READ_ALLOW_LIST,
+       ),
+     ).toEqual({ unexpected: [], drifted: [] });
++    const tokenReads = countMatches(TEAL_TOKEN_READ_PATTERN);
++    expect(
++      allowListViolations(
++        {
++          ...hitsByEnclosingRule(STORE_CSS_PATH, readApp(STORE_CSS_PATH), tokenReads),
++          ...hitsByEnclosingRule(UTILITIES_CSS_PATH, readApp(UTILITIES_CSS_PATH), tokenReads),
++        },
++        TEAL_TOKEN_READ_RULE_ALLOW_LIST,
++      ),
++    ).toEqual({ unexpected: [], drifted: [] });
+     expect(
+       hitsByFile(APP_ROOT, STYLE_SOURCE_EXTENSIONS, countMatches(TEAL_HEX_WITH_ALPHA_PATTERN)),
+     ).toEqual({});
+@@ -389,7 +418,25 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+           '}',
+         ].join('\n'),
+       ),
+-    ).toEqual({ 'x.css .b {': 1, 'x.css @keyframes k {': 1 });
++    ).toEqual({ 'x.css .a, .b {': 1, 'x.css @keyframes k {': 1 });
++    expect(
++      tealHitsByEnclosingRule(
++        'x.css',
++        [
++          '.dead {',
++          '  color: #13d9cc;',
++          '}',
++          '.live:hover { color: #13d9cc; }',
++          '.c { /* note */',
++          '  color: #13d9cc;',
++          '}',
++        ].join('\n'),
++      ),
++    ).toEqual({
++      'x.css .dead {': 1,
++      'x.css .live:hover { color: #13d9cc; }': 1,
++      'x.css .c { /* note */': 1,
++    });
+   });
+ 
+   it('LT4: the scan is non-vacuous and the teal matcher sees the CSS forms this stage removed', () => {
+diff --git a/app/styles/app.css b/app/styles/app.css
+index 7a88031..a89900a 100644
+--- a/app/styles/app.css
++++ b/app/styles/app.css
+@@ -3193,7 +3193,7 @@ button { cursor:pointer }
+   position: absolute;
+   inset: 0;
+   background: linear-gradient(
+-    180deg,
++    180deg in srgb,
+     rgba(255, 255, 255, 0.25) 0%,
+     rgba(255, 255, 255, 0.1) 20%,
+     color-mix(in srgb, var(--color-foreground) 6%, transparent) 40%,

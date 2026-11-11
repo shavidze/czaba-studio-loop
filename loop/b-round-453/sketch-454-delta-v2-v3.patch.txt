@@ -1,0 +1,266 @@
+diff --git a/app/lib/__tests__/store-live-teal.test.ts b/app/lib/__tests__/store-live-teal.test.ts
+index c103d0f..5d33f34 100644
+--- a/app/lib/__tests__/store-live-teal.test.ts
++++ b/app/lib/__tests__/store-live-teal.test.ts
+@@ -15,6 +15,23 @@ import {
+ const STORE_CSS_PATH = 'styles/app.css';
+ const UTILITIES_CSS_PATH = 'styles/base/utilities.css';
+ 
++const LIVE_HEADER_COUNTS: Readonly<Record<string, number>> = {
++  '.audio-player-artwork {': 1,
++  '.audio-player-artwork:hover {': 1,
++  '.audio-player-button-play {': 1,
++  '.audio-player-button-play:hover {': 1,
++  '.audio-player-progress::-webkit-slider-thumb:hover {': 1,
++  '.audio-player-progress::-moz-range-thumb:hover {': 1,
++  '.light-flicker-effect::before {': 1,
++  '.not-found-grid {': 1,
++  '.code-4 {': 1,
++  '.code-0 {': 1,
++  '.command-palette-item.selected {': 2,
++  '.styled-scrollbar {': 1,
++  '.styled-scrollbar::-webkit-scrollbar-thumb {': 1,
++  '.styled-scrollbar::-webkit-scrollbar-thumb:hover {': 1,
++};
++
+ const LIVE_RULE_BLOCKS: ReadonlyArray<readonly [string, string]> = [
+   [
+     STORE_CSS_PATH,
+@@ -86,8 +103,8 @@ const LIVE_RULE_BLOCKS: ReadonlyArray<readonly [string, string]> = [
+       '  position: absolute;',
+       '  inset: 0;',
+       '  background-image:',
+-      '    linear-gradient(rgba(236, 230, 218, 0.03) 1px, transparent 1px),',
+-      '    linear-gradient(90deg, rgba(236, 230, 218, 0.03) 1px, transparent 1px);',
++      '    linear-gradient(color-mix(in srgb, var(--color-foreground) 3%, transparent) 1px, transparent 1px),',
++      '    linear-gradient(90deg, color-mix(in srgb, var(--color-foreground) 3%, transparent) 1px, transparent 1px);',
+       '  background-size: 60px 60px;',
+       '  mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);',
+       '}',
+@@ -156,6 +173,78 @@ const LIVE_RULE_BLOCKS: ReadonlyArray<readonly [string, string]> = [
+   ],
+ ];
+ 
++const TEAL_RULE_ALLOW_LIST: StyleScanAllowList = {
++  'styles/app.css @theme {': { hits: 6, reason: 'dead teal tokens (STORE-2b-3d)' },
++  'styles/app.css .hover-glow:hover {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .interactive-card:hover {': { hits: 2, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .audio-preview-inline-button::before {': {
++    hits: 1,
++    reason: 'dead: every AudioPreviewButton caller passes variant="overlay" (STORE-2b-3d)',
++  },
++  'styles/app.css .audio-preview-inline-button:hover {': {
++    hits: 1,
++    reason: 'dead: inline variant never rendered (STORE-2b-3d)',
++  },
++  'styles/app.css @keyframes audioPlayingPulse {': {
++    hits: 4,
++    reason: 'dead: animates only the inline variant (STORE-2b-3d)',
++  },
++  'styles/app.css @keyframes playButtonPulse {': {
++    hits: 4,
++    reason: 'dead: animates only .is-playing, which no component sets (STORE-2b-3d)',
++  },
++  'styles/app.css .audio-player-progress.is-playing {': {
++    hits: 1,
++    reason: 'dead: no component sets .is-playing (STORE-2b-3d)',
++  },
++  'styles/app.css .product-detail-add-to-cart:hover {': { hits: 3, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .newsletter-button-large:hover {': { hits: 3, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .testimonial-card:hover {': { hits: 2, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .waveform-bar.active {': {
++    hits: 1,
++    reason:
++      'dead: WaveForm/TrackRow are reached only through the unmounted AssetListingPage (STORE-2b-3d)',
++  },
++  'styles/app.css .track-row-waveform:hover {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .loading-brand {': {
++    hits: 1,
++    reason: 'dead: PianoLoadingAnimation has no importer outside its barrel (STORE-2b-3d)',
++  },
++  'styles/app.css .pack-card-3d:hover > div {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .about-image-overlay {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .value-card:hover {': { hits: 2, reason: 'dead (STORE-2b-3d)' },
++  'styles/app.css .glass-card:hover {': { hits: 2, reason: 'dead (STORE-2b-3d)' },
++  'styles/base/utilities.css .hover-glow:hover {': { hits: 1, reason: 'dead (STORE-2b-3d)' },
++  'styles/base/utilities.css .interactive-card:hover {': { hits: 2, reason: 'dead (STORE-2b-3d)' },
++  'styles/base/utilities.css .stems-loader-list {': {
++    hits: 1,
++    reason: 'frozen legacy Studio StemsLoadingAnimation (legacy removal)',
++  },
++  'styles/base/utilities.css .stems-loader-list::-webkit-scrollbar-thumb {': {
++    hits: 1,
++    reason: 'frozen legacy Studio StemsLoadingAnimation (legacy removal)',
++  },
++  'styles/base/utilities.css .stems-loader-list::-webkit-scrollbar-thumb:hover {': {
++    hits: 1,
++    reason: 'frozen legacy Studio StemsLoadingAnimation (legacy removal)',
++  },
++};
++
++const TEAL_TOKEN_READ_PATTERN =
++  /var\(\s*--(?:color-glow-primary|color-video-sync|gradient-primary|gradient-hero|gradient-glow)\s*[,)]/g;
++
++const TEAL_TOKEN_READ_ALLOW_LIST: StyleScanAllowList = {
++  'styles/app.css': {
++    hits: 2,
++    reason: 'dead .product-detail-add-to-cart and .newsletter-button-large (STORE-2b-3d)',
++  },
++};
++
++const TEAL_HEX_WITH_ALPHA_PATTERN =
++  /#(?:13d9cc|14b8a6|0d9488|2dd4bf|5eead4|0f766e)[0-9a-f]{2}(?![0-9a-f])/gi;
++
++const TOP_LEVEL_HEADER = /^\S.*\{\s*$/;
++
+ const CSS_TEAL_ALLOW_LIST: StyleScanAllowList = {
+   'styles/app.css': {
+     hits: 37,
+@@ -181,6 +270,30 @@ function occurrences(source: string, literal: string): number {
+   return source.split(literal).length - 1;
+ }
+ 
++function countMatches(pattern: RegExp): (source: string) => number {
++  return (source) => (source.match(pattern) ?? []).length;
++}
++
++function lineCount(source: string, line: string): number {
++  return source.split('\n').filter((candidate) => candidate === line).length;
++}
++
++function tealHitsByEnclosingRule(path: string, source: string): Record<string, number> {
++  const hits: Record<string, number> = {};
++  let header = '(file start)';
++  for (const line of source.split('\n')) {
++    if (TOP_LEVEL_HEADER.test(line)) {
++      header = line.trim();
++    }
++    const found = countTealHits(line);
++    if (found > 0) {
++      const key = `${path} ${header}`;
++      hits[key] = (hits[key] ?? 0) + found;
++    }
++  }
++  return hits;
++}
++
+ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+   it('LT1: every live player, 404, palette and scrollbar rule is the teal-free block, exactly once', () => {
+     for (const [path, block] of LIVE_RULE_BLOCKS) {
+@@ -189,6 +302,10 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+       expect(countTealHits(block), label).toBe(0);
+       expect(countZeroOffsetGlowHits(block), label).toBe(0);
+     }
++    for (const [header, count] of Object.entries(LIVE_HEADER_COUNTS)) {
++      const path = header.startsWith('.styled-scrollbar') ? UTILITIES_CSS_PATH : STORE_CSS_PATH;
++      expect(lineCount(readApp(path), header), header).toBe(count);
++    }
+   });
+ 
+   it('LT2: the teal card light layer is gone and the card light keeps only neutral stops', () => {
+@@ -206,7 +323,7 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+           '    180deg,',
+           '    rgba(255, 255, 255, 0.25) 0%,',
+           '    rgba(255, 255, 255, 0.1) 20%,',
+-          '    rgba(236, 230, 218, 0.06) 40%,',
++          '    color-mix(in srgb, var(--color-foreground) 6%, transparent) 40%,',
+           '    transparent 60%',
+           '  );',
+           '  opacity: 0;',
+@@ -214,7 +331,6 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+         ].join('\n'),
+       ),
+     ).toBe(1);
+-    expect(occurrences(css, '.light-flicker-effect::before { animation-delay:')).toBe(6);
+     expect(occurrences(css, 'animation: light-flicker-on 1.8s ease-out forwards;')).toBe(1);
+   });
+ 
+@@ -226,6 +342,56 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+     });
+   });
+ 
++  it('LT5: every remaining teal line sits inside an allow-listed dead or frozen rule', () => {
++    const hits = {
++      ...tealHitsByEnclosingRule(STORE_CSS_PATH, readApp(STORE_CSS_PATH)),
++      ...tealHitsByEnclosingRule(UTILITIES_CSS_PATH, readApp(UTILITIES_CSS_PATH)),
++    };
++    expect(allowListViolations(hits, TEAL_RULE_ALLOW_LIST)).toEqual({
++      unexpected: [],
++      drifted: [],
++    });
++  });
++
++  it('LT6: no CSS reads a teal token outside the dead allow-list and no teal hex hides behind an alpha suffix', () => {
++    expect(
++      allowListViolations(
++        hitsByFile(APP_ROOT, STYLE_SOURCE_EXTENSIONS, countMatches(TEAL_TOKEN_READ_PATTERN)),
++        TEAL_TOKEN_READ_ALLOW_LIST,
++      ),
++    ).toEqual({ unexpected: [], drifted: [] });
++    expect(
++      hitsByFile(APP_ROOT, STYLE_SOURCE_EXTENSIONS, countMatches(TEAL_HEX_WITH_ALPHA_PATTERN)),
++    ).toEqual({});
++    expect(
++      countMatches(TEAL_TOKEN_READ_PATTERN)('box-shadow: 0 0 20px var(--color-glow-primary);'),
++    ).toBe(1);
++    expect(countMatches(TEAL_TOKEN_READ_PATTERN)('background: var(--gradient-primary, red);')).toBe(
++      1,
++    );
++    expect(
++      countMatches(TEAL_TOKEN_READ_PATTERN)('--gradient-primary: linear-gradient(red, blue);'),
++    ).toBe(0);
++    expect(countMatches(TEAL_HEX_WITH_ALPHA_PATTERN)('color: #13d9cc1a; color: #14B8A680;')).toBe(
++      2,
++    );
++    expect(countMatches(TEAL_HEX_WITH_ALPHA_PATTERN)('color: #13d9cc;')).toBe(0);
++    expect(
++      tealHitsByEnclosingRule(
++        'x.css',
++        [
++          '.a,',
++          '.b {',
++          '  color: #13d9cc;',
++          '}',
++          '@keyframes k {',
++          '  0% { color: #14b8a6; }',
++          '}',
++        ].join('\n'),
++      ),
++    ).toEqual({ 'x.css .b {': 1, 'x.css @keyframes k {': 1 });
++  });
++
+   it('LT4: the scan is non-vacuous and the teal matcher sees the CSS forms this stage removed', () => {
+     const sources = listFiles(APP_ROOT, STYLE_SOURCE_EXTENSIONS);
+     for (const path of Object.keys(CSS_TEAL_ALLOW_LIST)) {
+diff --git a/app/styles/app.css b/app/styles/app.css
+index 27ae4ca..7a88031 100644
+--- a/app/styles/app.css
++++ b/app/styles/app.css
+@@ -3196,7 +3196,7 @@ button { cursor:pointer }
+     180deg,
+     rgba(255, 255, 255, 0.25) 0%,
+     rgba(255, 255, 255, 0.1) 20%,
+-    rgba(236, 230, 218, 0.06) 40%,
++    color-mix(in srgb, var(--color-foreground) 6%, transparent) 40%,
+     transparent 60%
+   );
+   opacity: 0;
+@@ -3205,7 +3205,6 @@ button { cursor:pointer }
+   z-index: 1;
+ }
+ 
+-/* Glow რადიალური ეფექტი */
+ /* Stagger animation for grid items */
+ .light-flicker-stagger:nth-child(1) .light-flicker-effect::before { animation-delay: 0s; }
+ 
+@@ -3472,8 +3471,8 @@ button { cursor:pointer }
+   position: absolute;
+   inset: 0;
+   background-image:
+-    linear-gradient(rgba(236, 230, 218, 0.03) 1px, transparent 1px),
+-    linear-gradient(90deg, rgba(236, 230, 218, 0.03) 1px, transparent 1px);
++    linear-gradient(color-mix(in srgb, var(--color-foreground) 3%, transparent) 1px, transparent 1px),
++    linear-gradient(90deg, color-mix(in srgb, var(--color-foreground) 3%, transparent) 1px, transparent 1px);
+   background-size: 60px 60px;
+   mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+ }

@@ -1,0 +1,129 @@
+
+ RUN  v4.0.16 /tmp/b454-mut
+
+ ❯ app/lib/__tests__/store-live-teal.test.ts (6 tests | 4 failed) 38ms
+     × LT1: every live player, 404, palette and scrollbar rule is the teal-free block, exactly once 8ms
+     × LT2: the teal card light layer is gone and the card light keeps only neutral stops 1ms
+     × LT3: teal stays only in the allow-listed dead or frozen CSS, each file at its exact count 12ms
+     × LT5: every remaining teal line sits inside an allow-listed dead or frozen rule 6ms
+     ✓ LT6: no CSS reads a teal token outside the dead allow-list and no teal hex hides behind an alpha suffix 5ms
+     ✓ LT4: the scan is non-vacuous and the teal matcher sees the CSS forms this stage removed 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT1: every live player, 404, palette and scrollbar rule is the teal-free block, exactly once
+AssertionError: .audio-player-artwork {: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ app/lib/__tests__/store-live-teal.test.ts:301:56
+    299|     for (const [path, block] of LIVE_RULE_BLOCKS) {
+    300|       const label = block.split('\n')[0] ?? path;
+    301|       expect(occurrences(readApp(path), block), label).toBe(1);
+       |                                                        ^
+    302|       expect(countTealHits(block), label).toBe(0);
+    303|       expect(countZeroOffsetGlowHits(block), label).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT2: the teal card light layer is gone and the card light keeps only neutral stops
+AssertionError: expected 7 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 7
+
+ ❯ app/lib/__tests__/store-live-teal.test.ts:313:62
+    311|   it('LT2: the teal card light layer is gone and the card light keeps …
+    312|     const css = readApp(STORE_CSS_PATH);
+    313|     expect(occurrences(css, '.light-flicker-effect::after')).toBe(0);
+       |                                                              ^
+    314|     expect(
+    315|       occurrences(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT3: teal stays only in the allow-listed dead or frozen CSS, each file at its exact count
+AssertionError: expected { unexpected: [], drifted: [ …(2) ] } to deeply equal { unexpected: [], drifted: [] }
+
+- Expected
++ Received
+
+  {
+-   "drifted": [],
++   "drifted": [
++     "styles/app.css: 54 != 37",
++     "styles/base/utilities.css: 10 != 6",
++   ],
+    "unexpected": [],
+  }
+
+ ❯ app/lib/__tests__/store-live-teal.test.ts:339:60
+    337|   it('LT3: teal stays only in the allow-listed dead or frozen CSS, eac…
+    338|     const hits = hitsByFile(APP_ROOT, STYLE_SOURCE_EXTENSIONS, countTe…
+    339|     expect(allowListViolations(hits, CSS_TEAL_ALLOW_LIST)).toEqual({
+       |                                                            ^
+    340|       unexpected: [],
+    341|       drifted: [],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT5: every remaining teal line sits inside an allow-listed dead or frozen rule
+AssertionError: expected { unexpected: [ …(16) ], drifted: [] } to deeply equal { unexpected: [], drifted: [] }
+
+- Expected
++ Received
+
+  {
+    "drifted": [],
+-   "unexpected": [],
++   "unexpected": [
++     "styles/app.css .audio-player-artwork {",
++     "styles/app.css .audio-player-artwork:hover {",
++     "styles/app.css .audio-player-button-play {",
++     "styles/app.css .audio-player-button-play:hover {",
++     "styles/app.css .audio-player-progress::-webkit-slider-thumb:hover {",
++     "styles/app.css .audio-player-progress::-moz-range-thumb:hover {",
++     "styles/app.css .light-flicker-effect::before {",
++     "styles/app.css .light-flicker-effect::after {",
++     "styles/app.css .not-found-grid {",
++     "styles/app.css .code-4 {",
++     "styles/app.css .code-0 {",
++     "styles/app.css .command-palette-item.selected {",
++     "styles/base/utilities.css .scrollbar-hide::-webkit-scrollbar {",
++     "styles/base/utilities.css .styled-scrollbar {",
++     "styles/base/utilities.css .styled-scrollbar::-webkit-scrollbar-thumb {",
++     "styles/base/utilities.css .styled-scrollbar::-webkit-scrollbar-thumb:hover {",
++   ],
+  }
+
+ ❯ app/lib/__tests__/store-live-teal.test.ts:350:61
+    348|       ...tealHitsByEnclosingRule(UTILITIES_CSS_PATH, readApp(UTILITIES…
+    349|     };
+    350|     expect(allowListViolations(hits, TEAL_RULE_ALLOW_LIST)).toEqual({
+       |                                                             ^
+    351|       unexpected: [],
+    352|       drifted: [],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 2 passed (6)
+   Start at  12:52:29
+   Duration  192ms (transform 44ms, setup 0ms, import 52ms, tests 38ms, environment 0ms)
+
+
+::error file=/tmp/b454-mut/app/lib/__tests__/store-live-teal.test.ts,title=app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT1%3A every live player%2C 404%2C palette and scrollbar rule is the teal-free block%2C exactly once,line=301,column=56::AssertionError: .audio-player-artwork {: expected +0 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/__tests__/store-live-teal.test.ts:301:56%0A%0A
+
+::error file=/tmp/b454-mut/app/lib/__tests__/store-live-teal.test.ts,title=app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT2%3A the teal card light layer is gone and the card light keeps only neutral stops,line=313,column=62::AssertionError: expected 7 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 7%0A%0A ❯ app/lib/__tests__/store-live-teal.test.ts:313:62%0A%0A
+
+::error file=/tmp/b454-mut/app/lib/__tests__/store-live-teal.test.ts,title=app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT3%3A teal stays only in the allow-listed dead or frozen CSS%2C each file at its exact count,line=339,column=60::AssertionError: expected { unexpected: [], drifted: [ …(2) ] } to deeply equal { unexpected: [], drifted: [] }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "drifted": [],%0A+   "drifted": [%0A+     "styles/app.css: 54 != 37",%0A+     "styles/base/utilities.css: 10 != 6",%0A+   ],%0A    "unexpected": [],%0A  }%0A%0A ❯ app/lib/__tests__/store-live-teal.test.ts:339:60%0A%0A
+
+::error file=/tmp/b454-mut/app/lib/__tests__/store-live-teal.test.ts,title=app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT5%3A every remaining teal line sits inside an allow-listed dead or frozen rule,line=350,column=61::AssertionError: expected { unexpected: [ …(16) ], drifted: [] } to deeply equal { unexpected: [], drifted: [] }%0A%0A- Expected%0A+ Received%0A%0A  {%0A    "drifted": [],%0A-   "unexpected": [],%0A+   "unexpected": [%0A+     "styles/app.css .audio-player-artwork {",%0A+     "styles/app.css .audio-player-artwork:hover {",%0A+     "styles/app.css .audio-player-button-play {",%0A+     "styles/app.css .audio-player-button-play:hover {",%0A+     "styles/app.css .audio-player-progress::-webkit-slider-thumb:hover {",%0A+     "styles/app.css .audio-player-progress::-moz-range-thumb:hover {",%0A+     "styles/app.css .light-flicker-effect::before {",%0A+     "styles/app.css .light-flicker-effect::after {",%0A+     "styles/app.css .not-found-grid {",%0A+     "styles/app.css .code-4 {",%0A+     "styles/app.css .code-0 {",%0A+     "styles/app.css .command-palette-item.selected {",%0A+     "styles/base/utilities.css .scrollbar-hide::-webkit-scrollbar {",%0A+     "styles/base/utilities.css .styled-scrollbar {",%0A+     "styles/base/utilities.css .styled-scrollbar::-webkit-scrollbar-thumb {",%0A+     "styles/base/utilities.css .styled-scrollbar::-webkit-scrollbar-thumb:hover {",%0A+   ],%0A  }%0A%0A ❯ app/lib/__tests__/store-live-teal.test.ts:350:61%0A%0A
