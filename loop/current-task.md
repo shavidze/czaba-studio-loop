@@ -1,117 +1,134 @@
-# Round 446: STORE-2b-1 — the LeadMagnet popup no longer opens on product, cart and checkout pages
+# Round 447: STORE-2b-2a — the hardcoded teal leaves the reachable Store screens
 
-**Planned by:** B, at the round 445 → 446 planning, 2026-11-11 (`b-round-445.md`).
+**Planned by:** B, at the round 446 → 447 planning, 2026-11-11 (`b-round-446.md`).
 - The advisor was available and was consulted after orientation and before hand-off.
-- The round-445 task is archived as `tasks/round-445.md` (byte-identical copy made before this file was rewritten) [K18].
-- **Baseline:** gate 445 is `published`, commit `4bfebd7` [K1]. The store tree is clean at planning [K2].
-- **Regression:** not due. `regression-last.json` is 2026-11-10 (round 425); the next one is due on or after 2026-11-13.
-- **RETRO:** round 450.
+- The round-446 task is archived as `tasks/round-446.md` (byte-identical copy made before this file was rewritten).
+- **Baseline:** gate 446 is `published`, commit `5df7717` [K1]. The store tree is at `5df7717` and clean at planning [K2, K18].
+- **Regression:** not due (last 2026-11-10, round 425; due on or after 2026-11-13). **RETRO:** round 450.
 
 ## Why this round
-- C round 445 PASS (`browserVerified` true, 0 bugs) [K19] and gate 445 published `4bfebd7`. **SYS-3 is complete.** No C bug is open. No Critical/High is open; the open Mediums are root/manual/Saba-gated or scheduled (`context/active-summary.md`).
-- Order D-29z1581: STORE-REDESIGN 2b…5 is next. STEM-LANES is still `awaiting_user` (no answer to `user-review/AGREE-STEM-LANES.md`), so it does not outrank STORE-2b.
-- **STORE-2b is split (D-29z1583)**, one bounded stage per round, nothing dropped:
-  - **2b-1 (this round):** PD-REVIEW F4 / Saba Q3 — LeadMagnet route exclusion. It goes first because it is a Saba-approved behaviour (Medium in the PD review), it is small, and it removes the auto-opening popup that interrupts C's product-page probes in STORE-4 (L1).
-  - **2b-2:** hardcoded teal sweep in TS/TSX (recount at `4bfebd7`: 24 hits in 9 files with the regex in `b-round-445.md` §4; the old 37/14 count was at `caa09af` with a different regex).
-  - **2b-3:** glow blobs, gradient text, `shadow-glow`, teal gradient/glow tokens and alias colours in `app/styles/app.css`. `app/styles/**` is `global_forbidden`; 2b-3 gets a B narrow grant for `app/styles/app.css` with an exact byte scope, as rounds 192, 196, 201 and 316 did (`narrow_grants`).
-  - **2b-4:** F6 visual part, inside the restyle stages.
+- C round 446 PASS (`browserVerified`/`realVerified` true, 1 Low) and gate 446 published `5df7717`. **STORE-2b-1 is done.**
+- **C-R446-01 ruling (L10, D-29z1586).** C asked whether change 3 of round 446 ("the last submit error is cleared") covers a submit that is still in flight when the hide happens. It does not: round 446 specified the reset at hide time only, so this is a spec gap (origin **B sketch**; A applied the patch unchanged). It is the same issue as the code-reviewer's A-R446-REVIEW-L1, so C-R446-01 is recorded as `confirmedBy` on that id (L7). Severity stays Low: the path is rare and loses no data. It moves to `deferred_low_polish` and is attached to the next stage that touches `useLeadMagnet.ts` (the store polish pass), with C's probe `c-round-446/tools/inflight.cjs` as its acceptance row. Round 447 does not own that file.
+- Order (D-29z1583): STORE-2b-2 is next. STEM-LANES is still `awaiting_user`.
+- **STORE-2b-2 is split (D-29z1587):** the full recount at `5df7717` is **44 teal hits in 14 TS/TSX files** [K3, K4], not 24 in 9. The earlier recount missed `rgba(19, 217, 204 …)` and the `hsl(175 …)` forms. The hits fall into four groups:
+  - **2b-2a (this round): 21 hits in 7 files that render on Store pages C can reach** [K4, K19].
+  - **Stems modal, 2 hits:** `StemsPlayerModal.tsx` (1) and `StemControl.tsx` (1) [K4]. No mock product renders "Play Stems" (B probe: 0 of 6 handles [K19]). The product loader runs on the server, so a `page.route` stub cannot reach it. These hits move to **STORE-4**, whose D8 replaces the modal with an inline stems mini-mixer; the mapping there is Solo = `bg-foreground text-background`, spinner `text-muted`. That stage needs a mock product with stems: **ROOT-REQ-MOCK-API-STEMS** (the mock API is root's STORE-0 harness).
+  - **2b-2b (next): 8 hits in the e-mail HTML** (`app/lib/email.server.ts` 5, `app/routes/hire-us.tsx` 3) [K4]. E-mail HTML cannot use tokens and cannot be sent in the cloud, so it gets its own round. That round adds a row that renders the generated HTML in Chromium and measures contrast against the e-mail's own dark background.
+  - **Dead code, 12 hits:** `app/components/audio/Timeline.tsx` (5; 0 importers outside the barrel) [K5] and `app/components/loading/CinemaCurtainLoader.tsx` (7; 0 users) [K6]. `PianoLoadingAnimation.tsx` (orange; 0 users) [K7] joins them. Nothing is restyled here, and no browser row could prove a restyle. They are recorded as **LEGACY-DEAD-STORE-COMPONENTS** for the next cleanup or ARCH-SPLIT round, under Saba's legacy removal policy (2026-11-10).
+  - **Frozen legacy, 1 hit:** `app/components/studio/StudioTrack.tsx:155` (`app/components/studio/**` is `global_forbidden`). It is recorded under SRW-21 / legacy Studio removal and stays as it is.
 
 ## What changes (user-visible)
-1. On `/products/<handle>`, `/cart`, `/checkout` and `/checkout/<anything>` the popup never opens: neither the 8 s timer nor exit intent shows it, and no view is counted.
-2. Scrolling on an excluded page does not count as engagement for later pages. When the visitor returns to an allowed page, that page needs its own ≥ 40 % scroll inside a new 8 s window (or an exit intent after its own scroll), exactly as on a first page today.
-3. If the popup is open and the visitor reaches an excluded page (browser Back/Forward), the popup closes **without** being marked dismissed, the body unlocks, the new page does not jump to the old page's scroll offset, the step goes back to the offer, and the last submit error is cleared.
-4. Everything else is unchanged (keep-list): content, steps, copy, the 8 s one-shot timer, the 40 % threshold, exit intent, the 10-per-day cap, dismissal, submission, focus behaviour, and every allowed page (`/`, `/store`, `/free-downloads`, `/gift-cards`, `/about`, `/account/*`, `/recordings/*`, `/scenes/*`, …). Moving between two allowed pages keeps HEAD's carried-over window (LMR8).
+1. **Home page.**
+   - The **Studio showcase illustration** loses its teal. Waveforms become light ink and the volume fill brass, with a light thumb. The play button becomes brass with dark text, and the "Export Mix" pill brass on a faint brass fill. The waveform glow goes.
+   - The **entrance loader** wordmark "CZABA" becomes solid light ink, with no gradient and no glow. The teal halo goes. The sweep line becomes a solid thin brass line that keeps its width animation.
+   - The two **Special Offers** cards and the **Newsletter** button lose their teal hover glow. The image zoom and `hover:bg-brand-hover` still show the hover.
+2. **Product cards on the home page** (`ProductSection`; `ProductCard` renders on no other public route, and also on the protected `account.downloads.tsx`). The mouse-follow teal spotlight and the teal edge glow go. The card's hover scale and the preview overlay stay.
+3. **`/gift-cards`.** The selected amount card loses its teal glow and keeps `border-brand bg-brand/5`.
+4. **`/checkout/success`.** The one-shot teal ripple ring around the check icon goes. The brass check icon's scale-in stays.
+5. **Nothing else changes.** The keep-list content (SpecialOffers, LeadMagnet, Free downloads, badges, testimonials and stats) keeps its text, behaviour, timing and placement. Only the glow is removed, as Saba's decision 2 allows. Layout, sizes and copy do not change.
 
-Not changed, and why: `app/root.tsx` is protected (`global_forbidden`), so the mount stays where it is and the exclusion lives in the hook. `MAX_VIEWS_PER_DAY = 10` with its comment "Max 2 views per day" [K8] is not in Saba's decision → signal `SIG-R446-LEADMAGNET-CAP-COMMENT`, not touched.
+## Reference
+Ableton does not apply: this is a Store restyle. The authority is Saba's spec (`docs/technical/store-redesign/store-redesign-spec.md`). It sets one brass accent #C9A46A on #0E0D0C, says teal leaves the store, and makes "removal of glow and gradients" a permitted restyle on keep-list sections. The STORE-2 row says to remove the glow and the gradient text, with titles in #ECE6DA. For in-product consistency, the real Studio is the reference: Solo on is `border-foreground bg-foreground text-background` [K12], and Play is brass while playing.
 
-## Reference: how established stores do it
-The Ableton reference does not apply: this is a Store change. Store sources:
+**`product-designer` consult (this planning), adopted as the per-hit rulings in §1.**
+- Every glow or halo goes (X).
+- Brass stays only on flat fills and strokes (R).
+- Solo uses the light fill, not brass (brass means "playing" in the Studio) and not yellow (a second accent). This applies to the stems modal in STORE-4. In this round it decides that the StudioMockup solo waveform uses foreground, not yellow.
+- The checkout ripple was a judgement call. It is removed, because the check icon's scale-in is already the success beat. A brass ripple is the rejected option and is offered to Saba once as `SABA-Q-CHECKOUT-RIPPLE` (`awaiting_user`; the default ships).
+- The designer also spotted things outside this round, recorded but not touched:
+  - the white floor-reflection blur in the loader;
+  - the loader's `font-bold` [K11] against "500, never 700";
+  - ProductCard's `scale-[1.02]` and 500 ms transitions against the motion limits;
+  - the StudioMockup mute `bg-red-500` and window dots;
+  - StemControl's missing `aria-pressed` [K17].
 
-| Point | Source | What it says | CZABA decision |
-|---|---|---|---|
-| Overlays in checkout | Baymard Institute guideline #709 "Overlays Appearing During Checkout" (https://baymard.com/guidelines/709-overlays-appearing-during-checkout, fetched 2026-11-11; only the public summary is readable, the research is behind a login) | "Site-initiated overlays in checkout distract users at a critical time, slowing their progress", adding abandonment risk | No popup on `/cart`, `/checkout*` |
-| Product page | No primary source found (searched "Baymard checkout newsletter popup interrupt cart product page best practice"; the results were vendor blogs, treated as opinion) | — | Saba's decision Q3 (`docs/technical/studio-real-workspace/product-design-review-2026-10-31.md`, F4 and Q3) is the authority: `/products/*` excluded [K24] |
-| Behaviour details | `product-designer` consult at this planning | (a) suppress silently, count no view; (b) a fresh window after an excluded page; (c) an open popup hides on an excluded route without a dismissal; (d) only Saba's list, whole path segments | Adopted. One correction: the designer's row "after that, scroll 40 % and wait 8 s: dialog appears" is not HEAD behaviour (the 8 s check is one-shot; after it, only exit intent shows the popup). The keep-list wins, so the rows below follow HEAD's one-shot timer |
+  These belong to STORE-2c/2d (type and motion) and the polish pass. B records them in the backlog (D-29z1587).
 
-Research folder: `docs/technical/store-redesign/research/*.md` searched for `popup|newsletter|interstitial|lead magnet` — one unrelated hit (`competitors.md` on Shopify newsletter captcha gates); nothing on popup timing or exclusion.
+**Deviations:** none from the spec. In the loader, the block under the comment "Secondary glow - brand color" (l.141–158) **is** the teal halo, and 6a removes it. The non-teal glow blobs in TSX (`NewsletterSection.tsx` "Background glow", `gift-cards.tsx` "Background glow", the loader's white "Main spotlight glow" l.120–139 and white floor reflection) and the CSS classes `text-glow`, `hero-title-glow` and `light-flicker-effect` are **2b-3's** inventory, not this round's. They stay byte-unchanged here.
 
-Deviations and B's smallest-honest choices beyond Q3 (L44: each goes to Saba once as `SABA-Q-LEADMAGNET-NAV-RULES`, `awaiting_user`; the round implements the defaults below and does not wait):
-- **(c) An open popup is closed by navigation** to an excluded page. Q3 says "does not open there"; leaving a modal over the cart would defeat Q3's purpose, so B chose the hide (no dismissal recorded). Alternative for Saba: leave it open.
-- **(b) The 8 s window re-arms after every excluded page.** At HEAD a spent window never re-arms in the same visit; with this round, a visitor who goes home → product → home gets a new window on the second home visit, and a Back-hide can be followed by another show (each counts a view, capped at 10 per day). Alternative for Saba: no re-arm once a window was spent.
-
-Open question for Saba (not in scope, default "not excluded"): should `/recordings/*` and `/scenes/*` (product-detail-like views) also be excluded? → `SABA-Q-LEADMAGNET-RECORDINGS-SCENES` (`awaiting_user`).
-
-Not applicable, with reasons: the STORE stage rows for LCP/CLS, contrast and reduced motion (no markup, style or animation changes; the popup's markup is untouched); YouTube/AGREE (Saba already decided Q3 on 2026-10-31); screen budget (nothing persistent is added; a popup is removed from some routes); L55 product model (no data or lane model changes); Ableton parity rows (Store change).
+Screen budget: nothing is added; decoration is removed. LCP/CLS, contrast and reduced-motion rows apply (STORE stage rule).
 
 ## Ruling lines (L4)
-- Popup on an excluded route: "does not open" (Saba) wins over "behaviour unchanged" (keep-list).
-- An already-open popup reaching an excluded route: hide (ruling c) wins over "leave it open".
-- The 8 s window: HEAD's one-shot check (keep-list) wins over the designer's "wait 8 s again" wording. The premise is pinned by LMR13, green on the sketch and on the HEAD hook [K25].
-- The popup's own `email` and `validationError` state survive a route hide (the component stays mounted, as with every hide at HEAD): kept this round, recorded as `TL-R446-L3-LOCAL-STATE` (deferred Low).
-- Scroll after a route hide: "no jump to the old page's offset" wins over `useScrollLock`'s restore; every other caller of `useScrollLock` (`AuthModal`, `ui/Modal`) keeps the restore through the default `true` [K9].
-- A Back that lands on an excluded route while the popup is open loses Remix's saved scroll position for that page (tech-lead v2 Low, `TL-R446-L1-POP-RESTORE-LOST`): the page lands at its top. Accepted for this round; C7 compares with the no-popup control, whose saved position in the recipe is also the top.
+- **Glow removal vs keep-list.** On SpecialOffers, glow removal is a permitted restyle (Saba decision 2). The content, link targets, text and image stay byte-identical outside the removed class token.
+- **"Teal goes" vs "glow outside the list stays".** Only the 21 listed hits change. Any other glow in a granted file is untouched this round.
+- **ProductCard.** The spotlight layers go, and with them the state and handlers that exist only for them (`mousePosition`, `isHovering`, `handleMouseMove`, `onMouseMove/Enter/Leave`). `cardRef` stays if anything else uses it; A greps it, and if its only use was the spotlight, it goes too. The preview overlay wrapper (the one `opacity-0 group-hover:opacity-100 focus-within:opacity-100` tag) stays, so `store-focus-ring` (c) keeps exactly 1 wrapper. The 2 spotlight tags are self-closing and are not counted by that helper [K9].
+- **Muted waveform.** It keeps its neutral look but uses a token class (`text-dim` if defined in the theme, else `text-muted`; A cites the `@theme` line), not hex. No hex colour remains in StudioMockup's colour map.
 
-## 1. The sketch (apply it unchanged)
-- Patch: `b-round-445/sketch-446.patch.txt`, sha256 in `b-round-445/sketch-446.sha256` [K6]. Paths: `b-round-445/sketch-paths.txt`, copies in `b-round-445/sketch-files/`.
-- Review: `b-round-445/sketch-review.md`. tech-lead v1: approve-with-changes (M1 scroll restore, M2 same-render mask, L3 error reset, L4 router warnings), all applied in v2; v2 delta review: approve. v3 adds only test row LMR13 (test-only delta review: approve; title nit `TL-R446-V3-TITLE` accepted). Reviewed sha = dispatched sha [K21].
+## 1. Per-hit mapping (A implements exactly this; tokens only, no hex)
 
-| File | HEAD `4bfebd7` | After |
-|---|---|---|
-| `app/hooks/useLeadMagnet.ts` | effect deps `[isLoggedIn]` [K7]; timer 8000, threshold 40, cap 10, exit intent [K8] | adds exported `isLeadMagnetExcludedPath(pathname)` (`/products/` prefix; `/cart` or `/cart/…`; `/checkout` or `/checkout/…`) and reads `useLocation()` from `@remix-run/react`; effect deps `[isLoggedIn, isExcludedRoute]`; on an excluded route: `setShouldShow(false)`, `setCurrentStep('offer')`, `setError(null)`, return (no listeners, no timer); returns `shouldShow: shouldShow && !isExcludedRoute` and `isRouteExcluded` |
-| `app/hooks/useScrollLock.ts` | `useScrollLock(isLocked)` restores the locked scroll on unlock and unmount [K23] | `useScrollLock(isLocked, { restoreScrollOnUnlock })`, default `true`, read through a ref at unlock/cleanup (tech-lead: keep the ref-in-render form) |
-| `app/components/marketing/LeadMagnetPopup.tsx` | `useScrollLock(shouldShow)` [K9] | `useScrollLock(shouldShow, { restoreScrollOnUnlock: !isRouteExcluded })`; nothing else |
-| `app/lib/__tests__/store-lead-magnet-routes.test.tsx` | — | new: LMR1–LMR13, SL1–SL2 |
+| # | File:line at `5df7717` | Now | After |
+|---|---|---|---|
+| 1 | `ProductCard.tsx:96-116` | two mouse-follow radial teal layers | removed (layers + spotlight-only state/handlers, ruling above) |
+| 2 | `SpecialOffersSection.tsx:11`, `:47` | `transition-shadow hover:shadow-[0_0_20px_rgba(19,217,204,0.3)]` | both tokens removed; other classes unchanged |
+| 3 | `NewsletterSection.tsx:84` | `hover:shadow-[0_0_30px_rgba(19,217,204,0.3)]` | removed; `hover:bg-brand-hover` stays |
+| 4 | `gift-cards.tsx:291` | `shadow-[0_0_20px_rgba(19,217,204,0.2)]` | removed; `border-brand bg-brand/5` stays |
+| 5 | `checkout.success.tsx:63-70` | `motion.div` teal box-shadow ripple | the whole ripple `motion.div` removed |
+| 6a | `SpotlightLoader.tsx:141-158` ("Secondary glow - brand color", teal at l.155) | teal radial halo `motion.div` | removed with its comment |
+| 6b | `SpotlightLoader.tsx:200-203` | gradient wordmark (`background` + `WebkitBackgroundClip` + `WebkitTextFillColor` + `backgroundClip`) [K10] | removed; wordmark gets class `text-foreground`; `font-bold` and size unchanged (STORE-2c) |
+| 6c | `SpotlightLoader.tsx:204-205` | teal `drop-shadow` filter | removed |
+| 6d | `SpotlightLoader.tsx:218-222` | teal gradient sweep line (inline `background`) | inline `background` removed; class `bg-brand/50` added; width/opacity animation unchanged |
+| 7a | `StudioMockup.tsx:26-55` | `colorMap` hex (`#13D9CC`, `#F9A80C`, `#525252`), teal `drop-shadow` | drop-shadow removed; `stroke="currentColor"` on both paths; the svg gets `text-foreground` for normal and solo, and the muted token class (ruling above) for muted; the opacities 0.8/0.4 stay |
+| 7b | `StudioMockup.tsx:126` | fill `bg-teal-500` | `bg-brand` |
+| 7b' | `StudioMockup.tsx:130` | thumb `bg-teal-500` | `bg-foreground` |
+| 7c | `StudioMockup.tsx:180` | `bg-teal-500 text-white` | `bg-brand text-brand-foreground` |
+| 7d | `StudioMockup.tsx:211` | `bg-teal-500/20 text-teal-400` | `bg-brand/15 text-brand` |
 
-Callers swept [K11]: `useLeadMagnet` is used only by `LeadMagnetPopup` (plus the mock in `store-lead-magnet-dialog.test.tsx`, which returns no `isRouteExcluded`, so the popup keeps the restore there); no e2e or perf file references the popup.
-
-## Focus origins (L50, L47)
-`grep -nE 'onPointerDown(Capture)?|onBlur|settleEditor\(|\.focus\(|^\s*\{[^}]*(\.map\(|&&|\?)' app/components/marketing/LeadMagnetPopup.tsx app/hooks/useLeadMagnet.ts app/hooks/useScrollLock.ts` → 12 hits, all in the popup; saved with line numbers in `b-round-445/logs/l50-focus-origins.txt` [K26].
-- **R-A (open focus, return focus):** the route hide runs the popup's return-focus cleanup, which focuses the saved element only when it is still connected. Two origins, each a C row: nothing focused before the popup (the old page's element is gone → the focus a plain Back leaves, C8a), and a persistent header link focused before the popup (still connected → focus returns to that header link, C8b).
-- **R-B (step focus on email/success, the email retry focus):** not reached by a route hide (the step resets to offer while hidden, and the step-focus ref resets when hidden); unchanged, covered by `store-lead-magnet-dialog.test.tsx`.
-- **R-C (Tab wrap inside the dialog):** unchanged; dialog tests.
-- **R-D (step, error and submitting conditional renders):** step reset LMR6, error reset LMR12; local `email`/`validationError` kept (ruling above).
+A renames StudioMockup's `color` prop values only if needed to remove the word "teal" (for example `'active' | 'solo' | 'neutral'`). Every caller in the same file is updated. The prop is file-local [K4].
 
 ## 2. A: steps
-1. Run `bash b-round-445/claims-446.sh` before editing; K1, K2, K5 and K6 must print the values in `b-round-445/claims-446-planning-output.txt`. Otherwise STOP (L11).
-2. `git apply --check -p1` then `git apply -p1 b-round-445/sketch-446.patch.txt`. No hand edits to the four sketch files.
-3. Write `docs/implementation/2026/quarter-IV/291-store-2b-1-leadmagnet-route-exclusion.md` (Georgian, technical terms in English):
-   - l.1 title; l.3 `**თარიღი:** 2026-11-11`; l.4 exactly `**სტატუსი:** Completed (C round 446 PASS)` (L28); l.5 `**შეცვლილი პროექტი:** Store (…)`.
-   - The seven TEMPLATE headings in order (`## კონტექსტი` … `## TODO / შემდეგი ნაბიჯები`, L26).
-   - Content: Saba Q3/F4 and the Baymard #709 summary; rulings (a)–(d) and the one-shot-timer correction; the scroll-restore problem (tech-lead M1; B's browser measurement on the interim sketch before the scroll fix (`b-round-445/sketch-446-interim.patch.txt`): product page at y = 206 after Back vs 0 in the no-popup control, `b-round-445/probe/sketch-back-1440.json` (BACK vs BACKCTL rows)) and its fix; the same-render mask; TL-R446-L1-POP-RESTORE-LOST; a Mermaid diagram of route → hook → popup → scroll lock; the 4 changed files; the 14 mutant ids from `b-round-445/mutants/results.jsonl`; only test titles that exist (L26); TODO: STORE-2b-2/2b-3/2b-4, SIG-R446-LEADMAGNET-CAP-COMMENT, SABA-Q-LEADMAGNET-RECORDINGS-SCENES, TL-R446-L1-POP-RESTORE-LOST, TL-R446-L3-LOCAL-STATE, SABA-Q-LEADMAGNET-NAV-RULES.
-   - No `pending` form (L28).
-4. Checks A runs (speed rules, no full suite):
-   - A1: the four sketch paths are byte-identical to `b-round-445/sketch-files/` (K4 = 4/4).
-   - A2: `npx vitest run $(cat b-round-445/covering-files.txt)` — 4 files, 100 tests green, as in `b-round-445/logs/covering-sketch.log`.
-   - A3: `npm run typecheck` rc 0; `npm run lint` rc 0 with the warning count of `b-round-445/logs/lint-sketch.log`; `npx biome check` on the 4 sketch paths rc 0.
-   - A4: `bash b-round-445/claims-446.sh` after all edits; its diff against `b-round-445/claims-446-sketch-output.txt` shows only K17 (doc 291) changed.
-   - code-reviewer (3+ files rule).
-5. `git status` = exactly the 5 paths in `b-round-445/grants-446.txt` [K2]. No protected file [K3].
+1. Run `bash b-round-446/claims-447.sh` before editing. K1, K2, K3, K4 and K18 must equal `b-round-446/claims-447-planning-output.txt`. Otherwise STOP (L11).
+2. Apply §1 to the 7 files.
+3. Add `app/lib/__tests__/store-teal-sweep.test.ts`. It uses the same regex as the claims script (`R=` in `claims-447.sh`).
+   - **TS1:** scan every `app/**/*.{ts,tsx}` outside `__tests__`. Every teal hit must be in an explicit allow-list map of file → reason: `components/studio/StudioTrack.tsx` frozen legacy; `lib/email.server.ts` and `routes/hire-us.tsx` STORE-2b-2b; `components/audio/Timeline.tsx` and `components/loading/CinemaCurtainLoader.tsx` LEGACY-DEAD-STORE-COMPONENTS; `components/audio/StemsPlayerModal.tsx` and `components/audio/StemControl.tsx` STORE-4 (stems modal).
+   - **TS2 (non-vacuous):** the walker lists ≥ 200 files and contains the 7 granted paths, and the allow-listed files still have ≥ 1 hit each. A stale allow-list entry fails, so a later stage must shrink the list.
+   - **TS3:** the 7 granted files contain no `shadow-[0_0_` and no `drop-shadow(0 0`. The colour part reuses the claims regex `R`, not a bare `rgba(19` substring.
+   - **TS4:** `SpotlightLoader.tsx` has no `WebkitBackgroundClip` and no `backgroundClip`.
+   - Name the mutants in the doc and run each one on a scratch copy: M1 `bg-teal-500` re-added in StudioMockup → TS1 red; M2 an allow-list entry removed → TS1 red; M3 a fake allow-list entry for a clean file → TS2 red; M4 `hover:shadow-[0_0_20px_rgba(201,164,106,0.3)]` (brass glow) in SpecialOffers → TS3 red; M5 `WebkitBackgroundClip: 'text'` re-added → TS4 red. Revert each one. Save the results in `a-round-447/mutants.txt`.
+4. Write `docs/implementation/2026/quarter-IV/292-store-2b-2a-teal-sweep.md` in Georgian, with technical terms in English.
+   - l.3 `**თარიღი:** 2026-11-11`.
+   - l.4 exactly `**სტატუსი:** In Progress (stage 2b-2a of STORE-2b; C round 447 PASS)` (L28).
+   - The seven TEMPLATE headings in order (L26).
+   - Content: the inventory (44/14 → 23/9 here), the split, the per-hit table in prose, the product-designer rulings, the frozen and dead dispositions, mutants M1–M5, and only test ids that exist.
+   - TODO: 2b-2b e-mails, the stems-modal hits in STORE-4 (ROOT-REQ-MOCK-API-STEMS), 2b-3, 2b-4, LEGACY-DEAD-STORE-COMPONENTS, SABA-Q-CHECKOUT-RIPPLE.
+5. Checks (speed rules, no full suite):
+   - `npx vitest run $(cat b-round-446/covering-files.txt)`: all green. A red or slow (> 50 % of its timeout) covering file is a STOP (L11).
+   - `npm run typecheck` rc 0.
+   - `npm run lint` rc 0, with the warning count ≤ HEAD's (205).
+   - `npx biome check` on the 8 code/test paths rc 0.
+   - code-reviewer (3+ files).
+6. `bash b-round-446/claims-447.sh` after the edits. Only K3, K4 (the 7 granted files → 0), K9 (→ 1), K10 (→ 0), K11 (unchanged = 1), K13 and K14 may differ from the planning output. Save the diff as `a-round-447/claims-diff.txt`.
+7. `git status` shows only paths in `b-round-446/grants-447.txt`. No forbidden file is touched [K18].
 
 ## 3. C: acceptance rows
-Real Chromium (Playwright) on `http://127.0.0.1:5173` with the mock API on `:5199` (start `node tmp/studio-real-loop/mock-api/server.mjs` if it is not up). Store rows at **1440×900, 1280×720 and 375×812**; exit-intent rows at 1440 and 1280. Fresh context per cell, empty storage, cookies declined. Warm up once in a browser before timed cells (L38). The probe is `b-round-445/probe/lm-routes.cjs` (helpers from `c-round-205/tools/lib.cjs`); copy it into `c-round-446/` before editing (L60). HEAD control on a second server: `bash b-round-445/probe/sketch-server.sh start <c-round-446 dir> 5178 none` (`none` = HEAD without a patch, own Vite cacheDir; B ran this exact mode, `b-round-445/logs/head-server-none-mode.txt`) [K27].
+Real Chromium (Playwright) on `http://127.0.0.1:5173`, with the mock API on `:5199` (start `node tmp/studio-real-loop/mock-api/server.mjs` if it is down).
+- **Viewports:** 1440×900, 1280×720 and 375×812. Fresh context per cell, empty storage, cookies declined, LeadMagnet dismissed through `localStorage` only where it covers the element under test.
+- **HEAD control:** on `:5178` via `bash b-round-445/probe/sketch-server.sh start <c-round-447 dir> 5178 none` (own Vite cacheDir, L38).
+- **Probe:** copy `b-round-446/probe/teal-scan.cjs` into `c-round-447/` before editing it (L60).
 
 | Row | Action | Pass |
 |---|---|---|
-| C1 SOURCE-SCOPE | `git status` | the 5 granted paths only; `root.tsx`, `AuthModal.tsx`, `ui/Modal.tsx` unchanged [K3] |
-| C2 PATCH-IDENTITY | cmp | 4/4 [K4] |
-| C3 CONTROL-HOME | `/`: scroll 55 %, wait ≤ 14 s | popup visible, `viewCount` 1, all 3 viewports. HEAD the same |
-| C4 EXCLUDED-TIMER | `/products/pulse-loop-kit`, `/cart`, `/checkout/success`, `/checkout/cancel`: scroll 55 %, wait 14 s | no popup, `viewCount` absent or 0, each page had scroll room > 0 (non-vacuous). HEAD control: popup on all 4 × 3 (B: `b-round-445/probe/head-1440.json`, `head-1280-375.json`, 12/12) |
-| C5 EXCLUDED-EXIT | product page: scroll, exit intent (`mouseleave` clientY 0) | no popup. HEAD: popup |
-| C6 JOURNEY (L54) | `/` scroll 55 %, click the first product card link before 8 s, wait 12 s | no popup on the product page. HEAD: popup (B 3/3) |
-| C7 BACK-HIDE | `/products/pulse-loop-kit` → client link to `/` → scroll → popup → `goBack()` | on the product page: no popup; `body` `overflow`/`position` empty; `scrollY` equal to the no-popup control `BACKCTL` (same steps, popup suppressed); `dismissed` false; `viewCount` 1. Then `goForward()`, scroll, wait: popup on the **offer** step, `viewCount` 2. HEAD control: popup still open after Back |
-| C8a FOCUS-AFTER-HIDE, no prior focus (L47) | same as C7, read `document.activeElement` after Back | equal to `BACKCTL` (the focus a plain Back navigation leaves) at each viewport; B's values in `b-round-445/probe/sketch-all.json` [K25] |
-| C8b FOCUS-AFTER-HIDE, header link focused (L47) | probe mode `ONLY=header`: focus the first visible header link on `/`, scroll, popup, Back | focus is on that same header link (tag A, same name, visible ring if keyboard-focused) and equal to `BACKHCTL`; B's values in `b-round-445/probe/sketch-header.json` [K25] |
-| C9 KEEP-LIST | home popup at 1440: offer → FREE DOWNLOAD → email step, then Close | record — not run on sketch: screenshot pair HEAD (:5178) / tree (:5173) of the offer and email steps, and `scrollY` after Close; expected no visible change (the popup markup is untouched); a difference is a finding |
-| C10 COVERING | the files in `b-round-445/covering-files.txt` | green; counts equal to `b-round-445/logs/covering-sketch.log` |
-| C11 MUTANTS | make a `git clone --shared` of the store at `4bfebd7`, apply A's diff there, then `python3 -I b-round-445/mutants/run-mutants.py <clone> c-round-446/mutants/results.jsonl c-round-446/mutants` (the script takes tree, output and log dir; it never writes into `b-round-445/`) | 14 lines; ids, rc and failedRows equal to `b-round-445/mutants/results.jsonl` |
-| C12 STUDIO-SMOKE + AUTH | `/studio-lab` Play → Playing, Stop → Stopped (1440×900, 1280×720); anonymous `/studio/middle-east` "Sign in required", 0 `audio[src]` | as HEAD; any row that truly needs the backend is BLOCKED "backend unavailable in cloud" |
-| C13 DOCS | doc 291 l.4 exact, TEMPLATE headings in order, 14 mutant ids, test titles named exist, no `pending` | all true |
-| C14 CLAIMS | `bash b-round-445/claims-446.sh` vs `b-round-445/claims-446-sketch-output.txt` | only K17 differs |
+| C1 SOURCE-SCOPE | `git status` | only paths in `grants-447.txt`; `root.tsx`, `app/components/studio/**`, `app/styles/**` and the protected routes unchanged [K18] |
+| C2 CLAIMS | `bash b-round-446/claims-447.sh` vs the planning output | only the keys allowed in A step 6 differ; K4 = 0 for each of the 7 granted files; the 7 excluded files keep their counts |
+| C3 TEAL-SCAN | `teal-scan.cjs` on tree and HEAD at 1440 and 375, on `/`, `/store`, `/products/pulse-loop-kit`, `/gift-cards`, `/checkout/success` | tree: every remaining hit's element class contains `hero-title-glow`, `text-glow` or `light-flicker-effect` (2b-3's CSS), and 0 hits are on `svg`/`path`. At 1440, HEAD reproduces B's counts (`/` 34, `/gift-cards` 1 [K16]); at 375 the HEAD counts are `record` |
+| C4 HOVER-STATES (1440, 1280) | on `/`: hover the first product card in `ProductSection` (an `article` with a `/products/` link), each SpecialOffers card (`div.group.relative.min-h-[300px]`, nth 0 and 1) and the Newsletter submit; on `/gift-cards` click the first amount | tree: computed `box-shadow` of each hovered or selected element contains no `19, 217, 204`. The card has 0 descendants whose `background-image` includes `radial-gradient` (the measured element is the card; HEAD has 2). The card still scales: computed `scale` = `1.02`, as HEAD (transform stays `none`). The Newsletter background is brand-hover rgb(217, 184, 127) and the selected amount's border is brand. HEAD: the teal box-shadow is true on all 4, and the card has 2 radials (`b-round-446/probe/head-states.json` [K19]) |
+| C5 LOADER | fresh context, `/` at 3 viewports; read at about 450 ms inside `[data-testid="entrance-loader"]` (B's recipe in `head-states.cjs`) | tree: the wordmark span "CZABA" has `color` rgb(236, 230, 218), `-webkit-text-fill-color` not transparent, `background-image` none, `filter` none; 0 loader descendants with teal in `background-image`/`filter`; the sweep line's `background-color` is brass with alpha 0.5, and its width at the holding phase is > 0. HEAD: gradient + teal drop-shadow, 3 teal elements [K19]. Screenshot per viewport, tree and HEAD |
+| C6 REDUCED-MOTION | `prefers-reduced-motion: reduce`, `/` at 1440 and 375 | the loader behaves as at HEAD under reduced motion (same presence and duration); no new motion |
+| C7 STUDIO-SHOWCASE | `/`, scroll the Studio showcase into view at 3 viewports | tree: 0 `svg path` with teal stroke or teal svg filter (HEAD 8 [K19]); waveform stroke = foreground (the muted track = the muted token); the volume fill is brass and the thumb foreground; the play button is brass with dark text, contrast ≥ 4.5:1; "Export Mix" text-brand on `bg-brand/15`, contrast ≥ 4.5:1 measured on the composited background; screenshots tree and HEAD |
+| C8 CHECKOUT-SUCCESS | `/checkout/success` at 3 viewports (renders without a session, h1 "Your Collection Awaits") | tree: 0 elements matching `div.absolute.inset-0.rounded-full` with a box-shadow other than `none`, and no teal; the check icon renders and scales in. HEAD: the ripple element with a teal box-shadow [K19] |
+| C9 FULL-PAGE SHOTS (stage rule) | full-page screenshots of `/`, `/store` and `/products/pulse-loop-kit` at 1440, 1280 and 375, tree and HEAD, after the loader | saved; C lists every visible difference. Allowed: the 21 mapped hits only (showcase colours, the hover glows that are not visible at rest). Any other difference is a finding |
+| C10 KEEP-LIST | `/` at 3 viewports: SpecialOffers, Newsletter, the "Limited" badge, testimonials and stats; `innerText` and link `href`s of each section, HEAD vs tree | byte-identical |
+| C11 LCP-CLS | `/` and `/store` at 1440 and 375, 3 loads each, tree and HEAD | LCP ≤ 2.5 s and CLS < 0.1 on tree (`record` the HEAD values beside them) |
+| C12 COVERING | `b-round-446/covering-files.txt` | green; test counts recorded |
+| C13 MUTANTS | re-run A's M1–M5 on a `git clone --shared` scratch at `5df7717` + A's diff (never in the store tree) | each red on its named row, green after revert; equal to `a-round-447/mutants.txt` |
+| C14 STUDIO+AUTH | `/studio-lab` add a clip, Play advances the clock, Stop halts (1440, 1280); anonymous `/studio/middle-east` shows "Sign in required" with 0 `audio[src]` | as HEAD; purchase protection preserved |
+| C15 DOCS | doc 292 | l.4 exact; TEMPLATE headings in order; M1–M5 named; the cited test ids exist; no `pending` |
 
-Gate rows (full vitest, typecheck, build, Biome, verify): `gate`, not claimed by C.
-All L57 fields in `c-round-446.json`, an `origin` on every finding, `tools/l57-check.py` rc 0. `mutantRedOnSketch` = `b-round-445/mutants/results.jsonl`.
+Gate rows (full vitest, typecheck, build, Biome, verify) are `gate` and are not claimed by C. Write all L57 fields in `c-round-447.json`, with an `origin` on every finding; `mutantRedOnSketch` is `null` with the reason "no B sketch this round; A's mutants (C13)".
 
-Neighbours that could break: the other `useScrollLock` callers (AuthModal, ui/Modal: default restore unchanged; SL1 and the dialog file's LM8 cover it); the popup's focus return; the 10-per-day count.
+**Neighbours that could break:**
+- `store-focus-ring` (c), the ProductCard overlay wrapper count;
+- `store-entrance-loader` (the loader's timing, skip and once-per-session contract);
+- the ProductCard price and Buy rows (`product-price-cards`), which `account.downloads.tsx` (protected) also renders. That page needs sign-in and the backend, so its browser half is BLOCKED "backend unavailable in cloud"; the jsdom covering file `product-price-cards` covers the card itself.
 
 ## 4. Claims
-`b-round-445/claims-446.sh` (K1–K27). Planning output: `b-round-445/claims-446-planning-output.txt`. Sketch output: `b-round-445/claims-446-sketch-output.txt`.
+`b-round-446/claims-447.sh` (K1–K19); planning output `b-round-446/claims-447-planning-output.txt`. HEAD probes: `b-round-446/probe/teal-scan.cjs` with `teal-head-1440.json` [K15, K16], and `head-states.cjs` with `head-states.json` (3 viewports) [K19].

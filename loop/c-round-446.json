@@ -1,0 +1,69 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-11T05:00:24.3039730Z",
+  "round": 446,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R446-01",
+   "severity": "low",
+   "origin": "A",
+   "steps": [
+    "1440x900 fresh context, /api/subscribe routed to answer 500 {error:'STALE-BOOM'} after 5 s",
+    "/products/pulse-loop-kit -> client link to / -> scroll 55% -> popup -> FREE DOWNLOAD -> fill email -> CONTINUE (1 request fired)",
+    "300 ms later browser Back to the product page; wait 7 s so the request fails",
+    "Forward to /, scroll, popup opens on offer, click FREE DOWNLOAD"
+   ],
+   "expected": "Task change 3: a route hide clears the last submit error; the email step starts without it",
+   "actual": "The email step shows the stale error STALE-BOOM, because submitEmail's catch calls setError after the hide (confirms code-reviewer A-R446-REVIEW-L1). Offer step and the product page show nothing stale.",
+   "evidence": "c-round-446/inflight.json (hits 1, emailStale true), shots/inflight-1440.png, tools/inflight.cjs. Rare path, no data loss; Low, goes to deferred_low_polish. B to rule whether in-flight failures are covered by change 3."
+  }
+ ],
+ "passed": [
+  "C1-SOURCE-SCOPE (5 granted paths, no protected file)",
+  "C2-PATCH-IDENTITY 4/4 cmp",
+  "C3-CONTROL-HOME popup, viewCount 1 at 1440/1280/375; HEAD same",
+  "C4-EXCLUDED-TIMER 4 pages x 3 viewports no popup, scroll room>0 (206..1107, 171), viewCount absent; HEAD control popup 12/12",
+  "C5-EXCLUDED-EXIT no popup at 1440/1280/375; HEAD popup",
+  "C6-JOURNEY home->product card: no popup 3/3; HEAD popup 3/3",
+  "C7-BACK-HIDE no popup on product, body overflow/position empty, scrollY 0 = BACKCTL, dismissed false, viewCount 1->2 after forward, reopen on offer step; HEAD popup stays open, body locked fixed (3 viewports)",
+  "C8a-FOCUS-AFTER-HIDE activeElement BODY = BACKCTL at 3 viewports",
+  "C8b-FOCUS-HEADER-LINK header link CZABA kept = BACKHCTL at 1440/1280 and at 375 in 3 clean reruns (see flake note)",
+  "C9-KEEP-LIST offer and email screenshots HEAD vs tree byte-identical, scrollY after Close equal 2267, body unlocked, dismissed true",
+  "C10-COVERING 4 files 100 tests green",
+  "C11-MUTANTS 14 lines, id/rc/failedRows equal to B results",
+  "C12-STUDIO-SMOKE /studio-lab add clip, Play clock advanced 1.97 s in 2 s, Stop halted it, 1440 and 1280; anonymous /studio/middle-east shows Sign in required, 0 audio[src], 0 media file requests (premium not bypassed)",
+  "C13-DOCS l.4 exact, 7 headings in order, 14 mutant ids, 0 pending",
+  "C14-CLAIMS only K17 differs"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "blocked": [
+  "backend-dependent rows: none in this round (mock API :5199 used)",
+  "Export WAV/audio-graph measurement not applicable: round changes LeadMagnet/scroll lock only, Studio untouched"
+ ],
+ "manifestPaths": 5,
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": 1,
+ "assertsSpecified": true,
+ "mutantsRecorded": 14,
+ "mutantRedOnSketch": 14,
+ "mutantRedOnTree": 14,
+ "gateChecksNamed": true,
+ "gateChecksRunOnSketch": false,
+ "chainHeadGateRunGreen": true,
+ "affectedChecksNamed": true,
+ "affectedChecksRunOnSketch": true,
+ "notes": "Evidence under c-round-446/. One flake: first tree header-focus cell at 375 showed no popup plus a React Invalid hook call (dev-server cold start while three probes plus mutants ran in parallel); 3 clean isolated reruns equal B and the control. Unreproduced, not a bug claim. Tree 375 addToCart hitIsButton false equals B sketch (pre-existing). Deviation rulings (b),(c) not verifiable against a Saba decision; they are recorded as B proposals."
+}
