@@ -1,131 +1,112 @@
-# Round 477: DPG-P0-3a re-dispatch, the entrance loader and the header logo in Obsidian & Brass (R1 ruled)
+# Round 478: DPG-P0-3b, the design reference docs in Obsidian & Brass (last DPG P0 stage)
 
-**Planned by:** B, at the round 476 → 477 planning on 2026-11-12 (`b-round-476.md`).
-- **Advisor:** available, and consulted after orientation.
-- **Archive:** the round-476 task is `tasks/round-476.md` (byte-identical, `cmp`).
-- **What this round is:** the round-476 acceptance, run in full on the tree A already left. Round 476 stopped on the code-reviewer finding R1 before C could run any browser row. The R1 ruling (L10) is below. No feature scope changes.
+**Planned by:** B, at the round 477 → 478 planning on 2026-11-12 (`b-round-477.md`).
+- **Advisor:** available, consulted after orientation and before hand-off. Its gaps are closed below: lessons read, per-line classes, scan universe, `color-obsidian` location, the full fail list, name→value checks, a mechanical scratch run, docs readers and a C4 probe.
+- **Archive:** the round-477 task is `tasks/round-477.md` (byte-identical, `cmp`).
+- **What this round is:** DPG-DOCS-UPDATE (policy "DPG-FIX block", P0 item 4, and DPG rule 2 "token change = docs change"). A rewrites the stale teal/orange design reference docs so they state the live `app.css` `@theme` values. **Docs only; no `app/**` file changes.** Regression is not due: `date -u` at planning was 2026-11-12, and `regression-last.json` says on or after 2026-11-13.
 
 ## Decisions (`backlog.json` `decisions_log_b`)
-- **D-29z1688: ruling on R1 (C-R476-STOP-R1, A's STOP).** The tree is accepted as is.
-  - **The finding:** `SpotlightLoader.tsx` paints the overlay twice, with an inline `backgroundColor` style and a child `bg-background` layer [K21].
-  - **Why it is accepted:**
-    - Both parts were already at HEAD, as inline `'#000'` plus a child `bg-black` [K22]. The sketch changed their colour only.
-    - The render is identical; the reviewer said the same, and C confirmed it in source.
-    - `pd-p0-3a.md` ruling 1 names the inline style as a place to recolour.
-  - **Severity:** the reviewer called it Medium; B rates it **Low**. It is a pre-existing Tailwind-first duplication with no visible, functional, a11y or security effect, and this round did not introduce it.
-  - **Where it goes:** `deferred_low_polish`, as `A-R476-REVIEW-R1-OVERLAY-DUP`. It is also a named row candidate for DPG-CSS-DEDUP (P1 item 9), on the "next SpotlightLoader owner" list (D-29z1686).
-  - **The D-29z1683 STOP clause stays as it is:** an unruled Medium on a byte-equal file is still a STOP (L22, the gate never publishes an unruled Medium). R1 is now ruled. When A cites it by this D-ID, it is **not** a new STOP.
-- **D-29z1689: round 476 result.** C short FAIL (L22): C1, C2 and C12 (anonymous) PASS. C3–C11 were not run, and `browserVerified` is false (`c-round-476.json`).
-  - DPG-P0-3a stays **მუშავდება**.
-  - GATE460-2, A-R460-REVIEW-5 and the portal-test signal stay open until C passes this round.
-  - Reviewer Lows R2–R6 go to `deferred_low_polish` (A-R476-REVIEW-LOWS). R7 is A's fix to doc 309; C checks it in C11.
-  - The Architecture note (signal 4, `dustParticles` state kept in place) is recorded as an architecture signal, not a task.
-- **D-29z1690: prevention.** For a sketch granted byte-equal, B's `tech-lead` sketch review explicitly covers project-rule compliance on every line the sketch touches or recolours: Tailwind-first, inline styles and duplicate layers. The task rules each finding before dispatch. This is lesson L10's new clause, and it is recorded in `retro_candidates` for RETRO 480.
+- **D-29z1691: round 477 result.** C PASS, `browserVerified`/`realVerified` true, gate 477 published `10791ac`. DPG-P0-3a (DPG-SPOTLIGHT-FIX + the DPG-LOGO header colour) is C-verified and **awaits the DP gate** (DPG rule 4: not მზადაა until both reviewers give 10/10). GATE460-2 (C3: mutant M7 turns P4 red), A-R460-REVIEW-5 (C1: sketch sha256, comment fix) and the portal guard (C3: mutant M8 turns P1 red; C-R190-INFO I1, A-R190-SIGNALS #1) close. SABA-B-16 stays open (asset unnamed). C's notes (product hero white edge-light, brass "Sign In") are DP-gate inputs, not bugs.
+- **D-29z1692: the scope and the four classes of hits (this task).** B ran a hue-range scanner (`b-round-477/tools/hue-scan.py`: hex 3/4/6/8, `rgb[a]`, `hsl[a]` with hue 160–200° = TEAL, hue 25–45° with saturation ≥ 70 % = ORANGE, plus the words teal/cyan/turquoise/orange) over `docs/design` and the Store copy of `docs/technical/store-redesign/direction-decision.md`: **82 hit lines** [K2]. Each line is ruled into one class:
+  1. **Our stale tokens and guidance → rewrite** (55 lines): `DESIGN_SYSTEM.md`, `style-guide.md`, `components/button.md`, `audit-design.md` (the design-auditor checklist), `design-tokens.json`, `box-render-specs.md` l.110 [K19], `awwwards-improvements.md` (proposal snippets an agent would copy).
+  2. **Competitor facts → keep:** `design-systems-reference.md` SOUNDRAW rows.
+  3. **Dated measurements and dated audits → keep the body, add a banner:** `wcag-audit.md` (2025-01-03 ratios; swapping a hex would make a ratio false), `design-audit.md` (2026-01-09), `star-brand-audit.md` (2026-03-07, including its l.168 [K19] description of legacy `--mc-*` CSS), `design-systems-reference.md` (its CZABA row and snippet are the old state it scored). `wcag-audit.md` also gains a new section with ratios B computed for the live palette.
+  4. **Not old identity → keep:** `box-render-specs.md` l.54–55 (the Gold pack box colour, a product packaging palette) and `DESIGN_SYSTEM.md` version-history row 2.1 (l.1536, a history record) [K19].
+
+  Classes 2–4 are the **27-line residual list** `b-round-477/residual-478.tsv` (file + exact line text, compared by content, so a banner's line shift does not matter). The residual is deliberate, and root should read it as such.
+
+  This ruling **narrows D-29z1684's "51 total"**: that count came from an exact-value grep; this is the hue-range scan L2 requires.
+
+  **Awwwards snippets:** they are recoloured so nothing teal is left to copy. Their glow advice conflicts with the round-453 no-glow rule; doc 310 records this, and it goes to DPG-INTERACTION-FIX (P2) as SIG-R478-AWWWARDS-GLOW. It is not removed here.
+- **D-29z1693: what stays out, by name.** Fonts (Inter / Playfair in these docs [K23]) belong to DPG-FONT-RESOLVE (STORE-2c-2…4). `--color-info` blue and the error reds belong to DPG-COLOR-CONSOLIDATE (P1). `.claude/**` stays root-only (ROOT-REQ-DPG-PRIMITIVES-PATCH, `b-round-475/root-primitives-patch.md`). The 114 hue hit lines in docs outside `docs/design` (legacy Studio component docs describing frozen code, mermaid diagram fills, prompt kits for other industries; `b-round-477/scan/hue-docs-other.txt`) are recorded as signal SIG-R477-DOCS-OUTSIDE-DESIGN for the RETRO 480 primitive and doc staleness check (DPG rule 5). They are not tasked here. History records in `docs/implementation`, `docs/bugs` and `docs/plans` stay.
+- **D-29z1694: deviation from L56/L58, stated.** B ships no byte-equal sketch: the Georgian prose is A's to write. Instead every "after" value is the exit of a checker that reads `app.css` at run time, not a number B typed. Each checker is proven four ways: red on HEAD [K2 `unexpected=55`, K3 `FAILS 156`]; green on a synthetic compliant tree (`b-round-477/scan/syn-doc-token.txt` `FAILS 0`, `syn-residual.txt` `unexpected=0`); red again on a one-value mutant (`syn-doc-token-mutant.txt` `FAILS 2`); and the mechanical parts (four banners, the WCAG append, doc 307–309 l.4) on a scratch clone at `10791ac`, `b-round-477/claims-478-mechanical-scratch.txt` (K6 307–309, K10, K12, K13, K20, K21 and K22 green there). `doc-token-check.py` checks three things: (a) every `--color-*` / `--shadow-*` declaration equals `@theme`; (b) every colour literal in the four normative `.md` files exists in `app.css`; (c) **name→value**: on a line that names a colour token (`` `buy` ``, `buy:`), every hex equals that token's value. That last check is what catches `buy (#006AFF)`, a value `app.css` still holds as `--color-blue-60`. One literal is allowlisted with a reason: `hsl(0, 0%, 0%, 0.95)`, the DESIGN_SYSTEM modal backdrop example (HEAD l.1408 [K19]), which is not old identity. The WCAG ratios are the saved output of `b-round-477/tools/wcag-ratios.py` (`b-round-477/wcag-ratios.txt`).
 
 ## Rules
-- **Read `lessons.md` first,** in particular L10, L11, L22, L28, L29, L31, L54, L56, L57 and L58.
-- **Claims (L29):** `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-476/claims-477.sh`.
-  - B's output on the tree as A left it is `b-round-476/claims-477-planning-output.txt`.
-  - The allowed output after A is `b-round-476/claims-477-allowed-deltas.txt`. It is the script's output on B's scratch copy, made with A's doc edit (L56).
-  - The last line is `L58 OK`. This task dispatches no sketch.
-- **Screen budget (L39):** nothing new becomes permanently visible.
-  - The header wordmark and the transient loader change colour only.
-  - Persistent text lines are unchanged.
-- **One element, one rule (L4):** as in round 476. The header wordmark is brass, under D-29z1685 and D-29z1687.
-- **A reviewer finding on the unchanged sketch files** is handled under D-29z1683, plus D-29z1688 for R1.
+- **Read `lessons.md` first,** in particular L2 (colour migration clause), L26 (doc grants cover accuracy; TEMPLATE headings), L28, L29, L56 and L57.
+- **Claims (L29):** `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-477/claims-478.sh` (`STORE_ROOT=<copy>` runs it on a copy). B's output at HEAD is `b-round-477/claims-478-planning-output.txt`. The required values after A are in the C2 row of §2. The banner text lives in one file, `b-round-477/banner-478.txt` (0 hue hits [K21]).
+- **No code reads `docs/`** [K20 `0`]: no test or script under `app`, `perf` or `scripts` reads a file under `docs/`, so no vitest file covers these edits.
+- **Screen budget (L39):** nothing on screen changes. No `app/**` file is touched [K9].
+- **Tailwind scans `docs/**`** (C-R474-02): no added doc line may contain an arbitrary-value class string such as `bg-[#…]` or `text-[…]` [K8]. Write colours as plain values, `var(--color-…)` or token names (`bg-brand`).
+- **Reference-first:** not applicable (docs-only round; policy "Not in scope"). The source of truth for every value is `app/styles/app.css` `@theme`. The source of the brand reasoning is `docs/technical/store-redesign/direction-decision.md` and `docs/design/brand-vision.md` l.27 [K19]. **Do not invent brand reasoning:** every "why" sentence in the new section cites one of those two files.
 
 ## Baseline
-- **HEAD `edeba5a`.** Gate 476 was skipped (C FAIL), so HEAD is still gate 475's commit.
-- **The working tree is preserved from round 476** [K1]:
-  - the 5 sketch files, equal to `b-round-475/sketch-476-files-sha256.txt` [K2];
-  - the new doc 309.
-- **The sketch is already applied** [K2b]. A must not apply it again.
+- **HEAD `10791ac`** (gate 477 published). The working tree is clean [K17: 0 lines].
 
-### Grants (exactly these paths)
+### Grants (exactly these 16 paths)
 | Path | What |
 |---|---|
-| `docs/implementation/2026/quarter-IV/309-dpg-p0-3a-entrance-logo-brass.md` | A's own file from round 476. Two edits only: (1) l.4 becomes exactly `**სტატუსი:** In Progress (stage 3 of 4; C round 477 PASS)` (L28 re-dispatch); (2) one Problem → Solution entry under „პრობლემები და გადაწყვეტები“ for R1, naming `D-29z1688` exactly once in the file, in Georgian, 1–3 lines [K23][K24] |
+| `docs/design/DESIGN_SYSTEM.md` | (1) The token section (Borders, Brand, Text, Semantic, Commerce, Shadows; HEAD l.1014–1079 [K19]): every `--color-*` / `--shadow-*` declaration equals `app.css` `@theme`. Declare at least brand, brand-hover, brand-foreground, accent, background, surface, elevated, foreground, muted, dim, outline, outline-hover, positive, destructive, warning, info, buy and buy-hover. Drop `--shadow-glow`, which was removed from `app.css` in round 453 [K11]. (2) Replace the section `## რატომ Teal + Orange?` (HEAD l.720–751 [K19]) with `## რატომ Obsidian & Brass?` (exact heading), citing both source files by path. Keep a 60-30-10 block naming Brand (Brass). (3) The "why not pure black" rationale and its token block (HEAD l.704–716 [K19]): the background is warm obsidian `#0E0D0C`; drop the "blue undertone" sentence. (3b) Every other false colour line the checker lists, including the Semantic table (HEAD l.840 and l.844 [K19]) and the `/* OLD */` example (HEAD l.1489 [K19], which becomes `#A39B8E`). (4) Example literals (HEAD l.436 `color:` example, l.1332 focus `box-shadow` [K19]) use live values or `var(--color-brand)` / `rgba(var(--color-brand-rgb), 0.1)`. (5) Add a version-history row starting exactly `\| 2.2 \| 2026-11-12 \|` describing this update; keep row 2.1 as written |
+| `docs/design/style-guide.md` | The token table (HEAD l.20–32 [K19]), the 60-30-10 block, the `### Teal + Orange` section and the surface examples (HEAD l.57–59 [K19]) state live hex values. The section becomes one warm accent (brass). The `### Blue Undertone (HSL 220°)` section (HEAD l.52–59 [K19]) describes the warm obsidian neutrals with live hex values |
+| `docs/design/components/button.md` | Primary and Accent backgrounds name `#C9A46A`; Hover drops `shadow-glow` [K15] |
+| `docs/design/audit-design.md` | Checklist l.9–10 [K19] and the token block (HEAD l.60–85 [K19]) state live values |
+| `docs/design/design-tokens.json` | `color.*` and `shadow.*` leaves equal `app.css` (a `var()` token may hold its resolved value). Remove leaves whose token no longer exists (`crystal.*`, `premium.*`, `shadow.glow`, `shadow.glow-accent` [K3]). Typography, spacing and radius are unchanged. It must stay valid JSON |
+| `docs/design/box-render-specs.md` | l.110 only [K19]: the obsidian box accent becomes a brass edge glow (`#C9A46A` at 10%). l.54–55 (Gold box) stay [K19] |
+| `docs/design/awwwards-improvements.md` | l.71 [K19] → `#C9A46A`; each `rgba(19, 217, 204, a)` → `rgba(var(--color-brand-rgb), a)` with the same alpha |
+| `docs/design/design-audit.md`, `docs/design/star-brand-audit.md`, `docs/design/design-systems-reference.md` | **Banner only:** insert, after line 2, the banner line (exact text below) and one empty line, so the banner is line 3 [K13]. No other change; 0 deleted lines [K10] |
+| `docs/design/wcag-audit.md` | The same banner, plus `b-round-477/wcag-section-478.md` appended verbatim at the end of the file (after one empty line) [K12]. 0 deleted lines |
+| `docs/technical/store-redesign/direction-decision.md` | l.23 and the `## ტოკენები` section (HEAD l.48–56 [K19]) name only tokens that exist in `app.css` (`--color-brand`, `--color-brand-hover`, `--color-brand-rgb`, `--color-background`, `--color-surface`, …): 0 `--color-obsidian-*` / `--color-brass-*` [K4] |
+| `docs/implementation/2026/quarter-IV/307-…`, `308-…`, `309-…` | l.4 only, each exactly `**სტატუსი:** Completed (C round 478 PASS)` (L28 final stage of the P0 docs series) [K6] |
+| `docs/implementation/2026/quarter-IV/310-dpg-p0-3b-design-docs-brass.md` | New doc, TEMPLATE headings in order [K7]. l.4 exactly `**სტატუსი:** Completed (C round 478 PASS)`. Lists D-29z1692…D-29z1694 and the four classes |
 
-**Unchanged and byte-equal to the sketch:**
-- `app/components/loading/SpotlightLoader.tsx` [K2]
-- `app/components/loading/EntranceCover.tsx` [K2]
-- `app/components/layout/Header.tsx` [K2]
-- `app/lib/__tests__/store-entrance-loader.test.tsx` [K2]
-- `app/lib/__tests__/store-header-footer.test.tsx` [K2]
+**Accuracy clause (L26):** inside a granted rewrite file, A may also correct any other line that states a false colour value, without changing headings or adding sections. The banner-only files get the banner and nothing else.
 
-**Every other file is also unchanged:** `app/styles/**` [K9], `Footer.tsx` [K10], the protected files [K9] and the keep-list components.
+**Banner (exact, one line):**
 
-## Reference
-This is a colour-only round, so there is no reference product for behaviour. The Store reference is direction A, Obsidian & Brass (`/home/runner/czaba-project/docs/technical/store-redesign/direction-decision.md`). The palette ruling is `b-round-475/pd-p0-3a.md`.
+```
+> **ისტორიული ჩანაწერი (DPG-P0-3b, 2026-11-12):** ეს დოკუმენტი აღწერს მდგომარეობას თავის თარიღზე. 2026-10-25-დან CZABA-ს პალიტრა Obsidian & Brass-ია; მიმდინარე ტოკენები: `docs/design/DESIGN_SYSTEM.md` და `app/styles/app.css` (`@theme`). ქვემოთ მოცემული ძველი ფერები აღარ გამოიყენება.
+```
 
-**Deviations** (unchanged from round 476):
-1. `font-serif` is not added; it is SABA-Q-DPG-LOGO-FONT-SERIF.
-2. The loader wordmark stays `font-bold`.
-3. Two brass items in the `/store` header go to the DP gate.
+**Everything else is unchanged:** `app/**`, `.claude/**`, `public/**`, the protected files and every doc not listed.
 
 ## 1. A: steps
-1. **STOP (L11)** if `claims-477.sh` K1/K2/K2b differ from `b-round-476/claims-477-planning-output.txt`:
-   - HEAD `edeba5a`;
-   - 6 status lines;
-   - 5 of 5 `sha256sum -c` OK;
-   - reverse-check rc 0.
+1. **STOP (L11)** if `claims-478.sh` K1–K23 differ from `b-round-477/claims-478-planning-output.txt` before your first edit. Read `GEORGIAN_DOCS.md` and `DESIGN_TOKENS.md` (it is stale; do not copy its values).
+2. **Read the failure lists:**
+   - `b-round-477/scan/doc-token-head.txt` (156 fails at HEAD);
+   - the output of `python3 -I b-round-477/tools/residual-check.py . b-round-477/residual-478.tsv` (55 unexpected at HEAD).
 
-   Read `GEORGIAN_DOCS.md`.
-2. **Edit doc 309,** the two grant edits only.
-3. **Run the claims script** and save its output to `a-round-477/claims.txt`. It must be byte-equal to `b-round-476/claims-477-allowed-deltas.txt`.
-4. **Checks.** No source file changes, so A runs only:
-   - `npm run typecheck`;
-   - `npx vitest run $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-475/covering-476.txt)` (16 files), logged to `a-round-477/`.
+   Edit until both checkers exit 0. Never edit a residual line, the checkers or `residual-478.tsv`.
+3. **Write doc 310** and set doc 307/308/309 l.4.
+4. **Run the claims script** and save its output to `a-round-478/claims.txt`. It must show every "after" value in the C2 row.
+5. **Checks:**
+   - `npm run typecheck` (a sanity check; no TS file changes);
+   - `python3 -I -c 'import json;json.load(open("docs/design/design-tokens.json"))'` rc 0.
 
-   Mutants are not re-run by A (round 476 did: `a-round-476/mutants/summary.txt`); C runs them on its own copy. The full suite belongs to the gate.
-5. **Code-reviewer** is not re-run on the 5 unchanged files. Do not open a new STOP for R1 (D-29z1688).
-6. **Report** in `a-round-477.md`.
+   No vitest file covers `docs/**` [K20], so there is none to run. The full suite belongs to the gate.
+6. **Code-reviewer:** run it once on the diff (more than 3 files) and report Medium+ findings. A finding inside a residual line or a banner-only file is outside the grant: report it, do not fix it.
+7. **Report** in `a-round-478.md`. Describe each file's change from its saved diff, `a-round-478/docs.diff.txt` (L56).
 
 ## 2. C: what to verify
-**Files.** Write `c-round-477.md`, `c-round-477.json` (all L57 fields, including `mutantRedOnSketch` = `b-round-475/mutants/b-run/summary.txt`) and `c-round-477/progress.json` as you go.
-
-**Setup:**
-- Start the mock API with `node $(realpath mock-api/server.mjs)` from the loop folder if `:5199` does not answer.
-- **Warm the server first:** `b-round-475/probe/warm.mjs <base>` (L38).
-- **The probe:** `b-round-475/probe/probe-entrance.mjs <base> <tag> <outDir>`. It uses a fresh context per viewport and stubs only the LeadMagnet; the entrance must play.
-- **Never run vitest alongside a probe.**
-
-The child indices in the probe (`hold.kids[n]`) are unchanged, because the tree is the sketch.
+**Files.** Write `c-round-478.md`, `c-round-478.json` and `c-round-478/progress.json` as you go. The JSON carries all L57 fields. Its `mutantRedOnSketch` is `b-round-477/scan/syn-doc-token-mutant.txt`, noting that this round has a synthetic tree, not a sketch (D-29z1694). Run `python3 -I tools/l57-check.py`.
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| C1 | SOURCE-SCOPE | `git status --short --untracked-files=all` and the protected list | Only the 6 round-476 paths changed. The 5 sketch files equal `b-round-475/sketch-476-files-sha256.txt`. K9 = 0 |
-| C2 | CLAIMS | `bash b-round-476/claims-477.sh` | Byte-equal to `b-round-476/claims-477-allowed-deltas.txt`; last line `L58 OK` |
-| C3 | TESTS-MEAN-SOMETHING | Read P1–P4 and N3c. Run `python3 -I b-round-475/mutants/mutants.py <your cp -a copy> c-round-477/mutants` | 12 of 12 RED, with the same rows as `b-round-475/mutants/b-run/summary.txt`; no `NOT-APPLIED`. Each new row has a mutant that turns it red |
-| C4 | UNIT | `npx vitest run $(cat b-round-475/covering-476.txt)` | 16 files pass. `store-entrance-loader` stays under 50 % of the default timeout (L31) |
-| C5 | HAND-OFF COLOUR (both viewports) | `probe-<tag>.json`: `cover[].before`, `hold.overlayBg`, `hold.kids[0].bgc`, `after.bodyBg` | Every non-null cover sample, the overlay, its base layer and `body` after exit are all `rgb(14, 13, 12)`. HEAD control: `rgb(0, 0, 0)` (`b-round-475/probe/probe-head.json`) |
-| C6 | LIGHT, DUST, VIGNETTE (both viewports) | `hold.kids[1..3].bg`, `hold.dustBg`, `hold.kids[6].bg` | All values are as in `b-round-475/probe/probe-sketch.json`. The cone is `rgba(201, 164, 106, 0.04)` / `0.1`. The pool is `0.18` / `0.06`. The floor is `0.12`. Dust is `oklab(0.926355 0.00167474 0.0172472 / 0.5)`. The vignette ends `color(srgb 0.054902 0.0509804 0.0470588 / 0.8) 100%`. No captured overlay `bg` contains `255, 255, 255` |
-| C7 | WORDMARK + LOGO (both viewports) | `hold.word`, `after.logo`, `store.logo`; then `b-round-475/probe/contrast-wordmark.mjs <tag>` in your out-dir | The loader wordmark is `rgb(201, 164, 106)`, weight 700, box 318×72. The header logo is `rgb(201, 164, 106)`, weight 800, on `/` and `/store`. `ratioMedian` ≥ 4.5 (B: 7.55 / 7.56, `b-round-475/probe/contrast-wordmark.json`) |
-| C8 | TIMING (record) | `b-round-458/probe/entrance-timing.mjs <base> 1440 900 3` | **record:** `coverMs`, `onAt`/`offAt` per run, against SABA-B-13 (removal 1450–1900 ms from the first cover frame). A miss is reported with a HEAD control run, not as a FAIL of this colour round |
-| C9 | HEADER, two brass (record) | `after-*.png`, `store-header-*.png` | Both viewports, `/` and `/store`. The computed colours of the logo and the active "Collections" link, as DP-gate input. Persistent header text lines are unchanged |
-| C10 | JOURNEY (L54) | A fresh context on `/`: the entrance ends → click a ProductCard → product page → back | The product page shows its h1 and the brass logo. After back there is no second entrance. Screenshot each step |
-| C11 | DOC 309 | Headings, l.4 [K23] and the R1 entry [K24] | TEMPLATE headings in order. l.4 is exactly `**სტატუსი:** In Progress (stage 3 of 4; C round 477 PASS)`. The R1 entry names `D-29z1688`. Every row id the doc names exists (grep), including R7's "which rows pin what" text |
-| C12 | AUTH | `/studio/middle-east` anonymous; `/api/studio-token?product=middle-east&file=x` with no bearer | "Sign in required" and 0 audio `src`; 401. `/studio-lab` opens anonymously as the demo. The real-owner path is BLOCKED (backend unavailable in cloud) |
+| C1 | SOURCE-SCOPE | `git status --short --untracked-files=all` | Exactly the 16 granted paths: 11 under `docs/design`, `direction-decision.md`, docs 307–309 modified and 310 new. K9 = 0 |
+| C2 | CLAIMS | `bash b-round-477/claims-478.sh` | K1 `HEAD 10791ac`. K2 `hits=27 residual=27 unexpected=0 residual_changed=0`. K3 `FAILS 0`. K4 `0`. K5 all `exists`. K6 307/308/309/310 all `**სტატუსი:** Completed (C round 478 PASS)`. K7 `True`. K8 `0`. K9 `0`. K10 `0` four times. K11 `0`. K12 `13 of 13`. K13 `yes` four times. K14 `section 1`, sources ≥ 1 / ≥ 1, `blue-undertone 0`, `old-heading 0`. K15 `0`. K16 `1`. K17 16 lines. K18 `rc 0`. K19 unchanged from the planning output. K20 `0`. K21 `0`. K22 `0`. K23 unchanged |
+| C3 | CHECKERS MEAN SOMETHING | On your own `cp -a` copy of the tree, with `STORE_ROOT=<copy>`: (a) change `--color-brand` in DESIGN_SYSTEM.md to `#13d9cc`; (b) put `rgba(19, 217, 204, 0.3)` back on one awwwards line; (c) delete one residual line in `wcag-audit.md` | (a) K3 `FAILS ≥ 1`; (b) K2 `unexpected=1`; (c) K2 `residual_changed=1`. Then the real tree re-runs green |
+| C4 | VALUES TRUE | Independently of B's checker: for 6 tokens (brand, brand-hover, background, surface, foreground, muted), compare the value in DESIGN_SYSTEM.md, style-guide.md and design-tokens.json with `getComputedStyle(document.documentElement).getPropertyValue('--color-…')` on `/` in Chromium | All three docs equal the computed value (case-insensitive hex). B's baseline probe: `b-round-477/c4-computed-head.json` |
+| C5 | WCAG SECTION | Recompute the 10 ratios with your own formula from the hex pairs in the new section | Each is within ±0.01 of the doc |
+| C6 | REASONING SOURCED | Read `## რატომ Obsidian & Brass?` | Every "why" sentence cites `direction-decision.md` or `brand-vision.md`, and any quote is verbatim (grep it). No teal/orange word, no glow advice |
+| C7 | DOC 310 | Headings, l.4, D-IDs | TEMPLATE headings in order; l.4 exact; it names D-29z1692…D-29z1694; every test or row id it names exists (grep) |
+| C8 | EMISSION (record) | `git diff -U0 -- docs`, added lines | No arbitrary-value class candidate (K8). Record the count of removed `bg-[#13D9CC]`-style candidates (expected 0 in these files) |
+| C9 | AUTH + STUDIO OPENS | `/studio/middle-east` anonymous; `/api/studio-token?product=middle-east&file=x` with no bearer; `/studio-lab` in a fresh context at 1440×900 and 1280×720 | "Sign in required" with 0 audio `src`; 401; `/studio-lab` opens as the demo. The real-owner path is BLOCKED (backend unavailable in cloud) |
+| C10 | HOME UNCHANGED | `/` at 1440×900 and 1280×720 after the entrance | Header logo `rgb(201, 164, 106)`; `body` background `rgb(14, 13, 12)` (no app change in a docs-only round) |
 | gate | — | Full verify, code review, publish | Root. Not claimed |
 
 **What could break nearby:**
-- the pre-hydration cover (`--color-background`);
-- the skip, reduced-motion and once-per-tab paths (the L/E rows in C4);
-- the legacy pages that render `Header` (C9).
-
-**R1** is ruled (D-29z1688). C does not fail the round on it; C records it as known.
+- Tailwind candidate extraction from `docs/**` (C8);
+- `design-tokens.json` validity;
+- the residual files' history (C2 K10, C3c).
 
 ## 3. After this round
 1. **On C PASS:**
-   - DPG-SPOTLIGHT-FIX is C-verified and awaits the DP gate.
-   - The DPG-LOGO header colour is done; its `font-serif` half waits for Q1.
-   - GATE460-2, A-R460-REVIEW-5 and the portal signal close.
+   - DPG-DOCS-UPDATE is C-verified.
+   - **DPG P0 is complete** (P0-1…P0-3b), so root re-runs the DP gate (design-philosopher + product-designer).
+   - The P0 items stay "awaiting DP gate" until both reviewers give 10/10.
 2. **The next planning:**
-   - **REGRESSION-2026-11-13** first, if the date is 2026-11-13 or later (`regression-last.json` is 2026-11-10). Its header row expects the brass logo (D-29z1687).
-   - Then **DPG-P0-3b**, the design reference docs (scope and counts: `b-round-475/scan/docs-design-counts.txt`).
-   - Then **RETRO 480**.
-   - After P0, root re-runs the DP gate.
-3. **Root, non-blocking:**
-   - ROOT-REQ-DPG-PRIMITIVES-PATCH;
+   1. **REGRESSION-2026-11-13** (due on or after 2026-11-13);
+   2. **RETRO 480**;
+   3. DPG P1: the DPG-LOGO serif half (on Saba's answer), DPG-BUTTON-CLEANUP, DPG-FOOTER-LINKS, DPG-CSS-DEDUP, DPG-FONT-RESOLVE (= STORE-2c-2…4) and DPG-COLOR-CONSOLIDATE, plus any DP-gate findings root files.
+3. **Root, non-blocking for the loop:**
+   - ROOT-REQ-DPG-PRIMITIVES-PATCH (the `.claude/**` text). **It should land before the DP-gate re-run.** Otherwise P0 item 4 fails again on `DESIGN_TOKENS.md`;
    - ROOT-REQ-NAV-LOADING-BAR-RENDER;
    - ROOT-REQ-DPG-GATE-REPORT.
