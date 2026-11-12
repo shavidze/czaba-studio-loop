@@ -682,14 +682,63 @@ Reference: Ableton, Logic Pro, Splice all show their splash for at least 1–2 s
 ### Review stance (Saba, 2026-11-12)
 **ობიექტურად კრიტიკული, არა თავაზიანი.** Agents must be brutally honest — no "looks good overall" when something is mediocre. Judge against the stated mission: Steve Jobs-level attention, perceived value theory, and the specific goals we set. If it doesn't meet the bar, say exactly what fails and why. Positive feedback only when genuinely earned. "კრიტიკულად მიუდგეს ფერთა გამას და დიზაინს."
 
-### Known issues for the first review
-- **Logo still uses old colors** — not yet updated to Obsidian & Brass palette (Saba, 2026-11-12)
+### First gate result (2026-11-12, post STORE-2b)
+- **Design Philosopher:** 3.5/10 — FAIL ("identity crisis")
+- **Product Designer:** 4/10 — NOT READY
 
-### Schedule
-- After STORE-2b completes → first review
+**Root cause:** Token-level migration done (brass #c9a46a), but 100+ hardcoded teal values remain in CSS and components. Every hover, glow, animation, shadow is still teal. Two competing identities.
+
+**Saba's decision (2026-11-12):** "დაიწყოს იქამდე სანამ 10/10 არ იქნება ორივე" — iterate until BOTH agents give 10/10.
+
+### DPG-FIX block — IMMEDIATE PRIORITY (before STORE-3)
+
+**This block takes priority over STORE-2c/3/4/5 and all other work.** B must schedule these as bounded rounds. After each sub-block completes, root re-runs both agents. Loop continues until both score 10/10.
+
+#### P0 — Critical (blocks everything)
+
+1. **DPG-TEAL-PURGE:** Replace ALL ~100 hardcoded teal values (`rgba(19,217,204,...)`, `hsl(175,85%,...)`) in app.css, utilities.css, and all component TSX files with brass token references (`rgba(var(--color-brand-rgb),...)` or new `--color-brand-glow` tokens). Includes:
+   - 61 rgba teal in app.css
+   - 14 hsl teal in app.css
+   - Inline teal in ProductCard.tsx, SpotlightLoader.tsx, NewsletterSection.tsx, SpecialOffersSection.tsx, StudioMockup.tsx
+   - Scrollbar teal in utilities.css
+   - Email template teal in hire-us.tsx and email.server.ts
+
+2. **DPG-GRADIENT-TOKENS:** Redefine `--gradient-primary`, `--gradient-text`, `--gradient-hero`, `--gradient-glow`, `--shadow-glow`, `--color-glow-primary`, `--color-glow-secondary` to use brass hues. Define `--primary-hue`, `--primary-sat`, `--primary-light` (8 broken references) or replace.
+
+3. **DPG-SPOTLIGHT-FIX:** SpotlightLoader entrance must use brass palette — this is the FIRST thing users see.
+
+4. **DPG-DOCS-UPDATE:** Update DESIGN_TOKENS.md primitive (brand: #c9a46a not teal), DESIGN_SYSTEM.md ("Why Obsidian & Brass?" not "Why Teal + Orange?"), direction-decision.md (remove claim about --color-obsidian-* tokens that don't exist).
+
+5. **DPG-UNDEFINED-TOKENS:** Fix `--color-text-primary` (6 references, never defined), `--radius-xs` (4 references), `--radius_full` typo, `bg-primary`/`text-primary-foreground` undefined Tailwind classes.
+
+#### P1 — High (next after P0)
+
+6. **DPG-LOGO:** Header and Footer logo — add `font-serif text-brand`. Currently plain sans-serif.
+7. **DPG-BUTTON-CLEANUP:** Delete competing `.button-primary`, `.btn-primary` CSS classes. Use Button.tsx component only.
+8. **DPG-FOOTER-LINKS:** Change `<a>` to `<Link>` in Footer.tsx (full page reload kills premium feel).
+9. **DPG-CSS-DEDUP:** Remove duplicate hover utilities between app.css and utilities.css.
+10. **DPG-FONT-RESOLVE:** Resolve Inter vs Instrument Sans conflict between Store and Studio.
+11. **DPG-COLOR-CONSOLIDATE:** Consolidate `--color-secondary`/`--color-muted`, error colors, desaturate `--color-info`.
+
+#### P2 — Polish (after P1)
+
+12. **DPG-HERO-SIMPLIFY:** Reduce Hero from slideshow + 4 text layers to 1 image + 1 headline + 1 CTA.
+13. **DPG-SCROLL-ANIM:** Reduce ScrollReveal to 1-2 sections max, not all.
+14. **DPG-INTERACTION-FIX:** Remove opacity:0.9 from btn-primary hover. Reduce audio button scale 1.15→1.05.
+15. **DPG-SKELETON-WARM:** Fix skeleton shimmer from cold blue to warm obsidian tones.
+16. **DPG-DECORATIVE-PURGE:** Remove unused `--color-crystal-*`, `--color-premium-*`, orphan pink values.
+17. **DPG-FONT-SIZES:** Fix `font-size: 1rem` on badge/meta/label elements that should be 12-14px.
+18. **DPG-COPY-VOICE:** Unify vocabulary ("Sound Design" vs "Sound Collections" vs "Sound Packs").
+
+#### Re-review cycle
+After each priority level (P0, P1, P2) completes, root re-runs design-philosopher + product-designer. If score < 10/10, new findings become tasks. **Loop does not advance to STORE-3 until both agents score 10/10.**
+
+### Schedule (updated)
+- ✅ After STORE-2b completes → first review — **DONE, scored 3.5/10 and 4/10**
+- 📍 **DPG-FIX block — NOW (iterating until 10/10)**
 - After STORE-5 completes → full Store review
 - After STUDIO-VIS completes → full Studio review
-- After ARCH-SPLIT → regression review (split didn't break the feel)
+- After ARCH-SPLIT → regression review
 
 This is NOT optional — it's a quality gate, like C's browser verification.
 
