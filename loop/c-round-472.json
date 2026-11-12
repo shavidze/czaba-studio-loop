@@ -1,0 +1,42 @@
+{
+  "taskStatus": "FAIL",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {"checkedUtc": "2026-11-12T16:26:33.8371985Z", "round": 472, "attempt": 1, "store": 200},
+  "bugs": [
+    {
+      "id": "C-R472-01",
+      "severity": "medium",
+      "steps": [
+        "Read docs/implementation/2026/quarter-IV/306-store-2c-1-font-family-tokens.md l.76-80 (under 'შეცვლილი ფაილები')",
+        "Compare l.79 with self-hosted-fonts.test.ts FN4 (line 191) after sketch-472 and with doc l.88 / l.95",
+        "A-R472-REVIEW-M1 reproduced independently"
+      ],
+      "expected": "Doc 306 describes FN4 as it is after sketch-472: it reads only the store @theme block and pins the exact R-471-1 values; obsidian is not read (L26 doc accuracy; C12 'no stale claims').",
+      "actual": "l.79 still says FN4 compares the families of every --font-* declaration in the whole file, obsidian block included. This is false after sketch-472 and contradicts l.88 and l.95 of the same doc. l.78 names only TOKEN_FONT_FAMILIES (misses INSTRUMENT_SANS_STACK and STORE_THEME_FONT_TOKENS). l.90 says FN6 forbids only single-quoted 'Inter'/'Playfair Display'; FN6 now forbids either quote style. A stopped on this (outside the grant); the tree is otherwise consistent.",
+      "evidence": "c-round-472.md section C12; a-round-472.md; a-round-472/code-review.md"
+    }
+  ],
+  "passed": [
+    "C1-computed-fonts (24/24 pages x viewports: body/h1 Instrument Sans, mono Plex Mono, HEAD Inter control)",
+    "C2-network (tree requests no inter/playfair woff2, all font responses 200; HEAD requests inter on 24/24)",
+    "C3-overflow-reflow (0 overflow, 0 new clipped, only the 3 R-471-2 line growths)",
+    "C3b-cls (max tree 0.0216 < 0.1)",
+    "C3c-long-title (3/3/4 lines same as HEAD)",
+    "C4-keep-list-partial (Limited badges one line unclipped, Free Samples present, LeadMagnet FREE DOWNLOAD popup opens with focus inside and 1px brass outline on Tab, /about stats 2,500+/Happy Customers intact; see limits in md)",
+    "C5-weight (home h1 700 and store h1 600 visually clean, no fake bold; loaded faces Instrument Sans 400/500/600)",
+    "C6-glyphs (Instrument Sans 10, Noto Sans Georgian 7, DejaVu 2 arrows; kbd chips now Instrument Sans incl. U+21B5 recorded for 2c-3)",
+    "C7-studio-lab (opens anonymously with demo, workspace font families identical to HEAD: 108 Instrument Sans / 51 Plex Mono)",
+    "C8-legacy-studio-signin (Sign in required, 0 audio src, 0 audio requests; stubbed client path not run: backend unavailable in cloud)",
+    "C9-journey (store -> product -> Try it in the Studio -> /studio-lab?preview=middle-east, all render, tree fonts)",
+    "C10-unit-mutant (126 passed; mutants equal B's: georgia-serif/no-mono/commented-mono FN4 red, head-css FN4+FN6 red, obsidian-sans-georgia green by design)",
+    "C11-source-scope (3 status paths; app.css sha d3af7582d8199712 unchanged; test file = TREE + sketch-472 via git apply -R --check rc 0; protected sha256 -c rc 0)",
+    "C13-auth-smoke (/studio-lab anonymous OK; premium /studio/middle-east Sign in required; /api/studio-token 401 without bearer, 403 for fake bearer)",
+    "C14-claims (equal except expected K1/K4/K9; K3/K14 unchanged; L58 OK)"
+  ],
+  "blocked": [
+    "C8 stubbed client path (loading/transport state, 9-10px mono labels): not run; backend unavailable in cloud",
+    "C13 fake-bearer success path: BLOCKED, backend unavailable in cloud (fake bearer gives 403, never access)",
+    "gate rows (full verify, code review, publish): root"
+  ]
+}

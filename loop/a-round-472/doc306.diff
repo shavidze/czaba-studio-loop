@@ -1,0 +1,34 @@
+4c4
+< **სტატუსი:** In Progress (stage 1 of 4; C round 471 PASS)
+---
+> **სტატუსი:** In Progress (stage 1 of 4; C round 472 PASS)
+48,49c48,49
+<   - Instrument Sans მხოლოდ 400/500/600 weight-ებს აწვდის, ამიტომ ლათინური 700-ის მოთხოვნა 600-იანი face-ით უნდა დარენდერდეს, ყალბი bold-ის გარეშე. ეს product-designer-ის მეხსიერებიდანაა და Chromium-ის წყაროთი დადასტურებული არ არის; browser-ში C5 ამოწმებს.
+<   - Noto Sans Georgian მხოლოდ 400/500-ს აწვდის, ამიტომ ქართული bold ტექსტი ყალბი bold-ით იხატება.
+---
+>   - Instrument Sans მხოლოდ 400/500/600 weight-ებს აწვდის, ამიტომ ლათინური 700-ის მოთხოვნა 600-იანი face-ით უნდა დარენდერდეს, ყალბი bold-ის გარეშე. C-ის round 472-ის C5-მა browser-ში დაადასტურა, რომ ლათინური 700 600-იანი face-ით იხატება, ყალბი bold-ის გარეშე.
+>   - Noto Sans Georgian მხოლოდ 400/500-ს აწვდის, ამიტომ ქართული bold ტექსტი ყალბი bold-ით იხატება. Store-ის UI-ში დღეს ქართული ტექსტი არ არის (D-29z1663): store-ის route-ებსა და კომპონენტებში ქართული დამწერლობის UI სტრიქონი 0-ია, ყველა დამთხვევა კომენტარია.
+87,88c87,88
+< - **პრობლემა (ღია, A-R471-REVIEW-M1):** FN4 მთელ ფაილს სკანავს, obsidian ბლოკი კი იმავე სამ family-ს შეიცავს. ამიტომ Store-ის `@theme` token-ის რეგრესიას FN4 ვერ ამჩნევს. `--font-mono` ხაზის წაშლით ან `--font-serif: Georgia, serif`-ით mutant-ი 4 covering ფაილს 126/126-ით გადის. HEAD-ზე იგივე serif mutant-ი FN4-ს აწითლებდა.
+<   **გადაწყვეტა:** B-ს გადაწყვეტილებას ელოდება.
+---
+> - **პრობლემა (A-R471-REVIEW-M1 / C-R471-01):** round 471-ის FN4 მთელ ფაილს სკანავდა, obsidian ბლოკი კი იმავე სამ family-ს შეიცავს. ამიტომ Store-ის `@theme` token-ის რეგრესიას FN4 ვერ ამჩნევდა: `--font-mono` ხაზის წაშლით ან `--font-serif: Georgia, serif`-ით mutant-ი 4 covering ფაილს 126/126-ით გადიოდა.
+>   **გადაწყვეტა (D-29z1662):** FN4 ახლა მხოლოდ კომენტარებისგან გასუფთავებულ Store-ის `@theme {` ბლოკს კითხულობს და სამი token-ის (`--font-sans`, `--font-serif`, `--font-mono`) ზუსტ მნიშვნელობებს R-471-1-ის მიხედვით ამოწმებს. Obsidian ბლოკს ST4 და TH2 იცავენ.
+94,97c94,97
+< - **Unit (A, round 471):** 4 covering ფაილი (`self-hosted-fonts`, `store-theme-tokens`, `studio-theme-obsidian`, `third-party-licenses`) — 126 passed. `npm run typecheck` და `npm run lint` — rc 0.
+< - **FN4:** `app.css`-ის ყველა `--font-*` declaration-ის family-ები ზუსტად `TOKEN_FONT_FAMILIES`-ის ტოლია და თითოეული self-hosted სიაშია. Store-ის `@theme`-ს ცალკე არ ამოწმებს (იხ. A-R471-REVIEW-M1).
+< - **FN6:** `body`-ის `font-family` არის `var(--font-sans)`; `app.css`-ში არც Inter წერია, არც Playfair Display.
+< - **Mutant (B, sketch-ზე):** ახალი ტესტი HEAD-ის `app.css`-ზე FN4-სა და FN6-ს წითლად აჩენს.
+---
+> - **Unit (A, round 472):** 4 covering ფაილი (`self-hosted-fonts`, `store-theme-tokens`, `studio-theme-obsidian`, `third-party-licenses`) — 126 passed. `npm run typecheck` და `npm run lint` — rc 0.
+> - **FN4 (sketch-472):** კომენტარებისგან გასუფთავებულ `app.css`-ში სტრიქონი `\n@theme {` ზუსტად ერთხელ უნდა გვხვდებოდეს, ბლოკი კი `\n}`-ით იხურება. FN4 მხოლოდ ამ ბლოკის `--font-sans`/`--font-serif`/`--font-mono` მნიშვნელობებს უტოლებს R-471-1-ის stack-ებს (`STORE_THEME_FONT_TOKENS`). ამ token-ების family-ები ზუსტად `TOKEN_FONT_FAMILIES`-ია, თითოეული self-hosted სიაშია, face და OFL ლიცენზია აქვს. Obsidian ბლოკს FN4 არ კითხულობს.
+> - **FN6 (sketch-472):** `body` rule-ის `font-family` არის `var(--font-sans)` (whitespace-ის მიუხედავად); `app.css`-ში არც Inter წერია, არც Playfair Display, არც ერთი, არც ორმაგი ბრჭყალებით.
+> - **Mutant (B, sketch-472-ზე, `b-round-471/mutants-summary.txt`):** control — 6 passed; `georgia-serif`, `no-mono`, `commented-mono`, `theme-unterminated` — FN4 წითელი; `sans-inter` და `head-css` — FN4 და FN6 წითელი; `body-dq-inter` — FN6 წითელი; `obsidian-sans-georgia` ამ ფაილში მწვანეა, ST4 და TH2 კი თავიანთ ფაილებში წითლდება.
+106c106
+< - **დამოუკიდებელი browser შემოწმება:** C, round 471.
+---
+> - **დამოუკიდებელი browser შემოწმება:** C, round 472.
+113a114,116
+> - **2c-2:** `app.css`-ის `.artist-title { font-family: var(--font-serif) }` sweep-ის სიაშია; `--font-serif` 2c-4-ში მხოლოდ მისი მოშორების შემდეგ წაიშლება.
+> - **2c-3:** CommandPalette-ის `<kbd>` chip-ები Plex Mono-ს preflight-ით იღებს, ↵ (U+21B5) სხვა შრიფტით იხატება; Plex Mono-ს სიგანე Consolas-თან (A-R471-REVIEW-INFO-COVERAGE).
+> - **2c-4:** SR-472-L1 (font override `@theme`-ის გარეთ) და SR-472-L2 (ბრჭყალების გარეშე `Inter`) FN/TL row-ების გადაწერაში; Inter-ის ფაილების წაშლისას Cyrillic-ისა და Greek-ის დაფარვის დაკარგვის აღრიცხვა (A-R471-REVIEW-INFO-COVERAGE).

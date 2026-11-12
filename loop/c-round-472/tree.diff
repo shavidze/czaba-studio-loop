@@ -1,0 +1,95 @@
+diff --git a/app/lib/__tests__/self-hosted-fonts.test.ts b/app/lib/__tests__/self-hosted-fonts.test.ts
+index 3cd33f0..36e674f 100644
+--- a/app/lib/__tests__/self-hosted-fonts.test.ts
++++ b/app/lib/__tests__/self-hosted-fonts.test.ts
+@@ -99,6 +99,16 @@ const SELF_HOSTED_FONT_FAMILIES = [
+   'Playfair Display',
+ ];
+ 
++const TOKEN_FONT_FAMILIES = ['IBM Plex Mono', 'Instrument Sans', 'Noto Sans Georgian'];
++
++const INSTRUMENT_SANS_STACK = "'Instrument Sans', 'Noto Sans Georgian', system-ui, sans-serif";
++
++const STORE_THEME_FONT_TOKENS: Record<string, string> = {
++  '--font-mono': "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
++  '--font-sans': INSTRUMENT_SANS_STACK,
++  '--font-serif': INSTRUMENT_SANS_STACK,
++};
++
+ const SELF_HOSTED_FONT_LICENSES = [
+   'OFL-ibm-plex-mono.txt',
+   'OFL-instrument-sans.txt',
+@@ -178,15 +188,30 @@ describe('Self-hosted fonts (PERF-7)', () => {
+     }
+   });
+ 
+-  it('FN4: every family named by the font tokens in app.css has a face, and each family ships its OFL licence', () => {
+-    const appCss = readFileSync(APP_CSS_PATH, 'utf8');
++  it('FN4: the store @theme font tokens hold the Instrument Sans and Plex Mono stacks, every family has a face, and each family ships its OFL licence', () => {
++    const appCss = readFileSync(APP_CSS_PATH, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
++    const themeStart = appCss.indexOf('\n@theme {');
++    expect(themeStart).toBeGreaterThan(-1);
++    expect(appCss.indexOf('\n@theme {', themeStart + 1)).toBe(-1);
++    const themeEnd = appCss.indexOf('\n}', themeStart);
++    expect(themeEnd).toBeGreaterThan(themeStart);
++    const themeBlock = appCss.slice(themeStart, themeEnd);
++    const themeFontTokens: Record<string, string> = {};
++    for (const match of themeBlock.matchAll(/(--font-(?:sans|serif|mono)):\s*([^;]+);/g)) {
++      const [, token, value] = match;
++      if (token && value) themeFontTokens[token] = value.trim();
++    }
++    expect(themeFontTokens).toEqual(STORE_THEME_FONT_TOKENS);
+     const tokenFamilies = new Set<string>();
+-    for (const match of appCss.matchAll(/--font-(?:sans|serif|mono): ([^;]+);/g)) {
+-      for (const name of (match[1] ?? '').matchAll(/'([^']+)'/g)) {
++    for (const value of Object.values(themeFontTokens)) {
++      for (const name of value.matchAll(/'([^']+)'/g)) {
+         if (name[1]) tokenFamilies.add(name[1]);
+       }
+     }
+-    expect([...tokenFamilies].sort()).toEqual(SELF_HOSTED_FONT_FAMILIES);
++    expect([...tokenFamilies].sort()).toEqual(TOKEN_FONT_FAMILIES);
++    for (const family of tokenFamilies) {
++      expect(SELF_HOSTED_FONT_FAMILIES).toContain(family);
++    }
+     const css = readFileSync(FONTS_CSS_PATH, 'utf8');
+     for (const family of tokenFamilies) {
+       expect(css, family).toContain(`font-family: '${family}';`);
+@@ -199,6 +224,12 @@ describe('Self-hosted fonts (PERF-7)', () => {
+     }
+   });
+ 
++  it('FN6: the store body uses the font token, and app.css names neither Inter nor Playfair Display', () => {
++    const appCss = readFileSync(APP_CSS_PATH, 'utf8');
++    expect(appCss).toMatch(/(?:^|\n)body\s*\{[^}]*\bfont-family:\s*var\(--font-sans\);/);
++    expect(appCss).not.toMatch(/['"](?:Inter|Playfair Display)['"]/);
++  });
++
+   it('FN5: root links exactly the local font stylesheet, then app.css, with no external URL', () => {
+     const source = readFileSync(ROOT_PATH, 'utf8');
+     expect(source).toContain("import fontStyles from './assets/fonts/fonts.css?url';");
+diff --git a/app/styles/app.css b/app/styles/app.css
+index 9bcac97..209477d 100644
+--- a/app/styles/app.css
++++ b/app/styles/app.css
+@@ -119,8 +119,9 @@ html.lenis, html.lenis body {
+   --color-video-sync: #14b8a6;
+ 
+   /* ========== TYPOGRAPHY ========== */
+-  --font-sans: 'Inter', system-ui, sans-serif;
+-  --font-serif: 'Playfair Display', Georgia, serif;
++  --font-sans: 'Instrument Sans', 'Noto Sans Georgian', system-ui, sans-serif;
++  --font-serif: 'Instrument Sans', 'Noto Sans Georgian', system-ui, sans-serif;
++  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+   --text-label: 0.6875rem;
+   --text-label--line-height: 1rem;
+   --tracking-label: 0.14em;
+@@ -334,7 +335,7 @@ body {
+ }
+ 
+ body {
+-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
++  font-family: var(--font-sans);
+   color: var(--color-foreground);
+   background-color: var(--color-background);
+   line-height: 1.6;
