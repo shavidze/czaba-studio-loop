@@ -1,14 +1,14 @@
-# Active loop summary (2026-11-12T14:06:47.864Z)
+# Active loop summary (2026-11-12T15:27:59.689Z)
 
-- backlog.json 3382 KB -> active view 298 KB
-- status: G_ROOT_GATE round 469
-- servers: `{"checkedUtc":"2026-11-12T13:40:03.4213767Z","round":469,"attempt":1,"store":200}`
-- last publication: 9ba13acda88f88934814972ec23518205245b228 (rounds 465-467)
-- last root gate: round 469 skipped - C taskStatus BLOCKED
+- backlog.json 3386 KB -> active view 298 KB
+- status: G_ROOT_GATE round 470
+- servers: `{"checkedUtc":"2026-11-12T15:00:33.9837024Z","round":470,"attempt":1,"store":200}`
+- last publication: 5cd9645a684c29a8015ed946a5c6e80b169c2de0 (rounds 468-470)
+- last root gate: round 470 published - commit 5cd9645a684c29a8015ed946a5c6e80b169c2de0 pushed
 
 ## Current items: -
 
-## Open findings: 972 (11 Critical/High/Medium)
+## Open findings: 973 (11 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / listed in the Safari list (user-review/questions-retro-465.md Q2, D-29z1638); does not block | environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the cloud runner (same class as GATE97-S2); Tech  …[see backlog.json] / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
@@ -17,7 +17,7 @@
 - **STUDIO-VIS-5** / medium / scheduled (D-29z1512): REVIEW-RECOMMENDATIONS (Saba: defer) / Detail panel spacing (gap-0.5 -> gap-1, px-3 -> px-4)
 - **SABA-B-12** / medium / in_progress (D-29z1515, D-29z1521, D-29z1523, D-29z1527, D-29z1532, D-29z1536, D-29z1538): stages 1, 2a, 2b, 3, 3b passed C and are published (5a30894, 1197dcb, 1a417fb, 0c22ac9, 8233840); stage 4 (selects, STUDIO-VIS-3) in REVIEW-RECOMMENDATIONS / Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cance
 - **GATE462-M1-EMAIL-SERVER-POLICY** / medium / open_root (D-29z1632): question ROOT-REQ-EMAIL-SERVER-DELETION; non-blocking for the loop (2026-10-23 root clarification class: root-only); app/lib/email.server.ts is not in global_forbidden_files (claims-463 K11); 0 importers; r2-tokens.server.ts and every download route unchanged; C round 462 C8 p …[see backlog.json] / Round 462 deleted app/lib/email.server.ts (dead order-paid email builder that used getDownloadUrl); root to confirm the deletion is acceptab
-- **SABA-B-15** / medium / dispatched round 469 (D-29z1651): stage 2 fix = the 3 blur glows (ProductSection l.38-39, StudioShowcase l.75) -> radial gradients at today's strength (product-designer band 0.8-1.3x, b-round-468/pd-ruling.md); stage 1 cause confirmed by C round 468 (D-29z1650); after C PASS: "home cause fixed in cl …[see backlog.json] / Store scroll is not smooth and soft (Saba 2026-11-12, named /free-downloads on czaba-store-test.vercel.app)
+- **SABA-B-15** / medium / dispatched round 470 (D-29z1655): round 469 C BLOCKED (C1 control env-invalid; C2-C13 PASS) and C-R469-01 shape; stage 2b = sketch s6 + p95 control; after C PASS: "home cause fixed in cloud", closes only with TLM-R468-SABA-SCROLL-DEVICE | dispatched round 469 (D-29z1651): stage 2 fix = the 3 blur gl …[see backlog.json] / Store scroll is not smooth and soft (Saba 2026-11-12, named /free-downloads on czaba-store-test.vercel.app)
 - **TLM-R468-SABA-SCROLL-DEVICE** / medium / open_tech_lead_manual (D-29z1649): deadline RETRO 480 (L46); does not block (2026-10-23 root clarification class) | question user-review/questions-round-468.md Q1 (D-29z1651), with the Lenis-feel options (a) keep default, (b) shorter duration, (c) lerp, (d) off (R-468-1, L44) / Saba's own device: /free-downloads and / scroll on the Vercel preview after round 468 lands (mouse wheel and trackpad; Chrome DevTools Perfo
 - **SABA-B-16-LOGO-OLD-COLORS** / medium / open (D-29z1648): input to the first DP-GATE review (root, ROOT-REQ-DP-GATE-FIRST); which asset is unconfirmed: header wordmark is text-foreground (R59), so candidates are public/favicon.ico, public/og-image.jpg (public/** global_forbidden -> root) and the SpotlightLoader wordmark; user-review/quest …[see backlog.json] / Logo still uses the old colours, not Obsidian & Brass (Saba 2026-11-12, "Known issues for the first review")
-- ... and 961 Low/info (see backlog.json)
+- ... and 962 Low/info (see backlog.json)

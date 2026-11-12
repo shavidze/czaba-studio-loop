@@ -1,0 +1,303 @@
+import { act, fireEvent, render } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+import {
+  type ArrangementContextValue,
+  ArrangementProvider,
+  useArrangement,
+} from '~/contexts/ArrangementContext';
+import { waveformPeakColumns } from '~/lib/arrangement/peaks';
+import {
+  sliderPositionFromZoom,
+  spanInTimelineWindow,
+  zoomFromSliderPosition,
+} from '~/lib/arrangement/view';
+import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+import { createArrangement } from '../model';
+
+vi.mock('@remix-run/react', () => ({
+  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+    <a href={to} className={className}>
+      {children}
+    </a>
+  ),
+}));
+const fakeClock = { base: 0 };
+
+class FakeParam {
+  value = 0;
+  setTargetAtTime(target: number) {
+    this.value = target;
+  }
+}
+
+class FakeNode {
+  connect(destination: FakeNode) {
+    return destination;
+  }
+  disconnect() {}
+}
+
+class FakeGain extends FakeNode {
+  gain = new FakeParam();
+}
+
+class FakePanner extends FakeNode {
+  pan = new FakeParam();
+}
+
+class FakeSource extends FakeNode {
+  buffer: unknown = null;
+  onended: (() => void) | null = null;
+  start() {}
+  stop() {}
+}
+
+class FakeAudioContext {
+  state = 'running';
+  destination = new FakeNode();
+  sampleRate = 48000;
+  get currentTime() {
+    return Date.now() / 1000 - fakeClock.base;
+  }
+  resume() {
+    return Promise.resolve();
+  }
+  close() {
+    return Promise.resolve();
+  }
+  createGain() {
+    return new FakeGain();
+  }
+  createStereoPanner() {
+    return new FakePanner();
+  }
+  createBufferSource() {
+    return new FakeSource();
+  }
+}
+
+class FakeOfflineAudioContext {}
+
+class FakeAudioBuffer {
+  readonly length: number;
+  readonly numberOfChannels: number;
+  readonly sampleRate: number;
+  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
+    this.length = options.length;
+    this.numberOfChannels = options.numberOfChannels;
+    this.sampleRate = options.sampleRate;
+  }
+  get duration() {
+    return this.length / this.sampleRate;
+  }
+  getChannelData() {
+    return new Float32Array(this.length);
+  }
+}
+
+const resizeObservers: { callback: () => void; targets: Element[] }[] = [];
+
+class FakeResizeObserver {
+  private readonly entry: { callback: () => void; targets: Element[] };
+  constructor(callback: () => void) {
+    this.entry = { callback, targets: [] };
+    resizeObservers.push(this.entry);
+  }
+  observe(target: Element) {
+    this.entry.targets.push(target);
+  }
+  disconnect() {
+    this.entry.targets.length = 0;
+  }
+}
+
+const SCROLLER_TEST_ID = 'arrangement-timeline-scroller';
+const HEADER_PX = 224;
+const VIEWPORT_PX = 1216;
+const layout = { scrollerWidth: VIEWPORT_PX + HEADER_PX };
+
+const gateCollection: WorkspaceCollection = {
+  id: 'gate',
+  label: 'gate',
+  origin: 'demo',
+  sources: [{ id: 'song', title: 'Song', collectionLabel: 'gate', kind: 'music', origin: 'demo' }],
+  loadSource: async () => new AudioBuffer({ length: 20000, numberOfChannels: 1, sampleRate: 100 }),
+};
+
+const GATE_CLIPS: ArrangementClip[] = [
+  { id: 'near', trackId: 'music', sourceId: 'song', start: 0, sourceOffset: 0, duration: 50 },
+  { id: 'far', trackId: 'music', sourceId: 'song', start: 150, sourceOffset: 0, duration: 50 },
+];
+
+function gateArrangement(): Arrangement {
+  const base = createArrangement([
+    { id: 'video', kind: 'video', name: 'ვიდეო' },
+    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+  ]);
+  return { ...base, clips: GATE_CLIPS };
+}
+
+interface GateApiRef {
+  current: ArrangementContextValue | null;
+}
+
+function GateProbe({ api }: { api: GateApiRef }) {
+  api.current = useArrangement();
+  return null;
+}
+
+function live(api: GateApiRef): ArrangementContextValue {
+  if (!api.current) {
+    throw new Error('provider not mounted');
+  }
+  return api.current;
+}
+
+async function mountGateWorkspace(pxPerSecond: number) {
+  const api: GateApiRef = { current: null };
+  const view = render(
+    <ArrangementProvider collection={gateCollection} initialArrangement={gateArrangement()}>
+      <StudioWorkspace />
+      <GateProbe api={api} />
+    </ArrangementProvider>,
+  );
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+  act(() => live(api).setPxPerSecond(pxPerSecond));
+  return { api, view };
+}
+
+type GateView = Awaited<ReturnType<typeof mountGateWorkspace>>['view'];
+
+function columnsOf(view: GateView, clipId: string): number {
+  const svg = view.container.querySelector(
+    `[data-clip-id="${clipId}"] [data-testid="arrangement-clip-waveform"]`,
+  );
+  if (!svg) {
+    throw new Error(`no waveform for ${clipId}`);
+  }
+  return Number((svg.getAttribute('viewBox') ?? '').split(' ')[2]);
+}
+
+function pinOutsideClips(api: GateApiRef) {
+  act(() =>
+    live(api).setClipLaneDrag({
+      ghosts: GATE_CLIPS.map((clip) => ({
+        clipId: clip.id,
+        trackId: 'video',
+        start: clip.start,
+        duration: clip.duration,
+        blocked: false,
+        message: null,
+      })),
+      timeLocked: false,
+    }),
+  );
+}
+
+function scrollTo(view: GateView, left: number) {
+  const scroller = view.getByTestId(SCROLLER_TEST_ID);
+  scroller.scrollLeft = left;
+  fireEvent.scroll(scroller);
+}
+
+beforeEach(() => {
+  fakeClock.base = Date.now() / 1000;
+  layout.scrollerWidth = VIEWPORT_PX + HEADER_PX;
+  resizeObservers.length = 0;
+  vi.stubGlobal('AudioContext', FakeAudioContext);
+  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+  vi.stubGlobal('requestAnimationFrame', () => 1);
+  vi.stubGlobal('cancelAnimationFrame', () => undefined);
+  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
+  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
+  vi.spyOn(Element.prototype, 'clientWidth', 'get').mockImplementation(function stubClientWidth(
+    this: Element,
+  ) {
+    return this.getAttribute('data-testid') === SCROLLER_TEST_ID ? layout.scrollerWidth : 0;
+  });
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+describe('PERF-3d waveform columns follow the visible window', { timeout: 15_000 }, () => {
+  it('WG0 spanInTimelineWindow keeps every span without a window and includes touching edges', () => {
+    expect(spanInTimelineWindow(5000, 6000, undefined)).toBe(true);
+    expect(spanInTimelineWindow(0, 1000, { fromPx: 1000, toPx: 2000 })).toBe(true);
+    expect(spanInTimelineWindow(2000, 3000, { fromPx: 1000, toPx: 2000 })).toBe(true);
+    expect(spanInTimelineWindow(2001, 3000, { fromPx: 1000, toPx: 2000 })).toBe(false);
+    expect(spanInTimelineWindow(0, 999, { fromPx: 1000, toPx: 2000 })).toBe(false);
+  });
+
+  it('WG1 an unmeasured viewport rebuilds every clip at the new band', async () => {
+    layout.scrollerWidth = 0;
+    const { api, view } = await mountGateWorkspace(40);
+    expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, 40));
+    act(() => live(api).setPxPerSecond(20));
+    expect(columnsOf(view, 'near')).toBe(waveformPeakColumns(50, 20));
+    expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, 20));
+  });
+
+  it('WG2 a band crossing rebuilds only the clips inside the window', async () => {
+    const { api, view } = await mountGateWorkspace(40);
+    pinOutsideClips(api);
+    expect(waveformPeakColumns(50, 40)).not.toBe(waveformPeakColumns(50, 20));
+    expect(columnsOf(view, 'near')).toBe(waveformPeakColumns(50, 40));
+    expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, 40));
+    act(() => live(api).setPxPerSecond(20));
+    expect(columnsOf(view, 'near')).toBe(waveformPeakColumns(50, 20));
+    expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, 40));
+  });
+
+  it('WG3 a scroll that brings a stale clip into the window rebuilds it at the new band', async () => {
+    const { api, view } = await mountGateWorkspace(40);
+    pinOutsideClips(api);
+    act(() => live(api).setPxPerSecond(20));
+    expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, 40));
+    scrollTo(view, 3000);
+    expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, 20));
+    expect(columnsOf(view, 'near')).toBe(waveformPeakColumns(50, 20));
+  });
+
+  it('WG4 zooming back while the stale clip is outside keeps it at its old band', async () => {
+    const { api, view } = await mountGateWorkspace(40);
+    pinOutsideClips(api);
+    act(() => live(api).setPxPerSecond(20));
+    act(() => live(api).setPxPerSecond(40));
+    expect(columnsOf(view, 'near')).toBe(waveformPeakColumns(50, 40));
+    expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, 40));
+    act(() => live(api).setPxPerSecond(20));
+    scrollTo(view, 4000);
+    act(() => live(api).setPxPerSecond(40));
+    expect(columnsOf(view, 'near')).toBe(waveformPeakColumns(50, 20));
+    expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, 40));
+  });
+
+  it('WG5 a real anchored zoom gates by the pending view, not the old scroll', async () => {
+    const { api, view } = await mountGateWorkspace(40);
+    pinOutsideClips(api);
+    act(() => live(api).setPxPerSecond(20));
+    act(() => live(api).seekTo(175));
+    scrollTo(view, 3000);
+    expect(columnsOf(view, 'near')).toBe(waveformPeakColumns(50, 20));
+    expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, 20));
+    const position = sliderPositionFromZoom(40);
+    const zoomed = zoomFromSliderPosition(position);
+    expect(waveformPeakColumns(50, zoomed)).not.toBe(waveformPeakColumns(50, 20));
+    fireEvent.change(view.getByTestId('arrangement-zoom'), { target: { value: String(position) } });
+    expect(live(api).pxPerSecond).toBeCloseTo(zoomed, 9);
+    expect(view.getByTestId(SCROLLER_TEST_ID).scrollLeft).toBeCloseTo(175 * zoomed - 500, 6);
+    expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, zoomed));
+    expect(columnsOf(view, 'near')).toBe(waveformPeakColumns(50, 20));
+  });
+});

@@ -1,0 +1,59 @@
+--- a/app/styles/app.css
++++ b/app/styles/app.css
+@@ -119,8 +119,9 @@
+   --color-video-sync: #14b8a6;
+ 
+   /* ========== TYPOGRAPHY ========== */
+-  --font-sans: 'Inter', system-ui, sans-serif;
+-  --font-serif: 'Playfair Display', Georgia, serif;
++  --font-sans: 'Instrument Sans', 'Noto Sans Georgian', system-ui, sans-serif;
++  --font-serif: 'Instrument Sans', 'Noto Sans Georgian', system-ui, sans-serif;
++  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+   --text-label: 0.6875rem;
+   --text-label--line-height: 1rem;
+   --tracking-label: 0.14em;
+@@ -334,7 +335,7 @@
+ }
+ 
+ body {
+-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
++  font-family: var(--font-sans);
+   color: var(--color-foreground);
+   background-color: var(--color-background);
+   line-height: 1.6;
+--- a/app/lib/__tests__/self-hosted-fonts.test.ts
++++ b/app/lib/__tests__/self-hosted-fonts.test.ts
+@@ -99,6 +99,8 @@
+   'Playfair Display',
+ ];
+ 
++const TOKEN_FONT_FAMILIES = ['IBM Plex Mono', 'Instrument Sans', 'Noto Sans Georgian'];
++
+ const SELF_HOSTED_FONT_LICENSES = [
+   'OFL-ibm-plex-mono.txt',
+   'OFL-instrument-sans.txt',
+@@ -186,7 +188,10 @@
+         if (name[1]) tokenFamilies.add(name[1]);
+       }
+     }
+-    expect([...tokenFamilies].sort()).toEqual(SELF_HOSTED_FONT_FAMILIES);
++    expect([...tokenFamilies].sort()).toEqual(TOKEN_FONT_FAMILIES);
++    for (const family of TOKEN_FONT_FAMILIES) {
++      expect(SELF_HOSTED_FONT_FAMILIES).toContain(family);
++    }
+     const css = readFileSync(FONTS_CSS_PATH, 'utf8');
+     for (const family of tokenFamilies) {
+       expect(css, family).toContain(`font-family: '${family}';`);
+@@ -199,6 +204,12 @@
+     }
+   });
+ 
++  it('FN6: the store body uses the font token, and app.css names neither Inter nor Playfair Display', () => {
++    const appCss = readFileSync(APP_CSS_PATH, 'utf8');
++    expect(appCss).toContain('body {\n  font-family: var(--font-sans);');
++    expect(appCss).not.toMatch(/'Inter'|'Playfair Display'/);
++  });
++
+   it('FN5: root links exactly the local font stylesheet, then app.css, with no external URL', () => {
+     const source = readFileSync(ROOT_PATH, 'utf8');
+     expect(source).toContain("import fontStyles from './assets/fonts/fonts.css?url';");
