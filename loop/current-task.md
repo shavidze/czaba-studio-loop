@@ -1,168 +1,191 @@
-# Round 468: SABA-B-15 stage 1. Find what drops frames when the Store home page scrolls (diagnosis; no store change)
+# Round 469: SABA-B-15 stage 2. Replace the three home-page blur glows with radial gradients at today's strength
 
-**Planned by:** B, at the round 467 → 468 planning on 2026-11-12 (`b-round-467.md`). The advisor was available and was consulted twice: after orientation and before hand-off. The round-467 task is archived as `tasks/round-467.md`; its byte-identical copy is `b-round-467/current-task-before-468.md`.
+**Planned by:** B, at the round 468 → 469 planning on 2026-11-12 (`b-round-468.md`). The advisor was available and was consulted after orientation and before hand-off. `product-designer` was consulted on the look change (`b-round-468/pd-ruling.md`). The round-468 task is archived as `tasks/round-468.md`.
 
 ## Decisions (all in `backlog.json` `decisions_log_b`)
-- **D-29z1647: round 467 accepted.** C PASS (`c-round-467.json`: 13 rows, 0 bugs, browserVerified/realVerified true). Gate 467 published `9ba13ac` [K2].
-  - Closed: C-R466-01, A-R451-REVIEW-L2-ZERO-OFFSET-UNITS, INFO-TL-R451-GLOW-CALC and GATE452-L1-GLOW-REGEX-WHOLE-SOURCE.
-  - The STORE-2b-3c-2b code stage is done. A-R467-REVIEW-L1 (Low) goes to `deferred_low_polish`.
-- **D-29z1648: Saba's 2026-11-12 items are recorded (L42).**
-  - SABA-B-15: the scroll is not smooth (Medium).
-  - SABA-Q-CTRLK-CONTENT and SABA-Q-GIFTCARDS-HEADER: `awaiting_user`.
-  - SABA-B-16-LOGO-OLD-COLORS (Medium): input to the first DP-GATE.
-  - The critical review stance is recorded on ROOT-REQ-DP-GATE-FIRST.
-  - Questions: `user-review/questions-round-467.md`.
-- **D-29z1649: this dispatch.** SABA-B-15 goes ahead of STORE-2c. This follows the SABA-B-14 precedent: a Saba Medium on a mounted Store screen.
-  - It is split: **stage 1 = diagnosis** (this round), **stage 2 = the fix**, with exact grants, in round 469.
-  - Reason: B's own bisect shows the cost is not in the Lenis hook. The file that holds the cause is unknown, so a grant cannot be written yet.
-  - **Regression is not due.** `regression-last.json` is dated 2026-11-10 [K12], and 2026-11-10 + 3 days = 2026-11-13. This planning is dated 2026-11-12.
+- **D-29z1650: round 468 accepted.**
+  - C PASS (`c-round-468.json`: C1–C9, 0 bugs, browserVerified/realVerified true).
+  - Gate 468 was skipped, "no real changes" (no store change) [K2].
+  - **Cause confirmed** (in the cloud's software raster): three large `filter: blur()` glows.
+    - `ProductSection.tsx` l.38–39 [K3] causes the band at scrollY ≈ 360–900.
+    - `StudioShowcase.tsx` l.75 [K3] causes the band at ≈ 1850–2020.
+- **D-29z1651: this dispatch.** SABA-B-15 stage 2 = the fix, with exact grants. It keeps the gradient approach (A's proposal), with the opacity lowered to today's glow strength, as product-designer ruled.
+  - **The regression is not due.** `regression-last.json` is dated 2026-11-10 [K7], so it is due 2026-11-13. This planning is dated 2026-11-12.
+- **Not closed by this round.** SABA-B-15 becomes "home cause fixed in cloud" after C PASS.
+  - Saba named `/free-downloads`. It is 0 here at HEAD and is not touched.
+  - Everything was measured in SwiftShader software raster.
+  - TLM-R468-SABA-SCROLL-DEVICE stays open. The question to Saba is in `user-review/questions-round-468.md`.
 
 ## Rules
-- **Read `lessons.md` first.** L18 now has a scroll-frame clause from this issue.
-- **L57:** C writes **all L57 fields** (see `lessons.md` L57) and an enum `origin` per bug. C runs `python3 -I tools/l57-check.py c-round-468.json c-round-468/l57-check.txt` (rc 0) before hand-off.
-  - `mutantRedOnSketch` is `null`: no sketch, because this is a diagnosis round.
-  - The mutant of the eased-scroll guard is B's Lenis-off build (`b-round-467/probe/scroll-prod-lenis-off-cpu1.json`): 20 moving frames, which is < 100, so the guard is red.
-- **L29:** every statement about a file under `store/` carries a `[K#]` tag. The claims script is `b-round-467/claims-468.sh`, and B's run is `b-round-467/claims-468-planning-output.txt`.
-- **L38:** the frozen scroll probe runs alone. No vitest, tsc, build or other browser job runs while it does.
-- **L59 / L60:** run the heaviest browser rows first, and write `progress.json` after each row. Destructive commands stay inside your own round folder. Never use `git stash` or `git checkout --` in the store tree.
-- **Not applicable:** reference-first, Ableton conformance, the product-designer step and the screen budget. Nothing visible changes this round.
+- **Read `lessons.md` first.** It applies especially:
+  - L18 (scroll frames);
+  - L12 (no styling-class selectors in tests);
+  - L38 (perf runs alone);
+  - L57 (C's harness fields);
+  - L58;
+  - L59/L60 (progress, destructive commands).
+- **L29:** every statement about a file under `store/` carries a `[K#]` tag. The claims script is `b-round-468/claims-469.sh`, and B's run is `b-round-468/claims-469-planning-output.txt`.
+- **Reference-first:** not applicable, because this is a performance fix. **Screen budget:** not applicable, because no persistent element is added. **product-designer:** done at planning; C consults it in review mode (C7).
 
-## Baseline: HEAD `9ba13ac`, clean
-- `git status` shows 0 lines [K1]. The protected manifest `b-round-318/protected-sha256.txt` is rc 0 [K14].
-- **Grants in the store tree: none.** The store tree stays byte-identical, and so does every protected file.
-- All edits happen only in scratch copies under `a-round-468/` (A) or `c-round-468/` (C). Make each copy with `git -C <store> archive 9ba13ac | tar -x -C <dir>`, plus an `ln -s <store>/node_modules <dir>/node_modules`.
-- In a scratch copy, edit with a script or the editor tools, and save each change as a `*.diff.txt`.
+## Baseline: HEAD `9ba13ac`, clean [K1]; protected manifest rc 0 [K8]
 
-## 0. What B found
-**Saba (2026-11-12):** the Store scroll is "not smooth and soft". He named `/free-downloads`.
+### Grants (exactly these four paths)
+| Path | What |
+|---|---|
+| `app/components/home/ProductSection.tsx` | Only the two glow `<div>` lines (l.38–39 [K3]) |
+| `app/components/home/StudioShowcase.tsx` | Only the glow `<div>` line l.75 [K3]. The reflection line l.118 (`blur-[40px]`) stays |
+| `app/lib/__tests__/store-scroll-paint.test.ts` | New |
+| `docs/implementation/2026/quarter-IV/305-saba-b-15-home-scroll-glows.md` | New. The number 305 is free [K6] |
 
-**Probe:** `b-round-467/probe/store-scroll-probe.cjs`, sha in `store-scroll-probe.sha256` [K15].
-- It runs on a production build, served with the mock API, with the LeadMagnet suppressed through localStorage `czaba_lead_magnet` [K5].
-- Each pass sends 20 wheel ticks of 120 px, 60 ms apart. There are 3 passes per viewport.
-- It records frames over 33.4 ms while the page moves, long animation frames with their scripts, and the eased-scroll values.
+**Everything else stays byte-identical.** That includes:
+- `app/hooks/useSmoothScroll.ts`, so Lenis `duration: 1.2` is kept [K17];
+- `app/root.tsx` and `app/styles/**` (both forbidden [K17]);
+- the keep-list `SpecialOffersSection.tsx`;
+- `NewsletterSection.tsx`;
+- every protected file.
 
-**B's bisect:** `b-round-467/probe/bisect-b.md` [K16][K17][K20]. The metric is the median of frames over 33.4 ms on `/`, at 1440 / 1280.
+### Rulings carried from round 468
+- **R-468-1:** Lenis's curve is unchanged.
+- **R-468-2:** keep-list components are not touched.
+- **R-468-3:** no `root.tsx` or `app/styles/**` change.
 
-| Build | Median slow frames | Moving frames |
+**New rulings:**
+- **R-469-1 (product-designer, `pd-ruling.md`): the look stays at today's strength.**
+  - Glow contribution = mean section luminance of the build minus the **HEAD build with its glows hidden** (`look-profile.cjs` uses the variant named `hidden` as the control).
+  - Per section and viewport it must be **0.8×–1.3× HEAD's**.
+  - A's round-468 opacities measured 2.4–3.1× and are red.
+- **R-469-2: do not promote the glows.** No `will-change`, `transform-gpu` or `translate-z` on these elements. A's s5 screen made frames 10× worse.
+
+## Why we missed it (SABA-B-15, from round 468)
+- **Phase:** the STORE rounds' C rows measured LCP/CLS at load and contrast. No row measured frames while scrolling, and the PERF harness covers `/studio-lab` only. Smooth scroll was treated as "on" (Lenis is present), not as a measured behaviour.
+- **Rule:** already merged into L18, "Scroll frames (D-29z1648)" [K18]. It is unchanged this round.
+- **Round 468's own near-miss:**
+  - A's and C's whole-section pixel diff called a 2.4–3.1× stronger glow "a touch brighter", because the means were about 1/255.
+  - Only the deleted-glow control and product-designer caught it.
+  - This is recorded for RETRO 480 as RETRO480-LOOK-CONTROL. It is a counter, not yet a lesson (1×).
+
+## 0. The sketch (B, L58)
+**`b-round-468/sketch-469.diff.txt`** applies to the tree with `git apply --check` rc 0 [K9]. It changes 3 files:
+
+**1. ProductSection l.38–39.** `bg-<token>/5 blur-[1x0px]` becomes:
+```
+scale-220 rounded-full bg-radial from-brand/2 via-brand/1 via-30% to-transparent to-70%
+scale-225 rounded-full bg-radial from-accent/2 via-accent/1 via-30% to-transparent to-70%
+```
+The position classes and `size-[…]` are unchanged.
+
+**2. StudioShowcase l.75.** `bg-brand/20 blur-[120px]` becomes:
+```
+scale-175 rounded-full bg-radial from-brand/10 via-brand/5 via-40% to-transparent to-70%
+```
+
+**3. `store-scroll-paint.test.ts`.**
+- **SP1:** on files under `components/home/`, the large-blur count (`(?<![\w-])blur-\[(\d+)px\]` with px ≥ 80) must match the allow-list exactly:
+  - `NewsletterSection.tsx` 1;
+  - `SpecialOffersSection.tsx` 2.
+
+  These are the HEAD counts [K4]. The reason for both is SIG-R469-UNMEASURED-BLURS.
+- **SP2:** the 2 measured sections have 0 large blurs.
+- **SP3:** non-vacuous. Each listed file is scanned. The counter's self-tests are:
+  - `blur-[120px]` = 1;
+  - `md:blur-[100px] blur-[80px]` = 2;
+  - `blur-[40px] blur-[79px]` = 0;
+  - `backdrop-blur-[120px] backdrop-blur-lg` = 0.
+- **It does not pin the new gradient classes.** STORE-2d/3 may restyle these sections (L8).
+
+**B's measurements on the applied sketch** (`b-round-468/`, numbers in `claims-469-planning-output.txt`):
+
+| Check | Result | Source |
 |---|---|---|
-| HEAD | 9 / 8 | 165–175 |
-| Lenis off | 5 / 4 | 20 (not eased) |
-| Header `backdrop-blur-lg` removed | 10 / 8 | |
-| Hero's 2 backdrop blurs removed | 10 / 9 | |
-| Hero video `autoPlay` removed | 9 / 6 | |
-| Floor control: HEAD with all content hidden (`visibility: hidden`), same page height | 0 / 0 | 140 |
+| Frozen probe (`b-round-467/probe/store-scroll-probe.cjs`) | `/` medians **0 / 0**, moving 174–180, finalY 2400. `/free-downloads` 0, finalY 575 / 755 | K11 `scroll-sketch2-frozen.json` |
+| Full-page probe (`b-round-468/store-scroll-probe-full.cjs`, 40 ticks, `PATHS=/,/gift-cards`) | `/` medians **1 / 1**, finalY = maxScroll 4121. HEAD is 8 / 5. `/gift-cards` 0 at HEAD and on the sketch | K11 |
+| Look band (`look-probe2.cjs` + `look-profile.cjs`) | ratioToHead 1.19 / 1.21 (1440) and 1.09 / 1.20 (1280) | K12 |
+| Tailwind emitted every new class | yes | K15 `built-css-classes.txt` |
+| Unit | SP1–SP3: 3 passed | K13 |
+| SP mutant (HEAD's two section files) | SP1 and SP2 red: 2 failed | K13 |
+| Scan suites `store-*` + `studio-naming` with the sketch | 15 files, 212 tests passed | K13 |
+| L23 sweep: old glow tokens in the test roots | 0 files [K16]. The two section importers [K16] pass in the scan run | K16 |
 
-- **The cost is painting the visible home content.** The floor control (all content hidden, same page height) shows 0 slow frames and is still eased, so the bound ≤ 2 is reachable in this environment [K17].
-- **Lenis is not the cause.** The dev run attributes the long scripts to `useSmoothScroll.ts` `raf` [K18], because Lenis calls `scrollTo` every frame. With Lenis off, the slow frames remain, and their long frames carry no script.
-- **Where the slow frames fall** (`slowFrames` `[t, dt, y]` in `scroll-prod-9ba13ac-cpu1.json` [K22]): while scrollY is about **360–850**, and again about **1850–2000**. With Lenis off, the bands are about 360–960 and 2040–2280. Screen the content painted in those bands first.
-- **`/free-downloads` is not reproduced.** The screenshot `free-downloads-fullpage.png` shows its 3 free items, on a page 1475 px tall, and has 0 slow frames in every build [K17].
-  - Saba's own device stays a Tech Lead row: TLM-R468-SABA-SCROLL-DEVICE, deadline RETRO 480 (L46).
-- **The jump to scrollY 0 is not a bug.** It is the keep-list LeadMagnet's scroll lock (exploratory, `probe/superseded/`; lesson L1).
+- **An observation, not a bound:** one full-page pass at 1440 had 8 frames of 50 ms at scrollY 1796–2032, with no long task (`sketch2-full-slowframes.txt`). The medians stay ≤ 2. HEAD's 3 frames at 3012–3158 are an observation too.
 
-**Why we missed it.**
-- **Phase:** the STORE rounds. Their C rows measured LCP and CLS at load, plus contrast. No row measured frame timing while scrolling. The PERF harness covers `/studio-lab` only.
-- **Why:** smooth scroll was treated as "on" (Lenis is present), not as a measured behaviour.
-- **The rule, merged into L18:** a Store page with smooth scroll gets a wheel-scroll frame row on a production build, with the LeadMagnet stubbed.
+## 1. A: steps
+1. **STOP (L11) if the start state is wrong.** HEAD must be `9ba13ac` and the tree clean, with protected rc 0.
+2. **Apply the sketch.** Use `git apply b-round-468/sketch-469.diff.txt` from the store root. That is correct in the store repo; the loop-folder trap does not apply here.
+   - You may change only the opacity stops (`from-*/N`, `via-*/N`), and only to keep R-469-1 inside its band.
+   - Any other class change is a STOP for B.
+3. **Write doc 305** in Georgian, following `docs/implementation/TEMPLATE.md` and L26.
+   - Status l.4 is exactly `Completed (C round 469 PASS)` (L28).
+   - **Context:** Saba's report, the round-468 cause, and the software-raster limit.
+   - **Approach:** gradient vs blur. Why not `will-change`: s5. The rejected options are: delete the glows (look change), A's stronger opacities (product-designer) and a Lenis change (R-468-1).
+   - **Testing:** SP1–SP3 by id, the probe commands, and the band.
+   - **TODO:** TLM-R468-SABA-SCROLL-DEVICE and SIG-R469-UNMEASURED-BLURS.
+4. **Run the checks** (A's speed rules):
+   - `npm run typecheck`;
+   - `npm run lint`;
+   - `npx vitest run app/lib/__tests__/store-scroll-paint.test.ts app/lib/__tests__/studio-naming.test.tsx app/lib/__tests__/store-hidden-focusables.test.tsx app/lib/__tests__/store-` (the scan suites, L23).
 
-**Rulings for the fix (stage 2 inherits them):**
-- **R-468-1:** Lenis stays on with its current curve: `duration: 1.2` and the current easing [K3]. A proposal that needs a different scroll feel (`lerp`, `autoRaf` timing, a duration change) is listed as an **option for Saba**, with traces. It is never the chosen fix.
-- **R-468-2:** keep-list components (SpecialOffers, LeadMagnet, testimonials/stats) may only be restyled. A proposal that changes how they look is flagged for B and product-designer.
-- **R-468-3:** the fix must not touch `app/root.tsx` or `app/styles/**` [K13] unless root grants it. If the cause is there, the proposal names the root request.
-
-## 1. A: steps (no store change)
-1. **STOP (L11) if the start state is wrong.** HEAD must be `9ba13ac`, `git status` must be clean, and the protected manifest must be rc 0.
-2. **Reproduce HEAD.**
-   - Build a scratch copy `a-round-468/head` and serve it with `PORT=3468 npx remix-serve build/server/index.js`.
-   - If `curl 127.0.0.1:5199/api/products` is not 200, start `node <loop>/mock-api/server.mjs`.
-   - Run `node <loop>/b-round-467/probe/store-scroll-probe.cjs http://127.0.0.1:3468 <abs a-round-468/scroll-head.json> 1`.
-   - If either median on `/` is ≤ 2, the environment cannot show the bug: that is a STOP with the logs.
-3. **Trace.** Run one Playwright Chrome trace (`browser.startTracing` with the `devtools.timeline` categories) of the same wheel sequence on `/` at 1440×900. In `a-round-468/trace-summary.md`, list the event types (Paint, Layout, RecalculateStyle, UpdateLayerTree, Raster, DecodeImage, script) and their total time inside every frame over 33.4 ms, with the DOM node or URL where the trace names one.
-4. **Screen, then bisect.**
-   - **Screen cheaply first.** Use `b-round-467/probe/store-scroll-floor-probe.cjs` [K15] on the one served HEAD build, with `HIDE_CSS` set to a `visibility: hidden` (or `backdrop-filter: none`, `filter: none`, `animation: none`) rule for one suspect at a time. This needs no rebuild.
-   - **Confirm with a real source change.** Rebuild only to confirm a real source change.
-   - **Record every screen and every build** as one row of `a-round-468/bisect.md`, with the same columns as `bisect-b.md`.
-   - Start from the trace and the two scrollY bands.
-   - The suspects not yet tried include:
-     - the `ScrollReveal` wrappers on the home route;
-     - `ProductSection` / `ProductCard`, including its `backdrop-blur-sm` overlay and its images;
-     - `SpecialOffersSection` and its image;
-     - `NewsletterSection` and the footer;
-     - large decorative gradients or background layers;
-     - the `PageTransition` wrapper;
-     - framer-motion animations that start when a section enters view.
-   - Do not repeat B's rows.
-5. **Confirmed cause:** the smallest scratch change for which all of these hold on the same build:
-   - the `/` medians are **≤ 2** at both viewports;
-   - moving frames are ≥ 100 and `finalY` is 2400 (the scroll is still eased);
-   - `/free-downloads` stays at 0.
-
-   **Write the proposal:**
-   - `a-round-468/proposal.diff.txt`: a unified diff with `a/` and `b/` paths. It must pass `patch -p1 --dry-run` on a `9ba13ac` copy. Inside a scratch copy under the loop folder, never use `git apply`: the loop folder is a git repository, and `git apply` skips the paths silently;
-   - the list of store files it touches;
-   - `a-round-468/proposal-visual/`: before/after screenshots of each changed element at 1440×900 and 1280×720, with one sentence on what looks different;
-   - the R-468-1…3 status of the proposal.
-
-   If two causes add up, the proposal holds both.
-6. **No single source change reaches ≤ 2.**
-   - Report the per-section screen table, the narrowed set and the best partial result.
-   - If only hiding content reaches the floor, say so: that is a design question for B and product-designer (stage 2), not an A failure.
-   - A "BLOCKED for time" report must name the real stop signal (L59).
-7. **Report.** Write `a-round-468.md`: the commands, the trace summary, the bisect table and the proposal. Stop every server you started. Confirm with `git status` that the store tree is unchanged. No code-reviewer is needed (no store change), and there are no tests or doc this round.
+   Save the logs under `a-round-469/`.
+5. **If you changed an opacity stop,** re-run the band yourself:
+   - make a production build of a scratch copy of the tree (`git archive` of HEAD + your diff, applied with `patch -p1` under `a-round-469/`), next to a HEAD build;
+   - run `node b-round-468/look-probe2.cjs <out.json> <shotDir> head=<HEAD url> tree=<tree url> hidden=<HEAD url>,hide`;
+   - then run `node b-round-468/look-profile.cjs <out.json> <out.txt> tree`;
+   - perf runs alone (L38).
+6. **Ask `code-reviewer`** (4 changed files) and include its Architecture note.
+7. **Report** `a-round-469.md`: the diff stat, the logs, the reviewer findings, and whether you changed opacities from the sketch.
 
 ## 2. C: what to verify
-Write `c-round-468.md`, `c-round-468.json` and `c-round-468/progress.json` as you go. Use scratch copies under `c-round-468/`. HEAD is served on port 3471 and the proposal build on port 3472, never probed at the same time (L38). Start the mock API if port 5199 does not answer.
+- **Files:** write `c-round-469.md`, `c-round-469.json` and `c-round-469/progress.json` as you go.
+- **Builds:** make two scratch production builds under `c-round-469/`: **HEAD** (`git archive 9ba13ac`) on :3471 and **TREE** (HEAD + `git -C store diff` applied with `patch -p1`) on :3472. Start the mock API with `node $(realpath mock-api/server.mjs)` if :5199 does not answer.
+- **Order:** run the probes one at a time (L38), heaviest first.
+- **Budget:** at most 2 extra attempts per row to replace an environment-invalid measurement (agent-workflow).
+  - **Environment-invalid means only:** an L38 overlap (another job ran during the probe), or C1 failing (the environment cannot show the bug). A slow pass is never replaceable.
+  - In C2 and C3, record the slow-frame scrollY values of every pass. A cluster of slow frames inside one of the fix's bands (scrollY ≈ 360–900 or ≈ 1800–2050) in **two or more passes** is a FAIL, even when the median is ≤ 2. B's sketch had one such pass (`sketch2-full-slowframes.txt`).
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| C1 | REPRO-HEAD (browser, both viewports) | Probe on the HEAD build | Median slow frames on `/` ≥ 5 at either viewport. Otherwise the row is environment-invalid: replace it, at most 2 attempts |
-| C2 | CAUSE-CONFIRMED (browser, both viewports) | The loop folder is itself a git repository, so `git apply` inside a scratch copy there skips paths silently. Use `patch -p1 --dry-run -d <dir> < a-round-468/proposal.diff.txt`, then `patch -p1 -d <dir> < …`, and grep that each changed line landed. Apply it to a fresh `9ba13ac` scratch copy, build it, and run the probe | `/` medians ≤ 2 at 1440 and 1280. `finalY` is 2400 and moving frames are ≥ 100 per pass. `/free-downloads` has 0 slow frames, with `finalY` 575 / 755 |
-| C3 | GUARD-MUTANT (browser) | In a third scratch copy, apply `b-round-467/probe/lenis-off.diff.txt` on top of the proposal with `patch -p1` (as in C2). Build it and probe `/` at 1440 | Moving frames < 100. This proves the C2 eased-scroll guard can fail |
-| C4 | VISUAL (browser, both viewports) | Your own before/after screenshots of every element the proposal touches | Each difference matches A's sentence. Any visible change to a keep-list component is listed for B (R-468-2). This row is **record**: B rules on look changes in round 469 |
-| C5 | RULINGS | The proposal against R-468-1…3 | No Lenis curve change is chosen. `root.tsx` and `app/styles/**` are touched only with a named root request |
-| C6 | SOURCE-SCOPE | `git status --short --untracked-files=all` in the store; the protected manifest | 0 lines. Protected rc 0 |
-| C7 | AUTH + STUDIO SMOKE (browser, 1440 and 1280) | As round 467 C8, on the dev server: a fresh anonymous context and one untimed warm-up (L38). On `/studio-lab`, wait for `Demo collection ready` and add an item with Enter. Open `/studio/middle-east`. Call `GET /api/studio-token?product=middle-east&file=stem.mp3` without auth | `auth_user` is null and the clip count rises. The product route shows "Sign in required" and 0 `audio[src]`. The token API returns 401. The fake-bearer path is BLOCKED (backend unavailable in cloud) |
-| C8 | LESSON | `grep -c 'Scroll frames (D-29z1648)' lessons.md` | 1, and `wc -l lessons.md` ≤ 60 |
-| C9 | CLAIMS | `bash b-round-467/claims-468.sh` | Matches `b-round-467/claims-468-planning-output.txt` exactly. No `MISSING` |
-| gate | — | Root gate | No source change, so nothing is published. Not claimed |
+| C1 | HEAD-CONTROL (browser) | Frozen probe on HEAD | `/` median ≥ 5 at either viewport. Otherwise the environment is invalid: use a replacement attempt |
+| C2 | FRAMES (browser, both viewports) | `node b-round-467/probe/store-scroll-probe.cjs http://127.0.0.1:3472 <out> 1` | `/` medians **≤ 2**, moving ≥ 100 and finalY 2400 in every pass. `/free-downloads` median 0, finalY 575 / 755 |
+| C3 | FRAMES-FULL (browser, both viewports) | `PATHS=/,/gift-cards node b-round-468/store-scroll-probe-full.cjs http://127.0.0.1:3472 <out> 1` | `/` median **≤ 2**. In every pass finalY === maxScroll and moving ≥ 100. `/gift-cards` median ≤ 2 |
+| C4 | GUARD-MUTANT (browser, 1440) | `b-round-467/probe/lenis-off.diff.txt` applied on top of TREE (third scratch copy, `patch -p1`), then the frozen probe | `/` moving < 100. The eased-scroll guard of C2 can fail |
+| C5 | COMPUTED (browser, both viewports) | `node b-round-468/look-probe2.cjs <out> <shots> head=…3471 tree=…3472 hidden=…3471,hide` | TREE: product-section glowCount 2 and studio-showcase 1. Each has `filter` `none` and a `backgroundImage` containing `radial-gradient`. HEAD shows `blur(120px)` / `blur(100px)` |
+| C6 | LOOK-BAND (browser, both viewports) | `node b-round-468/look-profile.cjs <out> <txt> tree` | ratioToHead **0.8–1.3** for each section × viewport. The band is two-sided: A's round-468 opacities measured 2.4–3.1 (K12), and a deleted glow is 0 by construction |
+| C7 | SHAPE / EDGES (browser) | Same shots, plus your own 200 % zoom crops of each glow; binned profile and edgeJump from `look-profile.cjs`; product-designer in review mode (≤ 7 findings) | Record the rows. edgeJump at the top and bottom ≤ HEAD's + 1 level. No visible ring at the circle edge, no banding steps and no seam at the section edge at 100 %. A visible defect is a finding: **Medium** if it is seen at 100 % at either viewport, else Low |
+| C8 | OVERFLOW (browser) | `/` at 1440, 1280 and 375 on HEAD and TREE | `scrollWidth === clientWidth`, and scrollHeight is equal between HEAD and TREE |
+| C9 | UNIT + MUTANT | In the store: `npx vitest run app/lib/__tests__/store-scroll-paint.test.ts`. In a scratch copy of TREE, put back HEAD's `ProductSection.tsx` only, then HEAD's `StudioShowcase.tsx` only. `git -C store diff` leaves out the untracked test and doc, so copy `store-scroll-paint.test.ts` (and doc 305 for C11) from the store into each scratch copy with `cp`. Never use `git add -N` or `stash` in the store | rc 0 at the tree. Each mutant turns SP1 and SP2 red |
+| C10 | SOURCE-SCOPE | `git status --short --untracked-files=all`; `git diff -U0` of the two components; protected manifest | Exactly the 4 granted paths. The component diff touches only l.38–39 and l.75. `useSmoothScroll.ts`, `root.tsx`, `app/styles/**`, SpecialOffers and Newsletter are unchanged. No `will-change`/`transform-gpu` on the glow lines (R-469-2). Protected rc 0 |
+| C11 | DOC | Doc 305 | Its `## ` headings contain TEMPLATE's seven, in order. l.4 is `Completed (C round 469 PASS)`. Every SP id it cites exists in the test file (L26) |
+| C12 | AUTH + STUDIO SMOKE (browser, 1440 and 1280) | As round 468 C7 | Same PASS meaning. The fake-bearer path is BLOCKED (backend unavailable in cloud) |
+| C13 | CLAIMS | `bash b-round-468/claims-469.sh` | Equal to `claims-469-planning-output.txt` except K1's status count (4) and K9 (the diff is already applied, so `--check` fails). K6 and K16 read `9ba13ac`, so they do not change. No `MISSING` |
+| gate | — | Full verify, code review, publish | Root. Not claimed |
 
-**If A STOPs at step 2:** take the short route. Run C1, C6, C7 and C9, then write FAIL "STOPPED — routed to B" (L22).
-
-**If A reports no single source change (step 6):** C1, C6, C7, C8 and C9 still run. C re-runs A's best screen rows with the floor probe. The round is a FAIL "cause not found" unless A's screen table names the section whose hiding reaches ≤ 2. In that case C writes PARTIAL with that evidence, and B routes the design choice to stage 2.
-
-## 3. Claims (`b-round-467/claims-468.sh`)
+## 3. Claims (`b-round-468/claims-469.sh`)
 | Claim | What it checks |
 |---|---|
 | K1 | HEAD and status |
-| K2 | Gate 467 |
-| K3 | Hook facts (`duration: 1.2`, rAF / cAF / `autoRaf` / reduced-motion counts) |
-| K4 | The `root.tsx` call line |
-| K5 | The LeadMagnet key |
-| K6 | The Lenis CSS in `app.css` |
-| K7 | The `data-lenis-prevent` sites |
-| K8 | The Lenis version |
-| K9 | SWEEP over the test roots |
-| K10 | The hook's importers |
-| K11 | Doc 305 is free (for stage 2) |
-| K12 | `regression-last.json` |
-| K13 | The forbidden list |
-| K14 | Protected rc |
-| K15 | The probe sha |
-| K16 | The artifacts exist |
-| K17 | Medians and values per build |
-| K18 | Dev attribution |
-| K19 | `l58-check` (no sketch) |
-| K20 | The bisect diff files and their single-change content |
-| K21 | The loop folder is a git work tree (`git apply` trap) |
-| K22 | HEAD slow-frame scrollY values (the two bands) |
+| K2 | Gate 468 |
+| K3 | HEAD glow line numbers |
+| K4 | Large-blur counts at HEAD per home file |
+| K5 | The home route mounts |
+| K6 | Doc 305 is free |
+| K7 | `regression-last.json` |
+| K8 | Protected rc |
+| K9 | The sketch applies, and its files |
+| K10 | The artifacts exist |
+| K11 | Frame medians per file |
+| K12 | Look ratios |
+| K13 | Unit and mutant logs |
+| K14 | The probe shas |
+| K15 | The built CSS classes |
+| K16 | The test-root sweep |
+| K17 | Forbidden files and Lenis duration |
+| K18 | lessons.md |
 
-## 4. After this round (D-29z1649)
-1. **On C PASS:** round 469 = SABA-B-15 stage 2.
-   - Its grants are the proposal's files, plus a test and a doc.
-   - Its rows: C2's bound as the assert (B re-runs it on the sketch, L58), the guard mutant, and product-designer on any visible change.
-   - A visible change to a keep-list component is first asked of Saba.
-2. **Next planning dated 2026-11-13 or later:** REGRESSION-2026-11-13. It carries every `scope_additions` entry, including the new `/` scroll row (recorded in `backlog.json` `regression_rounds`).
-   - If round 469 is not dispatched yet at that planning, REGRESSION runs first, and SABA-B-15 stage 2 follows it.
-3. **Then:** STORE-2c (typography), STORE-2d (motion; owns Lenis reduced-motion), STORE-3, STORE-4, STORE-5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, and phase 2 under the skip rule.
+## 4. After this round
+1. **On C PASS:**
+   - SABA-B-15 = "home cause fixed in cloud (C round 469)". It closes only after Saba's device answer (TLM-R468-SABA-SCROLL-DEVICE, deadline RETRO 480).
+   - REG-SCROLL-HOME-FRAMES turns its `/` median ≤ 2 into an assert.
+2. **Next planning dated 2026-11-13 or later:** REGRESSION-2026-11-13, with every `scope_additions` entry.
+3. **Then:** STORE-2c, STORE-2d (it owns Lenis reduced-motion), STORE-3, STORE-4, STORE-5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, and phase 2 under the skip rule.
 4. **Root, non-blocking:**
-   - ROOT-REQ-DP-GATE-FIRST: the first DP-GATE, with SABA-B-16-LOGO-OLD-COLORS and the critical stance.
-   - The next RETRO is round 480.
+   - ROOT-REQ-DP-GATE-FIRST, with SABA-B-16 and the critical stance;
+   - the next RETRO is round 480.

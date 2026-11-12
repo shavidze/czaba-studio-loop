@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-12T11:33:36.385Z",
-  "current_task": "Round 467: STORE-2b-3c-2b fix-up - TS8 observes the shadow pre-check (C-R466-01, test-only; current-task.md, D-29z1646)",
+  "_generatedUtc": "2026-11-12T12:57:54.669Z",
+  "current_task": "Round 468: SABA-B-15 stage 1 - diagnose Store home scroll frame drops (trace + scratch bisect + proposal; no store change) (current-task.md, D-29z1649)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6760,26 +6760,47 @@
       "added": "2026-11-12 B round 462 -> 463 planning"
     },
     {
-      "id": "C-R466-01",
+      "id": "SABA-B-15",
       "severity": "medium",
-      "origin": "B spec",
-      "to": "B",
-      "added": "2026-11-12 B round 466 -> 467 planning",
-      "status": "dispatched round 467 (D-29z1646): TS8 observes the pattern scan with a String.prototype.matchAll spy; mutant M14-NO-PRECHECK turns TS8 red (b-round-466/mutants/summary.txt); tech-lead APPROVE (b-round-466/sketch-review.md)",
-      "title": "TS8 title claims it pins the /shadow/i pre-check skip, but removing the pre-check leaves TS8 (and all 31 covering tests) green: the pre-check never changes a result. Same finding as A-R466-REVIEW-M1 (code-reviewer) and B's own TL-R465-L1",
-      "evidence": "c-round-466/data/nopcheck-vitest.txt; a-round-466/noprecheck-vitest.log; a-round-466.md section 3",
-      "repro": "copy 6d321c7 + sketch-466 files; delete the 3-line pre-check in countZeroOffsetGlowHits; npx vitest run the 4 covering files -> 31/31 pass"
+      "origin": "pre-existing",
+      "status": "dispatched round 468 (D-29z1649): stage 1 diagnosis (A traces + bisects in scratch, proposal diff; no store change); stage 2 fix with exact grants in round 469",
+      "title": "Store scroll is not smooth and soft (Saba 2026-11-12, named /free-downloads on czaba-store-test.vercel.app)",
+      "evidence": "b-round-467/probe/bisect-b.md: prod 9ba13ac / median frames >33.4 ms 9 (1440) / 8 (1280), moving 165-175; Lenis off 5/4 with only 20 moving frames (not eased) and script-less long frames -> cost is page rendering, not the Lenis hook; header backdrop-blur, hero backdrop-blurs and hero video autoplay  …[see backlog.json]",
+      "repro": "node b-round-467/probe/store-scroll-probe.cjs <prod build url> <out.json> 1 (LeadMagnet suppressed)",
+      "why_we_missed": "STORE C rows measured LCP/CLS at load only; no scroll frame-timing row; PERF harness is /studio-lab only; rule merged into lessons L18",
+      "requested": "agent-workflow.md \"Saba feedback, 2026-11-12: Scroll is not smooth\"",
+      "added": "2026-11-12 B round 467 -> 468 planning"
+    },
+    {
+      "id": "TLM-R468-SABA-SCROLL-DEVICE",
+      "severity": "medium",
+      "origin": "environment",
+      "status": "open_tech_lead_manual (D-29z1649): deadline RETRO 480 (L46); does not block (2026-10-23 root clarification class)",
+      "title": "Saba's own device: /free-downloads and / scroll on the Vercel preview after round 468 lands (mouse wheel and trackpad; Chrome DevTools Performance trace if still not smooth)",
+      "added": "2026-11-12 B round 467 -> 468 planning"
+    },
+    {
+      "id": "SABA-Q-CTRLK-CONTENT",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1648): agent-workflow.md marks it \"Pendi",
+      "title": "Ctrl+K palette should offer more than the header (search, recent, shortcuts, etc.)"
+    },
+    {
+      "id": "SABA-Q-GIFTCARDS-HEADER",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1648): R57 (round 188) moved Gift Cards ",
+      "title": "Gift Cards has no separate place in the header - should it?"
+    },
+    {
+      "id": "SABA-B-16-LOGO-OLD-COLORS",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "status": "open (D-29z1648): input to the first DP-GATE review (root, ROOT-REQ-DP-GATE-FIRST); which asset is unconfirmed: header wordmark is text-foreground (R59), so candidates are public/favicon.ico, public/og-image.jpg (public/** global_forbidden -> root) and the SpotlightLoader wordmark; user-review/quest …[see backlog.json]",
+      "title": "Logo still uses the old colours, not Obsidian & Brass (Saba 2026-11-12, \"Known issues for the first review\")",
+      "added": "2026-11-12 B round 467 -> 468 planning"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 458,
-      "task": "current-task.md",
-      "decision": "D-29z1623",
-      "type": "STORE-2b-3c-2a re-dispatch v3: walker ruling A-R457-REVIEW-M1 (test-only)",
-      "status": "done (D-29z1624): C round 458 PASS (c-round-458.json: C1-C10 PASS, C4 covering 4 files/28 tests LT1-LT10 GS1-4 GT1-5b TS1-6, C5 mutants 42 lines cmp-equal 40 RED, C8/C8b walker class + limit forms, C9 docs; browserVerified/realVerified true); gate 458 published 891dc0f (verify green, review COMMIT OK 8/10)",
-      "note": "baseline db95f40 (gate 455 commit; gates 456/457 skipped); tree has round-456 sketch + round-457 delta + docs; delta b-round-457/sketch-458-delta.patch.txt sha 39839288; grants b-round-457/grants-458.txt (6)"
-    },
     {
       "round": 459,
       "task": "current-task.md",
@@ -6853,8 +6874,16 @@
       "task": "current-task.md",
       "decision": "D-29z1646",
       "type": "STORE-2b-3c-2b fix-up test-only: store-teal-sweep TS8 spy + docs 299/304 line 4 and doc 304 delta",
-      "status": "dispatched",
+      "status": "done (D-29z1647): C PASS, published 9ba13ac",
       "note": "baseline 6d321c7 + unpublished round-466 diff (4 paths); delta sketch sha 924c2700ad9126114ab8d1d13590b8bce176e77620347a78cb2b7f8ee6abf6ac; post-image b-round-466/sketch-467-files-sha256.txt"
+    },
+    {
+      "round": 468,
+      "task": "current-task.md",
+      "decision": "D-29z1649",
+      "type": "SABA-B-15 stage 1: diagnosis of Store home scroll frame drops (trace + scratch bisect + proposal diff; no store change)",
+      "status": "dispatched",
+      "note": "baseline 9ba13ac clean; grants none in the store tree; probe b-round-467/probe/store-scroll-probe.cjs; B bisect b-round-467/probe/bisect-b.md; claims b-round-467/claims-468.sh"
     }
   ],
   "other_keys": [

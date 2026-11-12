@@ -1,0 +1,27 @@
+app/components/home/ProductSection.tsx:54:43 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    52 │           {isLoading
+    53 │             ? Array.from({ length: skeletonCount }).map((_, index) => (
+  > 54 │                 <ProductCardSkeleton key={index} />
+       │                                           ^^^^^
+    55 │               ))
+    56 │             : displayProducts.map((product) => <ProductCard key={product.id} product={product} />)}
+  
+  i This is the source of the key value.
+  
+    51 │         <Carousel itemWidth={320}>
+    52 │           {isLoading
+  > 53 │             ? Array.from({ length: skeletonCount }).map((_, index) => (
+       │                                                             ^^^^^
+    54 │                 <ProductCardSkeleton key={index} />
+    55 │               ))
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+Checked 2 files in 4ms. No fixes applied.
+Found 1 warning.

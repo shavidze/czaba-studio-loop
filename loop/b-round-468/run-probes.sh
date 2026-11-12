@@ -1,0 +1,8 @@
+set -u
+cd /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/head && PORT=3480 npx remix-serve build/server/index.js > /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/serve-head.log 2>&1 & H=$!
+cd /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/sketch && PORT=3481 npx remix-serve build/server/index.js > /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/serve-sketch.log 2>&1 & K=$!
+sleep 8
+node /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/../b-round-467/probe/store-scroll-probe.cjs http://127.0.0.1:3481 /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/scroll-sketch-frozen.json 1 > /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/scroll-sketch-frozen.log 2>&1; echo frozen-sketch $? >> /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/probe-rc.txt
+PATHS=/,/gift-cards node /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/store-scroll-probe-full.cjs http://127.0.0.1:3480 /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/scroll-head-full.json 1 > /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/scroll-head-full.log 2>&1; echo full-head $? >> /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/probe-rc.txt
+PATHS=/,/gift-cards node /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/store-scroll-probe-full.cjs http://127.0.0.1:3481 /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/scroll-sketch-full.json 1 > /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/scroll-sketch-full.log 2>&1; echo full-sketch $? >> /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/probe-rc.txt
+kill $H $K; echo done >> /home/runner/czaba-project/tmp/studio-real-loop/b-round-468/probe-rc.txt

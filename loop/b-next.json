@@ -1,9 +1,10 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 467 C PASS (c-round-467.json: 13 rows, 0 bugs, browserVerified/realVerified true), gate 467 published 9ba13ac: closed C-R466-01, A-R451-REVIEW-L2-ZERO-OFFSET-UNITS, INFO-TL-R451-GLOW-CALC, GATE452-L1-GLOW-REGEX-WHOLE-SOURCE; STORE-2b-3c-2b done (D-29z1647). Saba's 2026-11-12 items recorded (D-29z1648). No C bugs open; next = SABA-B-15 (Saba Medium, scroll) reproduced by B on a 9ba13ac production build: / median frames >33.4 ms 9/8 at 1440/1280; B bisect shows the cost is page rendering (Lenis off keeps the drops; header blur, hero blurs, hero video ruled out), so round 468 is a diagnosis stage with no store change and round 469 the fix with exact grants; /free-downloads renders its 3 items and is clean in cloud (D-29z1649). Regression not due until 2026-11-13. Not complete: SABA-B-15, STORE-2c..5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, STEM-LANES (awaiting_user), T12-ADVANCED, phase 2, deferred Lows, Tech Lead manual rows. Not blocked: no external input needed for round 468.",
- "nextTask": "Round 468: SABA-B-15 stage 1 diagnosis (current-task.md): A reproduces the home-page scroll frame drops on a scratch production build with b-round-467/probe/store-scroll-probe.cjs, takes a Chrome trace, bisects suspects not yet tried (ScrollReveal, ProductSection/ProductCard, SpecialOffers, Newsletter/footer, background layers, PageTransition, in-view animations) in scratch only, and delivers a-round-468/proposal.diff.txt with visuals; store tree unchanged. C reproduces HEAD (median >= 5), applies the proposal to a scratch copy (median <= 2 at 1440 and 1280, eased scroll kept: moving >= 100, finalY 2400; /free-downloads 0), runs the Lenis-off guard mutant, rulings R-468-1..3, scope 0 lines, auth + Studio smoke, lesson grep, claims.",
+ "reason": "Round 468 C PASS (c-round-468.json: C1-C9, 0 bugs, browserVerified/realVerified true); diagnosis round with no store change, gate 468 skipped (no real changes), baseline stays 9ba13ac. Cause of SABA-B-15 confirmed in cloud: three large filter:blur() glows (ProductSection l.38-39, StudioShowcase l.75) (D-29z1650). product-designer ruled A's gradient proposal 2.4-3.1x too bright; B's tuned sketch (opacity stops only) measures ratioToHead 1.09-1.21, frozen / 0/0, full-page / 1/1 to the bottom (HEAD 8/5), guard test SP1-SP3 green and red on HEAD files (D-29z1651). Regression not due (2026-11-13 > 2026-11-12). Not complete: SABA-B-15 needs Saba's device check, REGRESSION-2026-11-13, STORE-2c..5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, STEM-LANES (awaiting_user), T12-ADVANCED, phase 2, deferred Lows, Tech Lead manual rows. Not blocked: no external input needed for round 469.",
+ "nextTask": "Round 469: SABA-B-15 stage 2 (current-task.md). A applies b-round-468/sketch-469.diff.txt: the 3 home glows (ProductSection l.38-39, StudioShowcase l.75) become radial gradients at today's strength (only the opacity stops may be tuned, band 0.8-1.3x HEAD), plus app/lib/__tests__/store-scroll-paint.test.ts (SP1-SP3) and doc 305; typecheck, lint, targeted scans, code-reviewer. C builds HEAD and TREE: HEAD control >= 5, frozen and full-page probes / median <= 2 with eased scroll (moving >= 100, finalY 2400 / maxScroll), Lenis-off guard mutant, computed radial-gradient + filter none, look band 0.8-1.3, shape/edges with product-designer review, overflow, unit + 2 mutants, source scope (4 paths), doc, auth + Studio smoke, claims.",
  "remaining": [
-  "SABA-B-15 stage 1 diagnosis (round 468, current-task.md), then stage 2 fix (round 469)",
+  "SABA-B-15 stage 2 fix (round 469, current-task.md); closes only with TLM-R468-SABA-SCROLL-DEVICE",
+  "user-review/questions-round-468.md Q1 (Saba device + Lenis-feel options)",
   "TLM-R468-SABA-SCROLL-DEVICE (Saba, deadline RETRO 480)",
   "SABA-B-16-LOGO-OLD-COLORS (DP-GATE input)",
   "SABA-Q-CTRLK-CONTENT",
@@ -114,6 +115,7 @@
   "STORE-3",
   "STORE-4",
   "STORE-5",
-  "A-R466-REVIEW-L1..L4, A-R466-REVIEW-INFO, TL-R466-L1/L2 (deferred_low_polish)"
+  "A-R466-REVIEW-L1..L4, A-R466-REVIEW-INFO, TL-R466-L1/L2 (deferred_low_polish)",
+  "SIG-R469-UNMEASURED-BLURS, SIG-R469-GLOW-PROMOTION-TRAP, INFO-R468-HERO-KENBURNS-INVALIDATION (architecture signals)"
  ]
 }

@@ -1,0 +1,10 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/playwright');
+const fs=require('fs');
+(async()=>{const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:1440,height:900}});
+await ctx.addInitScript(()=>{localStorage.setItem('czaba_lead_magnet',JSON.stringify({viewCount:99,lastShown:Date.now(),dismissed:true,submitted:true}));});
+const p=await ctx.newPage();await p.goto('http://127.0.0.1:3468/',{waitUntil:'load'});await p.waitForTimeout(4000);
+const gpu=await p.evaluate(()=>{const c=document.createElement('canvas').getContext('webgl');if(!c)return 'no-webgl';const e=c.getExtension('WEBGL_debug_renderer_info');return e?c.getParameter(e.UNMASKED_RENDERER_WEBGL):c.getParameter(c.RENDERER)});
+await b.startTracing(p,{path:process.argv[2],categories:['devtools.timeline','disabled-by-default-devtools.timeline','disabled-by-default-devtools.timeline.frame','blink.user_timing','cc','viz','gpu','benchmark','disabled-by-default-devtools.timeline.paint','toplevel','disabled-by-default-devtools.timeline.invalidationTracking','disabled-by-default-devtools.timeline.layers']});
+await p.evaluate(()=>{let last=performance.now();const t0=last;window.__s=[];const tick=t=>{const dt=t-last;if(dt>33.4){performance.mark('slow',{startTime:last,detail:{dt,y:scrollY}});window.__s.push([Math.round(dt),Math.round(scrollY)]);}last=t;if(t-t0<5200)requestAnimationFrame(tick)};requestAnimationFrame(tick)});
+await p.mouse.move(720,450);for(let i=0;i<20;i++){await p.mouse.wheel(0,120);await p.waitForTimeout(60);}await p.waitForTimeout(2000);
+const s=await p.evaluate(()=>window.__s);await b.stopTracing();console.log(JSON.stringify({gpu,slow:s}));await b.close();})();
