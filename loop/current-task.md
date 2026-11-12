@@ -1,138 +1,157 @@
-# Round 475: DPG-FIX P0 stage 2 (DPG-P0-2): every undefined token in the Store resolves; the card badge gets its chip
+# Round 476: DPG-FIX P0 stage 3a (DPG-P0-3a): the entrance loader and the header logo in Obsidian & Brass
 
-**Planned by:** B, at the round 474 → 475 planning on 2026-11-12 (`b-round-474.md`).
-- The advisor was available and consulted after orientation.
-- `product-designer` ruled on the visible repairs (`b-round-474/pd-p0-2.md`).
-- `tech-lead` reviewed the frozen sketch (`b-round-474/sketch-review.md`).
-- The round-474 task is archived as `tasks/round-474.md` (byte-identical, `cmp`).
+**Planned by:** B, at the round 475 → 476 planning on 2026-11-12 (`b-round-475.md`).
+- **Advisor:** available, and consulted after orientation.
+- **`product-designer`:** ruled on the palette (`b-round-475/pd-p0-3a.md`).
+- **`tech-lead`:** reviewed the sketch, APPROVE WITH CHANGES. All changes are adopted in v2 (`b-round-475/sketch-review.md`).
+- **Archive:** the round-475 task is `tasks/round-475.md` (byte-identical, `cmp`).
 
 ## Decisions (`backlog.json` `decisions_log_b`)
-- **D-29z1678: round 474 result.** C PASS with `browserVerified`/`realVerified` true (`c-round-474.json`); gate 474 published `297f5ae`. DPG-P0-1 is C-verified and **awaiting the DP-gate re-review** (Saba's design-gate rule 4), not მზადაა. A's C10 note is ruled: K16, K17 and K18 were direct consequences of the required edits and are accepted deltas (C-R474-01, L10).
-- **D-29z1679: P0-2 inventory by the real resolver** (`b-round-474/scan/`). Two scans use Tailwind's own compiler, so they agree with the browser (L52):
-  - undefined `var()` reads in non-test `app/**`: **14 at HEAD → 0 on the sketch** [K3];
-  - colour utilities Tailwind does not emit: **28 at HEAD → 24 on the sketch** [K4]. The 24 are dead files (18 `UserDropdown`, the glow remnants that the round 449/453 rulings keep), the frozen `GlobalPlayhead`, and one non-class string, `border-color` inside a `transition` value.
-  - **Saba's list vs the tree:**
-    - `--radius-xs` is **not broken**: Tailwind's default theme defines it as `0.125rem`, the browser resolves it [K6], and only the dead `TrackRow` reads it. It stays unchanged.
-    - `--radius_full` has 0 hits at HEAD.
-    - The scan found two undefined names Saba's list did not have: `--color-accent-hover` (`.nav-loading-bar`) and `--color-text-muted` (the two stub routes).
-- **D-29z1680: rulings** (`product-designer`, `b-round-474/pd-p0-2.md`):
-  1. **The non-New card badge** gets `bg-background/70 text-foreground`. Brass stays on "New" only. At HEAD the chip is transparent [K6]. This closes A-R187-PRODUCTCARD-PRIMARY-TOKEN.
-  2. **The card image wrapper:** `bg-card` (undefined) becomes `bg-surface`.
-  3. **The card title hover** `group-hover:text-primary` (undefined, a no-op) is removed with its `transition-colors`. Brass is for meaning; the card scale stays the hover cue.
-  4. **The nav loading bar.** It paints nothing at HEAD, because the undefined `--color-accent-hover` invalidates its `background` [K6].
-     - Do **not** switch on a flashing brass bar in a token round.
-     - The render line is in protected `app/root.tsx` [K5], so the rule becomes `display: none;` and its keyframes go. The look is unchanged and no layout is taken.
-     - Root removes the render line later: ROOT-REQ-NAV-LOADING-BAR-RENDER.
-     - The design question goes to Saba once: SABA-Q-PENDING-NAV-FEEDBACK (L44).
-  5. **The stub routes** `/search` and `/account/login`: `var(--color-muted)`. The stub rewrite and its copy are a separate task.
-  6. **`--color-text-primary`** (5 reads: CommandPalette and `.code-4`) becomes `var(--color-foreground)`. B measured every consumer inheriting `#ece6da` today at both viewports [K7], so 0 px change.
-  7. **The dead `.artist-photo-border/-glow`:** `--primary-hue/sat/light` becomes `rgba(var(--color-brand-rgb), …)`. The pink stop stays for DPG-DECORATIVE-PURGE (P2).
-  - **No `@theme` token is added, removed or changed.** So DPG rule 2 needs no design-doc edit [K16]. `docs/design/awwwards-improvements.md` describes the bar as a historical proposal (K19) and stays.
-- **D-29z1681: dispatch.** See the grants. The tests:
-  - a new resolver-backed guard, `store-undefined-tokens.test.ts` UT1–UT5, with the helper `helpers/token-resolve.ts`;
-  - the one `.code-4` pin line in `store-live-teal` [K10].
+- **D-29z1682: round 475 result.**
+  - C PASS, with `browserVerified`/`realVerified` true (`c-round-475.json`). Gate 475 published `edeba5a`.
+  - DPG-P0-2 is C-verified and **awaiting the DP-gate re-review**; it is not მზადაა.
+  - A-R187-PRODUCTCARD-PRIMARY-TOKEN closes on C6.
+- **D-29z1683: ruling on A's round-475 STOP (L10).**
+  - The tree is accepted as is, and C-R475-01 closes.
+  - **The clause that wins from now on:** for a file granted "byte-equal to the sketch", a reviewer **Low** is reported, never edited, and is not a STOP. A STOP is raised only for a Medium or higher finding, or one that needs a file outside the grant (§1.6 wins over §1.2).
+  - Reviewer findings:
+    - R1 is recorded as `confirmedBy` on SIG-R475-TOKEN-GUARD-LIMITS (L7);
+    - R2, R3, R4 and the UT3 title go to `deferred_low_polish` (C-R475-REVIEW-LOWS);
+    - the gate-475 suggestions (title hover cue, stub-route inline styles) are recorded as signals.
+- **D-29z1684: P0-3 is split.**
+  - **Round 476 = 3a, the loader and logo palette.** It is user-visible and needs the browser.
+  - **Round 477 = 3b, DPG-DOCS-UPDATE.** `docs/design/DESIGN_SYSTEM.md` has 13 hue hits and `docs/design/**` has 51 (`b-round-475/scan/docs-design-counts.txt`) [K18].
+  - A failure in one half no longer holds the other.
+  - **The `.claude` primitives text is delivered to root now:** `b-round-475/root-primitives-patch.md`, for ROOT-REQ-DPG-PRIMITIVES-PATCH.
+- **D-29z1685: palette rulings** (`product-designer`, `b-round-475/pd-p0-3a.md`):
+  - **Obsidian background:** `var(--color-background)` in the overlay, its base layer and the pre-hydration failsafe cover, so cover, loader and page share one colour.
+  - **Brass light:** cone 0.04 / 0.10 / 0.04, pool 0.18 / 0.06, floor 0.12.
+  - **Dust and vignette:** ivory dust `bg-foreground/50`; obsidian vignette via `color-mix`.
+  - **Brass wordmark,** with **DPG-LOGO's header colour pulled forward.** Its `font-serif` half is a no-op (`--font-serif` = Instrument Sans) [K20], so it is not added. That goes to Saba once as SABA-Q-DPG-LOGO-FONT-SERIF (`user-review/questions-round-475.md` Q1, L44).
+  - **Divider and tagline:** unchanged.
+  - **SABA-B-16 stays open.** The asset is unconfirmed (questions-round-467 Q3), and favicon and og-image are root-only.
+- **D-29z1687: R59 superseded.** The STORE-1 rule R59 (header wordmark `text-foreground`, marked vetoable) is superseded by Saba's DPG-LOGO (2026-11-12) for its colour clause. Its other clauses (non-heading span, link name `CZABA`, href `/`) stay, and N3 still pins them. The regression round must not report the brass logo as a regression.
+- **D-29z1686: parked items owned by "the next SpotlightLoader owner"** (L6). Each is now a row:
+  - the portal test, C-R190-INFO I1 / A-R190 Medium #1 → P1;
+  - GATE460-2, random dust per render → P4;
+  - A-R460-REVIEW-5, the stale comment → its sketch line.
+
+  Not taken: A-R460-REVIEW-4 (possible one-frame flash, needs its own probe) and C-R190-I4 (ArrowDown scroll). Both stay deferred: they are not colour, and they touch the skip path.
 
 ## Rules
 - **Read `lessons.md` first.** These apply especially:
-  - L1, L2 (DPG clause), L4, L12, L15 and L23;
-  - L26, L28, L29 and L31;
-  - L52, L56, L58 and L61.
-- **Claims:** `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-474/claims-475.sh`. B's output is in `b-round-474/claims-475-planning-output.txt`; its last line is `L58 OK`. The allowed deltas after A are in `b-round-474/claims-475-allowed-deltas.txt`, which is the script's output on B's sketch-applied tree (L56).
+  - L1, L2 (DPG clause), L4, L10 and L23;
+  - L29, L31, L39, L54, L56 and L58.
+- **Claims (L29):** `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-475/claims-476.sh`.
+  - B's output at HEAD is `b-round-475/claims-476-planning-output.txt`.
+  - The allowed deltas after A are `b-round-475/claims-476-allowed-deltas.txt`: the script's output on B's sketch-applied scratch, with a doc-309 placeholder (L56).
+  - The last line is `L58 OK`.
 - **Screen budget (L39):** nothing new becomes permanently visible.
-  - An existing badge gains a background chip.
-  - A no-op hover goes away.
-  - Two stub paragraphs turn muted.
+  - The header wordmark changes colour only.
+  - The loader is transient and changes colour only.
   - Persistent text lines are unchanged.
 - **One element, one rule (L4):**
-  - **The non-New badge:** "PD ruling 1" wins over the "screen budget no change" clause. Its box size must not change.
-  - **The `.code-4` pin in `store-live-teal`:** the sketch line wins over "test files unchanged".
+  - **The header wordmark:** "D-29z1685 brass" wins over "colour-only Store scope stays P1" and over the old STORE-1 rule R59 ("wordmark … text-foreground", vetoable; superseded by Saba's DPG-LOGO, D-29z1687). Only its colour class changes [K6].
+  - **`store-entrance-loader.test.tsx` E1:** its one cover-pin line changes (sketch); every other E/L row is byte-unchanged.
+- **Reviewer findings in A's step 6:** follow D-29z1683.
 
 ## Baseline
-- **HEAD `297f5ae`** (gate 474 published), with a clean tree [K1].
-- **Sketch:** `b-round-474/sketch-475.patch.txt` (v2, sha `d2385ffc…`, 7 files; `tech-lead` reviewed v1 and the v1 → v2 delta). It applies to HEAD with rc 0 [K2].
-- **Per-file sha256 values after applying it:** `b-round-474/sketch-475-files-sha256.txt`.
+- **HEAD `edeba5a`** (gate 475 published), clean tree [K1].
+- **Sketch v2:** `b-round-475/sketch-476.patch.txt`, sha `83341e9f…` [K2], 5 files. It applies to HEAD with rc 0.
+- **Per-file sha256 after applying:** `b-round-475/sketch-476-files-sha256.txt`.
 
 ### Grants (exactly these paths)
 | Path | What |
 |---|---|
-| `app/styles/app.css` | **Only the sketch's hunks, byte for byte** (narrow grant): the `.nav-loading-bar` body becomes `display: none;` and the `navLoadingProgress` keyframes and their comment line are deleted; the two `.artist-photo-*` values; the 5 `var(--color-text-primary)` reads. Every other byte is unchanged, including `@theme` and the obsidian block |
-| `app/components/product/ProductCard.tsx` | Only the sketch's three class edits (l.78, l.101, l.113; the h3 collapses to one line under Biome) [K2] |
-| `app/routes/search.tsx`, `app/routes/account_.login.tsx` | Only the sketch's one inline-style value each [K2] |
-| `app/lib/__tests__/store-live-teal.test.ts` | Only the sketch's one `.code-4` pin line [K10] |
-| `app/lib/__tests__/helpers/token-resolve.ts` | New, byte-equal to the sketch. Every review change is already in v2, so A adds nothing |
-| `app/lib/__tests__/store-undefined-tokens.test.ts` | New, byte-equal to the sketch (UT1–UT5, with UT2b) |
-| `docs/implementation/2026/quarter-IV/308-dpg-p0-2-undefined-tokens.md` | New. It follows TEMPLATE. l.4 is exactly `**სტატუსი:** In Progress (stage 2 of 3; C round 475 PASS)` (L28) |
+| `app/components/loading/SpotlightLoader.tsx` | Only the sketch's edits, byte for byte. The colour values change, the base-layer class changes and its English comment goes, the wordmark becomes `text-brand`, the dust is `bg-foreground/50` drawn once (`createDustParticles` + lazy `useState`), the vignette uses `color-mix`, and the Georgian timeline comment is corrected. Timing, phases, skip, portal and sizes are unchanged [K3][K4] |
+| `app/components/loading/EntranceCover.tsx` | Only `background:var(--color-black)` → `background:var(--color-background)` in `ENTRANCE_COVER_CSS` [K5] |
+| `app/components/layout/Header.tsx` | Only the wordmark span: `text-foreground` → `text-brand` (Biome puts the span on one line) [K6] |
+| `app/lib/__tests__/store-entrance-loader.test.tsx` | Only the sketch: the E1 cover pin line [K7] and the new rows P1–P4 [K8] |
+| `app/lib/__tests__/store-header-footer.test.tsx` | Only the sketch: the new row N3c [K8] |
+| `docs/implementation/2026/quarter-IV/309-dpg-p0-3a-entrance-logo-brass.md` | New. It follows TEMPLATE. l.4 is exactly `**სტატუსი:** In Progress (stage 3 of 4; C round 476 PASS)` (L28 form; DPG-FIX P0 is now 4 stages: P0-1, P0-2, P0-3a, P0-3b) |
 
 **Unchanged:** every other file, in particular:
-- the protected files (`app/root.tsx` [K5], `components/studio/**`, `public/**`, `.claude/**`, `package.json`);
-- the dead files that UT2 allow-lists;
-- the keep-list components;
-- `app/styles/base/utilities.css`.
+- `app/styles/**` (no `@theme` token is added or changed, so DPG rule 2 needs no design-doc edit in this half) [K9];
+- `Footer.tsx` [K10];
+- the protected files (`app/root.tsx`, `components/studio/**`, `public/**`, `.claude/**`, `package.json`) [K9];
+- the keep-list components.
 
 ## Reference
-Not applicable as a reference product. This round adds no new behaviour, and the scope comes from Saba's DPG-FIX P0 list.
-- **Design rulings:** `product-designer` (direction A Obsidian & Brass, brass reserved for meaning).
-- **Deviation:** the nav loading bar stays invisible (it is already invisible at HEAD). Whether CZABA should show pending-navigation feedback at all goes to Saba as SABA-Q-PENDING-NAV-FEEDBACK. It is not decided by the loop.
+**Reference product:** none for the behaviour, because nothing in it changes; this is a colour-only round.
+- **Store reference:** direction A, Obsidian & Brass (`/home/runner/czaba-project/docs/technical/store-redesign/direction-decision.md`).
+- **Ruling:** `product-designer` (`pd-p0-3a.md`).
+
+**Deviations from Saba's text:**
+1. **`font-serif` is not added.** It is a no-op, so it goes to Saba as a question (Q1).
+2. **The loader's wordmark weight stays `font-bold`,** against the header and footer `font-extrabold`. That is typography, outside a colour round, and goes to the DP gate.
+3. **Two brass items in the `/store` header** (logo + active nav) are recorded for the DP gate, not decided by the loop.
 
 ## 1. A: steps
-1. **STOP (L11) if K1 or K2 differ from B's output.** Read `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `FORWARDREF_COMPONENT.md` (ProductCard), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`.
-2. **Apply the sketch:** `git apply -p1 b-round-474/sketch-475.patch.txt`. This is a reviewed sketch, which L60 allows. Check all 7 sha256 values against `sketch-475-files-sha256.txt`. `b-round-474/sketch-review.md` shows each review finding already resolved in v2. If your code-reviewer asks for a change to a granted file, that is a STOP (L11), not an edit.
-3. **Write doc 308** (TEMPLATE headings in order, L26). It must:
-   - name the resolver scans and their HEAD/sketch counts;
-   - name the `--radius-xs` finding (not broken);
-   - name the nav-bar interim and the ROOT-REQ;
-   - name the TODO: P0-3, SABA-Q-PENDING-NAV-FEEDBACK, the dead-file cleanup (UserDropdown and the glow remnants, LEGACY-DEAD) and the stub-route task.
-4. **Run the checks** and save the logs to `a-round-475/`:
+1. **STOP (L11) if K1 or K2 differ from B's output.** Read `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `FORWARDREF_COMPONENT.md` (Header), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`.
+2. **Apply the sketch:** `git apply -p1 /home/runner/czaba-project/tmp/studio-real-loop/b-round-475/sketch-476.patch.txt`. This is a reviewed sketch, which L60 allows.
+   - Check all 5 sha256 values with `sha256sum -c` from the store root against `b-round-475/sketch-476-files-sha256.txt`.
+   - If a reviewer asks for a change to a granted file, follow D-29z1683.
+3. **Write doc 309** (TEMPLATE headings in order, L26). It must name:
+   - the `product-designer` rulings and the measured contrast (K16);
+   - the hand-off colour (K15);
+   - the parked items closed: P1, P4 and the comment;
+   - the deviations above;
+   - the TODO: P0-3b docs, ROOT-REQ-DPG-PRIMITIVES-PATCH, SABA-Q-DPG-LOGO-FONT-SERIF, SABA-B-16 and the DP-gate re-review.
+4. **Run the checks** and save the logs to `a-round-476/`:
    - `npm run typecheck` and `npm run lint`;
-   - `npx vitest run $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-474/covering-475.txt)` (16 files [K13]).
+   - `npx vitest run $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-475/covering-476.txt)` (16 files [K13]).
 
-   The full suite belongs to the gate. B's sketch run is K12.
-5. **Re-run B's mutants on a copy of your tree:** `b-round-474/mutants/run-mutants.sh /abs/path/to/copy /home/runner/czaba-project/tmp/studio-real-loop/a-round-475/mutants` (both paths absolute; the copy needs `node_modules`). Use `cp -a`, never the store tree (the script refuses it and restores from its own pristine snapshot, not git). All 11 must be red, with the same red rows as `b-round-474/mutants/summary.txt`. A line `<id> NOT-APPLIED` means the mutation text was not found in your tree: your edit differs from the sketch at that spot. Report it and show which equivalent mutant you ran instead; it is not a pass. If a run is interrupted, just run the script again: it restores `app/` from its snapshot first.
-6. **Run `code-reviewer`** (3+ files). STOP only for a Medium or higher finding that needs a file outside the grant, or that changes a ruled formula (L11).
-7. **Report in `a-round-475.md`:** the files and shas, the logs, the mutants and the reviewer findings, including its Architecture note.
+   The full suite belongs to the gate.
+5. **Mutants on a copy of your tree:**
+   ```
+   cp -a /home/runner/czaba-project/store /tmp/a476-mut
+   python3 -I /home/runner/czaba-project/tmp/studio-real-loop/b-round-475/mutants/mutants.py /tmp/a476-mut /home/runner/czaba-project/tmp/studio-real-loop/a-round-476/mutants
+   ```
+   The script refuses the store tree and restores each file itself. All 12 must be RED, with the same red rows as `b-round-475/mutants/b-run/summary.txt`. A `NOT-APPLIED` line means your edit differs from the sketch; it is not a pass.
+6. **Run `code-reviewer`** (3+ files), and pass its Architecture note on.
+7. **Report in `a-round-476.md`:** files and shas, logs, mutants, reviewer findings.
 
 ## 2. C: what to verify
-**Files.** Write `c-round-475.md`, `c-round-475.json` (all L57 fields) and `c-round-475/progress.json` as you go.
+**Files.** Write `c-round-476.md`, `c-round-476.json` (all L57 fields) and `c-round-476/progress.json` as you go.
+
+**Setup:**
 - Start the mock API with `node $(realpath mock-api/server.mjs)` from the loop folder if `:5199` does not answer.
-- Stub the LeadMagnet (`localStorage czaba_lead_magnet_dismissed`) and skip the entrance (`sessionStorage czaba_entrance_seen=1`) as B's probes do.
-- Reuse `b-round-474/probe/probe-head4.mjs` and `probe-card.mjs` (args: base URL and tag).
+- **The probe:** `b-round-475/probe/probe-entrance.mjs <base> <tag> <outDir>`. It uses a fresh context per viewport, so the entrance plays. It stubs the LeadMagnet only; the entrance must NOT be skipped.
+- **Before it:** warm the server once in a browser with `b-round-475/probe/warm.mjs <base>` (L38: a cold server timed out in B's first sketch run).
+- **Never run vitest alongside a probe.**
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| C1 | SOURCE-SCOPE | `git status --short --untracked-files=all` and the protected list | Only the granted paths changed. The 7 sketch files equal `sketch-475-files-sha256.txt`. K9 = 0 |
-| C2 | RESOLVER SCANS | K3b and K4b on the live tree | K3b `TOTAL 0`. K4b `TOTAL 24`, with exactly the lines of `b-round-474/scan/tw-undefined-sketch.txt` |
-| C3 | TESTS-MEAN-SOMETHING | Read the new test and helper. Run `run-mutants.sh` (absolute paths) on a `cp -a` copy of A's tree, out-dir under `c-round-475/` | 11 of 11 red, with the same red rows as `b-round-474/mutants/summary.txt` [K8]. Each UT row has a mutant that turns it red. The UT2 token lists equal `b-round-474/scan/tw-undefined-sketch.txt`, never wider. UT2 (batched helper) and the scan (one `build()` per token, `tw-undefined-ast.mjs`) agree; they are two oracles (L52) |
-| C4 | UNIT | `npx vitest run $(cat b-round-474/covering-475.txt)` | All 16 files pass. Record the UT2 time: it is at most 50 % of 30 s (L31). B's full run on v2 is K14 |
-| C5 | NO-CHANGE CONSUMERS (both viewports) | `probe-head4.mjs` on the tree, compared with `b-round-474/probe/probe-head4.json` | Trigger hover, input, close hover, item hover and both `.code-4` read `rgb(236, 230, 218)`, the same as HEAD. Palette and trigger-hover screenshots are pixel-equal to HEAD (`b-round-474/probe/head-*.png`), as they are on B's sketch run (byte-equal). The 404 differs only inside the `.code-0-inner` box (`pulse404` animation). B's HEAD-vs-HEAD control differs in the same box (`probe/ctl-404-*.png`, `diffpng.mjs`: bbox 692–748 × 355–880), so it is a control pair (L37). Any diff outside that box is a FAIL |
-| C6 | BADGE (both viewports) | `probe-card.mjs` on `/`: a non-New badge ("Ambient") and the "New" badge | Non-New computed bg `oklab(0.159861 0.001029 0.00248618 / 0.7)`, which is Tailwind v4's form of `bg-background/70`; colour `rgb(236, 230, 218)` [K15]. Every badge box w/h equals HEAD's (`b-round-474/probe/probe-card-head.json`); "New" is unchanged. Contrast with `b-round-474/probe/probe-contrast.mjs`: text vs median chip pixel ≥ 4.5:1 on every visible non-New badge. B's sketch run: 8.91–8.95:1; HEAD: 8.67–8.82:1, because the covers are dark under the chip (`probe-sketch-contrast.json`, `probe-head-contrast.json`). The chip is consistency, not a contrast rescue, and the row only asserts ≥ 4.5 |
-| C7 | IMAGE WRAPPER | `b-round-474/probe/probe-rows.mjs` (images aborted) | The card image wrapper's computed bg is `rgb(22, 20, 18)` and its box is 320×320 at both viewports (B's sketch run; HEAD `rgba(0, 0, 0, 0)`) [K15] |
-| C8 | TITLE HOVER | `probe-rows.mjs`: the mouse goes to a card **inside the viewport** (bbox check first) | The h3 is `rgb(236, 230, 218)` before and after hover. The card wrapper's computed **`scale`** goes from `none` to `1.02`. Tailwind v4 `scale-*` sets `scale`, not `transform`, so a `transform` read says `none` on HEAD too. 0 elements in `article` have a `bg-`/`text-` class with `primary` or `card` |
-| C9 | NAV BAR (pending navigation) | `probe-rows.mjs`: from `/`, hold every `?_data=` request with `page.route` until released, then click the header link named "Collections". While pending, read `.nav-loading-bar` and screenshot the top 4 px | The node exists (root still renders it, K5), computed `display` is `none` and its bbox is null or 0×0. The top 4 px strip is pixel-equal to the strip just before the click. The header bbox is unchanged. Record HEAD as the control: there `display` is `block`, `background-image` is `none` and the width animates (`navLoadingProgress`), with the strip also pixel-equal (`probe-head-rows.json`) |
-| C10 | STUB COPY | `/search` and `/account/login` (`probe-rows.mjs`) | The paragraph colour is `rgb(163, 155, 142)` on both (HEAD `rgb(236, 230, 218)`). The heading and button are unchanged |
-| C11 | DEAD RULES | On `/store`, inject `<div class="artist-photo-border">` and `<div class="artist-photo-glow">` | The border colour is `rgba(201, 164, 106, 0.3)`. The background-image starts `linear-gradient(135deg, rgba(201, 164, 106, 0.2) 0%,`. The pink stop stays (P2) |
-| C12 | JOURNEY (L54) | `/` → click a ProductCard → product page → back | The product page loads with its own h1. The card badge and colours read the same after back |
-| C13 | DOC 308 + DPG rule 2 | Headings, l.4, and each claim against the test file (L26). K16 | TEMPLATE headings in order. l.4 exact. Every UT row the doc names exists. K16 = 0 |
-| C14 | AUTH | `/studio/middle-east` anonymous, and `/api/studio-token?product=middle-east&file=x` with no bearer | "Sign in required" and 0 audio `src`; 401. The real-owner path is BLOCKED (backend unavailable in cloud) |
-| C15 | CLAIMS | `bash b-round-474/claims-475.sh` | Byte-equal to `b-round-474/claims-475-allowed-deltas.txt`, the script's output on B's sketch-applied clone with a doc 308 placeholder. Against the planning output, only K1 (8 status lines), K2b (`reverse-ok`), K3b (`TOTAL 0`), K4b (`TOTAL 24`) and K10 (empty) differ. The last line is `L58 OK` |
+| C1 | SOURCE-SCOPE | `git status --short --untracked-files=all` and the protected list | Only the 6 granted paths changed. The 5 sketch files equal `sketch-476-files-sha256.txt`. K9 = 0 |
+| C2 | CLAIMS | `bash b-round-475/claims-476.sh` | Byte-equal to `b-round-475/claims-476-allowed-deltas.txt`; last line `L58 OK` |
+| C3 | TESTS-MEAN-SOMETHING | Read P1–P4 and N3c. Run `mutants.py` on your own `cp -a` copy, out-dir under `c-round-476/` | 12 of 12 RED, with the same rows as `b-round-475/mutants/b-run/summary.txt` [K14]. Each new row has a mutant that turns it red |
+| C4 | UNIT | `npx vitest run $(cat b-round-475/covering-476.txt)` | 16 files pass. `store-entrance-loader` stays under 50 % of the default timeout (L31; B's run is K17) |
+| C5 | HAND-OFF COLOUR (both viewports) | `probe-entrance.mjs` → `probe-<tag>.json`: `cover[].before`, `hold.overlayBg`, `hold.kids[0].bgc`, `after.bodyBg` | Every non-null cover sample, the overlay, its base layer and `body` after exit are all `rgb(14, 13, 12)`. HEAD control: the cover and overlay are `rgb(0, 0, 0)` (K15, `b-round-475/probe/probe-head.json`) |
+| C6 | LIGHT, DUST, VIGNETTE (both viewports) | Same JSON, `hold.kids[1..3].bg`, `hold.dustBg`, `hold.kids[6].bg` | The cone carries `rgba(201, 164, 106, 0.04)` and `0.1`. The pool is `rgba(201, 164, 106, 0.18) 0%, rgba(201, 164, 106, 0.06) 40%`. The floor is `rgba(201, 164, 106, 0.12)`. Dust is `oklab(0.926355 0.00167474 0.0172472 / 0.5)`. The vignette ends `color(srgb 0.054902 0.0509804 0.0470588 / 0.8) 100%`. No captured overlay `bg` text (the probe keeps the first 160 characters per child) contains `255, 255, 255`; P3 covers the full source. All values are as in `b-round-475/probe/probe-sketch.json` |
+| C7 | WORDMARK + LOGO (both viewports) | `hold.word`, `after.logo` and `store.logo`; then `b-round-475/probe/contrast-wordmark.mjs <tag>` (run in your out-dir, after copying `probe-<tag>.json` and the `-hold-` PNGs there) | The loader wordmark is `rgb(201, 164, 106)`, weight 700, box 318×72, the same as HEAD. The header logo is `rgb(201, 164, 106)`, weight 800, on `/` and on `/store`. Wordmark contrast `ratioMedian` ≥ 4.5 (B's sketch: 7.55 / 7.56, K16) |
+| C8 | TIMING UNCHANGED (record) | `b-round-458/probe/entrance-timing.mjs <base> 1440 900 3` [K19], on the tree | **record — not run on sketch: B ran the colour probes only** (L58): `coverMs` and `onAt`/`offAt` per run. C compares them with the SABA-B-13 contract: removal 1450–1900 ms from the first cover frame. A miss is reported with HEAD's run as the control, not as a FAIL of this colour round |
+| C9 | HEADER, two brass (record) | `after-*.png` and `store-header-*.png` from the probe | Screenshots at both viewports, `/` and `/store`. Record the computed colours of the logo and the active "Collections" (B: both `rgb(201, 164, 106)`). Input for the DP gate, not pass/fail. Persistent text lines in the header are unchanged |
+| C10 | JOURNEY (L54) | A fresh context on `/`: watch the entrance end, click a ProductCard → product page → back | The product page shows its own h1 and the brass logo. After back, there is no second entrance (once per tab). Screenshot each step |
+| C11 | DOC 309 | Headings and l.4; each claim against the tests | TEMPLATE headings in order. l.4 exact. Every row id the doc names exists |
+| C12 | AUTH | `/studio/middle-east` anonymous; `/api/studio-token?product=middle-east&file=x` with no bearer | "Sign in required" and 0 audio `src`; 401. The real-owner path is BLOCKED (backend unavailable in cloud) |
 | gate | — | Full verify, code review, publish | Root. Not claimed |
 
 **What could break nearby:**
-- **Other suites using the `@tailwindcss` compile cost:** UT2 runs about 3 s. C4 and the gate cover this.
-- **The CommandPalette and 404 colours:** C5 covers these.
-- **The legacy pages that render ProductCard** (`account.downloads.tsx`, protected): sign-in, so BLOCKED. The class change is the same component.
-- **The `TrackRow` and `ArtistBioSection` dead rules:** C11 covers these.
+- **The pre-hydration cover** (E rows and C5): it now reads `--color-background`, which is defined in `@theme`, as `--color-black` was in Tailwind's default.
+- **The skip, reduced-motion and once-per-tab paths:** unchanged code, covered by the L/E rows in C4.
+- **The legacy pages that render `Header`:** same component; C9 covers it.
 
 ## 3. After this round
 1. **On C PASS:**
-   - DPG-P0-2 becomes C-verified and **awaiting the DP-gate re-review**;
-   - A-R187-PRODUCTCARD-PRIMARY-TOKEN closes;
-   - the dead UT2 files join LEGACY-DEAD.
+   - DPG-SPOTLIGHT-FIX is C-verified and awaiting the DP gate.
+   - The DPG-LOGO header colour is done; its `font-serif` half waits for Q1.
+   - GATE460-2, A-R460-REVIEW-5 and the portal-test signal close.
 2. **The next planning:**
-   - **REGRESSION-2026-11-13** first, if the date is 2026-11-13 or later (`regression-last.json` 2026-11-10);
-   - then **DPG-P0-3**: SpotlightLoader with SABA-B-16, and the docs (`DESIGN_SYSTEM.md`, plus the primitives patch via root).
-   - After P0-3, root's P0 DP-gate re-review.
+   - **REGRESSION-2026-11-13** first, if the date is 2026-11-13 or later (`regression-last.json` 2026-11-10). Its header row expects the brass logo (R59 superseded, D-29z1687).
+   - Then **DPG-P0-3b** (DESIGN_SYSTEM.md and the `docs/design` reference docs).
+   - Then **RETRO 480**, which falls due by round count.
+   - After P0, root re-runs the DP gate.
 3. **Root, non-blocking:**
+   - ROOT-REQ-DPG-PRIMITIVES-PATCH (text ready in `b-round-475/root-primitives-patch.md`);
    - ROOT-REQ-NAV-LOADING-BAR-RENDER;
-   - ROOT-REQ-DPG-PRIMITIVES-PATCH (now also C-R474-02: `.claude/**` and `docs/**` markdown emits unused teal utilities);
-   - ROOT-REQ-DPG-GATE-REPORT;
-   - RETRO 480.
+   - ROOT-REQ-DPG-GATE-REPORT.

@@ -1,0 +1,71 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/ctree[39m
+
+ [31m❯[39m app/lib/__tests__/store-undefined-tokens.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 2266[2mms[22m[39m
+[31m     [31m×[31m UT1: every var() read without a fallback in non-test app sources resolves to a declared property[39m[32m 105[2mms[22m[39m
+     [33m[2m✓[22m[39m UT2: colour utilities that Tailwind does not emit exist only in the allow-listed dead, frozen or non-class files, with their exact tokens [33m 1800[2mms[22m[39m
+     [32m✓[39m UT2b: every allow-listed dead file stays unmounted[32m 212[2mms[22m[39m
+     [32m✓[39m UT3: the resolver agrees with the browser on the replaced and replacement classes[32m 15[2mms[22m[39m
+[31m     [31m×[31m UT4: fixtures, flagged and clean[39m[32m 58[2mms[22m[39m
+     [32m✓[39m UT5: the nav loading bar paints nothing and keeps no animation[32m 6[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-undefined-tokens.test.ts[2m > [22mStore undefined tokens (DPG-P0-2)[2m > [22mUT1: every var() read without a fallback in non-test app sources resolves to a declared property
+[31m[1mAssertionError[22m: expected [ …(6) ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "components/arrangement/studio-fader.ts:45 --spacing",[39m
+[31m+   "components/arrangement/studio-fader.ts:45 --spacing",[39m
+[31m+   "components/loading/EntranceCover.tsx:24 --color-black",[39m
+[31m+   "styles/app.css:846 --radius-xs",[39m
+[31m+   "styles/app.css:975 --radius-xs",[39m
+[31m+   "styles/app.css:1095 --radius-xs",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m app/lib/__tests__/store-undefined-tokens.test.ts:[2m114:38[22m[39m
+    [90m112| [39m    [34mexpect[39m(reads[33m.[39mlength)[33m.[39m[34mtoBeGreaterThanOrEqual[39m([33mMIN_PROPERTY_READS[39m)[33m;[39m
+    [90m113| [39m    [35mconst[39m hits [33m=[39m [35mawait[39m [34mundefinedPropertyReads[39m(sources[33m,[39m themeCss)[33m;[39m
+    [90m114| [39m    [34mexpect[39m(hits[33m.[39m[34mmap[39m(formatTokenHit))[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m115| [39m  })[33m;[39m
+    [90m116| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-undefined-tokens.test.ts[2m > [22mStore undefined tokens (DPG-P0-2)[2m > [22mUT4: fixtures, flagged and clean
+[31m[1mAssertionError[22m: expected [ 'fx/a.css:1 --nope-token', …(2) ] to deeply equal [ 'fx/a.css:1 --nope-token', …(1) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "fx/a.css:1 --nope-token",[22m
+[31m+   "fx/b.css:1 --color-black",[39m
+[2m    "fx/d.css:1 --color-text-primary",[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/__tests__/store-undefined-tokens.test.ts:[2m193:39[22m[39m
+    [90m191| [39m    ])[33m;[39m
+    [90m192| [39m    [35mconst[39m reads [33m=[39m [35mawait[39m [34mundefinedPropertyReads[39m(css[33m,[39m themeCss)[33m;[39m
+    [90m193| [39m    [34mexpect[39m(reads[33m.[39m[34mmap[39m(formatTokenHit))[33m.[39m[34mtoEqual[39m([
+    [90m   | [39m                                      [31m^[39m
+    [90m194| [39m      [32m'fx/a.css:1 --nope-token'[39m[33m,[39m
+    [90m195| [39m      [32m'fx/d.css:1 --color-text-primary'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 19:02:10
+[2m   Duration [22m 3.02s[2m (transform 206ms, setup 0ms, import 594ms, tests 2.27s, environment 0ms)[22m
+
+
+::error file=/tmp/ctree/app/lib/__tests__/store-undefined-tokens.test.ts,title=app/lib/__tests__/store-undefined-tokens.test.ts > Store undefined tokens (DPG-P0-2) > UT1%3A every var() read without a fallback in non-test app sources resolves to a declared property,line=114,column=38::AssertionError: expected [ …(6) ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "components/arrangement/studio-fader.ts:45 --spacing",%0A+   "components/arrangement/studio-fader.ts:45 --spacing",%0A+   "components/loading/EntranceCover.tsx:24 --color-black",%0A+   "styles/app.css:846 --radius-xs",%0A+   "styles/app.css:975 --radius-xs",%0A+   "styles/app.css:1095 --radius-xs",%0A+ ]%0A%0A ❯ app/lib/__tests__/store-undefined-tokens.test.ts:114:38%0A%0A
+
+::error file=/tmp/ctree/app/lib/__tests__/store-undefined-tokens.test.ts,title=app/lib/__tests__/store-undefined-tokens.test.ts > Store undefined tokens (DPG-P0-2) > UT4%3A fixtures%2C flagged and clean,line=193,column=39::AssertionError: expected [ 'fx/a.css:1 --nope-token', …(2) ] to deeply equal [ 'fx/a.css:1 --nope-token', …(1) ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    "fx/a.css:1 --nope-token",%0A+   "fx/b.css:1 --color-black",%0A    "fx/d.css:1 --color-text-primary",%0A  ]%0A%0A ❯ app/lib/__tests__/store-undefined-tokens.test.ts:193:39%0A%0A

@@ -1,0 +1,255 @@
+diff --git a/app/components/layout/Header.tsx b/app/components/layout/Header.tsx
+index d969b90..ec1f0f9 100644
+--- a/app/components/layout/Header.tsx
++++ b/app/components/layout/Header.tsx
+@@ -68,9 +68,7 @@ export function Header({ cartCount = 0 }: HeaderProps) {
+     <header className="sticky top-0 z-50 border-b border-outline bg-background/95 backdrop-blur-lg">
+       <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-12 px-4 py-4 sm:px-6 lg:px-8">
+         <Link to="/" className="no-underline cursor-pointer">
+-          <span className="block text-2xl font-extrabold tracking-tighter text-foreground">
+-            CZABA
+-          </span>
++          <span className="block text-2xl font-extrabold tracking-tighter text-brand">CZABA</span>
+         </Link>
+ 
+         {/* desktop nav */}
+diff --git a/app/components/loading/EntranceCover.tsx b/app/components/loading/EntranceCover.tsx
+index 85075ae..178b81b 100644
+--- a/app/components/loading/EntranceCover.tsx
++++ b/app/components/loading/EntranceCover.tsx
+@@ -21,7 +21,7 @@ declare global {
+   }
+ }
+ 
+-export const ENTRANCE_COVER_CSS = `@media (prefers-reduced-motion: no-preference){body::before{content:"";position:fixed;inset:0;z-index:60;background:var(--color-black);animation:czaba-entrance-failsafe ${ENTRANCE_EXIT_MS}ms ease-in-out ${ENTRANCE_FAILSAFE_MS}ms forwards}}@keyframes czaba-entrance-failsafe{to{opacity:0;visibility:hidden}}`;
++export const ENTRANCE_COVER_CSS = `@media (prefers-reduced-motion: no-preference){body::before{content:"";position:fixed;inset:0;z-index:60;background:var(--color-background);animation:czaba-entrance-failsafe ${ENTRANCE_EXIT_MS}ms ease-in-out ${ENTRANCE_FAILSAFE_MS}ms forwards}}@keyframes czaba-entrance-failsafe{to{opacity:0;visibility:hidden}}`;
+ 
+ // ერთხელ tab-ზე (D10): ამ ხაზის წაშლით ანიმაცია ყოველ ჩატვირთვაზე ითამაშებს (SABA-Q-ENTRANCE-RELOAD)
+ const sessionGate = `if(sessionStorage.getItem('${ENTRANCE_SESSION_KEY}')==='1')return;sessionStorage.setItem('${ENTRANCE_SESSION_KEY}','1');`;
+diff --git a/app/components/loading/SpotlightLoader.tsx b/app/components/loading/SpotlightLoader.tsx
+index 2509533..5ea1b1c 100644
+--- a/app/components/loading/SpotlightLoader.tsx
++++ b/app/components/loading/SpotlightLoader.tsx
+@@ -29,7 +29,7 @@ export interface EntranceTimeline {
+   endInMs: number;
+ }
+ 
+-// დრო ითვლება ფარდის ჩართვიდან (data-start): მოცილება >= 1450 ms, <= 1900 ms
++// დრო ითვლება claimEntranceStart-ის performance.now()-დან: მოცილება >= 1450 ms, <= 1900 ms
+ export function entranceTimeline(elapsedAtTakeoverMs: number): EntranceTimeline {
+   const elapsed = Math.max(0, elapsedAtTakeoverMs);
+   const exitAt = Math.min(
+@@ -98,10 +98,29 @@ function claimEntranceStart(): number | null {
+ 
+ type Phase = 'spotlight' | 'reveal' | 'holding' | 'exit';
+ 
++const DUST_PARTICLE_COUNT = 15;
++
++interface DustParticle {
++  id: number;
++  x: number;
++  duration: number;
++  delay: number;
++}
++
++function createDustParticles(): DustParticle[] {
++  return Array.from({ length: DUST_PARTICLE_COUNT }, (_, id) => ({
++    id,
++    x: 40 + Math.random() * 20,
++    duration: 1 + Math.random() * 0.8,
++    delay: Math.random() * 0.3,
++  }));
++}
++
+ export function SpotlightLoader() {
+   const [startMs, setStartMs] = useState<number | null>(null);
+   const [isVisible, setIsVisible] = useState(false);
+   const [phase, setPhase] = useState<Phase>('spotlight');
++  const [dustParticles] = useState(createDustParticles);
+   const overlayRef = useRef<HTMLDivElement>(null);
+ 
+   useEffect(() => {
+@@ -159,10 +178,10 @@ export function SpotlightLoader() {
+         animate={{ opacity: isExit ? 0 : 1 }}
+         transition={{ duration: EXIT_DURATION, ease: 'easeInOut' }}
+         className={cn('fixed inset-0 z-50 overflow-hidden', isExit && 'pointer-events-none')}
+-        style={{ backgroundColor: '#000' }}
++        style={{ backgroundColor: 'var(--color-background)' }}
+       >
+-        {/* Deep black background */}
+-        <div className="absolute inset-0 bg-black" />
++        {/* Obsidian background */}
++        <div className="absolute inset-0 bg-background" />
+ 
+         {/* Spotlight cone from top */}
+         <motion.div
+@@ -184,9 +203,9 @@ export function SpotlightLoader() {
+                 from 270deg at 50% 0%,
+                 transparent 0deg,
+                 transparent 70deg,
+-                rgba(255,255,255,0.03) 85deg,
+-                rgba(255,255,255,0.08) 90deg,
+-                rgba(255,255,255,0.03) 95deg,
++                rgba(var(--color-brand-rgb),0.04) 85deg,
++                rgba(var(--color-brand-rgb),0.1) 90deg,
++                rgba(var(--color-brand-rgb),0.04) 95deg,
+                 transparent 110deg,
+                 transparent 360deg
+               )
+@@ -210,7 +229,7 @@ export function SpotlightLoader() {
+             width: '500px',
+             height: '500px',
+             background:
+-              'radial-gradient(ellipse, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 40%, transparent 70%)',
++              'radial-gradient(ellipse, rgba(var(--color-brand-rgb),0.18) 0%, rgba(var(--color-brand-rgb),0.06) 40%, transparent 70%)',
+             filter: 'blur(40px)',
+           }}
+         />
+@@ -228,7 +247,7 @@ export function SpotlightLoader() {
+           className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[400px] h-[150px]"
+           style={{
+             background:
+-              'radial-gradient(ellipse at center top, rgba(255,255,255,0.1) 0%, transparent 70%)',
++              'radial-gradient(ellipse at center top, rgba(var(--color-brand-rgb),0.12) 0%, transparent 70%)',
+             filter: 'blur(20px)',
+           }}
+         />
+@@ -253,7 +272,7 @@ export function SpotlightLoader() {
+               letterSpacing: showLogo ? '0.2em' : '0.3em',
+             }}
+             transition={{ duration: 0.4, ease: 'easeOut' }}
+-            className="block text-5xl md:text-7xl font-bold text-foreground"
++            className="block text-5xl md:text-7xl font-bold text-brand"
+           >
+             CZABA
+           </motion.span>
+@@ -283,12 +302,12 @@ export function SpotlightLoader() {
+ 
+         {/* Dust particles in spotlight */}
+         <div className="absolute inset-0 pointer-events-none overflow-hidden">
+-          {[...Array(15)].map((_, i) => (
++          {dustParticles.map((particle) => (
+             <motion.div
+-              key={i}
++              key={particle.id}
+               initial={{
+                 opacity: 0,
+-                x: `${40 + Math.random() * 20}%`,
++                x: `${particle.x}%`,
+                 y: '-10%',
+               }}
+               animate={{
+@@ -296,12 +315,12 @@ export function SpotlightLoader() {
+                 y: '110%',
+               }}
+               transition={{
+-                duration: 1 + Math.random() * 0.8,
+-                delay: Math.random() * 0.3,
++                duration: particle.duration,
++                delay: particle.delay,
+                 repeat: Infinity,
+                 ease: 'linear',
+               }}
+-              className="absolute w-[2px] h-[2px] rounded-full bg-white/50"
++              className="absolute w-[2px] h-[2px] rounded-full bg-foreground/50"
+             />
+           ))}
+         </div>
+@@ -310,7 +329,8 @@ export function SpotlightLoader() {
+         <div
+           className="absolute inset-0 pointer-events-none"
+           style={{
+-            background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.8) 100%)',
++            background:
++              'radial-gradient(ellipse at center, transparent 30%, color-mix(in srgb, var(--color-background) 80%, transparent) 100%)',
+           }}
+         />
+ 
+diff --git a/app/lib/__tests__/store-entrance-loader.test.tsx b/app/lib/__tests__/store-entrance-loader.test.tsx
+index c1ad553..bbc2c15 100644
+--- a/app/lib/__tests__/store-entrance-loader.test.tsx
++++ b/app/lib/__tests__/store-entrance-loader.test.tsx
+@@ -306,6 +306,54 @@ describe('SpotlightLoader entrance (STORE-1d D10, SABA-B-13 minimum)', () => {
+     }).not.toThrow();
+     expect(consoleError).not.toHaveBeenCalled();
+   });
++
++  it('P1 the overlay is portalled straight into document.body', () => {
++    mountEntranceLoader();
++    const overlay = findOverlay();
++    expect(overlay).not.toBeNull();
++    expect(overlay?.parentElement).toBe(document.body);
++  });
++
++  it('P2 the overlay, its base layer, the wordmark and the dust use the Obsidian and Brass tokens', () => {
++    const clock = { ms: 0 };
++    mountEntranceLoader();
++    advanceTo(clock, 400);
++    const overlay = findOverlay();
++    if (!(overlay instanceof HTMLElement)) throw new Error('overlay missing');
++    expect(overlay.style.backgroundColor).toBe('var(--color-background)');
++    expect(overlay.querySelectorAll(':scope > div.bg-background')).toHaveLength(1);
++    const wordmark = [...overlay.querySelectorAll('span')].find(
++      (node) => node.textContent === 'CZABA',
++    );
++    expect(wordmark?.classList.contains('text-brand')).toBe(true);
++    expect(wordmark?.classList.contains('text-foreground')).toBe(false);
++    expect(overlay.querySelectorAll('div.rounded-full.bg-foreground\\/50')).toHaveLength(15);
++    const classes = [...overlay.querySelectorAll('*')].map(
++      (node) => node.getAttribute('class') ?? '',
++    );
++    expect(classes.filter((name) => /\bbg-(black|white)\b/.test(name))).toEqual([]);
++  });
++
++  it('P3 the loader source draws its light in brass and its shade in obsidian, never white or black', () => {
++    const source = readFileSync(
++      resolve(process.cwd(), 'app/components/loading/SpotlightLoader.tsx'),
++      'utf8',
++    );
++    expect(source.match(/rgba\(var\(--color-brand-rgb\),\s*0?\.\d+\)/g)).toHaveLength(6);
++    expect(source).toContain('color-mix(in srgb, var(--color-background) 80%, transparent)');
++    expect(source).not.toMatch(/rgba\(\s*(255|0)\s*,\s*\1\s*,\s*\1\b/);
++    expect(source).not.toMatch(/#000\b|#fff\b|\bbg-(black|white)\b/i);
++  });
++
++  it('P4 the dust particles are drawn once per entrance, not on every phase change', () => {
++    const random = vi.spyOn(Math, 'random');
++    const clock = { ms: 0 };
++    mountEntranceLoader();
++    advanceTo(clock, 400);
++    advanceTo(clock, 1300);
++    expect(findOverlay()).not.toBeNull();
++    expect(random).toHaveBeenCalledTimes(45);
++  });
+ });
+ 
+ function installHeadCover() {
+@@ -431,7 +479,7 @@ describe('SABA-B-13 static head cover and takeover', () => {
+     expect(html).toContain(`<style id="${ENTRANCE_COVER_ID}" media="not all">`);
+     expect(html).toContain('body::before');
+     expect(html).toContain('z-index:60');
+-    expect(html).toContain('background:var(--color-black)');
++    expect(html).toContain('background:var(--color-background)');
+     expect(html).toContain(`250ms ease-in-out ${ENTRANCE_FAILSAFE_MS}ms forwards`);
+     expect(html).toContain('prefers-reduced-motion: no-preference');
+     expect(html).toContain('<script>');
+diff --git a/app/lib/__tests__/store-header-footer.test.tsx b/app/lib/__tests__/store-header-footer.test.tsx
+index a25d420..1a6d654 100644
+--- a/app/lib/__tests__/store-header-footer.test.tsx
++++ b/app/lib/__tests__/store-header-footer.test.tsx
+@@ -129,6 +129,15 @@ describe('Store Header (STORE-1c)', () => {
+     expect(within(header).getByRole('link', { name: 'CZABA' })).toBe(homeLink);
+   });
+ 
++  it('N3c the header wordmark is brass, the same colour as the entrance and footer wordmarks', () => {
++    const { container } = renderHeaderAt('/');
++    const homeLink = getHeaderElement(container).querySelector('a[href="/"]');
++    const wordmark = homeLink?.querySelector('span');
++    expect(wordmark?.textContent).toBe('CZABA');
++    expect(wordmark?.classList.contains('text-brand')).toBe(true);
++    expect(wordmark?.classList.contains('text-foreground')).toBe(false);
++  });
++
+   it('N4 Collections carries the active underline on /store and the others do not', () => {
+     const { container } = renderHeaderAt('/store');
+     const desktopNav = getHeaderElement(container).querySelector('nav');
