@@ -742,6 +742,22 @@ After each priority level (P0, P1, P2) completes, root re-runs design-philosophe
 
 This is NOT optional — it's a quality gate, like C's browser verification.
 
+### Process improvements from DPG-1 failure analysis (Saba, 2026-11-12)
+
+**Root cause:** STORE-2b teal sweep found 21/100+ teal references. C verified function, not visual consistency. Primitive docs stayed outdated. No design review existed.
+
+**5 new rules to prevent recurrence:**
+
+1. **Color sweep = exhaustive grep, not component scan.** Any color migration round must include `grep -rn` for ALL known old-color patterns (hex, rgb, rgba, hsl, Tailwind class names) across ALL file types (css, tsx, ts, md). C verifies the count drops to zero.
+
+2. **Token change = docs change in same round.** When a design token is added/changed/removed in app.css, the SAME round must update: DESIGN_TOKENS.md primitive, DESIGN_SYSTEM.md doc, and any direction/spec docs that reference the old values. C checks all three.
+
+3. **C acceptance rows for visual blocks include color audit.** For any STORE/STUDIO visual round, C must verify: `grep -c '<old-pattern>' <files> = 0`. Not just "page loads" but "old visual identity is fully removed."
+
+4. **Major visual block "done" = C PASS + design gate.** A visual block (STORE-2b, STORE-3, etc.) is not complete until BOTH design-philosopher and product-designer score 10/10. C PASS alone is functional verification only.
+
+5. **Primitive staleness check at RETRO.** Every retrospective round checks: do the primitives (DESIGN_TOKENS.md, DESIGN_SYSTEM.md, FORWARDREF_COMPONENT.md etc.) match the actual codebase? Stale primitives cause agents to produce wrong output.
+
 ## Saba feedback, 2026-11-11: Store audio player seek thumb desyncs from progress bar
 
 The white circle (seek thumb) on the Store's audio player jumps ahead of the brass progress bar line during playback. They should move together — the thumb leading the bar looks like a rendering bug and breaks the polished feel.
