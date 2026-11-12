@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-12T08:18:11.835Z",
-  "current_task": "Round 463: STORE-2b-3d-2, delete the dead Store CSS rules + C-R462-01 (current-task.md, D-29z1633)",
+  "_generatedUtc": "2026-11-12T09:30:28.891Z",
+  "current_task": "Round 464: STORE-2b-3d-3, delete the 4 orphan keyframes + DC2 counts only animation use (A-R463-REVIEW-M1 = C-R463-01, B-R463-DC2-UNDERSCORE, A-R463-REVIEW-L3) (current-task.md, D-29z1635)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6691,12 +6691,6 @@
       "title": ""
     },
     {
-      "id": "GATE453-I5-BRAND-TINT-GLOWS-OUTSIDE-GRANT",
-      "severity": "info",
-      "status": "scheduled round 463 (D-29z1633): .track-card brand shadow an",
-      "title": "brand-tinted box-shadow rules (app.css ~2269-2275) and glow-pulse keyframes remain"
-    },
-    {
       "id": "SABA-Q-ENTRANCE-RELOAD",
       "severity": "info",
       "status": "awaiting_user (D-29z1616): non-blocking; default (a) keep on",
@@ -6763,12 +6757,6 @@
       "title": "ArtistBioSection.tsx (unmounted) is the only renderer of NEWSLETTER_STATS (Downloads, Products, 10K+"
     },
     {
-      "id": "C-R462-01",
-      "severity": "low",
-      "status": "scheduled round 463 (D-29z1633): doc 301 correction in the s",
-      "title": "Doc 301 named the 12 retired Tailwind utilities literally; Tailwind v4 scans docs/*.md, so they stay"
-    },
-    {
       "id": "GATE462-M1-EMAIL-SERVER-POLICY",
       "severity": "medium",
       "origin": "gate reviewer round 462 (policy flag, not a defect)",
@@ -6778,22 +6766,21 @@
       "added": "2026-11-12 B round 462 -> 463 planning"
     },
     {
-      "id": "GATE462-L2-SENDORDEREMAIL-KEY",
-      "severity": "low",
-      "status": "scheduled round 463 (D-29z1633): key renamed to sendOrderPai",
-      "title": "store-gradient-text DELETED_STORE_MODULES key sendOrderEmail is not the deleted export (sendOrderPai"
+      "id": "A-R463-REVIEW-M1",
+      "severity": "medium",
+      "origin": "B spec",
+      "status": "scheduled round 464 (D-29z1635): sketch-464 deletes the 4 orphans and rewrites DC2 (+DC4); closes on C PASS",
+      "title": "DC2 (store-dead-css.test.ts) counts a keyframes name as consumed on any whole-word text match (comment, identifier, type field), so 4 keyframes orphaned by round 463 (float, grain, fadeInUp, fadeOut) stayed in app.css and the shipped CSS",
+      "evidence": "a-round-463.md code-reviewer M1; c-round-463.md C-R463-01; gates/round-463/review.md finding 1",
+      "confirmedBy": [
+        "C-R463-01 (C round 463, Low, origin B spec)",
+        "GATE463-1 (gate 463 review finding 1, Low)"
+      ],
+      "ruling": "D-29z1634: Medium kept for the test contract (DC2 could not detect an orphan); no visible effect (C7 deadAnim 0/0); C-R463-01 is a confirmation, not a new bug (L7)",
+      "added": "2026-11-12 B round 463 -> 464 planning"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 454,
-      "task": "current-task.md",
-      "decision": "D-29z1612",
-      "type": "STORE-2b-3c-1 live teal CSS",
-      "status": "c_pass_published",
-      "note": "baseline db641ec; sketch b-round-453/sketch-454.patch.txt sha 9f6fcb40 (v4; v1-v3 superseded); grants b-round-453/grants-454.txt (4, narrow app/styles/app.css + app/styles/base/utilities.css); claims b-round-453/claims-454.sh K1-K14; mutants 27 lines; full suite on sketch 284/4138",
-      "result": "C round 454 PASS (c-round-454.json: C1-C10 passed, browserVerified/realVerified true, 0 bugs; blocked: fake-bearer premium path + signed-in legacy ExportDialog (backend unavailable in cloud), Firefox/Safari scrollbar (TLM-R454-FIREFOX-SAFARI-SCROLLBAR, deadline RETRO 465)); gate 454 published 2e26962 (review COMMIT OK 9/10, verify green) (D-29z1615)"
-    },
     {
       "round": 455,
       "task": "current-task.md",
@@ -6866,8 +6853,17 @@
       "task": "current-task.md",
       "decision": "D-29z1633",
       "type": "STORE-2b-3d-2: delete dead Store CSS rules (306 blocks + 6 keyframes) + C-R462-01 doc-301 fix",
+      "status": "c_pass_published",
+      "note": "baseline eb4d6df (gate 462 published); A applies b-round-462/sketch-463.patch.txt v2 sha f299877b; grants = b-round-462/grants-463.txt (7 paths)",
+      "result": "C round 463 PASS (c-round-463.json C1-C10, browserVerified/realVerified true; 1 Low C-R463-01 origin B spec = confirmedBy on A-R463-REVIEW-M1); gate 463 published d55ec17 (review COMMIT OK, all Lows) (D-29z1634)"
+    },
+    {
+      "round": 464,
+      "task": "current-task.md",
+      "decision": "D-29z1635",
+      "type": "STORE-2b-3d-3: delete 4 orphan @keyframes (float, grain, fadeInUp, fadeOut) + 2 comment headers; DC2 counts only animation declarations/utilities/inline styles, comments stripped; new DC4",
       "status": "dispatched",
-      "note": "baseline eb4d6df (gate 462 published); A applies b-round-462/sketch-463.patch.txt v2 sha f299877b; grants = b-round-462/grants-463.txt (7 paths)"
+      "note": "baseline d55ec17 (gate 463 published); A applies b-round-463/sketch-464.patch.txt sha 35f0fb1f (v3); grants = b-round-463/grants-464.txt (3 paths)"
     }
   ],
   "other_keys": [

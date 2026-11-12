@@ -1,14 +1,14 @@
-# Active loop summary (2026-11-12T08:18:11.835Z)
+# Active loop summary (2026-11-12T09:30:28.891Z)
 
-- backlog.json 3337 KB -> active view 296 KB
-- status: G_ROOT_GATE round 463
-- servers: `{"checkedUtc":"2026-11-12T07:55:29.3320582Z","round":463,"attempt":1,"store":200}`
-- last publication: d55ec17132979c3589dfdcc142793d68a0682dc7 (rounds 463-463)
-- last root gate: round 463 published - commit d55ec17132979c3589dfdcc142793d68a0682dc7 pushed
+- backlog.json 3345 KB -> active view 296 KB
+- status: G_ROOT_GATE round 464
+- servers: `{"checkedUtc":"2026-11-12T09:05:11.8676299Z","round":464,"attempt":1,"store":200}`
+- last publication: 6d321c740ed4343ab185381f7ae4216d9a350290 (rounds 464-464)
+- last root gate: round 464 published - commit 6d321c740ed4343ab185381f7ae4216d9a350290 pushed
 
 ## Current items: -
 
-## Open findings: 971 (8 Critical/High/Medium)
+## Open findings: 969 (9 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the cloud runner (same class as GATE97-S2); Tech Lead manual check, does not block T12 per the 2026-10-23 rule / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
@@ -17,4 +17,5 @@
 - **STUDIO-VIS-5** / medium / scheduled (D-29z1512): REVIEW-RECOMMENDATIONS (Saba: defer) / Detail panel spacing (gap-0.5 -> gap-1, px-3 -> px-4)
 - **SABA-B-12** / medium / in_progress (D-29z1515, D-29z1521, D-29z1523, D-29z1527, D-29z1532, D-29z1536, D-29z1538): stages 1, 2a, 2b, 3, 3b passed C and are published (5a30894, 1197dcb, 1a417fb, 0c22ac9, 8233840); stage 4 (selects, STUDIO-VIS-3) in REVIEW-RECOMMENDATIONS / Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cance
 - **GATE462-M1-EMAIL-SERVER-POLICY** / medium / open_root (D-29z1632): question ROOT-REQ-EMAIL-SERVER-DELETION; non-blocking for the loop (2026-10-23 root clarification class: root-only); app/lib/email.server.ts is not in global_forbidden_files (claims-463 K11); 0 importers; r2-tokens.server.ts and every download route unchanged; C round 462 C8 p …[see backlog.json] / Round 462 deleted app/lib/email.server.ts (dead order-paid email builder that used getDownloadUrl); root to confirm the deletion is acceptab
-- ... and 963 Low/info (see backlog.json)
+- **A-R463-REVIEW-M1** / medium / scheduled round 464 (D-29z1635): sketch-464 deletes the 4 orphans and rewrites DC2 (+DC4); closes on C PASS / DC2 (store-dead-css.test.ts) counts a keyframes name as consumed on any whole-word text match (comment, identifier, type field), so 4 keyfra
+- ... and 960 Low/info (see backlog.json)
