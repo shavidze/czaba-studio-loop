@@ -1,0 +1,27 @@
+# Expected claim deltas after A (claims-466.sh run with S=/tmp/b466-scratch = sketch applied + doc-304 placeholder + doc 299 l.4 Completed). On the real store after A: K2 storeHead stays 6d321c7 (scratch hash is its own repo) and statusLines=4 (3 M + doc 304); K3 manifestRc=1 (exactly the 3 granted tracked files FAILED) protectedRc=0; K4 0/5/1/0; K6 adds TS7 TS8; K7 doc 304 present; K8 sketchApplies=no (already applied; the multi-line git error is expected); K21=1 (store-teal-sweep.test.ts holds the split prefix of a join() fixture, not a full class); K22 doc 299 l.4 Completed (C round 466 PASS) and inProgressHits=20. Any other differing K line is a finding.
+2,4c2,4
+< K2 storeHead=6d321c7 statusLines=0
+< K3 manifestEntries=1377 manifestRc=0 protectedRc=0
+< K4 headGlowBlur=1 headZeroLength=0 headPrecheck=0 zeroPxForms=4
+---
+> K2 storeHead=e80b97c statusLines=4
+> K3 manifestEntries=1377 manifestRc=1 protectedRc=0
+> K4 headGlowBlur=0 headZeroLength=5 headPrecheck=1 zeroPxForms=0
+6,8c6,12
+< K6 tsRows=TS1 TS2 TS3 TS4 TS5 TS6 
+< K7 doc304=absent lastDoc=303-store-2b-3d-3-orphan-keyframes.md
+< K8 sketchApplies=yes sketchSha=06b2af46191097c0 files=2
+---
+> K6 tsRows=TS1 TS2 TS3 TS4 TS5 TS6 TS7 TS8 
+> K7 doc304=present lastDoc=304-store-2b-3c-2b-glow-scanner-forms.md
+> K8 sketchApplies=error: patch failed: app/lib/__tests__/helpers/style-scan.ts:54
+> error: app/lib/__tests__/helpers/style-scan.ts: patch does not apply
+> error: patch failed: app/lib/__tests__/store-teal-sweep.test.ts:124
+> error: app/lib/__tests__/store-teal-sweep.test.ts: patch does not apply
+> no sketchSha=06b2af46191097c0 files=2
+21,22c25,26
+< K21 testFixtureSweep=0
+< K22 doc299line4=**სტატუსი:** In Progress (stage 1 of 2; C round 458 PASS) inProgressHits=21
+---
+> K21 testFixtureSweep=1
+> K22 doc299line4=**სტატუსი:** Completed (C round 466 PASS) inProgressHits=20

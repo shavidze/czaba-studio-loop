@@ -1,0 +1,79 @@
+diff --git a/app/lib/__tests__/helpers/style-scan.ts b/app/lib/__tests__/helpers/style-scan.ts
+index 5f17a7b..72b19a3 100644
+--- a/app/lib/__tests__/helpers/style-scan.ts
++++ b/app/lib/__tests__/helpers/style-scan.ts
+@@ -54,14 +54,15 @@ const SCRIPT_GRADIENT_TEXT_PATTERN_SOURCE = [
+ ].join('|');
+ 
+ const LAYER_START = /(?<=(?:^|[:'"`,[]|inset)[\s_]*)/.source;
+-const GLOW_BLUR = /(?:[1-9]|0?\.\d*[1-9]|var\(|\$\{)/.source;
++const GLOW_BLUR = /(?:[1-9]|0?\.\d*[1-9]|var\(|\$\{|(?:calc|min|max|clamp)\(|['"`]\s*\+)/.source;
++const ZERO_LENGTH = /[+-]?(?:0+(?:\.0*)?|\.0+)(?:px|r?em|ch|ex|vh|vw|vmin|vmax)?/.source;
+ const SHADOW_VALUE_SPAN = /(?:[^;},]|,(?!\s*['"]?[\w-]+['"]?\s*:)){0,300}?/.source;
+ 
+ const ZERO_OFFSET_GLOW_PATTERN_SOURCE = [
+-  `(?:drop-|text-)?shadow-\\[[^\\]]{0,300}?${LAYER_START}0(?:px)?_0(?:px)?_${GLOW_BLUR}`,
+-  `\\[(?:box|text)-shadow:[^\\]]{0,300}?${LAYER_START}0(?:px)?_0(?:px)?_${GLOW_BLUR}`,
+-  `drop-shadow\\([\\s_]*0(?:px)?[\\s_]+0(?:px)?[\\s_]+${GLOW_BLUR}`,
+-  `(?:box-?shadow|text-?shadow)['"]?\\s*:${SHADOW_VALUE_SPAN}${LAYER_START}0(?:px)?\\s+0(?:px)?\\s+${GLOW_BLUR}`,
++  `(?:drop-|text-)?shadow-\\[[^\\]]{0,300}?${LAYER_START}${ZERO_LENGTH}_${ZERO_LENGTH}_${GLOW_BLUR}`,
++  `\\[(?:box|text)-shadow:[^\\]]{0,300}?${LAYER_START}${ZERO_LENGTH}_${ZERO_LENGTH}_${GLOW_BLUR}`,
++  `drop-shadow\\([\\s_]*${ZERO_LENGTH}[\\s_]+${ZERO_LENGTH}[\\s_]+${GLOW_BLUR}`,
++  `(?:box-?shadow|text-?shadow)['"]?\\s*:${SHADOW_VALUE_SPAN}${LAYER_START}${ZERO_LENGTH}\\s+${ZERO_LENGTH}\\s+${GLOW_BLUR}`,
+ ].join('|');
+ 
+ export interface ImportBinding {
+@@ -194,6 +195,9 @@ export function countTealHits(source: string): number {
+ }
+ 
+ export function countZeroOffsetGlowHits(source: string): number {
++  if (!/shadow/i.test(source)) {
++    return 0;
++  }
+   return countWhole(source, ZERO_OFFSET_GLOW_PATTERN_SOURCE);
+ }
+ 
+diff --git a/app/lib/__tests__/store-teal-sweep.test.ts b/app/lib/__tests__/store-teal-sweep.test.ts
+index 4217b13..5ecda6d 100644
+--- a/app/lib/__tests__/store-teal-sweep.test.ts
++++ b/app/lib/__tests__/store-teal-sweep.test.ts
+@@ -124,4 +124,39 @@ describe('store teal sweep (STORE-2b-2a, STORE-2b-2b)', () => {
+     ];
+     expect(offsets.map(countZeroOffsetGlowHits)).toEqual(offsets.map(() => 0));
+   });
++
++  it('TS7: zero offsets in any unit or sign, function blurs and concatenated blurs count as glows', () => {
++    const glows = [
++      "boxShadow: '0rem 0rem 20px red'",
++      "boxShadow: '-0 0 20px red'",
++      "boxShadow: '0 -0 20px red'",
++      "boxShadow: '+0 0.0px 8px red'",
++      ['className="shadow-[0rem', '_0_20px_red]"'].join(''),
++      ['className="[text-shadow:0em', '_0_6px_red]"'].join(''),
++      '.z { box-shadow: 0em 0 12px red; }',
++      "filter: 'drop-shadow(0rem 0 8px red)'",
++      "boxShadow: '0 0 calc(4px * 2) red'",
++      "textShadow: '0 0 max(2px, 1vw) red'",
++      "boxShadow: '0 0 min(8px, 2vw) red'",
++      "boxShadow: '0 0 clamp(4px, 1vw, 12px) red'",
++      "boxShadow: '0 0 ' + radius + 'px red'",
++    ];
++    expect(glows.map(countZeroOffsetGlowHits)).toEqual(glows.map(() => 1));
++    const offsets = [
++      "boxShadow: '0rem 0rem 0 1px red'",
++      "boxShadow: '0 0.5px 4px red'",
++      "boxShadow: '-1px 0 8px red'",
++      "boxShadow: '0 0 0rem 1px red'",
++      ['className="shadow-[0rem', '_2px_8px_black]"'].join(''),
++      "filter: 'drop-shadow(0 1rem 8px red)'",
++      "margin: '0rem 0 12px'",
++    ];
++    expect(offsets.map(countZeroOffsetGlowHits)).toEqual(offsets.map(() => 0));
++  });
++
++  it('TS8: the shadow pre-check skips only sources without the word shadow, in any case', () => {
++    expect(countZeroOffsetGlowHits("margin: '0 0 12px'; padding: 0 0 8px;")).toBe(0);
++    expect(countZeroOffsetGlowHits('.u { BOX-SHADOW: 0 0 8px red; }')).toBe(1);
++    expect(countZeroOffsetGlowHits("style={{ TextShadow: '0 0 6px red' }}")).toBe(1);
++  });
+ });
