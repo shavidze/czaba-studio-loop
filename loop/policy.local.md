@@ -679,6 +679,12 @@ Reference: Ableton, Logic Pro, Splice all show their splash for at least 1–2 s
 - **Calm confidence:** no clutter, no noise, no unnecessary elements
 - **Brand consistency:** Obsidian & Brass throughout, no leftover teal/blue/generic
 
+### Review stance (Saba, 2026-11-12)
+**ობიექტურად კრიტიკული, არა თავაზიანი.** Agents must be brutally honest — no "looks good overall" when something is mediocre. Judge against the stated mission: Steve Jobs-level attention, perceived value theory, and the specific goals we set. If it doesn't meet the bar, say exactly what fails and why. Positive feedback only when genuinely earned. "კრიტიკულად მიუდგეს ფერთა გამას და დიზაინს."
+
+### Known issues for the first review
+- **Logo still uses old colors** — not yet updated to Obsidian & Brass palette (Saba, 2026-11-12)
+
 ### Schedule
 - After STORE-2b completes → first review
 - After STORE-5 completes → full Store review
