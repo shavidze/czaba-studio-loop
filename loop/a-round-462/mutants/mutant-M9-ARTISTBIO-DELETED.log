@@ -1,0 +1,78 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a462-mut[39m
+
+ [32m✓[39m app/lib/__tests__/store-glow-shadow.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 157[2mms[22m[39m
+ [31m❯[39m app/lib/__tests__/store-gradient-text.test.ts [2m([22m[2m9 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 228[2mms[22m[39m
+     [32m✓[39m GT1: no app CSS rule paints text with a background clip, except the allow-listed dead rule at its exact count[32m 37[2mms[22m[39m
+     [32m✓[39m GT1b: no app or perf script clips text to a background (class, inline style or CSS text); the script allow-list is empty[32m 47[2mms[22m[39m
+     [32m✓[39m GT2: the --gradient-text token is neither defined nor read anywhere in app[32m 25[2mms[22m[39m
+[31m     [31m×[31m GT3: only the allow-listed dead files name the retired text-glow or hero-title-glow class, each at its exact count[39m[32m 44[2mms[22m[39m
+     [32m✓[39m GT4: the CSS scan is non-vacuous and its parser handles case, lists, comments, quotes and alpha-zero fills[32m 12[2mms[22m[39m
+     [32m✓[39m GT4b: the script scan finds every gradient-text spelling and is non-vacuous[32m 32[2mms[22m[39m
+[31m     [31m×[31m GT5: the allow-listed dead components stay unmounted (no importer outside their own file and the barrels)[39m[32m 16[2mms[22m[39m
+     [32m✓[39m GT5b: the dead-module import matcher still recognises every import form of a common-named module (fixture modules)[32m 4[2mms[22m[39m
+[31m     [31m×[31m GT6: the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1)[39m[32m 7[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-teal-sweep.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 343[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-live-teal.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 820[2mms[22m[39m
+     [33m[2m✓[22m[39m LT7: every dead-labelled teal rule has no mounted consumer (A-R454-REVIEW-M-DEAD-UNCHECKED) [33m 409[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT3: only the allow-listed dead files name the retired text-glow or hero-title-glow class, each at its exact count
+[31m[1mAssertionError[22m: expected [ Array(1) ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "components/home/ArtistBioSection.tsx: 0 != 1",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m152:21[22m[39m
+    [90m150| [39m    const { unexpected, drifted } = allowListViolations(counts, RETIRE…
+    [90m151| [39m    [34mexpect[39m(unexpected)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m152| [39m    [34mexpect[39m(drifted)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m153| [39m  })[33m;[39m
+    [90m154| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT5: the allow-listed dead components stay unmounted (no importer outside their own file and the barrels)
+[31m[1mAssertionError[22m: expected [ …(343) ] to include 'components/home/ArtistBioSection.tsx'[39m
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m224:23[22m[39m
+    [90m222| [39m    [35mconst[39m sources [33m=[39m [34mlistFiles[39m([33mAPP_ROOT[39m[33m,[39m [33mSCRIPT_SOURCE_EXTENSIONS[39m)[33m;[39m
+    [90m223| [39m    const importers = Object.entries(DEAD_COMPONENTS).flatMap(([name, …
+    [90m224| [39m      [34mexpect[39m(sources)[33m.[39m[34mtoContain[39m(ownFile)[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m225| [39m      [35mconst[39m word [33m=[39m [35mnew[39m [33mRegExp[39m([32m`(?<![\\w$])[39m[36m${[39mname[36m}[39m[32m(?![\\w$])`[39m)[33m;[39m
+    [90m226| [39m      [35mreturn[39m sources
+[90m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m223:55[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT6: the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1)
+[31m[1mAssertionError[22m: expected [ …(343) ] to include 'components/home/ArtistBioSection.tsx'[39m
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m273:23[22m[39m
+    [90m271| [39m    [35mconst[39m sources [33m=[39m [34mlistFiles[39m([33mAPP_ROOT[39m[33m,[39m [33mSCRIPT_SOURCE_EXTENSIONS[39m)[33m;[39m
+    [90m272| [39m    [35mfor[39m ([35mconst[39m kept [35mof[39m [33mObject[39m[33m.[39m[34mvalues[39m([33mDEAD_COMPONENTS[39m)) {
+    [90m273| [39m      [34mexpect[39m(sources)[33m.[39m[34mtoContain[39m(kept)[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m274| [39m    }
+    [90m275| [39m    [35mfor[39m ([35mconst[39m path [35mof[39m [33mObject[39m[33m.[39m[34mvalues[39m([33mDELETED_STORE_MODULES[39m)) {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m26 passed[39m[22m[90m (29)[39m
+[2m   Start at [22m 06:09:37
+[2m   Duration [22m 1.21s[2m (transform 348ms, setup 0ms, import 442ms, tests 1.55s, environment 1ms)[22m
+
+
+::error file=/tmp/a462-mut/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT3%3A only the allow-listed dead files name the retired text-glow or hero-title-glow class%2C each at its exact count,line=152,column=21::AssertionError: expected [ Array(1) ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "components/home/ArtistBioSection.tsx: 0 != 1",%0A+ ]%0A%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:152:21%0A%0A
+
+::error file=/tmp/a462-mut/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT5%3A the allow-listed dead components stay unmounted (no importer outside their own file and the barrels),line=224,column=23::AssertionError: expected [ …(343) ] to include 'components/home/ArtistBioSection.tsx'%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:224:23%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:223:55%0A%0A
+
+::error file=/tmp/a462-mut/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT6%3A the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1),line=273,column=23::AssertionError: expected [ …(343) ] to include 'components/home/ArtistBioSection.tsx'%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:273:23%0A%0A

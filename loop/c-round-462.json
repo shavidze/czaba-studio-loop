@@ -1,0 +1,64 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-12T06:14:17.1797763Z",
+  "round": 462,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R462-01",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "Build HEAD a7fa78e and the working tree (production) and run b-round-461/build-compare.py",
+    "Rebuild the tree with docs/implementation/.../301-*.md removed and compare again"
+   ],
+   "expected": "CSS: exactly 12 Tailwind utilities removed, 0 added (b-round-461/build-compare.txt, cmp equal)",
+   "actual": "With doc 301 present the CSS is unchanged (selectors head=tree=2068, removed=0). Without doc 301 the output is byte-identical to B's (removed=12). Doc 301 (\u00a72.3 requires it to name the 12 utilities) contains the class strings, and Tailwind v4 auto-source scans docs/*.md, so the 12 dead rules (775 B) stay in the shipped bundle. Doc 301 l.112 says the CSS bundle loses them; false for the published tree. No live element affected (C7: 12/12 rows equal).",
+   "evidence": "c-round-462/build-compare.txt, c-round-462/build-compare-nodoc.txt, c-round-462/prod-nodoc/build.log"
+  }
+ ],
+ "passed": [
+  "C1",
+  "C2(K23 only differs, B spec placeholder)",
+  "C3",
+  "C4",
+  "C5",
+  "C6(difference judged benign, see C-R462-01)",
+  "C7",
+  "C8",
+  "C9",
+  "C10"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "lint",
+  "verify"
+ ],
+ "blocked": [],
+ "manifestPaths": "b-round-461/grants-462.txt (15 paths)",
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": null,
+ "assertsSpecified": null,
+ "mutantsRecorded": "c-round-462/mutants/mutants.txt byte-identical to b-round-461/mutants/mutants.txt",
+ "mutantRedOnSketch": "b-round-461/mutants/mutants.txt",
+ "mutantRedOnTree": "c-round-462/mutants/mutants.txt (sketch scratch, sha-identical files)",
+ "gateChecksNamed": null,
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "covering 6 files",
+  "build-compare",
+  "store-pages probe"
+ ],
+ "affectedChecksRunOnSketch": "b-round-461/precheck-covering.log, b-round-461/build-compare.txt; C re-ran covering 6/77 green (c-round-462/covering.log)",
+ "observations": "K23 differs from the expected file only because B's placeholder doc 301 lacked line 4; A's doc has the required line (B spec, info). Studio audio graph/export not exercised: no Studio code changed; C8 only checks demo open, play/stop, protection."
+}

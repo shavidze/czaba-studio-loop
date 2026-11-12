@@ -1,0 +1,67 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c462-mut[39m
+
+ [32m✓[39m app/lib/__tests__/store-glow-shadow.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 160[2mms[22m[39m
+ [31m❯[39m app/lib/__tests__/store-gradient-text.test.ts [2m([22m[2m9 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 237[2mms[22m[39m
+     [32m✓[39m GT1: no app CSS rule paints text with a background clip, except the allow-listed dead rule at its exact count[32m 43[2mms[22m[39m
+     [32m✓[39m GT1b: no app or perf script clips text to a background (class, inline style or CSS text); the script allow-list is empty[32m 49[2mms[22m[39m
+     [32m✓[39m GT2: the --gradient-text token is neither defined nor read anywhere in app[32m 25[2mms[22m[39m
+     [32m✓[39m GT3: only the allow-listed dead files name the retired text-glow or hero-title-glow class, each at its exact count[32m 29[2mms[22m[39m
+     [32m✓[39m GT4: the CSS scan is non-vacuous and its parser handles case, lists, comments, quotes and alpha-zero fills[32m 14[2mms[22m[39m
+[31m     [31m×[31m GT4b: the script scan finds every gradient-text spelling and is non-vacuous[39m[32m 27[2mms[22m[39m
+     [32m✓[39m GT5: the allow-listed dead components stay unmounted (no importer outside their own file and the barrels)[32m 32[2mms[22m[39m
+     [32m✓[39m GT5b: the dead-module import matcher still recognises every import form of a common-named module (fixture modules)[32m 4[2mms[22m[39m
+     [32m✓[39m GT6: the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1)[32m 8[2mms[22m[39m
+ [31m❯[39m app/lib/__tests__/store-teal-sweep.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 324[2mms[22m[39m
+     [32m✓[39m TS1: every remaining teal hit in app sources sits in an allow-listed file[32m 188[2mms[22m[39m
+     [32m✓[39m TS2: the scan is non-vacuous and every allow-list entry keeps its exact hit count[32m 123[2mms[22m[39m
+     [32m✓[39m TS3: the granted store files carry no glow token, no zero-offset glow and no teal colour[32m 5[2mms[22m[39m
+     [32m✓[39m TS4: the entrance loader wordmark has no gradient text clip[32m 0[2mms[22m[39m
+[31m     [31m×[31m TS5: perf sources carry no teal colour and the perf scan is non-vacuous[39m[32m 4[2mms[22m[39m
+     [32m✓[39m TS6: the zero-offset glow scanner finds every spelling and skips offset shadows and rings[32m 1[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-live-teal.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 808[2mms[22m[39m
+     [33m[2m✓[22m[39m LT7: every dead-labelled teal rule has no mounted consumer (A-R454-REVIEW-M-DEAD-UNCHECKED) [33m 396[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT4b: the script scan finds every gradient-text spelling and is non-vacuous
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m217:66[22m[39m
+    [90m215| [39m      expect.arrayContaining(['app/root.tsx', 'app/components/loading/…
+    [90m216| [39m    )[33m;[39m
+    [90m217| [39m    expect(everyScript.some((path) => path.startsWith('perf/'))).toBe(…
+    [90m   | [39m                                                                 [31m^[39m
+    [90m218| [39m    expect(SCRIPT_SCAN_ROOTS.map((root) => root.prefix)).toEqual(['app…
+    [90m219| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-teal-sweep.test.ts[2m > [22mstore teal sweep (STORE-2b-2a, STORE-2b-2b)[2m > [22mTS5: perf sources carry no teal colour and the perf scan is non-vacuous
+[31m[1mAssertionError[22m: expected 0 to be greater than or equal to 10[39m
+[36m [2m❯[22m app/lib/__tests__/store-teal-sweep.test.ts:[2m88:28[22m[39m
+    [90m 86| [39m  it('TS5: perf sources carry no teal colour and the perf scan is non-…
+    [90m 87| [39m    [35mconst[39m sources [33m=[39m [34mlistFiles[39m([33mPERF_ROOT[39m[33m,[39m [33mSCRIPT_SOURCE_EXTENSIONS[39m)[33m;[39m
+    [90m 88| [39m    expect(sources.length).toBeGreaterThanOrEqual(MIN_SCANNED_PERF_SOU…
+    [90m   | [39m                           [31m^[39m
+    [90m 89| [39m    const offenders = sources.filter((path) => countTealHits(readFrom(…
+    [90m 90| [39m    [34mexpect[39m(offenders)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m27 passed[39m[22m[90m (29)[39m
+[2m   Start at [22m 06:19:16
+[2m   Duration [22m 1.20s[2m (transform 422ms, setup 0ms, import 514ms, tests 1.53s, environment 1ms)[22m
+
+
+::error file=/tmp/c462-mut/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT4b%3A the script scan finds every gradient-text spelling and is non-vacuous,line=217,column=66::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:217:66%0A%0A
+
+::error file=/tmp/c462-mut/app/lib/__tests__/store-teal-sweep.test.ts,title=app/lib/__tests__/store-teal-sweep.test.ts > store teal sweep (STORE-2b-2a%2C STORE-2b-2b) > TS5%3A perf sources carry no teal colour and the perf scan is non-vacuous,line=88,column=28::AssertionError: expected 0 to be greater than or equal to 10%0A ❯ app/lib/__tests__/store-teal-sweep.test.ts:88:28%0A%0A
