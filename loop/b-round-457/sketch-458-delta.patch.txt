@@ -1,0 +1,338 @@
+diff --git a/app/lib/__tests__/helpers/style-scan.ts b/app/lib/__tests__/helpers/style-scan.ts
+index 0b6f607..5f17a7b 100644
+--- a/app/lib/__tests__/helpers/style-scan.ts
++++ b/app/lib/__tests__/helpers/style-scan.ts
+@@ -69,18 +69,29 @@ export interface ImportBinding {
+   exported: string;
+ }
+ 
++export type SpecifierForm = 'module' | 'directory' | 'index';
++
+ export interface ResolvedImport {
+   target: string;
++  form: SpecifierForm;
+   names: string[];
+   bindings: ImportBinding[];
+   namespace: boolean;
+ }
+ 
++interface ResolvedSpecifier {
++  target: string;
++  form: SpecifierForm;
++}
++
++const IMPORT_CLAUSE_GRAMMAR = /^(?:[\w$]+\s*,?\s*)?(?:\{[^{}]*\}|\*(?:\s*as\s+[\w$]+)?)?$/;
++
+ const IMPORT_STATEMENT =
+   /\b(?:import|export)\s+(?:type\s+)?([\w$*\s{},]*?)\s*from\s*['"]([^'"\n]+)['"]|\bimport\s*\(\s*['"]([^'"\n]+)['"]\s*\)/g;
+ 
+-function resolveSpecifier(importer: string, specifier: string): string | null {
+-  const path = specifier.replace(/[?#].*$/, '').replace(/(.)\/+$/, '$1');
++function resolveSpecifier(importer: string, specifier: string): ResolvedSpecifier | null {
++  const bare = specifier.replace(/[?#].*$/, '');
++  const path = bare.replace(/(.)\/+$/, '$1');
+   let target: string;
+   if (path.startsWith('~/')) {
+     target = path.slice(2);
+@@ -89,16 +100,24 @@ function resolveSpecifier(importer: string, specifier: string): string | null {
+   } else {
+     return null;
+   }
+-  return target.replace(/\.(ts|tsx|js|jsx)$/, '').replace(/\/index$/, '');
++  const module = target.replace(/\.(ts|tsx|js|jsx)$/, '');
++  if (/\/index$/.test(module)) {
++    return { target: module.replace(/\/index$/, ''), form: 'index' };
++  }
++  return { target: module, form: path === bare ? 'module' : 'directory' };
+ }
+ 
+-export function resolvedImports(source: string, importer: string): ResolvedImport[] {
++export function resolvedImports(
++  source: string,
++  importer: string,
++  wholeOnUnparsedClause = false,
++): ResolvedImport[] {
+   const imports: ResolvedImport[] = [];
+   for (const match of source.matchAll(IMPORT_STATEMENT)) {
+     const clause = match[1] ?? '';
+     const specifier = match[2] ?? match[3] ?? '';
+-    const target = resolveSpecifier(importer, specifier);
+-    if (target === null) {
++    const resolved = resolveSpecifier(importer, specifier);
++    if (resolved === null) {
+       continue;
+     }
+     const braced = /\{([^}]*)\}/.exec(clause)?.[1] ?? '';
+@@ -121,10 +140,14 @@ export function resolvedImports(source: string, importer: string): ResolvedImpor
+       bindings.push({ imported: 'default', exported: defaultClause });
+     }
+     imports.push({
+-      target,
++      ...resolved,
+       names: bindings.map((binding) => binding.imported),
+       bindings,
+-      namespace: match[3] !== undefined || /\*/.test(clause) || clause.trim() === '',
++      namespace:
++        match[3] !== undefined ||
++        /\*/.test(clause) ||
++        clause.trim() === '' ||
++        (wholeOnUnparsedClause && !IMPORT_CLAUSE_GRAMMAR.test(clause.trim())),
+     });
+   }
+   return imports;
+@@ -333,6 +356,13 @@ function withoutComments(source: string): string {
+   return source.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, ' ');
+ }
+ 
++const QUOTED_OR_COMMENT =
++  /('(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`)|\/\*[\s\S]*?\*\/|\/\/[^\n]*/g;
++
++function withoutCommentsOutsideStrings(source: string): string {
++  return source.replace(QUOTED_OR_COMMENT, (_whole, quoted: string | undefined) => quoted ?? ' ');
++}
++
+ export function isReExportBarrel(source: string): boolean {
+   const statements = withoutComments(source)
+     .split(/;|\n(?=\s*export\b)/)
+@@ -356,9 +386,9 @@ const NON_SCRIPT_MODULE =
+ function wholeModuleImports(source: string, importer: string, pattern: RegExp): ResolvedImport[] {
+   const imports: ResolvedImport[] = [];
+   for (const match of source.matchAll(pattern)) {
+-    const target = resolveSpecifier(importer, match[1] ?? '');
+-    if (target !== null) {
+-      imports.push({ target, names: [], bindings: [], namespace: true });
++    const resolved = resolveSpecifier(importer, match[1] ?? '');
++    if (resolved !== null) {
++      imports.push({ ...resolved, names: [], bindings: [], namespace: true });
+     }
+   }
+   return imports;
+@@ -367,10 +397,10 @@ function wholeModuleImports(source: string, importer: string, pattern: RegExp):
+ function namespaceReExports(source: string, importer: string): ResolvedImport[] {
+   const imports: ResolvedImport[] = [];
+   for (const match of source.matchAll(NAMESPACE_RE_EXPORT)) {
+-    const target = resolveSpecifier(importer, match[2] ?? '');
+-    if (target !== null) {
++    const resolved = resolveSpecifier(importer, match[2] ?? '');
++    if (resolved !== null) {
+       imports.push({
+-        target,
++        ...resolved,
+         names: ['*'],
+         bindings: [{ imported: '*', exported: match[1] ?? '' }],
+         namespace: false,
+@@ -382,10 +412,13 @@ function namespaceReExports(source: string, importer: string): ResolvedImport[]
+ 
+ export function mountGraphImports(source: string, importer: string): ResolvedImport[] {
+   const stripped = withoutComments(source);
++  const stringAware = withoutCommentsOutsideStrings(source);
+   return [
+     ...resolvedImports(source, importer),
+     ...resolvedImports(stripped, importer),
++    ...resolvedImports(stringAware, importer, true),
+     ...namespaceReExports(stripped, importer),
++    ...namespaceReExports(stringAware, importer),
+     ...wholeModuleImports(source, importer, SIDE_EFFECT_IMPORT),
+     ...wholeModuleImports(source, importer, IMPORT_META_URL_MODULE),
+   ];
+@@ -396,31 +429,36 @@ export function unfollowedLocalSpecifiers(
+   importer: string,
+   sources: ReadonlyMap<string, string>,
+ ): string[] {
+-  const targets = new Set(mountGraphImports(source, importer).map((entry) => entry.target));
++  const followed = new Set(
++    mountGraphImports(source, importer).map((entry) => `${entry.form}|${entry.target}`),
++  );
+   return [...source.matchAll(LOCAL_SPECIFIER_LITERAL)]
+     .map((match) => match[1] ?? '')
+     .filter((specifier) => {
+-      const target = resolveSpecifier(importer, specifier);
++      const resolved = resolveSpecifier(importer, specifier);
+       return (
+-        target === null ||
+-        !targets.has(target) ||
+-        (scriptFileFor(target, sources) === null && !NON_SCRIPT_MODULE.test(target))
++        resolved === null ||
++        !followed.has(`${resolved.form}|${resolved.target}`) ||
++        (scriptFilesFor(resolved, sources).length === 0 && !NON_SCRIPT_MODULE.test(resolved.target))
+       );
+     });
+ }
+ 
+-function scriptFileFor(target: string, sources: ReadonlyMap<string, string>): string | null {
+-  for (const candidate of [
+-    `${target}.ts`,
+-    `${target}.tsx`,
+-    `${target}/index.ts`,
+-    `${target}/index.tsx`,
+-  ]) {
+-    if (sources.has(candidate)) {
+-      return candidate;
+-    }
+-  }
+-  return null;
++function scriptFilesFor(
++  { target, form }: ResolvedSpecifier,
++  sources: ReadonlyMap<string, string>,
++): string[] {
++  const moduleFile = [`${target}.ts`, `${target}.tsx`].find((candidate) => sources.has(candidate));
++  const indexFile = [`${target}/index.ts`, `${target}/index.tsx`].find((candidate) =>
++    sources.has(candidate),
++  );
++  const files =
++    form === 'index'
++      ? [indexFile]
++      : form === 'directory'
++        ? [moduleFile, indexFile]
++        : [moduleFile ?? indexFile];
++  return files.filter((file): file is string => file !== undefined);
+ }
+ 
+ export function reachableScripts(sources: ReadonlyMap<string, string>): Set<string> {
+@@ -439,23 +477,21 @@ export function reachableScripts(sources: ReadonlyMap<string, string>): Set<stri
+     const source = sources.get(next.file) ?? '';
+     const barrelNames = isReExportBarrel(source) ? next.names : null;
+     for (const entry of mountGraphImports(source, next.file)) {
+-      const file = scriptFileFor(entry.target, sources);
+-      if (file === null) {
+-        continue;
+-      }
+-      if (barrelNames !== null && !entry.namespace) {
+-        const forwarded = entry.bindings
+-          .filter((binding) => barrelNames.includes(binding.exported))
+-          .map((binding) => binding.imported);
+-        if (forwarded.includes('*')) {
+-          pending.push({ file, names: null });
+-        } else if (forwarded.length > 0) {
+-          pending.push({ file, names: forwarded });
++      for (const file of scriptFilesFor(entry, sources)) {
++        if (barrelNames !== null && !entry.namespace) {
++          const forwarded = entry.bindings
++            .filter((binding) => barrelNames.includes(binding.exported))
++            .map((binding) => binding.imported);
++          if (forwarded.includes('*')) {
++            pending.push({ file, names: null });
++          } else if (forwarded.length > 0) {
++            pending.push({ file, names: forwarded });
++          }
++          continue;
+         }
+-        continue;
++        const names = entry.namespace || entry.names.includes('*') ? barrelNames : entry.names;
++        pending.push({ file, names: isReExportBarrel(sources.get(file) ?? '') ? names : null });
+       }
+-      const names = entry.namespace || entry.names.includes('*') ? barrelNames : entry.names;
+-      pending.push({ file, names: isReExportBarrel(sources.get(file) ?? '') ? names : null });
+     }
+   }
+   return reached;
+diff --git a/app/lib/__tests__/store-live-teal.test.ts b/app/lib/__tests__/store-live-teal.test.ts
+index 7b143f6..2279085 100644
+--- a/app/lib/__tests__/store-live-teal.test.ts
++++ b/app/lib/__tests__/store-live-teal.test.ts
+@@ -340,8 +340,8 @@ function escapedPattern(literal: string): string {
+ function tokenPattern(token: string): RegExp {
+   const word = escapedPattern(token);
+   return THEME_TOKEN_NAMES.includes(token)
+-    ? new RegExp(`(?<![\\w/.])(?:[\\w-]*-)?${word}(?![\\w-])`)
+-    : new RegExp(`(?<![\\w-])${word}(?![\\w-])`);
++    ? new RegExp(`(?<![\\w/.])(?:[\\w-]*-)?${word}(?![A-Za-z0-9-])`)
++    : new RegExp(`(?<![\\w-])${word}(?![A-Za-z0-9-])`);
+ }
+ 
+ function deadRuleKeys(): string[] {
+@@ -818,7 +818,28 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+         'routes/x.tsx',
+         fixtures,
+       ),
++    ).toEqual([]);
++    expect(
++      unfollowedLocalSpecifiers(
++        "const re = /`/;\nimport {\n  // c\n  Q,\n} from './q';\nconst t = `x`;",
++        'routes/x.tsx',
++        fixtures,
++      ),
++    ).toEqual([]);
++    expect(
++      unfollowedLocalSpecifiers(
++        "const re = /\\/*/;\nimport {\n  // c\n  Q,\n} from './q';\nconst end = '*/';",
++        'routes/x.tsx',
++        fixtures,
++      ),
+     ).toEqual(['./q']);
++    expect(
++      unfollowedLocalSpecifiers(
++        "import { A } from './a/index';\nimport { B } from './dir/index';\nimport { C } from './a/';",
++        'routes/x.tsx',
++        fixtures,
++      ),
++    ).toEqual(['./a/index']);
+     expect(
+       unfollowedLocalSpecifiers(
+         "import W from '../lib/w.worker?worker';\nimport M from './missing';\nimport s from './s.css?url';\nimport D from './dir/';\nimport h from './h.css#x';",
+@@ -827,4 +848,65 @@ describe('store live teal CSS (STORE-2b-3c-1)', () => {
+       ),
+     ).toEqual(['./missing']);
+   });
++  it('LT10: directory specifiers follow every file a real resolver may pick, and names survive clause and comment hazards (A-R457-REVIEW-M1)', () => {
++    const directory = (specifier: string): Map<string, string> =>
++      new Map<string, string>([
++        ['routes/a.tsx', `import { Y } from ${specifier};`],
++        ['lib/u.ts', "export { Z } from './z';"],
++        ['lib/z.ts', 'export const Z = 1;'],
++        ['lib/u/index.ts', "export { Y } from './Y';"],
++        ['lib/u/Y.tsx', 'export const Y = 1;'],
++      ]);
++    const sorted = (files: Map<string, string>): string[] => [...reachableScripts(files)].sort();
++    expect(sorted(directory("'~/lib/u/'"))).toEqual([
++      'lib/u.ts',
++      'lib/u/Y.tsx',
++      'lib/u/index.ts',
++      'routes/a.tsx',
++    ]);
++    expect(sorted(directory("'../lib/u/'"))).toEqual([
++      'lib/u.ts',
++      'lib/u/Y.tsx',
++      'lib/u/index.ts',
++      'routes/a.tsx',
++    ]);
++    expect(sorted(directory("'~/lib/u/index'"))).toEqual([
++      'lib/u/Y.tsx',
++      'lib/u/index.ts',
++      'routes/a.tsx',
++    ]);
++    expect(sorted(directory("'~/lib/u/index.ts'"))).toEqual([
++      'lib/u/Y.tsx',
++      'lib/u/index.ts',
++      'routes/a.tsx',
++    ]);
++    expect(sorted(directory("'~/lib/u'"))).toEqual(['lib/u.ts', 'routes/a.tsx']);
++    const kit = (route: string): Map<string, string> =>
++      new Map<string, string>([
++        ['routes/a.tsx', route],
++        ['kit/index.ts', "export { A } from './A';\nexport { Row } from './Row';"],
++        ['kit/A.tsx', 'export const A = 1;'],
++        ['kit/Row.tsx', 'export const Row = 1;'],
++      ]);
++    expect(sorted(kit("export interface P {}\nexport { Row } from '~/kit';"))).toContain(
++      'kit/Row.tsx',
++    );
++    expect(
++      sorted(
++        kit(
++          "import { A } from '~/kit';\nconst accept = 'audio/*';\nimport {\n  // c\n  Row,\n} from '~/kit';\nconst end = '*/';",
++        ),
++      ),
++    ).toContain('kit/Row.tsx');
++    expect(sorted(kit("import { A } from '~/kit';"))).toEqual([
++      'kit/A.tsx',
++      'kit/index.ts',
++      'routes/a.tsx',
++    ]);
++    expect(tokenPattern('playButtonPulse').test('animate-[playButtonPulse_1s_infinite]')).toBe(
++      true,
++    );
++    expect(tokenPattern('value-card').test('[&_.value-card_span]:block')).toBe(true);
++    expect(tokenPattern('value-card').test('className="value-card-x"')).toBe(false);
++  });
+ });

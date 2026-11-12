@@ -1,0 +1,67 @@
+{
+ "taskStatus": "FAIL",
+ "bugs": [
+  {
+   "id": "A-R457-REVIEW-M1",
+   "severity": "medium",
+   "origin": "B spec",
+   "steps": [
+    "git clone --shared store at db95f40 into /tmp/c457-head; copy the tree's 4 granted test files; copy a-round-457/zz-a457-probe.test.ts into app/lib/__tests__/",
+    "npx vitest run app/lib/__tests__/zz-a457-probe.test.ts and read the P lines"
+   ],
+   "expected": "A directory specifier ('~/lib/u/' or '~/lib/u/index') resolves like TypeScript to lib/u/index.ts, or LT9 reports it unfollowed",
+   "actual": "P1 and P2 reach only lib/u.ts, and the directory barrel's leaves are not reached; unfollowed=[]; LT9 stays green. P4b and P5 also lose a name with LT9 green. Replay output equals a-round-457/probe-dir-slash.txt. Latent in app/ today (one sibling pair, no importer)",
+   "evidence": "c-round-457/probe-replay.txt"
+  }
+ ],
+ "passed": [
+  "C1 SOURCE-SCOPE (6 grant paths; doc 298 diff is l.4 only)",
+  "C2 CLAIMS (head clone and tree outputs equal, stderr empty)",
+  "C3 APPLY (4 OK)",
+  "C4 COVERING (4 files / 27 tests)",
+  "C7 STUDIO + PURCHASE PROTECTION (1440 and 1280)"
+ ],
+ "blocked": [
+  "C5 MUTANTS, C6 assert-map, C8 walker class, C9 docs, C10 not run: L22 short route, A STOPPED on an unruled Medium (A-R457-REVIEW-M1); routed to B"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-12T00:11:12.4726888Z",
+  "round": 457,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": null,
+ "missingPaths": null,
+ "countMismatches": 0,
+ "claimCheckMinutes": null,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": "b-round-456/mutants/mutants.txt (B's file; C did not re-run mutants on the tree, L22 short route)",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": "b-round-456/precheck-full-raw.log",
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "covering-457",
+  "mutants",
+  "walker class",
+  "c12"
+ ],
+ "affectedChecksRunOnSketch": "b-round-456/precheck-covering.log",
+ "notes": "Short FAIL: A STOPPED on A-R457-REVIEW-M1, an unruled Medium (L22/RETRO 450). C reproduced it; it needs a B ruling. Covering tests are green, so the delta itself is consistent.",
+ "evidence": "c-round-457.md"
+}

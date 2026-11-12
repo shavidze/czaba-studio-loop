@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-11T23:17:29.940Z",
-  "current_task": "Round 456: STORE-2b-3c-2a shared CSS rule reader + dead-consumer check (current-task.md, D-29z1619)",
+  "_generatedUtc": "2026-11-12T00:13:08.345Z",
+  "current_task": "Round 457: STORE-2b-3c-2a re-dispatch, mount walker ruling A-R456-REVIEW-M1 (current-task.md, D-29z1621)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6706,7 +6706,7 @@
       "id": "SABA-B-13",
       "severity": "medium",
       "origin": "Saba 2026-11-11 (policy section \"Store first-load animation too fast\")",
-      "status": "scheduled (D-29z1619): STORE-2b-ENTRANCE right after round 456 (REGRESSION-2026-11-13 first if planned on/after 11-13) | scheduled (D-29z1616): STORE-2b-ENTRANCE, after 2b-3c-2",
+      "status": "scheduled (D-29z1621): STORE-2b-ENTRANCE right after 2b-3c-2a passes C (round 457 re-dispatch); REGRESSION-2026-11-13 first if planned on/after 11-13 | scheduled (D-29z1619): STORE-2b-ENTRANCE right after round 456 (REGRESSION-2026-11-13 first if planned on/after 11-13) | scheduled (D-29z1616): STOR …[see backlog.json]",
       "title": "Store entrance animation flashes instead of playing through; needs a minimum display duration (Saba: e.g. 1.2-1.5 s)",
       "evidence": "b-round-454/probe/entrance-head-1440.txt (dev server, fresh tab: FCP 496 ms, entrance overlay mounts at 1522 ms, i.e. after the page content painted; same-tab reload: no entrance at all, czaba_entrance_seen in sessionStorage); SpotlightLoader.tsx SPOTLIGHT_ENTRANCE_TOTAL_MS = 1150, logo visible ~650 …[see backlog.json]",
       "b_facts": "timer-driven (content speed does not shorten it); mounts in useEffect after hydration, so SSR content paints first and the black overlay drops over it; once per tab session (spec D10 / R61). Production-build timing not yet measured (planning of the stage).",
@@ -6716,7 +6716,7 @@
       "id": "A-R454-REVIEW-M-DEAD-UNCHECKED",
       "severity": "medium",
       "origin": "A code-reviewer round 454",
-      "status": "in_progress (D-29z1619): round 456 LT7 (token consumers + name-precise mount walker) and LT8 (walker self-test) | scheduled (D-29z1615): owner STORE-2b-3c-2 (round 456), else 2b-3d",
+      "status": "in_progress (D-29z1621): round 457 re-dispatch (round 456 C FAIL on A-R456-REVIEW-M1; LT7 verdicts held at HEAD, walker made sound + LT9) | in_progress (D-29z1619): round 456 LT7 (token consumers + name-precise mount walker) and LT8 (walker self-test) | scheduled (D-29z1615): owner STORE-2b-3c-2 (ro …[see backlog.json]",
       "title": "store-live-teal LT3/LT5/LT6 trust the \"dead\" label of allow-listed rules; nothing asserts that those classes have no mounted consumer",
       "evidence": "a-round-454.md code-reviewer findings; audio-preview-inline-button / waveform-bar / track-row-waveform / loading-brand appear in TSX of components that are unmounted today",
       "note": "test-strength gap, no behaviour defect (C round 454); confirmedBy gate 454 review suggestion 6"
@@ -6750,18 +6750,25 @@
       "severity": "info",
       "status": "logged (D-29z1618)",
       "title": "b-round-454/probe altleft-5173/5181 files are named for the opposite trees; the task text matched wh"
+    },
+    {
+      "id": "A-R456-REVIEW-M1",
+      "severity": "medium",
+      "origin": "B spec (LT7 unmounted verdict new in the round-456 sketch; matcher pre-existing)",
+      "confirmedBy": "C round 456 (c-round-456.json, flip-probe-c.log)",
+      "status": "ruled + in_progress (D-29z1621): accepted Medium; fix in the walker only (mountGraphImports = raw + comment-stripped matcher union, side-effect imports, import.meta.url workers, export * as N), GT5b switched to the same edges, permanent guard LT9; round 457 sketch delta sha 2b97313c (tech-lead v3 AP …[see backlog.json]",
+      "title": "Mount walker drops import/export statements with a comment inside the braces (ScrollReveal reported unmounted); same class: worker new URL edges, side-effect imports, export * as N",
+      "evidence": "a-round-456.md STOP; c-round-456/flip-probe-c.log; b-round-456/probe/sweep-sketch456.txt, flips-288-to-v2.txt",
+      "added": "2026-11-11 B round 456 -> 457 planning"
+    },
+    {
+      "id": "INFO-A-R456-PREFLIGHT-LATE",
+      "severity": "info",
+      "status": "logged (D-29z1620)",
+      "title": "A read the pre-flight skill after applying the sketch, not first"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 447,
-      "task": "current-task.md",
-      "decision": "D-29z1588",
-      "type": "STORE-2b-2a (teal sweep, reachable Store screens: 21 hits / 7 files)",
-      "status": "c_pass_published",
-      "note": "baseline 5df7717 (gate 446 published); no B sketch (per-hit mapping table in task); claims b-round-446/claims-447.sh; grants b-round-446/grants-447.txt; HEAD probe b-round-446/probe/teal-head-1440.json; HEAD state probe b-round-446/probe/head-states.json (3 viewports)",
-      "result": "C round 447 PASS (c-round-447.json, browserVerified/realVerified true, C1-C15 PASS, 0 bugs, observations O1-O6), gate 447 published cce5eda (review COMMIT OK 9/10, verify green: 279 files / 4109 tests) (D-29z1589)"
-    },
     {
       "round": 448,
       "task": "current-task.md",
@@ -6835,8 +6842,17 @@
       "task": "current-task.md",
       "decision": "D-29z1619",
       "type": "STORE-2b-3c-2a shared CSS rule reader + dead-consumer check (test-only)",
+      "status": "c_fail_stopped_routed_to_b",
+      "note": "baseline db95f40 (gate 455 published); sketch b-round-455/sketch-456.patch.txt; grants b-round-455/grants-456.txt (5: 3 test files, doc 298 l.4, new doc 299); claims b-round-455/claims-456.sh; covering b-round-455/covering-456.txt (4 files); mutants b-round-455/mutants/mutants.txt",
+      "result": "C round 456 FAIL (STOPPED, routed to B; lesson L22 short route): C1-C4, C6 counts, C7 (browser, studio + purchase protection at 1440/1280), C8, C9 passed; C5 mutants not run, C6 assert map not written; bug A-R456-REVIEW-M1 Medium (origin B spec) confirmed by C (c-round-456/flip-probe-c.log); browserVerified/realVerified true; gate 456 skipped (C taskStatus FAIL); nothing published. Tree keeps A's round-456 work (sketch-456 byte-exact + doc 298 l.4 + doc 299), 5 dirty paths."
+    },
+    {
+      "round": 457,
+      "task": "current-task.md",
+      "decision": "D-29z1621",
+      "type": "STORE-2b-3c-2a re-dispatch: walker ruling A-R456-REVIEW-M1 (test-only)",
       "status": "dispatched",
-      "note": "baseline db95f40 (gate 455 published); sketch b-round-455/sketch-456.patch.txt; grants b-round-455/grants-456.txt (5: 3 test files, doc 298 l.4, new doc 299); claims b-round-455/claims-456.sh; covering b-round-455/covering-456.txt (4 files); mutants b-round-455/mutants/mutants.txt"
+      "note": "baseline db95f40 (gate 455 commit; gate 456 skipped); tree has round-456 sketch + docs; delta b-round-456/sketch-457-delta.patch.txt sha 2b97313c; grants b-round-456/grants-457.txt (6)"
     }
   ],
   "other_keys": [
