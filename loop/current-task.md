@@ -1,155 +1,153 @@
-# Round 479: DPG-FOOTER-LINKS. Store internal links navigate inside the app (DPG P1)
+# Round 480: RETRO 480 (twentieth retrospective, rounds 465–479; trigger: 15 rounds since RETRO 465) + whole-screen and journey review. No app code. A: nothing to implement. C: checks that the retro is traceable, plus the auth guard, a short Studio smoke test and the screen capture in the browser
 
-**Planned by:** B, at the round 478 → 479 planning on 2026-11-12 (`b-round-478.md`).
-- **Advisor:** available. Consulted twice: after orientation, and before hand-off. The second pass found that the focus helper also fired on Ctrl/middle clicks that do not navigate. Both passes are closed below.
-- **Archive:** the round-478 task is `tasks/round-478.md` (byte-identical, `cmp`).
-- **Regression is not due.** `date -u` was 2026-11-12 20:58, and `regression-last.json` says on or after 2026-11-13.
+**Planned by:** B, at the round 479 → 480 planning, 2026-11-12 (planning started 22:43Z; `b-round-479.md`, `b-round-479/checkpoint.md`). The advisor was available and was consulted after orientation and before hand-off. The round-479 task is archived as `tasks/round-479.md`, a byte-identical copy [K15].
 
-**What this round is:** DPG-FIX P1 item 3, "Change `<a>` to `<Link>` in Footer.tsx (full page reload kills premium feel)". The scope is widened to the same root cause: a full document reload on an internal Store link. Nothing on screen changes. What changes is that the page no longer reloads, so the entrance cover, fonts and app state are not re-fetched or re-run.
-
-## Decisions (`backlog.json` `decisions_log_b`)
-- **D-29z1695, round 478 result:**
-  - C PASS. `browserVerified`/`realVerified` are true. Gate 478 published `75a6028`.
-  - DPG-DOCS-UPDATE is C-verified and **awaits the DP gate**. DPG P0 is complete on C evidence, so root re-runs the DP gate.
-  - C-R478-01 → `deferred_low_polish`.
-- **D-29z1696, rulings on A-478's open review items:**
-  - H2 is accepted.
-  - M3, L9 and L11 → Low B-R478-BANNER-DATE (origin: B spec), deferred.
-  - M4 and gate finding 3 → input to DPG-COLOR-CONSOLIDATE (SIG-R478-COOL-NEUTRAL-HUE).
-  - L6 extends SIG-R478-AWWWARDS-GLOW.
-  - The `direction-decision.md:18` misquote → Low B-R478-DD-QUOTE.
-  - The gate's checker-as-CI note → SIG-R478-DOC-TOKEN-CHECKER-CI. It is not tasked.
-- **D-29z1697, scope and P1 order:**
-  - **Order.** DPG-LOGO's serif half is `awaiting_user`. DPG-BUTTON-CLEANUP needs `app/styles/app.css`, which is globally forbidden and needs a narrow grant, plus a Button migration across six files and a product-designer pass, so it is the next P1 round. FOOTER-LINKS depends on neither.
-  - **Inventory.** It covers every `<a` tag in `app/**`, parsed as whole tags.
-  - **In scope:**
-    - Footer: 9 links;
-    - `CookieConsent` → `/privacy`;
-    - `ProductSection` "View all" → `/store` (home);
-    - `privacy.tsx` → `/cookies`;
-    - `terms.tsx` → `/license`;
-    - `faq.tsx` "Contact Us" → `/hire-us`.
-  - **Ruled out:**
-
-    | Link | Reason |
-    |---|---|
-    | `ErrorBoundary` "/" | A full reload is the error recovery |
-    | `UserDropdown` | Imported nowhere (SIG-R479-USERDROPDOWN-DEAD) |
-    | `SignUpForm` | Inside the auth modal, which would stay open (SIG-R479-AUTH-MODAL-LINKS) |
-    | `account.orders` `/music` | Dead target (B-R478-DEAD-MUSIC-LINK) |
-    | `account.downloads` | Protected |
-    | Every `mailto:` and `https:` link | Not internal |
-- **D-29z1698, the focus contract (L47).** A client navigation keeps the document, so Chrome keeps the sequential-focus start at the link that unmounted.
-  - **Measured on B's sketch dev server:** after Enter on footer "Support", the first Tab lands on the `/support` "Live Chat" button. At HEAD (full reload) it lands on the header logo.
-  - `blur()` does not fix it. Focusing `document.body` does: a temporary `tabindex=-1`, `focus({ preventScroll: true })`, then the attribute is removed. The first Tab is then the header logo at both viewports, for footer and in-page links.
-  - The helper acts **only on a plain primary activation**. With Ctrl, Meta, Shift or Alt held, a non-zero button, or `defaultPrevented`, it does nothing: the browser opens a new tab and focus stays on the link, as at HEAD (`b-round-478/probe/modifier-sketch.json` vs `modifier-head.json`).
-  - **Implementation:** the shared helper `releaseLinkFocus` in `app/lib/link-focus.ts` (a 3-word name, per `AGENT_DISCOVERABLE_CODE.md` rule 1), used on every route-content Link. It is not a duplicate of `app/lib/focus-source.ts`, which tracks pointer vs keyboard focus for `:focus-visible`.
-  - **Exception:** the persistent CookieConsent banner link stays mounted, so it does **not** use the helper.
-- **D-29z1699, new findings:**
-  - **B-R478-DEAD-LICENSE-LINK (Medium, `awaiting_user`).** Footer "License" and the Terms link go to `/license`, which has no route; the 404 page renders with HTTP 200. Licence copy is legal content, so it goes to Saba (`user-review/questions-round-478.md` Q1). This round keeps the target and only makes the link client-side; C records the 404 and does not FAIL on it.
-  - **B-R478-DEAD-MUSIC-LINK (Medium).** Scheduled later.
-  - **B-R478-SOFT-404 (Low).** Deferred.
-
-## Reference: how the reference does it
-This is a navigation behaviour on a Store page. The reference is the current Store itself (full reload, measured) and the framework's documented Link behaviour. There is no Ableton reference (Store).
-
-| Point | Source | Confirmed behaviour | CZABA after this round | C row |
-|---|---|---|---|---|
-| Internal navigation | Remix 2.13.1 `<Link>` docs, https://remix.run/docs/en/2.13.1/components/link (the version from the dev server log; B did not open the page this round, so the doc is a pointer, not evidence). Measured instead: `b-round-478/probe/modifier-head.json` and `modifier-sketch.json` | **Measured:** a `<Link>` click changes the path with no reload (marker alive). Ctrl+click, Ctrl+Enter and a middle click open one new page and leave the current page, path and focus unchanged, at HEAD and on the sketch | All in-scope links use `<Link to>`. The href is unchanged | C5, C8, C9 |
-| Scroll after navigation | Remix `<ScrollRestoration>` in `root.tsx`; B measured HEAD's existing header `<Link>`s and the sketch (`b-round-478/probe/nav-final-*.json`) | A new location lands at `scrollY 0` (400 ms and 3 s), with Lenis on. One wheel step afterwards moves about 171–200 px, with no jump back | Same as the full reload: `scrollY 0` | C5, C7 |
-| Focus after navigation | HEAD full reload (`nav-final-5173.json`) | After the reload, focus is on `body` and the first Tab is the header logo `a[href="/"]` | Same (D-29z1698) | C6 |
-| Same-route click | Measured: footer "FAQ" on `/faq` from the page bottom (`modifier-*.json`) | HEAD reloads and Chrome restores `scrollY` ≈ 2158 (1440) | The sketch lands at `scrollY 0` (deviation 3) | C5 |
-| Persistent chrome | Measured: CookieConsent is rendered by `root.tsx` and is not unmounted by navigation | The banner stays until a decision is made | Its Privacy link navigates client-side; the banner stays, and so does focus on the link | C10 |
-
-**Deviations from HEAD:**
-1. **No document reload.** This is the item's purpose (DPG-FIX P1 "full page reload kills premium feel").
-2. **The new page title is not announced.** A reload makes screen readers announce the new page title; a client navigation does not. Fixing that needs a root-level route announcer in `root.tsx`, which is root-only. It is recorded as SIG-R479-ROUTE-ANNOUNCE and is not tasked here.
-3. **A same-route click goes to the top.** Clicking the link of the page you are on now scrolls to the top instead of reloading in place. That is the common single-page-app result of clicking the current page's link; the reload's restored position is a side effect, not a design.
+## Decisions
+All are in `backlog.json` (v466 → v469) under `decisions_log_b` [K10].
+- **D-29z1700: round 479 accepted.** C PASS (`c-round-479.json`, 0 bugs, `browserVerified`/`realVerified` true); gate 479 published `bbb3193` [K1]. DPG-FOOTER-LINKS is C-verified and waits for the DP gate. Gate finding 1 becomes the open Medium GATE479-M1-ROUTE-ANNOUNCE.
+- **D-29z1701: round-479 rulings.** Seven Lows deferred (incl. B-R479-LEADMAGNET-TIMER-CLIENT-NAV, a Saba question); `ArrangementLibraryMenu.tsx:131` ruled out; SIG-R479-INTERNAL-LINK-WRAPPER.
+- **D-29z1702: order.** Round 480 = RETRO 480; round 481 = REGRESSION-2026-11-13 (not due at this planning: `regression-last.json` 2026-11-10 [K13]).
+- **D-29z1703: RETRO data**, window 465–479.
+- **D-29z1704: GATE479-M1-ROUTE-ANNOUNCE ruling** and the post-regression order.
+- **D-29z1705: L46 rulings and screen** → `user-review/questions-retro-480.md` Q1–Q7 [K22]; SR-480-1…3; FIREFOX-CHECKS, SAFARI-CHECKS, HIREUS-EMAIL-CLIENTS opened as blocked tasks.
+- **D-29z1706: lessons, candidate rulings, systemic task, counters for RETRO 495.**
+- **D-29z1707: advisor closing-check corrections** (single-runner counter 1×, non-blocking class of the three new tasks, four more inputs ruled, staleness check widened to fonts, L47 clause "once an announcer exists").
 
 ## Rules
-- **Read `lessons.md` first,** in particular L12 (no class selectors in tests), L13 (whole-tag guards), L23, L29, L47, L52, L56 and L58.
-- **Claims (L29):** `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-478/claims-479.sh`. B's output at HEAD is `b-round-478/claims-479-planning-output.txt`, and on the sketch it is `claims-479-sketch-output.txt`.
-- **Sketch (L58):**
-  - The sketch is `b-round-478/sketch-479/`: 11 files, with hashes in `sketch-479.sha256` and the diff against HEAD in `sketch-479.patch.txt`.
-  - It is Biome-formatted, `tsc` rc 0 on a scratch copy, and all 162 tests in the 10 covering files pass (`sketch-vitest-final.log`).
-  - A may apply it as is. Any byte difference from the sketch is listed in `a-round-479.md` with its reason (K10).
-- **Screen budget (L39):** nothing visible changes. There is no new text, class or element. `onClick` handlers and the element type change only.
-- **Primitives:** `AGENT_DISCOVERABLE_CODE.md` (new export `releaseLinkFocus`), `FORWARDREF_COMPONENT.md` (components touched), `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md` (tests), and `GEORGIAN_DOCS.md` (doc 311).
+- **Policy:** "Retrospective: stop, look back, improve" (2026-10-26), "Look back on every issue Saba finds, and guard the whole screen" (2026-10-28), the RETRO journey step (2026-10-31), DPG process rule 5 (primitive staleness at RETRO, 2026-11-12), and `backlog.json` → `retro_policy`.
+- **Read `lessons.md` first.** This planning changed it; the hunks are in [K18] and `b-round-479/lessons-diff.txt`.
+- **L57 / L22:** C's JSON carries all L57 fields. Each is `null` with the reason "RETRO: no assert specified", except `gateChecksNamed` and the four manifest fields. Every bug carries an enum `origin`. Before hand-off, C runs `python3 -I tools/l57-check.py c-round-480.json c-round-480/l57-check.txt` and gets rc 0.
+- **L29:** untagged code text below is a row id, a loop-artifact path or a description of what C runs. The only facts about `store/` are HEAD, the tree, the manifest, the protected list, the primitive counts and lines, the Header link count, the root.tsx Studio guard and the routes without `meta` [K1] [K2] [K3] [K4] [K19] [K25] [K26] [K30] [K31] [K32] [K33].
+- **L59 / L60:** run every row until it has a result, browser rows first. Write `c-round-480/progress.json` after each row. Destructive commands stay inside `c-round-480/`.
+- **Not applicable in a RETRO round:** reference-first, the Ableton conformance check, the product-designer design step and the screen budget. Nothing visible changes.
 
-## Baseline
-- **HEAD `75a6028`** (gate 478 published). The working tree is clean [K7: 0 lines].
+## Baseline: HEAD `bbb3193`, clean tree
+- **Gate:** gate 479 published `bbb3193…` on both remotes [K1]. `context/head-sha.txt` may be stale (it said `75a6028` at planning); `git rev-parse HEAD` is the truth.
+- **Tree:** at planning, `git status --short --untracked-files=all` was empty and HEAD was `bbb3193` [K2] [K19].
+- **Frozen files:** every tracked file is in `b-round-479/r480-tree-sha256.txt`, **1,391** entries [K3]. Check from `store/` with `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-479/r480-tree-sha256.txt`; B got rc 0 [K25]. Each of the 11 protected files in `b-round-318/protected-sha256.txt` appears exactly once [K4], and that file also checks rc 0 [K25].
+- **Grants: none.** No file in `store/` may change in this round.
 
-### Grants (exactly these 12 paths)
-| Path | What |
+## 0. Why this round
+- **The RETRO is due:** `retro_policy.next_due` named round 480 (D-29z1640).
+- **Nothing blocks a code-free round.** No Critical or High finding is open. The open Mediums are manual, root, Saba or scheduled items, plus GATE479-M1 (ruled D-29z1704; it is scheduled after the regression and does not need this round).
+- **REGRESSION is not due:** `regression-last.json` says 2026-11-10 [K13] and planning started 2026-11-12T22:43Z. It is round 481.
+
+## 1. What B produced (the objects under test)
+| File | Content |
 |---|---|
-| `app/components/layout/Footer.tsx` | All 9 `<a href={ROUTES.*}>` become `<Link to={ROUTES.*} … onClick={releaseLinkFocus}>`. Text, classes and order are unchanged. `Link` comes from `@remix-run/react` |
-| `app/components/common/CookieConsent.tsx` | The Privacy Policy `<a href="/privacy">` becomes `<Link to="/privacy">` with the same classes and **no** focus helper |
-| `app/components/home/ProductSection.tsx` | The "View all" `<a href={viewAllLink}>` becomes `<Link to={viewAllLink} onClick={releaseLinkFocus}>` |
-| `app/routes/privacy.tsx`, `app/routes/terms.tsx`, `app/routes/faq.tsx` | The one internal `<a>` in each (`/cookies`, `/license`, `/hire-us`) becomes a `Link` with the helper. `mailto:` and `https:` links stay `<a>` |
-| `app/lib/link-focus.ts` (new) | `releaseLinkFocus(event)`: on a plain primary activation only (no modifier, button 0, not `defaultPrevented`), focus `body` with `preventScroll`, adding a temporary `tabindex=-1` only when the body had none, then removing it |
-| `app/lib/__tests__/link-focus.test.tsx` (new) | LF1, LF2 and LF3 (Ctrl, Meta, Shift, Alt and middle-button clicks keep focus on the link) |
-| `app/lib/__tests__/store-internal-links.test.ts` (new) | IL1 (6 files), IL2 (4 targets carry the helper), IL3 (the scanner mutant), IL4 (the CookieConsent link has no helper) |
-| `app/lib/__tests__/store-header-footer.test.tsx` | F1 renders inside `MemoryRouter`, with **no assertion lost**. Add F2 (9 links: router navigation + focus on `body`, no tabindex left) and F3 (exactly the 9 internal links in order) |
-| `app/components/common/__tests__/CookieConsent.test.tsx` | The `@remix-run/react` mock keeps the real module (`importOriginal`) and overrides only `useLocation`. Renders use `wrapper: MemoryRouter`. CC1–CC5 are unchanged, with no assertion lost. Add CC6 (the Privacy link has href `/privacy` and the Remix Link marker `data-discover="true"`) |
-| `docs/implementation/2026/quarter-IV/311-dpg-footer-links.md` (new) | TEMPLATE headings in order; l.4 exactly `**სტატუსი:** Completed (C round 479 PASS)`. It names D-29z1697…D-29z1699 and the focus measurement, and cites only test ids that exist (L26) |
+| `retros/retro-480.md` | Georgian analysis for Saba, 13 sections, window 465–479 |
+| `lessons.md` | [K7]. Before-copy `b-round-479/lessons-before-480.md`; diff `b-round-479/lessons-diff.txt` [K18]. Lesson ids unchanged [K12] |
+| `user-review/screen-review-480.md` | Line counts equal 465's; SR-480-1…3. Captures in `b-round-479/screens/`: `capture.mjs`, `capture.log`, `screen480.json`, `compare.py`, `compare-465.txt`, 12 PNGs [K5] [K6] [K9] |
+| `user-review/questions-retro-480.md` | Q1–Q7, each with a default [K22] |
+| `b-round-479/consult-tech-lead.md`, `consult-product-designer.md`, `consult-inputs.md` | Consult inputs and returned reports |
+| `b-round-479/primitive-staleness.txt` | The primitive teal and font counts, B's reading of each hit, and the SIG-R477 doc counts [K26] [K32] [K33] |
+| `b-round-479/*.py`, `misc-outputs.sh`, `stops-head.sh`, `data/*` | The scripts and data behind every number |
+| `backlog.json` (v469) | D-29z1700…D-29z1707 and the ids of [K24]. Before-copies `b-round-479/backlog-before-480.json` (before acceptance), `backlog-before-retro.json` and `backlog-before-fix.json`. Edit scripts `update-backlog-accept.py`, `update-backlog-retro.py`, `update-backlog-fix.py`, each with a `.done` marker. Retro input `b-round-479/backlog-retro-input.json` (v467) [K23] |
+| `feature-status.md` | Round 479 result; the RETRO 480 row; the RETRO 480 manual list at the top of §5. Before-copy `b-round-479/feature-status-before-480.md` |
 
-**Everything else is unchanged:**
-- `app/root.tsx`, `app/styles/**`, the auth components, every protected file, `public/**` and `.claude/**`;
-- every other route and component.
+**Order of work for the scripts:**
+1. Copy `b-round-479/*.py` (except `update-*.py` and `edit-lessons*.py`), `misc-outputs.sh` and `stops-head.sh` to `c-round-480/scripts/`. Rewrite every `b-round-479/data/` output path to `c-round-480/data/`, keeping the inputs `b-round-479/backlog-retro-input.json` and `archive-findings-snapshot.json`. Run from the loop root.
+2. Run order:
+   1. `collect.py` (stdout = `collect.txt`; writes `rounds-465-479.json`);
+   2. `cost.py` (stdout = `cost.txt`; writes `cost-rows.json`);
+   3. `classify.py`, `fails-detail.py`, `gate-reviews.py`, `l57-coverage.py`, `manifest-fields.py`, `exp-fields.py`, `awaiting-user.py`, `retro480-deadlines.py`, `deferred-added.py` (each stdout = `<name>.txt`);
+   4. `stage-sums.py`;
+   5. `misc-outputs.sh c-round-480/data`;
+   6. `stops-head.sh > c-round-480/data/stops-head.txt`.
 
-`ErrorBoundary`, `SignUpForm`, `UserDropdown` and `account.*` stay `<a>` (D-29z1697).
+   `cmp` each output with B's file of the same name; any difference is a finding. The data scripts read only `c-round-465.json` … `c-round-479.json` (and their result files), the retro input and the archive snapshot, so C's own `c-round-480.json` cannot change them.
+3. Loops: `l57-check-window.txt` = `tools/l57-check.py c-round-N.json /dev/null`, last line, N = 465…479. `l58-check-window.txt` = `tools/l58-check.py tasks/round-N.md`, last line, N = 466…479. Re-run both and `cmp`.
+4. **Do not run** `update-backlog-*.py`, `update-feature-status.py` or `edit-lessons*.py` (four lesson scripts). Their `.done` markers make them refuse.
 
-## 1. A: steps
-1. **STOP (L11)** if `claims-479.sh` K1–K9 differ from `b-round-478/claims-479-planning-output.txt` before your first edit.
-2. **Apply the sketch:** copy the 11 files from `b-round-478/sketch-479/`, or write the same change yourself. Then write doc 311.
-3. **Checks:**
-   - `npm run typecheck`;
-   - `npm run lint`;
-   - `npx vitest run $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-478/covering-candidates.txt) app/components/common/__tests__/CookieConsent.test.tsx app/lib/__tests__/store-internal-links.test.ts app/lib/__tests__/link-focus.test.tsx`.
+## 2. A: nothing to implement
+A writes `a-round-480.md` with one line: "RETRO round, no implementation." **STOP (L11):** if the frozen manifest is not rc 0, A reports the failing paths and changes nothing.
 
-   The expected result is 10 files and 162 tests, all passing. The full suite belongs to the gate.
-4. **Claims:** run the script and save it to `a-round-479/claims.txt`.
-5. **Code-reviewer:** run it once (12 files). Report Medium+ findings; an unruled Medium is a STOP (L10).
-6. **Report** in `a-round-479.md`.
-
-## 2. C: what to verify
-Write `c-round-479.md`, `c-round-479.json` (with all L57 fields; `mutantRedOnSketch` = `b-round-478/mutant-*.log`) and `c-round-479/progress.json` as you go.
-
-**Browser setup.** Seed `localStorage.czaba_lead_magnet` as dismissed and submitted, as in `b-round-478/probe/nav-probe-sketch.mjs`, except in C10 and C13. Wait at least 3.5 s after `networkidle` for hydration. Use B's probe script as a starting point, not as evidence.
+## 3. C: what to verify
+C writes `c-round-480.md` and `c-round-480.json` as it goes, plus `c-round-480/progress.json` after every row. Browser rows (2–4) go first.
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| C1 | SOURCE-SCOPE | `git status --short --untracked-files=all` | Exactly the 12 granted paths. K8 `0` |
-| C2 | CLAIMS | `bash b-round-478/claims-479.sh` | K1 `HEAD 75a6028`. K2 `footer-anchor-routes 0 footer-to-routes 9`. K3: each of the 5 lines `href… 0 to… 1`. K4 `license:0 collections.music:0`. K5 `exists`, with the 5 files `ProductSection Footer faq privacy terms`. K6 all `exists`. K7 12 lines. K8 `0`. K10 `0` (or each differing file is explained in `a-round-479.md`) |
-| C3 | TESTS | The A step-3 vitest command | 10 files, 162 tests, 0 failed. F1 and CC1–CC5 keep every original `expect` (diff the test files: no removed `expect(` line) |
-| C4 | TESTS MEAN SOMETHING | On your own copy of the whole tree, made the way B's scratch was (store minus `.git`, `docs` and `public`, with `node_modules` and `public` symlinked, so the vitest config is present): (a) restore HEAD's 6 source files; (b) turn the CookieConsent Link back into `<a>`; (c) turn footer Support back into `<a>`; (d) make the helper a no-op; (e) remove `onClick` from `faq.tsx`; (f) delete the helper's modifier guard. Run the 4 test files `store-header-footer`, `CookieConsent`, `store-internal-links` and `link-focus` | Each run is red: (a) 21 failed; (b) 3 (IL1, IL4, CC6); (c) 2 (IL1, F2-Support); (d) 11 (LF1, LF2, 9× F2); (e) 1 (IL2-faq); (f) 5 (LF3). Then the real tree is green again. B's logs: `b-round-478/mutant-*.log` (`baseline-sources`, M1–M5) |
-| C5 | NO RELOAD, SCROLL TOP | At 1440×900 and 1280×720: on `/faq` and on `/`, wheel to the bottom, set `window.__probeMarker`, then mouse-click footer "Support". Also on `/faq`, click footer "FAQ" (same route) | The path is `/support`, the marker survives, and `scrollY` is 0 at 400 ms and at 3 s. Same route: the path stays `/faq`, the marker survives and `scrollY` is 0 (deviation 3). **Control at baseline** (or B's `nav-final-5173.json`): the marker is lost |
-| C6 | FOCUS START (L47) | At both viewports: (a) focus footer "Support" with the keyboard and press Enter; (b) the same with `/faq` "Contact Us"; (c) mouse-click footer "Support" | After each: `document.activeElement` is `BODY`, `body` has no `tabindex`, `body` does not match `:focus-visible` (no visible ring), the first Tab focuses the header logo `a[href="/"]`, and the marker survives |
-| C7 | NO SCROLL JUMP-BACK | After C5, one mouse-wheel step of 200 | `scrollY` ≤ 250 (B measured 171 at 1440 and 200 at 1280) |
-| C8 | EVERY TARGET | At 1440×900, from a page whose layout includes the footer: click each of the 9 footer links, plus privacy → Cookie Policy link, terms → License page, faq → Contact Us, and home "View all" | Each one changes `location.pathname` to its href with the marker alive. `/license` shows the 404 page; record it under B-R478-DEAD-LICENSE-LINK, it is not a FAIL |
-| C9 | MODIFIER CLICK | At both viewports, from `/faq` scrolled to the bottom: (a) Ctrl+click footer "FAQ"; (b) focus it and press Ctrl+Enter; (c) middle-click it | Each opens exactly one new page at `/faq`. The current page keeps its path, `scrollY` and marker, and **focus stays on the link** (`document.activeElement` is that `a`), as at HEAD (`b-round-478/probe/modifier-head.json`) |
-| C10 | COOKIE BANNER | A fresh context with no consent decision and LeadMagnet seeded: wait for the banner, then click "Privacy Policy" | The path is `/privacy`, the marker survives, the banner is still visible with Accept and Decline, and no consent is stored |
-| C11 | AUTH + STUDIO OPENS | `/studio/middle-east` anonymous; `/api/studio-token?product=middle-east&file=x` with no bearer; `/studio-lab` in a fresh context at 1440×900 and 1280×720 | "Sign in required" with 0 audio `src`; 401; `/studio-lab` opens as the demo. The real-owner path is BLOCKED (backend unavailable in cloud) |
-| C12 | DOC 311 | Headings, l.4, D-IDs, test ids | TEMPLATE headings in order; l.4 exact; it names D-29z1697…D-29z1699; every test id it names exists (grep) |
-| C13 | LEADMAGNET AFTER CLIENT NAV (record) | A fresh context, LeadMagnet **not** seeded: on `/`, scroll more than 40 %, client-navigate via footer "FAQ" within 8 s, then wait 10 s | Record whether the popup opens on `/faq`, and compare with HEAD (a reload restarts the 8 s timer). Not a FAIL row. A popup that opens over a page where it is excluded (`/products/*`, `/cart`, `/checkout*`) would be a bug |
-| gate | — | Full verify, code review, publish | Root. Not claimed |
+| 1 | **SOURCE-SCOPE** (start) | `git status --short --untracked-files=all` in `store/`; the r480 manifest and the protected manifest | 0 lines; both rc 0 |
+| 2 | **G480-AUTH (browser)** | Fresh anonymous context at 1440×900 and 1280×720: open `/studio-lab`, then `/studio/middle-east` (warm both first with one untimed browser load, L38), then `GET /api/studio-token?product=middle-east&file=stem.mp3` with no Authorization header | `localStorage.auth_user` is null and the workspace opens; "Sign in required" with 0 `audio[src]`; the token API returns 401. Fake-bearer premium path: BLOCKED (backend unavailable in cloud) |
+| 3 | **STUDIO-SMOKE-480 (browser)** | Both viewports, after `Demo collection ready`: add one library item with Enter; Play about 1.5 s, then Stop; open Export, then close it | The clip appears; the position advances and then stops; the dialog opens and closes. Screenshots under `c-round-480/` |
+| 4 | **RT-SCREEN (browser)** | Check `http://127.0.0.1:5199/api/products`; if it is not 200, start `node mock-api/server.mjs` in the background and stop it afterwards (by PID; `pkill -f` can match your own shell). Run `b-round-415/screens/warmup.mjs` from `store/`. Then, from the loop root, run `node <abs>/b-round-479/screens/capture.mjs <abs c-round-480/screens>`, and open the PNGs `screen-review-480.md` cites | Line counts equal B's [K5]: 138/168/118/144, outside 97/124/86/101; ±2 per cell for status-line timing, each delta explained. The journey: 3 clips at `left` 512 / 1152 / 1792, and the status names the fourth at 00:48.000 "(nearest free spot)" [K6]. Each SR-480-n statement matches its PNG: Store header "CZABA" brass vs Studio "← CZABA" in the text colour (SR-480-1; record the computed `color` of both); the play button over the cover's brand mark (SR-480-2); the bordered "Demo collection — no sign-in required" box (SR-480-3; record the computed `border-top-width`) |
+| 5 | **CLAIMS** | `bash b-round-479/claims-480.sh` compared with `b-round-479/claims-480-planning-output.txt` | No `MISSING`; stderr empty. Differences only where C's own work changes a value (expected: none), each explained. K10 may differ if root's optimizer rewrote `backlog.json`; check that the last D-ID is still D-29z1707 |
+| 6 | **RT-NUM** | Re-run the scripts (§1) and `cmp`. Recompute every number in `retro-480.md` §1, §2, §4 and §9 from its named file, at least the list below | Every number matches its source. A number without a source is a finding (origin `B spec`) |
+| 7 | **RT-CAUSE** | For each fact in §3, §5, §6, §7 and §8, open the quoted source, at least the list below | Each fact is in its source. Each opinion is labelled as `tech-lead`'s or `product-designer`'s. No invented cause |
+| 8 | **RT-IDS** | [K24]; in `backlog.json`: `retro_runs` round 480; `retro_policy.next_due` names round 495; every RETRO480-* and RC-R47x entry in `retro_candidates` has a status starting `ruled (D-29z1706)` (RETRO480-SINGLE-RUNNER-CONTROL then says "still 1x", D-29z1707); FIREFOX-CHECKS starts `open_root`, SAFARI-CHECKS and HIREUS-EMAIL-CLIENTS start `open_tech_lead_manual`; FIREFOX-CHECKS, SAFARI-CHECKS and HIREUS-EMAIL-CLIENTS each list the TLM ids that retro §8 names | All present, with the status the retro states |
+| 9 | **RT-LESSONS** | `lessons.md` against `b-round-479/lessons-before-480.md` | ≤ 60 lines and ≤ 57,500 bytes [K7], three parts. The diff touches only the hunks of [K18]. Each change is the one retro §10 describes: removed text is evidence or explanation only (no finding id disappears; the only id that leaves is D-29z1639, the RETRO 465 note in the l.3 pointer, kept in the before-copy; compare the id lists, `b-round-479/lesson-finding-ids.txt`), and added clauses are word for word those quoted in retro §10. Read `edit-lessons.log` and `edit-lessons-2.log` for the exact removed spans. l.3 is a pointer that names `retro-480.md`, `465–479` and `b-round-479/lessons-before-480.md` |
+| 10 | **RT-CHECKERS** | The L57 and L58 loops (§1.3); `python3 -I tools/l58-check.py current-task.md` [K28] | The loops equal B's files: L57 OK 10/15 (INCOMPLETE 469, 470, 472, 475, 477); L58 OK 13/14 (471 INCOMPLETE) [K21]. l58 on this task gives rc 0 |
+| 11 | **RT-SABA** | `retro-480.md` §12, `screen-review-480.md`, `questions-retro-480.md` | Every rule change and screen item is information, a proposal or a question; nothing is presented as Saba's decision. Each question has a default. Q2 states that LeadMagnet is on the keep-list and its behaviour is unchanged until Saba answers. Q3/Q4 state which task opens and what blocks it |
+| 12 | **RT-PRIMITIVES** | From `store/`, re-run the K26, K32 and K33 commands and open each hit | Counts and lines equal [K26] [K32] [K33]. B's reading in `b-round-479/primitive-staleness.txt` matches each hit (teal: DESIGN_TOKENS l.9 and l.108 stale, l.26 inline example; TAILWIND_FIRST l.15 and l.18 bad-example hex; DESIGN_SYSTEM l.1536 changelog. Fonts: DESIGN_TOKENS l.57–59, TAILWIND_FIRST l.101/105 and DESIGN_SYSTEM l.750–761 name Playfair Display / Inter while app.css l.113–115 has Instrument Sans / IBM Plex Mono) |
+| 13 | **SOURCE-SCOPE** (end) + **L57** | As row 1; then `l57-check` on `c-round-480.json` | 0 lines and both rc 0; then rc 0 |
 
-**What could break nearby:**
-- tests that render these components without a router (C3);
-- hydration on content routes (C5, C8);
-- the persistent cookie banner (C10);
-- the LeadMagnet timer across client navigation (C13);
-- browser default behaviour for modifier clicks (C9).
+**RT-NUM, at least:**
+- **Totals [K16]:** $214.36; B $133.40, A $68.69, C $12.27; B share 62.2 % [K29].
+- **Medians and averages (`data/cost.txt`):** round $15.29; B $9.38; B min/max 1.95/13.45; A average FAIL 4.90, PASS 4.43; FAIL rounds $60.45 and the top five.
+- **Stage sums (`data/stage-sums.txt`):** the nine stage values of retro §2.
+- **Retro 465 comparison:** $282.31, $20.25 and 71.7 % come from `retros/retro-465.md` §1/§2; "24 % cheaper" = 1 − 214.36/282.31.
+- **Verdicts [K20]:** 10 PASS, FAIL [466, 471, 472, 476], BLOCKED [469], gate skipped [465, 466, 468, 469, 471, 472, 476], `browserVerified` 13/15.
+- **STOPs [K17]:** 466, 471, 472, 475, 476 (`data/stops-head.txt` and `data/stops-count.txt`). Also read the first 3 lines of each `a-round-N.md`, N = 465…479, and confirm the five by hand.
+- **Findings:** C bugs 11 with severities (`data/fails-detail.txt`); new deferred 43 and its split by method (a 43, b 36, c 40) and prefix (`data/deferred-added.txt`); 7 of the 43 carry `added` "2026-11-12 B round 479 -> 480 planning"; classify window open 6, deferred 31, archive 8 (`data/classify.txt`).
+- **Gate reviews:** 8 reviews, 35 items: low 15, info 6, unlabelled 13, medium 1 (`data/gate-reviews.txt`).
+- **Checkers:** L57 10/15; L58 13/14.
+- **Fix-up chains (retro §4):** 466→467, 469→470, 471→472→473, 476→477, from `data/task-titles.txt`.
+- **Lesson sizes [K7] [K14]:** after 57,487 B; before 59,870 B (`b-round-479/lessons-before-480.md`), L23 4,622 and L58 5,400 (bytes of the line without its newline; `wc -c` on `grep -m1` adds 1).
+- **Screen counts [K5].**
 
-## 3. After this round
-1. **On C PASS:** DPG-FOOTER-LINKS is C-verified. It awaits the P1 DP gate (DPG rule 4), so it is not მზადაა until then.
-2. **The next planning:**
-   1. **REGRESSION-2026-11-13** (due on or after 2026-11-13);
-   2. **RETRO 480**;
-   3. DPG-BUTTON-CLEANUP;
-   4. then the rest of P1 and any DP-gate findings root files.
-3. **Saba:** `user-review/questions-round-478.md` (the License page and the `/music` links).
-4. **Root, non-blocking:**
-   - ROOT-REQ-DPG-PRIMITIVES-PATCH (before the DP-gate re-run);
-   - the DP-gate re-run after P0;
-   - ROOT-REQ-NAV-LOADING-BAR-RENDER.
+**RT-CAUSE, at least:**
+- 466: `a-round-466.md` l.3–4 and `c-round-466.json` (C-R466-01);
+- 469/470: `c-round-469.json` (C-R469-01) and `tasks/round-470.md` "Why we missed it";
+- 471: `a-round-471.md` l.3, `c-round-471.json` (C-R471-01), `backlog.json` RC-R471-L58-SKIPPED;
+- 472: `a-round-472.md` l.3 and `c-round-472.json` (C-R472-01), RC-R472-DOC-GRANT-LINES;
+- 475: `a-round-475.md` l.3 and `c-round-475.json` (C-R475-01), RC-R475-STOP-CLAUSE;
+- 476: `a-round-476.md` l.3 and `c-round-476.json` (C-R476-STOP-R1);
+- 479 gate Medium: `gates/round-479/review.md` finding 1; the Header link count at `75a6028`, the root.tsx Studio guard and the routes without `meta` [K30] [K31];
+- the Saba-found issues: `tasks/round-468.md` l.62–65 and the L18 "Scroll frames" clause; the SABA-B-16 status in `backlog.json`;
+- the consults: `b-round-479/consult-tech-lead.md` and `consult-product-designer.md`.
+
+## 4. Claims
+The script is `b-round-479/claims-480.sh`. B's run is saved in `b-round-479/claims-480-planning-output.txt`, with stderr in `b-round-479/claims-480-planning.err` (empty).
+
+| Claim | What it checks |
+|---|---|
+| K1 | Gate 479 |
+| K2 | The tree at planning |
+| K3 | The manifest count |
+| K4 | Each protected file appears once in the manifest |
+| K5 | Screen line counts |
+| K6 | Journey clips |
+| K7 | `lessons.md` lines and bytes |
+| K8 | Every artifact in `b-round-479/cited-artifacts.txt` exists |
+| K9 | PNG count |
+| K10 | Backlog version and last D-ID |
+| K11 | l57 check on `c-round-479.json` |
+| K12 | Lesson ids equal the before-copy |
+| K13 | Regression date |
+| K14 | L23, L58, L29 and L37 byte counts |
+| K15 | The archived task equals B's copy |
+| K16 | Cost medians and totals |
+| K17 | STOP rounds (new and old method) |
+| K18 | Lessons diff hunks |
+| K19 | HEAD and status now |
+| K20 | Fail, blocked, gate-skipped and browser counts |
+| K21 | l58-check on tasks 466–479 |
+| K22 | The questions file has 7 questions |
+| K23 | The retro input is v467 |
+| K24 | New ids, `retro_runs` 480, `next_due` |
+| K25 | r480 manifest and protected manifest rc |
+| K26 | Primitive teal counts |
+| K27 | Installed Playwright browsers (the Q3 premise) |
+| K28 | l58-check on this task |
+| K29 | B share |
+| K30 | Header `<Link>` count at `75a6028`; root.tsx `isStudioPage` lines; root.tsx `meta` count |
+| K31 | `meta` count in the 7 routes retro §7 names |
+| K32 | Teal hit lines in the 3 primitive/design files |
+| K33 | Font hit lines; DESIGN_SYSTEM l.750–761; app.css l.113–115 |
+
+## 5. After this round (D-29z1704)
+1. **Round 481:** REGRESSION-2026-11-13, with any `scope_additions` from `regression_rounds`.
+2. Then GATE479-M1-ROUTE-ANNOUNCE (ruling D-29z1704) and B-R478-DEAD-MUSIC-LINK (`account.orders` only).
+3. Then DPG-BUTTON-CLEANUP and the rest of DPG P1, the DP-gate findings when root publishes them, SYS-R465-DEAD-CSS-MATCHER, STORE-2c…5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2 under the skip rule.
+4. **STEM-LANES** jumps ahead as soon as Saba answers AGREE-STEM-LANES.
+5. **Next RETRO:** round 495.
