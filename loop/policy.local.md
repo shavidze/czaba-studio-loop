@@ -700,3 +700,18 @@ The white circle (seek thumb) on the Store's audio player jumps ahead of the bra
 **Where:** Store audio player component (likely `app/components/ui/AudioPlayer.tsx` or `AudioPreviewButton.tsx`)
 **Fix:** Ensure thumb position and progress bar width update in the same animation frame. This is likely a CSS transition timing mismatch — the thumb uses no transition while the bar uses a CSS transition with a delay.
 **Priority:** Medium — visible on every product page.
+
+## Saba feedback, 2026-11-12: Ctrl+K menu items visible in header
+
+The Ctrl+K (command palette / search) keyboard shortcut menus should NOT be visible in the Store header. They are showing when they shouldn't be.
+
+**Where:** Store header / navigation component
+**Priority:** Medium — visible to all users.
+
+## Saba feedback, 2026-11-12: Scroll is not smooth on main page / free-downloads
+
+The page scroll on the Store is not smooth and soft as expected. Specifically noticed on https://czaba-store-test.vercel.app/free-downloads — scroll should feel polished, with smooth momentum.
+
+**Where:** Store global scroll behavior, likely `app.css` or layout component
+**Fix:** Check `scroll-behavior: smooth` on html/body. May also need to audit any scroll-jacking or heavy re-renders during scroll that cause jank.
+**Priority:** Medium — affects perceived quality of the entire Store experience.
