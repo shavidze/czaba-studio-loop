@@ -1,0 +1,158 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/__tests__/store-teal-sweep.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 296[2mms[22m[39m
+     [32m✓[39m TS1: every remaining teal hit in app sources sits in an allow-listed file[32m 100[2mms[22m[39m
+     [32m✓[39m TS2: the scan is non-vacuous and every allow-list entry keeps its exact hit count[32m 108[2mms[22m[39m
+     [32m✓[39m TS3: the granted store files carry no glow token, no zero-offset glow and no teal colour[32m 5[2mms[22m[39m
+     [32m✓[39m TS4: the entrance loader wordmark has no gradient text clip[32m 0[2mms[22m[39m
+     [32m✓[39m TS5: perf sources carry no teal colour and the perf scan is non-vacuous[32m 9[2mms[22m[39m
+     [32m✓[39m TS6: the zero-offset glow scanner finds every spelling and skips offset shadows and rings[32m 1[2mms[22m[39m
+     [32m✓[39m TS7: zero offsets in any unit or sign, function blurs and concatenated blurs count as glows[32m 0[2mms[22m[39m
+     [32m✓[39m TS8: the shadow pre-check skips the pattern scan only for sources without the word shadow, in any case[32m 1[2mms[22m[39m
+[31m     [31m×[31m HUE1: no colour literal with hue 160-200 remains in app sources outside the frozen legacy Studio list[39m[32m 66[2mms[22m[39m
+     [32m✓[39m HUE2: the hue-range scanner catches every colour syntax and skips brass, neutrals, selector words and comments[32m 1[2mms[22m[39m
+[31m     [31m×[31m HUE3: one teal rgba line added to the store stylesheet is seen by the scan[39m[32m 3[2mms[22m[39m
+ [31m❯[39m app/lib/__tests__/store-live-teal.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 664[2mms[22m[39m
+     [32m✓[39m LT1: every live player, 404, palette and scrollbar rule is the teal-free block, exactly once[32m 37[2mms[22m[39m
+     [32m✓[39m LT2: the teal card light layer is gone and the card light keeps only neutral stops[32m 0[2mms[22m[39m
+[31m     [31m×[31m LT3: teal stays only in the allow-listed dead or frozen CSS, each file at its exact count[39m[32m 18[2mms[22m[39m
+[31m     [31m×[31m LT11: the store stylesheet and the utilities stylesheet carry no teal colour (DPG-P0-1)[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m LT5: every remaining teal line sits inside an allow-listed dead or frozen rule[39m[32m 6[2mms[22m[39m
+     [32m✓[39m LT6: no CSS reads a teal token outside the dead allow-list and no teal hex hides behind an alpha suffix[32m 12[2mms[22m[39m
+     [32m✓[39m LT4: the scan is non-vacuous and the teal matcher sees the CSS forms this stage removed[32m 6[2mms[22m[39m
+     [33m[2m✓[22m[39m LT7: no dead-labelled teal rule remains, and the brass-swapped former dead rules still have no mounted consumer (DPG-P0-1) [33m 364[2mms[22m[39m
+     [32m✓[39m LT8: the mount walker follows routes, barrels by name, namespaces, re-export stars and dynamic imports[32m 2[2mms[22m[39m
+     [32m✓[39m LT9: the mount walker follows every local module specifier in app source to a file (A-R456-REVIEW-M1)[32m 211[2mms[22m[39m
+     [32m✓[39m LT10: directory specifiers follow every file a real resolver may pick, and names survive clause and comment hazards (A-R457-REVIEW-M1)[32m 3[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-live-teal.test.ts[2m > [22mstore live teal CSS (STORE-2b-3c-1)[2m > [22mLT3: teal stays only in the allow-listed dead or frozen CSS, each file at its exact count
+[31m[1mAssertionError[22m: expected { …(2) } to deeply equal { unexpected: [], drifted: [] }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "drifted": [],[22m
+[32m-   "unexpected": [],[39m
+[31m+   "unexpected": [[39m
+[31m+     "styles/app.css",[39m
+[31m+   ],[39m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/__tests__/store-live-teal.test.ts:[2m379:60[22m[39m
+    [90m377| [39m  it('LT3: teal stays only in the allow-listed dead or frozen CSS, eac…
+    [90m378| [39m    const hits = hitsByFile(APP_ROOT, STYLE_SOURCE_EXTENSIONS, countTe…
+    [90m379| [39m    [34mexpect[39m([34mallowListViolations[39m(hits[33m,[39m [33mCSS_TEAL_ALLOW_LIST[39m))[33m.[39m[34mtoEqual[39m({
+    [90m   | [39m                                                           [31m^[39m
+    [90m380| [39m      unexpected[33m:[39m [][33m,[39m
+    [90m381| [39m      drifted[33m:[39m [][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-live-teal.test.ts[2m > [22mstore live teal CSS (STORE-2b-3c-1)[2m > [22mLT11: the store stylesheet and the utilities stylesheet carry no teal colour (DPG-P0-1)
+[31m[1mAssertionError[22m: styles/app.css: expected 1 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m app/lib/__tests__/store-live-teal.test.ts:[2m387:50[22m[39m
+    [90m385| [39m  it('LT11: the store stylesheet and the utilities stylesheet carry no…
+    [90m386| [39m    [35mfor[39m ([35mconst[39m path [35mof[39m [33mSTORE_TEAL_FREE_STYLESHEETS[39m) {
+    [90m387| [39m      [34mexpect[39m([34mcountTealHits[39m([34mreadApp[39m(path))[33m,[39m path)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                                 [31m^[39m
+    [90m388| [39m    }
+    [90m389| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-live-teal.test.ts[2m > [22mstore live teal CSS (STORE-2b-3c-1)[2m > [22mLT5: every remaining teal line sits inside an allow-listed dead or frozen rule
+[31m[1mAssertionError[22m: expected { …(2) } to deeply equal { unexpected: [], drifted: [] }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "drifted": [],[22m
+[32m-   "unexpected": [],[39m
+[31m+   "unexpected": [[39m
+[31m+     "styles/app.css .hue3-mutant",[39m
+[31m+   ],[39m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/__tests__/store-live-teal.test.ts:[2m396:61[22m[39m
+    [90m394| [39m      ...tealHitsByEnclosingRule(UTILITIES_CSS_PATH, readApp(UTILITIES…
+    [90m395| [39m    }[33m;[39m
+    [90m396| [39m    [34mexpect[39m([34mallowListViolations[39m(hits[33m,[39m [33mTEAL_RULE_ALLOW_LIST[39m))[33m.[39m[34mtoEqual[39m({
+    [90m   | [39m                                                            [31m^[39m
+    [90m397| [39m      unexpected[33m:[39m [][33m,[39m
+    [90m398| [39m      drifted[33m:[39m [][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-teal-sweep.test.ts[2m > [22mstore hue-range colour sweep (DPG-P0-1)[2m > [22mHUE1: no colour literal with hue 160-200 remains in app sources outside the frozen legacy Studio list
+[31m[1mAssertionError[22m: expected { …(2) } to deeply equal { unexpected: [], drifted: [] }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "drifted": [],[22m
+[32m-   "unexpected": [],[39m
+[31m+   "unexpected": [[39m
+[31m+     "styles/app.css",[39m
+[31m+   ],[39m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/__tests__/store-teal-sweep.test.ts:[2m253:78[22m[39m
+    [90m251| [39m      [34mexpect[39m(sources)[33m.[39m[34mtoContain[39m(path)[33m;[39m
+    [90m252| [39m    }
+    [90m253| [39m    expect(allowListViolations(hueRangeHitsByFile(), HUE_RANGE_FROZEN_…
+    [90m   | [39m                                                                             [31m^[39m
+    [90m254| [39m      unexpected[33m:[39m [][33m,[39m
+    [90m255| [39m      drifted[33m:[39m [][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-teal-sweep.test.ts[2m > [22mstore hue-range colour sweep (DPG-P0-1)[2m > [22mHUE3: one teal rgba line added to the store stylesheet is seen by the scan
+[31m[1mAssertionError[22m: expected [ 'rgba(19, 217, 204' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "rgba(19, 217, 204",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m app/lib/__tests__/store-teal-sweep.test.ts:[2m270:37[22m[39m
+    [90m268| [39m  it('HUE3: one teal rgba line added to the store stylesheet is seen b…
+    [90m269| [39m    [35mconst[39m css [33m=[39m [34mreadApp[39m([32m'styles/app.css'[39m)[33m;[39m
+    [90m270| [39m    [34mexpect[39m([34mhueRangeColourHits[39m(css))[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m271| [39m    expect(hueRangeColourHits(`${css}\n.x { background: rgba(19, 217, …
+    [90m272| [39m      [32m'rgba(19, 217, 204'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m17 passed[39m[22m[90m (22)[39m
+[2m   Start at [22m 17:28:50
+[2m   Duration [22m 981ms[2m (transform 223ms, setup 0ms, import 265ms, tests 960ms, environment 0ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/store-live-teal.test.ts,title=app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT3%3A teal stays only in the allow-listed dead or frozen CSS%2C each file at its exact count,line=379,column=60::AssertionError: expected { …(2) } to deeply equal { unexpected: [], drifted: [] }%0A%0A- Expected%0A+ Received%0A%0A  {%0A    "drifted": [],%0A-   "unexpected": [],%0A+   "unexpected": [%0A+     "styles/app.css",%0A+   ],%0A  }%0A%0A ❯ app/lib/__tests__/store-live-teal.test.ts:379:60%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/store-live-teal.test.ts,title=app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT11%3A the store stylesheet and the utilities stylesheet carry no teal colour (DPG-P0-1),line=387,column=50::AssertionError: styles/app.css: expected 1 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/__tests__/store-live-teal.test.ts:387:50%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/store-live-teal.test.ts,title=app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT5%3A every remaining teal line sits inside an allow-listed dead or frozen rule,line=396,column=61::AssertionError: expected { …(2) } to deeply equal { unexpected: [], drifted: [] }%0A%0A- Expected%0A+ Received%0A%0A  {%0A    "drifted": [],%0A-   "unexpected": [],%0A+   "unexpected": [%0A+     "styles/app.css .hue3-mutant",%0A+   ],%0A  }%0A%0A ❯ app/lib/__tests__/store-live-teal.test.ts:396:61%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/store-teal-sweep.test.ts,title=app/lib/__tests__/store-teal-sweep.test.ts > store hue-range colour sweep (DPG-P0-1) > HUE1%3A no colour literal with hue 160-200 remains in app sources outside the frozen legacy Studio list,line=253,column=78::AssertionError: expected { …(2) } to deeply equal { unexpected: [], drifted: [] }%0A%0A- Expected%0A+ Received%0A%0A  {%0A    "drifted": [],%0A-   "unexpected": [],%0A+   "unexpected": [%0A+     "styles/app.css",%0A+   ],%0A  }%0A%0A ❯ app/lib/__tests__/store-teal-sweep.test.ts:253:78%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/store-teal-sweep.test.ts,title=app/lib/__tests__/store-teal-sweep.test.ts > store hue-range colour sweep (DPG-P0-1) > HUE3%3A one teal rgba line added to the store stylesheet is seen by the scan,line=270,column=37::AssertionError: expected [ 'rgba(19, 217, 204' ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "rgba(19, 217, 204",%0A+ ]%0A%0A ❯ app/lib/__tests__/store-teal-sweep.test.ts:270:37%0A%0A

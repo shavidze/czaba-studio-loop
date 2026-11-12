@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-12T16:59:29.577Z",
-  "current_task": "Round 473: STORE-2c-1 doc fix-up - doc 306 l.4/l.78/l.79/l.90 exact text + whole-doc accuracy grant (C-R472-01); C short route (scope, doc vs test, smoke, claims) (current-task.md, D-29z1671)",
+  "_generatedUtc": "2026-11-12T17:54:15.316Z",
+  "current_task": "Round 474: DPG-FIX P0 stage 1 (DPG-P0-1) - Store teal to brass token refs, gradient/glow tokens brass, 7 dead decorative tokens deleted, StemControl/StemsPlayerModal teal swapped; tests: allow-lists shrink, GR1, HUE1-3 hue-range scanner (current-task.md, D-29z1677)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -258,7 +258,7 @@
     },
     {
       "id": "DPG-FIX",
-      "status": "queued, next feature block after STORE-2c-1 closes (D-29z1669); not dispatched in round 473 because P0 rewrites app.css, which carries the unpublished 2c-1 change",
+      "status": "in_progress (D-29z1677): P0-1 dispatched round 474 (teal purge, gradient/glow tokens, decorative token deletion); P0-2 undefined tokens and P0-3 SpotlightLoader+docs next; after each P level root re-runs the DP gate; C-verified DPG ids are awaiting DP-gate re-review | queued, next feature block afte …[see backlog.json]",
       "source": "Saba 2026-11-12 policy section 'Design philosophy acceptance gate' / 'DPG-FIX block - IMMEDIATE PRIORITY (before STORE-3)'; first gate 3.5/10 (design-philosopher), 4/10 (product-designer)",
       "priority": "Saba: takes priority over STORE-2c/3/4/5 and all other work; loop does not advance to STORE-3 until both agents score 10/10",
       "order": {
@@ -296,7 +296,14 @@
         "root_only": "DPG-DOCS-UPDATE edits to .claude/primitives/* are proposals for Saba (retro rule); public/** (logo assets) is root-only; email.server.ts was deleted in round 462; legacy /studio CSS frozen per 2026-11-10 legacy policy unless root says otherwise (ROOT-REQ-DPG-GATE-REPORT)",
         "inventory": "b-round-472/teal-inventory.txt (exact-value grep; the next B planning must run a hue-range scan (160-200 deg) for every colour literal and Tailwind teal-/cyan- classes and read app/lib/__tests__/store-live-teal.test.ts before sizing P0)"
       },
-      "added": "2026-11-12 B round 472 -> 473 planning"
+      "added": "2026-11-12 B round 472 -> 473 planning",
+      "p0_split_d29z1674": {
+        "P0-1": "round 474: DPG-TEAL-PURGE (Store, non-frozen), DPG-GRADIENT-TOKENS, DPG-DECORATIVE-PURGE token half",
+        "P0-2": "DPG-UNDEFINED-TOKENS (--primary-hue artist-photo, --radius-xs, --color-text-primary incl. pinned .code-4, ProductCard bg-primary/text-primary-foreground); docs same round (DPG rule 2); product-designer",
+        "P0-3": "DPG-SPOTLIGHT-FIX (no teal; brass-or-white is a design call with SABA-B-16) + DPG-DOCS-UPDATE (DESIGN_SYSTEM.md 13 hits; primitives via ROOT-REQ-DPG-PRIMITIVES-PATCH)",
+        "frozen": "legacy Studio teal -> SABA-Q-DPG-LEGACY-STUDIO-TEAL",
+        "inventory": "b-round-473/dpg-inventory.md"
+      }
     },
     {
       "id": "STORE-REDESIGN",
@@ -6838,7 +6845,7 @@
       "id": "SABA-B-16-LOGO-OLD-COLORS",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "open (D-29z1648): input to the first DP-GATE review (root, ROOT-REQ-DP-GATE-FIRST); which asset is unconfirmed: header wordmark is text-foreground (R59), so candidates are public/favicon.ico, public/og-image.jpg (public/** global_forbidden -> root) and the SpotlightLoader wordmark; user-review/quest …[see backlog.json]",
+      "status": "open (D-29z1674): input to DPG-P0-3 (SpotlightLoader has 0 teal at 58fc56e; white light + bg-brand/50, b-round-473/dpg-inventory.md) | open (D-29z1648): input to the first DP-GATE review (root, ROOT-REQ-DP-GATE-FIRST); which asset is unconfirmed: header wordmark is text-foreground (R59), so candidat …[see backlog.json]",
       "title": "Logo still uses the old colours, not Obsidian & Brass (Saba 2026-11-12, \"Known issues for the first review\")",
       "added": "2026-11-12 B round 467 -> 468 planning"
     },
@@ -6849,48 +6856,19 @@
       "title": "Legacy /studio/<handle> inherits the store font tokens (Instrument Sans / Plex Mono) from STORE-2c-1"
     },
     {
-      "id": "C-R471-01",
-      "aliases": [
-        "A-R471-REVIEW-M1"
-      ],
-      "severity": "medium",
-      "origin": "B spec",
-      "status": "fix verified C round 472 C10 (FN4 red on georgia-serif/no-mono/commented-mono/head-css); closes when STORE-2c-1 is published (D-29z1667)",
-      "title": "Round-471 FN4 scanned all of app.css; the obsidian block alone supplied the three families, so wrong store @theme font tokens (--font-serif: Georgia; --font-mono deleted) passed",
-      "evidence": "c-round-471.md C10, a-round-471/mut-tree-*.log",
-      "repro": "c-round-471.json bugs[0].steps",
-      "added": "2026-11-12 B round 471 -> 472 planning"
-    },
-    {
-      "id": "C-R472-01",
-      "aliases": [
-        "A-R472-REVIEW-M1"
-      ],
-      "severity": "medium",
-      "origin": "B grant scope",
-      "status": "fix dispatched round 473 (D-29z1668, D-29z1671)",
-      "title": "Doc 306 l.79 still describes the round-471 FN4 (whole file, obsidian included); l.78 misses INSTRUMENT_SANS_STACK/STORE_THEME_FONT_TOKENS; l.90 says FN6 forbids only single quotes",
-      "evidence": "c-round-472.md C12, c-round-472.json bugs[0], a-round-472.md STOP",
-      "repro": "c-round-472.json bugs[0].steps",
-      "added": "2026-11-12 B round 472 -> 473 planning"
-    },
-    {
       "id": "C-R472-EVID-SPECIALOFFERS",
       "severity": "info",
-      "status": "open evidence (D-29z1672): unverifiable on mock data; owner ",
+      "status": "open evidence (D-29z1674): DPG-P0-1 does not touch SpecialOf",
       "title": "Home SpecialOffers shows no text on the cloud mock (HEAD and TREE); keep-list row cannot be seen in "
+    },
+    {
+      "id": "SABA-Q-DPG-LEGACY-STUDIO-TEAL",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1675): user-review/questions-round-473.m",
+      "title": "Legacy purchased Studio keeps teal: components/studio/StudioTrack.tsx:155 hsl(175,85%,46%) waveform "
     }
   ],
   "recent_rounds": [
-    {
-      "round": 464,
-      "task": "current-task.md",
-      "decision": "D-29z1635",
-      "type": "STORE-2b-3d-3: delete 4 orphan @keyframes (float, grain, fadeInUp, fadeOut) + 2 comment headers; DC2 counts only animation declarations/utilities/inline styles, comments stripped; new DC4",
-      "status": "c_pass_published",
-      "note": "baseline d55ec17 (gate 463 published); A applies b-round-463/sketch-464.patch.txt sha 35f0fb1f (v3); grants = b-round-463/grants-464.txt (3 paths)",
-      "result": "C round 464 PASS (c-round-464.json C1-C10, browserVerified/realVerified true, 0 bugs; C7 26/26 page rows + non-vacuity, C8 /studio-lab anonymous + /studio/middle-east \"Sign in required\" at 1440 and 1280), gate 464 published 6d321c7 (review COMMIT OK, 9/10, 2 Lows + 2 info + 1 architecture note) (D-29z1636)"
-    },
     {
       "round": 465,
       "task": "current-task.md",
@@ -6963,8 +6941,16 @@
       "task": "current-task.md",
       "decision": "D-29z1671",
       "type": "STORE-2c-1 doc fix-up (C-R472-01): doc 306 exact lines + whole-doc accuracy grant",
-      "status": "dispatched",
+      "status": "C PASS (c-round-473.json, browserVerified/realVerified true); gate 473 published 58fc56e (rounds 471-473) (D-29z1673)",
       "note": "baseline HEAD 5cd9645 + 3-path tree (diff 7a5ee8da803b7379, app.css d3af7582, test bb46efc7); claims b-round-472/claims-473.sh"
+    },
+    {
+      "round": 474,
+      "task": "current-task.md",
+      "decision": "D-29z1677",
+      "type": "DPG-P0-1: Store teal purge + brass gradient/glow tokens + decorative token deletion (sketch b-round-473/sketch-474.patch.txt)",
+      "status": "dispatched",
+      "note": "baseline HEAD 58fc56e clean; claims b-round-473/claims-474.sh; tech-lead APPROVE b-round-473/sketch-review.md"
     }
   ],
   "other_keys": [

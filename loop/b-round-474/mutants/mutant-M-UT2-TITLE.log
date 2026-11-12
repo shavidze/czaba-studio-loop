@@ -1,0 +1,52 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b474-mutA[39m
+
+ [31m❯[39m app/lib/__tests__/store-undefined-tokens.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 2095[2mms[22m[39m
+     [32m✓[39m UT1: every var() read without a fallback in non-test app sources resolves to a declared property[32m 77[2mms[22m[39m
+[31m     [31m×[31m UT2: colour utilities that Tailwind does not emit exist only in the allow-listed dead, frozen or non-class files, with their exact tokens[39m[33m 1716[2mms[22m[39m
+     [32m✓[39m UT2b: every allow-listed dead file stays unmounted[32m 180[2mms[22m[39m
+     [32m✓[39m UT3: the resolver agrees with the browser on the replaced and replacement classes[32m 12[2mms[22m[39m
+     [32m✓[39m UT4: fixtures, flagged and clean[32m 48[2mms[22m[39m
+     [32m✓[39m UT5: the nav loading bar paints nothing and keeps no animation[32m 6[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-undefined-tokens.test.ts[2m > [22mStore undefined tokens (DPG-P0-2)[2m > [22mUT2: colour utilities that Tailwind does not emit exist only in the allow-listed dead, frozen or non-class files, with their exact tokens
+[31m[1mAssertionError[22m: expected { …(8) } to deeply equal { …(7) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -26,10 +26,13 @@[39m
+[2m      "text-glow",[22m
+[2m    ],[22m
+[2m    "components/home/TestimonialsSection.tsx": [[22m
+[2m      "text-glow",[22m
+[2m    ],[22m
+[31m+   "components/product/ProductCard.tsx": [[39m
+[31m+     "group-hover:text-primary",[39m
+[31m+   ],[39m
+[2m    "components/studio/GlobalPlayhead.tsx": [[22m
+[2m      "shadow-glow",[22m
+[2m    ],[22m
+[2m    "components/ui/IconButton.tsx": [[22m
+[2m      "hover:shadow-glow",[22m
+
+[36m [2m❯[22m app/lib/__tests__/store-undefined-tokens.test.ts:[2m122:32[22m[39m
+    [90m120| [39m    expect(tokens.length).toBeGreaterThanOrEqual(MIN_COLOUR_UTILITY_TO…
+    [90m121| [39m    [35mconst[39m hits [33m=[39m [35mawait[39m [34mnonEmittingColourUtilities[39m(scripts[33m,[39m themeCss)[33m;[39m
+    [90m122| [39m    [34mexpect[39m([34mtokensByFile[39m(hits))[33m.[39m[34mtoEqual[39m(
+    [90m   | [39m                               [31m^[39m
+    [90m123| [39m      [33mObject[39m[33m.[39m[34mfromEntries[39m(
+    [90m124| [39m        Object.entries(NON_EMITTING_ALLOW_LIST).map(([file, entry]) =>…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 18:36:14
+[2m   Duration [22m 2.85s[2m (transform 205ms, setup 0ms, import 604ms, tests 2.10s, environment 0ms)[22m
+
+
+::error file=/tmp/b474-mutA/app/lib/__tests__/store-undefined-tokens.test.ts,title=app/lib/__tests__/store-undefined-tokens.test.ts > Store undefined tokens (DPG-P0-2) > UT2%3A colour utilities that Tailwind does not emit exist only in the allow-listed dead%2C frozen or non-class files%2C with their exact tokens,line=122,column=32::AssertionError: expected { …(8) } to deeply equal { …(7) }%0A%0A- Expected%0A+ Received%0A%0A@@ -26,10 +26,13 @@%0A      "text-glow",%0A    ],%0A    "components/home/TestimonialsSection.tsx": [%0A      "text-glow",%0A    ],%0A+   "components/product/ProductCard.tsx": [%0A+     "group-hover:text-primary",%0A+   ],%0A    "components/studio/GlobalPlayhead.tsx": [%0A      "shadow-glow",%0A    ],%0A    "components/ui/IconButton.tsx": [%0A      "hover:shadow-glow",%0A%0A ❯ app/lib/__tests__/store-undefined-tokens.test.ts:122:32%0A%0A

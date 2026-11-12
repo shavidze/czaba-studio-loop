@@ -1,0 +1,557 @@
+diff --git a/app/components/product/ProductCard.tsx b/app/components/product/ProductCard.tsx
+index 7327d3a..58e8e71 100644
+--- a/app/components/product/ProductCard.tsx
++++ b/app/components/product/ProductCard.tsx
+@@ -75,7 +75,7 @@ export function ProductCard({ product }: ProductCardProps) {
+     <article className="group relative">
+       <div className="transition-transform duration-200 ease-out group-hover:scale-[1.02]">
+         <Link to={`/products/${product.handle}`} className="block rounded-xl">
+-          <div className="light-flicker-effect relative aspect-square rounded-xl overflow-hidden bg-card mb-4">
++          <div className="light-flicker-effect relative aspect-square rounded-xl overflow-hidden bg-surface mb-4">
+             <img
+               src={image}
+               alt={product.title}
+@@ -98,7 +98,7 @@ export function ProductCard({ product }: ProductCardProps) {
+             {badgeText && (
+               <div
+                 className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm ${
+-                  isNew ? 'bg-brand/90 text-background' : 'bg-primary/90 text-primary-foreground'
++                  isNew ? 'bg-brand/90 text-background' : 'bg-background/70 text-foreground'
+                 }`}
+               >
+                 {badgeText}
+@@ -110,9 +110,7 @@ export function ProductCard({ product }: ProductCardProps) {
+             <p className="text-xs text-muted uppercase tracking-wider mb-1">
+               {productType || 'Music'}
+             </p>
+-            <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+-              {product.title}
+-            </h3>
++            <h3 className="font-semibold text-foreground mb-2">{product.title}</h3>
+             <div className="flex items-center gap-2">
+               <span
+                 className={
+diff --git a/app/lib/__tests__/helpers/token-resolve.ts b/app/lib/__tests__/helpers/token-resolve.ts
+new file mode 100644
+index 0000000..0cdc123
+--- /dev/null
++++ b/app/lib/__tests__/helpers/token-resolve.ts
+@@ -0,0 +1,161 @@
++import { readFileSync } from 'node:fs';
++import { createRequire } from 'node:module';
++import { dirname, resolve } from 'node:path';
++import { compile } from 'tailwindcss';
++import ts from 'typescript';
++import { APP_ROOT } from './style-scan';
++
++export const STORE_STYLES_ROOT = resolve(APP_ROOT, 'styles');
++export const STORE_THEME_ENTRY = 'styles/app.css';
++
++const COLOUR_UTILITY_PREFIX =
++  /^(?:bg|text|border(?:-[trblxyse])?|ring(?:-offset)?|outline|from|via|to|shadow|fill|stroke|divide|placeholder|caret|accent|decoration)-/;
++const CLASS_TOKEN_SHAPE = /^[a-z0-9:/_.\-[\]#%,!]+$/i;
++const PROPERTY_READ = /var\(\s*(--[A-Za-z0-9_-]+)\s*(,)?/g;
++const PROPERTY_DECLARATIONS = [
++  /(--[A-Za-z0-9_-]+)\s*:/g,
++  /\[(--[A-Za-z0-9_-]+):/g,
++  /['"](--[A-Za-z0-9_-]+)['"]\s*[:,)]/g,
++];
++
++const requireFromHelpers = createRequire(
++  resolve(APP_ROOT, 'lib/__tests__/helpers/token-resolve.ts'),
++);
++
++async function loadStylesheet(
++  id: string,
++  base: string,
++): Promise<{ path: string; base: string; content: string }> {
++  const path =
++    id === 'tailwindcss' ? requireFromHelpers.resolve('tailwindcss/index.css') : resolve(base, id);
++  return { path, base: dirname(path), content: readFileSync(path, 'utf8') };
++}
++
++export interface ThemeResolver {
++  emitsUtility(candidate: string): boolean;
++  emittingUtilities(candidates: ReadonlyArray<string>): Set<string>;
++  definesProperty(name: string): boolean;
++}
++
++function classSelectorPattern(candidate: string): RegExp {
++  const leadingDigit = /^[0-9]/.test(candidate) ? `\\3${candidate.charAt(0)} ` : '';
++  const rest = leadingDigit === '' ? candidate : candidate.slice(1);
++  const cssEscaped = `${leadingDigit}${rest.replace(/[^A-Za-z0-9_-]/g, (character) => `\\${character}`)}`;
++  const source = cssEscaped.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
++  return new RegExp(`\\.${source}(?![\\w-])`);
++}
++
++export async function createThemeResolver(
++  themeCss: string,
++  propertyNames: ReadonlyArray<string>,
++): Promise<ThemeResolver> {
++  const probeRule = `\n.token-resolve-probe{${propertyNames
++    .map((name, index) => `--token-resolve-${index}:var(${name});`)
++    .join('')}}`;
++  const compiler = await compile(`${themeCss}${probeRule}`, {
++    base: STORE_STYLES_ROOT,
++    loadStylesheet,
++  });
++  const baseline = compiler.build([]);
++  return {
++    emitsUtility(candidate) {
++      return classSelectorPattern(candidate).test(compiler.build([candidate]));
++    },
++    emittingUtilities(candidates) {
++      const unique = [...new Set(candidates)];
++      const output = compiler.build(unique);
++      return new Set(unique.filter((candidate) => classSelectorPattern(candidate).test(output)));
++    },
++    definesProperty(name) {
++      const escaped = name.replace(/-/g, '\\-');
++      return new RegExp(`(^|[\\s{;])${escaped}\\s*:`).test(baseline);
++    },
++  };
++}
++
++export interface TokenHit {
++  file: string;
++  line: number;
++  token: string;
++}
++
++export function formatTokenHit(hit: TokenHit): string {
++  return `${hit.file}:${hit.line} ${hit.token}`;
++}
++
++export function propertyReads(sources: ReadonlyMap<string, string>): TokenHit[] {
++  const reads: TokenHit[] = [];
++  for (const [file, source] of sources) {
++    source.split('\n').forEach((text, index) => {
++      for (const match of text.matchAll(PROPERTY_READ)) {
++        const name = match[1];
++        if (name !== undefined && match[2] === undefined && !name.startsWith('--tw-')) {
++          reads.push({ file, line: index + 1, token: name });
++        }
++      }
++    });
++  }
++  return reads;
++}
++
++export function declaredProperties(sources: ReadonlyMap<string, string>): Set<string> {
++  const declared = new Set<string>();
++  for (const source of sources.values()) {
++    for (const pattern of PROPERTY_DECLARATIONS) {
++      for (const match of source.matchAll(pattern)) {
++        if (match[1] !== undefined) {
++          declared.add(match[1]);
++        }
++      }
++    }
++  }
++  return declared;
++}
++
++export async function undefinedPropertyReads(
++  sources: ReadonlyMap<string, string>,
++  themeCss: string,
++): Promise<TokenHit[]> {
++  const reads = propertyReads(sources);
++  const declared = declaredProperties(sources);
++  const resolver = await createThemeResolver(themeCss, [
++    ...new Set(reads.map((read) => read.token)),
++  ]);
++  return reads.filter((read) => !declared.has(read.token) && !resolver.definesProperty(read.token));
++}
++
++export function colourUtilityTokens(file: string, source: string): TokenHit[] {
++  const kind = file.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
++  const sourceFile = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, kind);
++  const tokens: TokenHit[] = [];
++  const visit = (node: ts.Node): void => {
++    if (
++      ts.isStringLiteral(node) ||
++      ts.isNoSubstitutionTemplateLiteral(node) ||
++      ts.isTemplateHead(node) ||
++      ts.isTemplateMiddle(node) ||
++      ts.isTemplateTail(node)
++    ) {
++      const line = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
++      for (const token of node.text.split(/\s+/)) {
++        const utility = (token.split(':').pop() ?? '').replace(/^!/, '');
++        if (token !== '' && COLOUR_UTILITY_PREFIX.test(utility) && CLASS_TOKEN_SHAPE.test(token)) {
++          tokens.push({ file, line, token });
++        }
++      }
++    }
++    ts.forEachChild(node, visit);
++  };
++  visit(sourceFile);
++  return tokens;
++}
++
++export async function nonEmittingColourUtilities(
++  sources: ReadonlyMap<string, string>,
++  themeCss: string,
++): Promise<TokenHit[]> {
++  const resolver = await createThemeResolver(themeCss, []);
++  const tokens = [...sources].flatMap(([file, source]) => colourUtilityTokens(file, source));
++  const emitting = resolver.emittingUtilities(tokens.map((hit) => hit.token));
++  return tokens.filter((hit) => !emitting.has(hit.token));
++}
+diff --git a/app/lib/__tests__/store-live-teal.test.ts b/app/lib/__tests__/store-live-teal.test.ts
+index adac8a8..bf11e7e 100644
+--- a/app/lib/__tests__/store-live-teal.test.ts
++++ b/app/lib/__tests__/store-live-teal.test.ts
+@@ -125,7 +125,7 @@ const LIVE_RULE_BLOCKS: ReadonlyArray<readonly [string, string]> = [
+       '.code-4 {',
+       '  font-size: clamp(6rem, 15vw, 12rem);',
+       '  font-weight: 800;',
+-      '  color: var(--color-text-primary);',
++      '  color: var(--color-foreground);',
+       '  line-height: 1;',
+       '  text-shadow: none;',
+       '}',
+diff --git a/app/lib/__tests__/store-undefined-tokens.test.ts b/app/lib/__tests__/store-undefined-tokens.test.ts
+new file mode 100644
+index 0000000..63176ab
+--- /dev/null
++++ b/app/lib/__tests__/store-undefined-tokens.test.ts
+@@ -0,0 +1,206 @@
++// @vitest-environment node
++import { beforeAll, describe, expect, it } from 'vitest';
++import {
++  ANY_STYLED_SOURCE_EXTENSIONS,
++  APP_ROOT,
++  appScriptSources,
++  cssRuleBodies,
++  listFiles,
++  reachableScripts,
++  readApp,
++} from './helpers/style-scan';
++import {
++  colourUtilityTokens,
++  createThemeResolver,
++  formatTokenHit,
++  nonEmittingColourUtilities,
++  STORE_THEME_ENTRY,
++  type ThemeResolver,
++  type TokenHit,
++  undefinedPropertyReads,
++} from './helpers/token-resolve';
++
++const MIN_SCANNED_SOURCES = 200;
++const MIN_PROPERTY_READS = 200;
++const MIN_COLOUR_UTILITY_TOKENS = 300;
++const FROZEN_LEGACY_STUDIO = 'components/studio/GlobalPlayhead.tsx';
++const TRANSITION_PROPERTY_FILE = 'routes/store.tsx';
++
++const NON_EMITTING_ALLOW_LIST: Readonly<
++  Record<string, { tokens: ReadonlyArray<string>; reason: string }>
++> = {
++  'components/auth/UserDropdown.tsx': {
++    tokens: [
++      ...Array<string>(2).fill('bg-brand-surface-elevated'),
++      ...Array<string>(3).fill('border-brand-border'),
++      ...Array<string>(3).fill('hover:bg-brand-surface'),
++      'hover:border-brand-border-hover',
++      ...Array<string>(3).fill('hover:text-text'),
++      ...Array<string>(2).fill('text-text'),
++      ...Array<string>(4).fill('text-text-muted'),
++    ],
++    reason: 'dead: no importer outside its barrel',
++  },
++  'components/chat/ChatButton.tsx': {
++    tokens: ['hover:shadow-glow'],
++    reason: 'dead: ChatWidget is not mounted (round 453 ruling)',
++  },
++  'components/home/ArtistBioSection.tsx': {
++    tokens: ['text-glow'],
++    reason: 'dead: text-glow kept by the round 449 ruling',
++  },
++  'components/home/TestimonialsSection.tsx': {
++    tokens: ['text-glow'],
++    reason: 'dead: text-glow kept by the round 449 ruling',
++  },
++  'components/ui/IconButton.tsx': {
++    tokens: ['hover:shadow-glow'],
++    reason: 'dead: shadow-glow kept by the round 453 ruling',
++  },
++  [FROZEN_LEGACY_STUDIO]: { tokens: ['shadow-glow'], reason: 'frozen legacy Studio' },
++  [TRANSITION_PROPERTY_FILE]: {
++    tokens: ['border-color'],
++    reason: 'border-color is a transition property name, not a class',
++  },
++};
++
++const REPLACEMENT_CLASSES: ReadonlyArray<string> = [
++  'bg-surface',
++  'bg-background/70',
++  'text-foreground',
++];
++const REMOVED_CLASSES: ReadonlyArray<string> = [
++  'bg-card',
++  'bg-primary/90',
++  'text-primary-foreground',
++  'group-hover:text-primary',
++];
++
++function styledSources(): Map<string, string> {
++  return new Map(
++    listFiles(APP_ROOT, ANY_STYLED_SOURCE_EXTENSIONS)
++      .filter((path) => !path.includes('__tests__'))
++      .map((path): [string, string] => [path, readApp(path)]),
++  );
++}
++
++function tokensByFile(hits: ReadonlyArray<TokenHit>): Record<string, string[]> {
++  const tokens: Record<string, string[]> = {};
++  for (const hit of hits) {
++    tokens[hit.file] = [...(tokens[hit.file] ?? []), hit.token];
++  }
++  for (const file of Object.keys(tokens)) {
++    tokens[file]?.sort();
++  }
++  return tokens;
++}
++
++describe('Store undefined tokens (DPG-P0-2)', { timeout: 30_000 }, () => {
++  let themeCss = '';
++  let sources = new Map<string, string>();
++  let resolver: ThemeResolver;
++
++  beforeAll(async () => {
++    themeCss = readApp(STORE_THEME_ENTRY);
++    sources = styledSources();
++    resolver = await createThemeResolver(themeCss, []);
++  });
++
++  it('UT1: every var() read without a fallback in non-test app sources resolves to a declared property', async () => {
++    expect(sources.size).toBeGreaterThanOrEqual(MIN_SCANNED_SOURCES);
++    const reads = [...sources.values()].join('\n').match(/var\(\s*--/g) ?? [];
++    expect(reads.length).toBeGreaterThanOrEqual(MIN_PROPERTY_READS);
++    const hits = await undefinedPropertyReads(sources, themeCss);
++    expect(hits.map(formatTokenHit)).toEqual([]);
++  });
++
++  it('UT2: colour utilities that Tailwind does not emit exist only in the allow-listed dead, frozen or non-class files, with their exact tokens', async () => {
++    const scripts = new Map([...sources].filter(([path]) => /\.(ts|tsx)$/.test(path)));
++    const tokens = [...scripts].flatMap(([file, source]) => colourUtilityTokens(file, source));
++    expect(tokens.length).toBeGreaterThanOrEqual(MIN_COLOUR_UTILITY_TOKENS);
++    const hits = await nonEmittingColourUtilities(scripts, themeCss);
++    expect(tokensByFile(hits)).toEqual(
++      Object.fromEntries(
++        Object.entries(NON_EMITTING_ALLOW_LIST).map(([file, entry]) => [
++          file,
++          [...entry.tokens].sort(),
++        ]),
++      ),
++    );
++  });
++
++  it('UT2b: every allow-listed dead file stays unmounted', () => {
++    const reachable = reachableScripts(appScriptSources());
++    const dead = Object.keys(NON_EMITTING_ALLOW_LIST).filter(
++      (file) => file !== FROZEN_LEGACY_STUDIO && file !== TRANSITION_PROPERTY_FILE,
++    );
++    expect(dead).toHaveLength(5);
++    expect(dead.filter((file) => reachable.has(file))).toEqual([]);
++    expect(reachable.has('components/product/ProductCard.tsx')).toBe(true);
++  });
++
++  it('UT3: the resolver agrees with the browser on the replaced and replacement classes', () => {
++    for (const candidate of REPLACEMENT_CLASSES) {
++      expect(resolver.emitsUtility(candidate), candidate).toBe(true);
++    }
++    for (const candidate of REMOVED_CLASSES) {
++      expect(resolver.emitsUtility(candidate), candidate).toBe(false);
++    }
++    expect(resolver.definesProperty('--color-foreground')).toBe(true);
++    expect(resolver.definesProperty('--color-muted')).toBe(true);
++  });
++
++  it('UT4: fixtures, flagged and clean', async () => {
++    const fixtures = new Map<string, string>([
++      ['fx/Badge.tsx', 'export const B = () => <div className="bg-primary/90 text-foreground" />;'],
++      [
++        'fx/Apostrophe.tsx',
++        'export const A = () => <p>I\'m <span className="text-glow">x</span></p>;',
++      ],
++      [
++        'fx/Template.tsx',
++        ['export const t = (on: boolean) => `p-2 ', '$', '{on ? "bg-card" : "bg-surface"}`;'].join(
++          '',
++        ),
++      ],
++      [
++        'fx/Variant.tsx',
++        'export const V = () => <div className="text-sheen hover:text-sheen 2xl:text-2xl 2xl:bg-card" />;',
++      ],
++      [
++        'fx/Clean.tsx',
++        'export const C = () => <div className="bg-brand/90 text-background hover:bg-elevated" />;',
++      ],
++    ]);
++    const utilities = await nonEmittingColourUtilities(
++      fixtures,
++      `${themeCss}\n.text-sheen { color: var(--color-brand); }\n`,
++    );
++    expect(utilities.map(formatTokenHit)).toEqual([
++      'fx/Badge.tsx:1 bg-primary/90',
++      'fx/Apostrophe.tsx:1 text-glow',
++      'fx/Template.tsx:1 bg-card',
++      'fx/Variant.tsx:1 hover:text-sheen',
++      'fx/Variant.tsx:1 2xl:bg-card',
++    ]);
++    const css = new Map<string, string>([
++      ['fx/a.css', '.x { color: var(--nope-token); }'],
++      ['fx/b.css', '.y { color: var(--color-black); outline-offset: var(--focus-offset, 2px); }'],
++      ['fx/c.tsx', "export const s = { '--local-gap': '1px', gap: 'var(--local-gap)' };"],
++      ['fx/d.css', '.z { color: var(--color-text-primary); }'],
++    ]);
++    const reads = await undefinedPropertyReads(css, themeCss);
++    expect(reads.map(formatTokenHit)).toEqual([
++      'fx/a.css:1 --nope-token',
++      'fx/d.css:1 --color-text-primary',
++    ]);
++  });
++
++  it('UT5: the nav loading bar paints nothing and keeps no animation', () => {
++    expect(cssRuleBodies(themeCss, '.nav-loading-bar').map((body) => body.trim())).toEqual([
++      'display: none;',
++    ]);
++    expect(themeCss).not.toContain('navLoadingProgress');
++    expect(themeCss).not.toContain('--color-accent-hover');
++  });
++});
+diff --git a/app/routes/account_.login.tsx b/app/routes/account_.login.tsx
+index 9e87e9c..9e45edf 100644
+--- a/app/routes/account_.login.tsx
++++ b/app/routes/account_.login.tsx
+@@ -4,7 +4,7 @@ export default function Login() {
+   return (
+     <div className="container" style={{ padding: '4rem 1.5rem', textAlign: 'center' }}>
+       <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Sign In</h1>
+-      <p style={{ color: 'var(--color-text-muted)', marginBottom: '2rem' }}>
++      <p style={{ color: 'var(--color-muted)', marginBottom: '2rem' }}>
+         Authentication coming soon...
+       </p>
+       <Link to="/" className="button button-primary">
+diff --git a/app/routes/search.tsx b/app/routes/search.tsx
+index e6df9c9..4b7abbf 100644
+--- a/app/routes/search.tsx
++++ b/app/routes/search.tsx
+@@ -4,7 +4,7 @@ export default function Search() {
+   return (
+     <div className="container" style={{ padding: '4rem 1.5rem', textAlign: 'center' }}>
+       <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Search</h1>
+-      <p style={{ color: 'var(--color-text-muted)', marginBottom: '2rem' }}>
++      <p style={{ color: 'var(--color-muted)', marginBottom: '2rem' }}>
+         Search functionality coming soon...
+       </p>
+       <Link to="/" className="button button-primary">
+diff --git a/app/styles/app.css b/app/styles/app.css
+index fcc5f40..810efa8 100644
+--- a/app/styles/app.css
++++ b/app/styles/app.css
+@@ -187,37 +187,8 @@ html.lenis, html.lenis body {
+   50% { opacity: 0.7; }
+ }
+ 
+-/* Navigation Loading Bar - cinematic progress */
+ .nav-loading-bar {
+-  position: fixed;
+-  top: 0;
+-  left: 0;
+-  height: 2px;
+-  background: linear-gradient(
+-    90deg,
+-    transparent,
+-    var(--color-accent),
+-    var(--color-accent-hover),
+-    var(--color-accent),
+-    transparent
+-  );
+-  z-index: 10000;
+-  animation: navLoadingProgress 1.5s ease-in-out infinite;
+-}
+-
+-@keyframes navLoadingProgress {
+-  0% {
+-    width: 0%;
+-    left: 0;
+-  }
+-  50% {
+-    width: 70%;
+-    left: 15%;
+-  }
+-  100% {
+-    width: 0%;
+-    left: 100%;
+-  }
++  display: none;
+ }
+ 
+ /* Page transition wrapper */
+@@ -691,7 +662,7 @@ button { cursor:pointer }
+   right: -1rem;
+   width: 6rem;
+   height: 6rem;
+-  border: 2px solid hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.3);
++  border: 2px solid rgba(var(--color-brand-rgb), 0.3);
+   border-radius: var(--radius-lg);
+   pointer-events: none;
+ }
+@@ -703,7 +674,7 @@ button { cursor:pointer }
+   width: 8rem;
+   height: 8rem;
+   background: linear-gradient(135deg,
+-    hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2) 0%,
++    rgba(var(--color-brand-rgb), 0.2) 0%,
+     hsla(340, 85%, 55%, 0.2) 100%);
+   border-radius: var(--radius-lg);
+   filter: blur(40px);
+@@ -1350,7 +1321,7 @@ button { cursor:pointer }
+ .code-4 {
+   font-size: clamp(6rem, 15vw, 12rem);
+   font-weight: 800;
+-  color: var(--color-text-primary);
++  color: var(--color-foreground);
+   line-height: 1;
+   text-shadow: none;
+ }
+@@ -1445,7 +1416,7 @@ button { cursor:pointer }
+ 
+ .command-palette-trigger:hover {
+   border-color: var(--color-accent);
+-  color: var(--color-text-primary);
++  color: var(--color-foreground);
+ }
+ 
+ .command-palette-hint {
+@@ -1507,7 +1478,7 @@ button { cursor:pointer }
+   background: transparent;
+   border: none;
+   font-size: 1rem;
+-  color: var(--color-text-primary);
++  color: var(--color-foreground);
+ }
+ 
+ .command-palette-input::placeholder {
+@@ -1524,7 +1495,7 @@ button { cursor:pointer }
+ 
+ .command-palette-close:hover {
+   background: var(--color-elevated);
+-  color: var(--color-text-primary);
++  color: var(--color-foreground);
+ }
+ 
+ .command-palette-results {
+@@ -1551,7 +1522,7 @@ button { cursor:pointer }
+   background: transparent;
+   border: none;
+   border-radius: var(--radius-md);
+-  color: var(--color-text-primary);
++  color: var(--color-foreground);
+   cursor: pointer;
+   text-align: left;
+   transition: all var(--duration-fast) ease;

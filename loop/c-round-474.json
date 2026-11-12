@@ -1,0 +1,81 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-12T17:40:31.4635570Z",
+  "round": 474,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R474-01",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "bash b-round-473/claims-474.sh on A's tree",
+    "diff against claims-474-planning-output.txt"
+   ],
+   "expected": "C10: only K1, K2b, K13, K13b differ",
+   "actual": "K16 (1\u21920), K17 (line 142\u2192133) and K18 (1\u21920) also differ; each is the direct consequence of an edit the task itself requires (ST3 pin 26\u219229, 7 tokens deleted, LT7 replaced). A reported this correctly.",
+   "evidence": "c-round-474/claims-c.txt; a-round-474.md top"
+  },
+  {
+   "id": "C-R474-02",
+   "severity": "low",
+   "origin": "pre-existing",
+   "steps": [
+    "open /store on HEAD 58fc56e (:5180) and on the tree",
+    "search document.styleSheets for 19, 217, 204"
+   ],
+   "expected": "No teal in emitted store CSS (DPG rule 1: old pattern removed)",
+   "actual": "Tailwind emits .bg-[#13D9CC] {rgb(19,217,204)} on both HEAD and tree. The class string is an example in .claude/primitives/TAILWIND_FIRST.md, .claude/HOW_TO_USE_PRIMITIVES.md and the tailwind-v4 SKILL.md, which Tailwind v4 scans. Unused by any element; the HUE1 scan covers app/** only, so it does not see it.",
+   "evidence": "c-round-474/b3.mjs output; grep -rIl"
+  }
+ ],
+ "passed": [
+  "C1 SOURCE-SCOPE",
+  "C2 HUE-SCAN (K13=20,K13b=9, residue = frozen list only)",
+  "C3 TESTS-MEAN-SOMETHING (HUE3, M-GR1, M-ST, M-TS all red on scratch copy)",
+  "C4 UNIT (14 files, 158 tests)",
+  "C5 BROWSER NO-CHANGE (store/product/studio-lab 0 px diff vs HEAD at both viewports; home differs only by animation, tree-vs-tree control also differs, t1==h1 exact)",
+  "C6 BROWSER RULE PROBE (brass in scrollbar-color, box-shadow, background-image; no 19,217,204 in the three rules)",
+  "C7 CONTRAST 8.32:1 (arithmetic only, component unreachable)",
+  "C8 DOC 307 (headings in TEMPLATE order, l.4 exact, collapse recorded, frozen question named; K19=0)",
+  "C9 AUTH (anonymous /studio/middle-east: Sign in required, 0 audio src; /api/studio-token?product&file with no bearer 401)",
+  "C10 CLAIMS (L58 OK; diffs = K1,K2b,K13,K13b + K16,K17,K18 explained, see C-R474-01)"
+ ],
+ "blocked": [
+  "Real-owner premium path: backend unavailable in cloud",
+  "StemControl Solo / StemsPlayerModal not reachable in browser (StemsPlayerModal can never open per D-29z1676); arithmetic only",
+  "gate rows (full verify, code review, publish): root"
+ ],
+ "manifestPaths": "8 modified + doc 307 (c-round-474/c1-status.txt)",
+ "missingPaths": [],
+ "countMismatches": [
+  "K16",
+  "K17",
+  "K18"
+ ],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": "HUE1,HUE2,HUE3,GR1,ST3(29),ST3b,LT11",
+ "mutantsRecorded": 4,
+ "mutantRedOnSketch": "b-round-473/ scratch pre-run (5 red) is B's; A mutants under a-round-474/mutants",
+ "mutantRedOnTree": "HUE3,M-GR1,M-ST,M-TS all red on scratch copy (c-round-474/mutants.txt)",
+ "gateChecksNamed": [
+  "verify",
+  "code-review",
+  "publish"
+ ],
+ "gateChecksRunOnSketch": 0,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "14 covering vitest files",
+  "browser no-change",
+  "rule probe"
+ ],
+ "affectedChecksRunOnSketch": "3 of 3 run by C on the tree",
+ "na_reason": null,
+ "evidence": "c-round-474/ (browser.json, pixeldiff.json, home-compare.json, c4-vitest.log, hue-scan.txt, claims-c.txt, screenshots)"
+}

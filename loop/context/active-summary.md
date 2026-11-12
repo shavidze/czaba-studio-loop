@@ -1,14 +1,14 @@
-# Active loop summary (2026-11-12T16:59:29.577Z)
+# Active loop summary (2026-11-12T17:54:15.316Z)
 
-- backlog.json 3399 KB -> active view 302 KB
-- status: G_ROOT_GATE round 473
-- servers: `{"checkedUtc":"2026-11-12T16:53:39.2925116Z","round":473,"attempt":1,"store":200}`
-- last publication: 58fc56e01a0fe35779724f596daa1497222c614b (rounds 471-473)
-- last root gate: round 473 published - commit 58fc56e01a0fe35779724f596daa1497222c614b pushed
+- backlog.json 3401 KB -> active view 301 KB
+- status: G_ROOT_GATE round 474
+- servers: `{"checkedUtc":"2026-11-12T17:40:31.4635570Z","round":474,"attempt":1,"store":200}`
+- last publication: 297f5aea1e4ecd51f23e0872458eed3b1d0132ee (rounds 474-474)
+- last root gate: round 474 published - commit 297f5aea1e4ecd51f23e0872458eed3b1d0132ee pushed
 
 ## Current items: -
 
-## Open findings: 976 (13 Critical/High/Medium)
+## Open findings: 975 (11 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / listed in the Safari list (user-review/questions-retro-465.md Q2, D-29z1638); does not block | environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the cloud runner (same class as GATE97-S2); Tech  …[see backlog.json] / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
@@ -19,7 +19,5 @@
 - **GATE462-M1-EMAIL-SERVER-POLICY** / medium / open_root (D-29z1632): question ROOT-REQ-EMAIL-SERVER-DELETION; non-blocking for the loop (2026-10-23 root clarification class: root-only); app/lib/email.server.ts is not in global_forbidden_files (claims-463 K11); 0 importers; r2-tokens.server.ts and every download route unchanged; C round 462 C8 p …[see backlog.json] / Round 462 deleted app/lib/email.server.ts (dead order-paid email builder that used getDownloadUrl); root to confirm the deletion is acceptab
 - **SABA-B-15** / medium / home cause fixed in cloud (C round 470, D-29z1656): rounds 468-470 C PASS, published 5cd9645; closes only with TLM-R468-SABA-SCROLL-DEVICE (deadline RETRO 480) | dispatched round 470 (D-29z1655): round 469 C BLOCKED (C1 control env-invalid; C2-C13 PASS) and C-R469-01 shape; stage 2b = sketch s6 + p9 …[see backlog.json] / Store scroll is not smooth and soft (Saba 2026-11-12, named /free-downloads on czaba-store-test.vercel.app)
 - **TLM-R468-SABA-SCROLL-DEVICE** / medium / open_tech_lead_manual (D-29z1649): deadline RETRO 480 (L46); does not block (2026-10-23 root clarification class) | question user-review/questions-round-468.md Q1 (D-29z1651), with the Lenis-feel options (a) keep default, (b) shorter duration, (c) lerp, (d) off (R-468-1, L44) / Saba's own device: /free-downloads and / scroll on the Vercel preview after round 468 lands (mouse wheel and trackpad; Chrome DevTools Perfo
-- **SABA-B-16-LOGO-OLD-COLORS** / medium / open (D-29z1648): input to the first DP-GATE review (root, ROOT-REQ-DP-GATE-FIRST); which asset is unconfirmed: header wordmark is text-foreground (R59), so candidates are public/favicon.ico, public/og-image.jpg (public/** global_forbidden -> root) and the SpotlightLoader wordmark; user-review/quest …[see backlog.json] / Logo still uses the old colours, not Obsidian & Brass (Saba 2026-11-12, "Known issues for the first review")
-- **C-R471-01** / medium / fix verified C round 472 C10 (FN4 red on georgia-serif/no-mono/commented-mono/head-css); closes when STORE-2c-1 is published (D-29z1667) / Round-471 FN4 scanned all of app.css; the obsidian block alone supplied the three families, so wrong store @theme font tokens (--font-serif:
-- **C-R472-01** / medium / fix dispatched round 473 (D-29z1668, D-29z1671) / Doc 306 l.79 still describes the round-471 FN4 (whole file, obsidian included); l.78 misses INSTRUMENT_SANS_STACK/STORE_THEME_FONT_TOKENS; l
-- ... and 963 Low/info (see backlog.json)
+- **SABA-B-16-LOGO-OLD-COLORS** / medium / open (D-29z1674): input to DPG-P0-3 (SpotlightLoader has 0 teal at 58fc56e; white light + bg-brand/50, b-round-473/dpg-inventory.md) | open (D-29z1648): input to the first DP-GATE review (root, ROOT-REQ-DP-GATE-FIRST); which asset is unconfirmed: header wordmark is text-foreground (R59), so candidat …[see backlog.json] / Logo still uses the old colours, not Obsidian & Brass (Saba 2026-11-12, "Known issues for the first review")
+- ... and 964 Low/info (see backlog.json)

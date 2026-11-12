@@ -1,138 +1,138 @@
-# Round 474: DPG-FIX P0 stage 1 (DPG-P0-1): no teal left in the Store, gradient and glow tokens brass
+# Round 475: DPG-FIX P0 stage 2 (DPG-P0-2): every undefined token in the Store resolves; the card badge gets its chip
 
-**Planned by:** B, at the round 473 → 474 planning on 2026-11-12 (`b-round-473.md`).
+**Planned by:** B, at the round 474 → 475 planning on 2026-11-12 (`b-round-474.md`).
 - The advisor was available and consulted after orientation.
-- `tech-lead` reviewed the sketch: APPROVE with three test changes, all adopted (`b-round-473/sketch-review.md`).
-- The round-473 task is archived as `tasks/round-473.md` (byte-identical, checked with `cmp`).
+- `product-designer` ruled on the visible repairs (`b-round-474/pd-p0-2.md`).
+- `tech-lead` reviewed the frozen sketch (`b-round-474/sketch-review.md`).
+- The round-474 task is archived as `tasks/round-474.md` (byte-identical, `cmp`).
 
 ## Decisions (`backlog.json` `decisions_log_b`)
-- **D-29z1673: round 473 result.** C PASS, with `browserVerified` and `realVerified` true (`c-round-473.json`). Gate 473 published `58fc56e`.
-  - STORE-2c-1 is **done**. Its browser evidence is C round 472 C1–C10, at the same `app.css` sha `d3af7582…` that `58fc56e` holds. Its doc evidence is C round 473.
-  - C-R471-01 and C-R472-01 are closed.
-  - DPG-FONT-RESOLVE stays open: 2c-1 is only its token half.
-- **D-29z1674: DPG P0 inventory and stage split** (`b-round-473/dpg-inventory.md`).
-  - The policy says about 100 teal values. Its "61" equals the hue-scan total of `app.css` at `a8599a2` (2026-11-11, before STORE-2b-3) [K15], so the review most likely read that older tree. `58fc56e` holds 41 hue-scan hits in all of `app/` [K3, K13]. Root is asked to name the commit the reviewers read (ROOT-REQ-DPG-GATE-REPORT).
-  - P0 is split into three stages:
-    - **P0-1 (this round):** teal, gradient and glow tokens, and the dead decorative tokens.
-    - **P0-2:** the undefined tokens. These are live and visible.
-    - **P0-3:** SpotlightLoader and the docs. These need `product-designer` and root's report.
-- **D-29z1675: rulings for P0-1.**
-  - **Replace teal in place with brass token references; do not delete the dead rules.** Saba's text asks for "brass token references", and dead rules go to the LEGACY-DEAD list (tech-lead APPROVE).
-  - **The 5 gradient tokens and 2 glow tokens are redefined** from `var(--color-*)` (Saba's DPG-GRADIENT-TOKENS). Two of them deliberately collapse, and the doc records this:
-    - `--gradient-accent` becomes equal to `--gradient-primary`;
-    - `--color-glow-secondary` changes from orange to `--color-brand-hover`.
-  - **The 7 decorative `--color-crystal-*` and `--color-premium-*` tokens are deleted** (0 readers [K6]). This is the token half of DPG-DECORATIVE-PURGE, pulled forward.
-  - **The frozen legacy Studio teal stays and is listed, not edited.** It covers `components/studio/**` and both `studio.css` copies. It goes to Saba as SABA-Q-DPG-LEGACY-STUDIO-TEAL (`user-review/questions-round-473.md` Q1).
-- **D-29z1676: StemsPlayerModal can never open.** `createDisplayVersions` never sets `stems`, so `PlayStemsButton` never renders [K5]. Its teal is swapped anyway, and the dead path is added to LEGACY-DEAD-STORE-COMPONENTS (signal SIG-R473-STEMS-PLAYER-DEAD).
+- **D-29z1678: round 474 result.** C PASS with `browserVerified`/`realVerified` true (`c-round-474.json`); gate 474 published `297f5ae`. DPG-P0-1 is C-verified and **awaiting the DP-gate re-review** (Saba's design-gate rule 4), not მზადაა. A's C10 note is ruled: K16, K17 and K18 were direct consequences of the required edits and are accepted deltas (C-R474-01, L10).
+- **D-29z1679: P0-2 inventory by the real resolver** (`b-round-474/scan/`). Two scans use Tailwind's own compiler, so they agree with the browser (L52):
+  - undefined `var()` reads in non-test `app/**`: **14 at HEAD → 0 on the sketch** [K3];
+  - colour utilities Tailwind does not emit: **28 at HEAD → 24 on the sketch** [K4]. The 24 are dead files (18 `UserDropdown`, the glow remnants that the round 449/453 rulings keep), the frozen `GlobalPlayhead`, and one non-class string, `border-color` inside a `transition` value.
+  - **Saba's list vs the tree:**
+    - `--radius-xs` is **not broken**: Tailwind's default theme defines it as `0.125rem`, the browser resolves it [K6], and only the dead `TrackRow` reads it. It stays unchanged.
+    - `--radius_full` has 0 hits at HEAD.
+    - The scan found two undefined names Saba's list did not have: `--color-accent-hover` (`.nav-loading-bar`) and `--color-text-muted` (the two stub routes).
+- **D-29z1680: rulings** (`product-designer`, `b-round-474/pd-p0-2.md`):
+  1. **The non-New card badge** gets `bg-background/70 text-foreground`. Brass stays on "New" only. At HEAD the chip is transparent [K6]. This closes A-R187-PRODUCTCARD-PRIMARY-TOKEN.
+  2. **The card image wrapper:** `bg-card` (undefined) becomes `bg-surface`.
+  3. **The card title hover** `group-hover:text-primary` (undefined, a no-op) is removed with its `transition-colors`. Brass is for meaning; the card scale stays the hover cue.
+  4. **The nav loading bar.** It paints nothing at HEAD, because the undefined `--color-accent-hover` invalidates its `background` [K6].
+     - Do **not** switch on a flashing brass bar in a token round.
+     - The render line is in protected `app/root.tsx` [K5], so the rule becomes `display: none;` and its keyframes go. The look is unchanged and no layout is taken.
+     - Root removes the render line later: ROOT-REQ-NAV-LOADING-BAR-RENDER.
+     - The design question goes to Saba once: SABA-Q-PENDING-NAV-FEEDBACK (L44).
+  5. **The stub routes** `/search` and `/account/login`: `var(--color-muted)`. The stub rewrite and its copy are a separate task.
+  6. **`--color-text-primary`** (5 reads: CommandPalette and `.code-4`) becomes `var(--color-foreground)`. B measured every consumer inheriting `#ece6da` today at both viewports [K7], so 0 px change.
+  7. **The dead `.artist-photo-border/-glow`:** `--primary-hue/sat/light` becomes `rgba(var(--color-brand-rgb), …)`. The pink stop stays for DPG-DECORATIVE-PURGE (P2).
+  - **No `@theme` token is added, removed or changed.** So DPG rule 2 needs no design-doc edit [K16]. `docs/design/awwwards-improvements.md` describes the bar as a historical proposal (K19) and stays.
+- **D-29z1681: dispatch.** See the grants. The tests:
+  - a new resolver-backed guard, `store-undefined-tokens.test.ts` UT1–UT5, with the helper `helpers/token-resolve.ts`;
+  - the one `.code-4` pin line in `store-live-teal` [K10].
 
 ## Rules
 - **Read `lessons.md` first.** These apply especially:
-  - L1 (inventory, scanner proved on mutants), L2 (token change, including the new DPG clause) and L4;
-  - L10, L11, L12, L15, L23, L26, L28 and L29;
-  - L56–L58.
-- **Claims script:** `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-473/claims-474.sh`. B's output is in `b-round-473/claims-474-planning-output.txt`, ending in `L58 OK`. The 14 covering files are listed in `b-round-473/covering-474.txt` [K21].
-- **Screen budget:** nothing visible changes on any reachable Store page. Every changed rule or token is either unread or applies to an element that never renders.
+  - L1, L2 (DPG clause), L4, L12, L15 and L23;
+  - L26, L28, L29 and L31;
+  - L52, L56, L58 and L61.
+- **Claims:** `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-474/claims-475.sh`. B's output is in `b-round-474/claims-475-planning-output.txt`; its last line is `L58 OK`. The allowed deltas after A are in `b-round-474/claims-475-allowed-deltas.txt`, which is the script's output on B's sketch-applied tree (L56).
+- **Screen budget (L39):** nothing new becomes permanently visible.
+  - An existing badge gains a background chip.
+  - A no-op hover goes away.
+  - Two stub paragraphs turn muted.
+  - Persistent text lines are unchanged.
+- **One element, one rule (L4):**
+  - **The non-New badge:** "PD ruling 1" wins over the "screen budget no change" clause. Its box size must not change.
+  - **The `.code-4` pin in `store-live-teal`:** the sketch line wins over "test files unchanged".
 
 ## Baseline
-- **HEAD `58fc56e`** (gate 473 published), with a clean tree [K1].
-- **Sketch:** `b-round-473/sketch-474.patch.txt`, sha `239e1da1…`. It applies to HEAD with rc 0 [K2]. The per-file sha256 values after applying it are in `b-round-473/sketch-474-files-sha256.txt`.
+- **HEAD `297f5ae`** (gate 474 published), with a clean tree [K1].
+- **Sketch:** `b-round-474/sketch-475.patch.txt` (v2, sha `d2385ffc…`, 7 files; `tech-lead` reviewed v1 and the v1 → v2 delta). It applies to HEAD with rc 0 [K2].
+- **Per-file sha256 values after applying it:** `b-round-474/sketch-475-files-sha256.txt`.
 
 ### Grants (exactly these paths)
 | Path | What |
 |---|---|
-| `app/styles/app.css` | **Only the sketch's hunks, byte for byte.** It deletes the 7 decorative tokens and redefines the glow, `video-sync` and 5 gradient tokens. It also changes the 7 `rgba(19, 217, 204,` occurrences [K15] to `rgba(var(--color-brand-rgb),` and `hsl(175, 85%, 65%)` to `var(--color-brand-hover)`. The obsidian block and every other byte stay unchanged |
-| `app/styles/base/utilities.css` | Only the sketch's 3 `.stems-loader-list` values |
-| `app/components/audio/StemControl.tsx` | Only the sketch's Solo-active class: `bg-brand text-background shadow-md` |
-| `app/components/audio/StemsPlayerModal.tsx` | Only the sketch's spinner class: `text-brand` |
-| `app/lib/__tests__/store-live-teal.test.ts` | Test edits in §1 step 3 |
-| `app/lib/__tests__/store-teal-sweep.test.ts` | Test edits in §1 step 3, plus the new HUE rows |
-| `app/lib/__tests__/store-theme-tokens.test.ts` | Test edits in §1 step 3 |
-| `app/lib/__tests__/helpers/style-scan.ts` | Only if the hue scanner is placed here. It must be a new export, and every existing export stays byte-identical |
-| `docs/implementation/2026/quarter-IV/307-dpg-p0-1-teal-purge-brass-tokens.md` | A new doc that follows TEMPLATE. l.4 is exactly `**სტატუსი:** In Progress (stage 1 of 3; C round 474 PASS)` (L28) |
+| `app/styles/app.css` | **Only the sketch's hunks, byte for byte** (narrow grant): the `.nav-loading-bar` body becomes `display: none;` and the `navLoadingProgress` keyframes and their comment line are deleted; the two `.artist-photo-*` values; the 5 `var(--color-text-primary)` reads. Every other byte is unchanged, including `@theme` and the obsidian block |
+| `app/components/product/ProductCard.tsx` | Only the sketch's three class edits (l.78, l.101, l.113; the h3 collapses to one line under Biome) [K2] |
+| `app/routes/search.tsx`, `app/routes/account_.login.tsx` | Only the sketch's one inline-style value each [K2] |
+| `app/lib/__tests__/store-live-teal.test.ts` | Only the sketch's one `.code-4` pin line [K10] |
+| `app/lib/__tests__/helpers/token-resolve.ts` | New, byte-equal to the sketch. Every review change is already in v2, so A adds nothing |
+| `app/lib/__tests__/store-undefined-tokens.test.ts` | New, byte-equal to the sketch (UT1–UT5, with UT2b) |
+| `docs/implementation/2026/quarter-IV/308-dpg-p0-2-undefined-tokens.md` | New. It follows TEMPLATE. l.4 is exactly `**სტატუსი:** In Progress (stage 2 of 3; C round 475 PASS)` (L28) |
 
 **Unchanged:** every other file, in particular:
-- the protected files (`root.tsx`, `components/studio/**`, `styles/studio.css`, `styles/pages/studio.css`, `public/**` and `.claude/**`);
-- the keep-list components.
+- the protected files (`app/root.tsx` [K5], `components/studio/**`, `public/**`, `.claude/**`, `package.json`);
+- the dead files that UT2 allow-lists;
+- the keep-list components;
+- `app/styles/base/utilities.css`.
 
 ## Reference
-Not applicable: there is no new behaviour. Scope comes from Saba's DPG-FIX P0 list (policy, 2026-11-12). Brand tokens: `--color-brand` `#c9a46a`, `--color-brand-hover` `#d9b87f`, `--color-brand-rgb` `201, 164, 106` (`app.css` @theme) [K17].
+Not applicable as a reference product. This round adds no new behaviour, and the scope comes from Saba's DPG-FIX P0 list.
+- **Design rulings:** `product-designer` (direction A Obsidian & Brass, brass reserved for meaning).
+- **Deviation:** the nav loading bar stays invisible (it is already invisible at HEAD). Whether CZABA should show pending-navigation feedback at all goes to Saba as SABA-Q-PENDING-NAV-FEEDBACK. It is not decided by the loop.
 
 ## 1. A: steps
-1. **STOP (L11) if K1 or K2 differ from B's output.** Read `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`.
-2. **Apply the sketch:** `git apply -p1 b-round-473/sketch-474.patch.txt`. This is a reviewed `git apply` sketch, which L60 allows. Then check the 4 file sha256 values against `sketch-474-files-sha256.txt`.
-3. **Edit the three test files.** No assertion is lost; equal or stronger replacements are allowed (L4). B's scratch pre-run turns exactly LT3, LT5, LT7, TS2 and ST3 red, with 5 failed and 147 passed over 14 files [K4]. The edits:
-   - **`store-teal-sweep`:**
-     - remove the StemControl and StemsPlayerModal entries from `TEAL_ALLOW_LIST`, so only `StudioTrack.tsx` remains;
-     - add both files to `GRANTED_TEAL_FREE_SOURCES`.
-   - **`store-live-teal`:**
-     - remove the `styles/app.css` and `styles/base/utilities.css` entries from `CSS_TEAL_ALLOW_LIST`, and every app.css and utilities.css entry from `TEAL_RULE_ALLOW_LIST`;
-     - add a row asserting that both files have **0** teal hits;
-     - keep LT6, the teal-token-read ban. The two `studio.css` entries stay at their exact counts.
-     - **Replace LT7** (it needs at least 5 dead-labelled rules [K18]) with an assertion that no `dead`-labelled teal rule remains. Delete the dead-rule constants and helpers only where nothing else uses them.
-   - **`store-theme-tokens`:**
-     - remove the 7 decorative keys from `STORE_2B_EXEMPT_COLOUR_KEYS` and add a row asserting they are absent from `@theme`;
-     - move `--color-glow-primary`, `--color-glow-secondary` and `--color-video-sync` from the exempt list to the checked keys, so ST3's count goes from 26 to 29 [K16];
-     - **add GR1:** each of `--gradient-primary`, `--gradient-card`, `--gradient-hero`, `--gradient-accent` and `--gradient-glow` is built only from `var(--color-…)`, `rgba(var(--color-brand-rgb), …)`, `transparent`, keywords and percentages. It contains no `hsl(`, no `#` and no numeric `rgb(`.
-   - **New HUE rows** (in `store-teal-sweep`, or in a new export in `helpers/style-scan.ts`):
-     - **HUE1:** no colour literal with hue 160–200° (saturation ≥ 25 %, lightness 12–90 %) appears in non-test `app/**` sources (`.css`, `.ts`, `.tsx`), except the frozen list at exact counts: `components/studio/StudioTrack.tsx` 1, `styles/studio.css` 4, `styles/pages/studio.css` 4.
-     - **HUE2 fixtures:** each form is caught. The forms are:
-       - `#1dc`, `#13d9cc`, `#13d9cc80`;
-       - `rgb(19 217 204 / 0.4)`, `rgba(19,217,204,.2)`;
-       - `hsl(175deg 85% 46%)`, `hsla(175, 85%, 46%, 0.3)`;
-       - `oklch(0.78 0.13 185)`, `hwb(175 8% 15%)`;
-       - the named colours `teal`, `cyan`, `aqua`, `turquoise`, `darkcyan` and `lightseagreen` as CSS values;
-       - `bg-teal-500`, `text-cyan-400`, `bg-[hsl(175_85%_46%)]`, `bg-[#13d9cc]`.
-
-       These are **not** flagged: `#c9a46a`, `#d9b87f`, `rgba(var(--color-brand-rgb), 0.4)`, `#404040`, `hsl(38, 95%, 55%)`, a selector word such as `.slider-thumb-teal`, and the word "Cyan" in a comment.
-     - **HUE3 (L52):** a mutant that adds `rgba(19, 217, 204, 0.2)` to `app.css` turns HUE1 red.
-4. **Write doc 307** (TEMPLATE headings in order). Its TODO section names P0-2 and P0-3 and SABA-Q-DPG-LEGACY-STUDIO-TEAL.
-5. **Run the checks** and save the logs to `a-round-474/`:
+1. **STOP (L11) if K1 or K2 differ from B's output.** Read `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `FORWARDREF_COMPONENT.md` (ProductCard), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`.
+2. **Apply the sketch:** `git apply -p1 b-round-474/sketch-475.patch.txt`. This is a reviewed sketch, which L60 allows. Check all 7 sha256 values against `sketch-475-files-sha256.txt`. `b-round-474/sketch-review.md` shows each review finding already resolved in v2. If your code-reviewer asks for a change to a granted file, that is a STOP (L11), not an edit.
+3. **Write doc 308** (TEMPLATE headings in order, L26). It must:
+   - name the resolver scans and their HEAD/sketch counts;
+   - name the `--radius-xs` finding (not broken);
+   - name the nav-bar interim and the ROOT-REQ;
+   - name the TODO: P0-3, SABA-Q-PENDING-NAV-FEEDBACK, the dead-file cleanup (UserDropdown and the glow remnants, LEGACY-DEAD) and the stub-route task.
+4. **Run the checks** and save the logs to `a-round-475/`:
    - `npm run typecheck` and `npm run lint`;
-   - `npx vitest run $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-473/covering-474.txt)` (the 14 files of B's pre-run);
-   - `npm run build`, which proves that the `@theme` compile works (tech-lead 3a). The full verify belongs to the gate.
-6. **Record the mutants,** with each log under `a-round-474/mutants/`:
-   - **HUE3** turns HUE1 red.
-   - **M-GR1:** restoring `hsl(175` in `--gradient-primary` turns GR1 red.
-   - **M-ST:** re-adding `--color-crystal-cyan` turns the decorative-absent row red.
-   - **M-TS:** restoring `bg-teal-500` in StemControl turns TS1 or HUE1 red.
-7. **Run `code-reviewer`** (3+ files). STOP only for a Medium or higher finding that needs a file outside the grant.
-8. **Report in `a-round-474.md`:**
-   - the files and their shas;
-   - the test edits, with every removed assertion and its replacement;
-   - the mutants;
-   - the logs;
-   - the reviewer findings.
+   - `npx vitest run $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-474/covering-475.txt)` (16 files [K13]).
+
+   The full suite belongs to the gate. B's sketch run is K12.
+5. **Re-run B's mutants on a copy of your tree:** `b-round-474/mutants/run-mutants.sh /abs/path/to/copy /home/runner/czaba-project/tmp/studio-real-loop/a-round-475/mutants` (both paths absolute; the copy needs `node_modules`). Use `cp -a`, never the store tree (the script refuses it and restores from its own pristine snapshot, not git). All 11 must be red, with the same red rows as `b-round-474/mutants/summary.txt`. A line `<id> NOT-APPLIED` means the mutation text was not found in your tree: your edit differs from the sketch at that spot. Report it and show which equivalent mutant you ran instead; it is not a pass. If a run is interrupted, just run the script again: it restores `app/` from its snapshot first.
+6. **Run `code-reviewer`** (3+ files). STOP only for a Medium or higher finding that needs a file outside the grant, or that changes a ruled formula (L11).
+7. **Report in `a-round-475.md`:** the files and shas, the logs, the mutants and the reviewer findings, including its Architecture note.
 
 ## 2. C: what to verify
-**Files.** Write `c-round-474.md`, `c-round-474.json` (all L57 fields) and `c-round-474/progress.json` as you go. Start the mock API with `node $(realpath mock-api/server.mjs)` from the loop folder if `:5199` does not answer.
+**Files.** Write `c-round-475.md`, `c-round-475.json` (all L57 fields) and `c-round-475/progress.json` as you go.
+- Start the mock API with `node $(realpath mock-api/server.mjs)` from the loop folder if `:5199` does not answer.
+- Stub the LeadMagnet (`localStorage czaba_lead_magnet_dismissed`) and skip the entrance (`sessionStorage czaba_entrance_seen=1`) as B's probes do.
+- Reuse `b-round-474/probe/probe-head4.mjs` and `probe-card.mjs` (args: base URL and tag).
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| C1 | SOURCE-SCOPE | `git status --short --untracked-files=all` and the protected manifest | Only the granted paths changed. The 4 source files equal `sketch-474-files-sha256.txt`. Protected files: 0 changes [K10] |
-| C2 | HUE-SCAN (DPG rule 1) | Claims K13 (the hue scanner over the live `app/`) and K13b (the exact-value teal grep outside `__tests__`). Planning: 41 and 27. Also `python3 -I /home/runner/czaba-project/tmp/studio-real-loop/b-round-473/scan/hue-scan-v2.py /home/runner/czaba-project/store/app <out>` for the per-file list | **K13 = TOTAL 20, K13b = 9, 0 colour hits outside the frozen list.** The listed residue is exactly `StudioTrack.tsx` 1 hsl, the two `studio.css` copies (4 hex each, plus selector words), `VideoPlayer.tsx` class words 2, and `ableton-export.ts` comment 1, as in `scan/app-counts-sketch.txt`. Any other hit is a FAIL |
-| C3 | TESTS-MEAN-SOMETHING | Read the diff of the 3 test files. Re-run A's 4 mutants (HUE3, M-GR1, M-ST, M-TS) on a scratch copy | No assertion was dropped without an equal or stronger replacement. HUE2 has every listed form, positive and negative. Each mutant is red |
-| C4 | UNIT | `npx vitest run $(cat b-round-473/covering-474.txt)` | All 14 files pass |
-| C5 | BROWSER NO-CHANGE (1440×900 and 1280×720) | Screenshot `/`, `/store`, `/products/middle-east` and `/studio-lab` on the tree. Compare them with the same pages on a HEAD `58fc56e` build (L38: separate Vite `cacheDir`, or a `git archive` copy) | Same layout, and no new brass or teal areas. Differences only where animation or timing varies, each one explained. `/studio-lab` opens anonymously |
-| C6 | BROWSER RULE PROBE | On `/store` (tree), inject test elements with `page.evaluate`: `<div class="stems-loader-list">`, `<button class="audio-preview-inline-button playing">` and `<div class="waveform-bar active">` | Computed `scrollbar-color`, `box-shadow` (during the animation) and `background-image` contain `rgb(201, 164, 106)` / `rgba(201, 164, 106` or `rgb(217, 184, 127)`, and no `19, 217, 204`. Record `getComputedStyle(documentElement)` for `--gradient-primary` and `--color-glow-primary`, which may be empty when Tailwind does not emit an unused token. That is a record, not an assert |
-| C7 | CONTRAST (L15) | StemControl Solo active, `text-background` on `bg-brand`: compute it from the token hex values | ≥ 4.5:1. Recorded with the formula. The component cannot be reached in the browser [K5], so this row is arithmetic only and says so |
-| C8 | DOC 307 + DPG rule 2 | Headings, l.4, and every claim against the test files (L26). Claim K19: the 15 changed or removed tokens named in `docs/design`, `.claude/primitives` or `docs/technical/architecture` | TEMPLATE headings in order. l.4 exact. The deliberate collapse (accent = primary, glow-secondary → brand-hover) is recorded. Frozen-list question named. No "pending". K19 stays 0, so no design doc describes a changed token. The brand-colour docs (`DESIGN_SYSTEM.md`, `DESIGN_TOKENS.md` l.9/l.26/l.108 [K14]) are P0-3 |
-| C9 | AUTH | `/studio/middle-east` anonymous, and `/api/studio-token` with no bearer | "Sign in required", 0 audio `src`; 401. The real-owner path is BLOCKED (backend unavailable in cloud) |
-| C10 | CLAIMS | `bash b-round-473/claims-474.sh` | Equal to `claims-474-planning-output.txt`, except K1 (status lines), K2b (now `reverse-ok`), K13 (20) and K13b (9). K10 stays 0. The last line is `L58 OK` |
+| C1 | SOURCE-SCOPE | `git status --short --untracked-files=all` and the protected list | Only the granted paths changed. The 7 sketch files equal `sketch-475-files-sha256.txt`. K9 = 0 |
+| C2 | RESOLVER SCANS | K3b and K4b on the live tree | K3b `TOTAL 0`. K4b `TOTAL 24`, with exactly the lines of `b-round-474/scan/tw-undefined-sketch.txt` |
+| C3 | TESTS-MEAN-SOMETHING | Read the new test and helper. Run `run-mutants.sh` (absolute paths) on a `cp -a` copy of A's tree, out-dir under `c-round-475/` | 11 of 11 red, with the same red rows as `b-round-474/mutants/summary.txt` [K8]. Each UT row has a mutant that turns it red. The UT2 token lists equal `b-round-474/scan/tw-undefined-sketch.txt`, never wider. UT2 (batched helper) and the scan (one `build()` per token, `tw-undefined-ast.mjs`) agree; they are two oracles (L52) |
+| C4 | UNIT | `npx vitest run $(cat b-round-474/covering-475.txt)` | All 16 files pass. Record the UT2 time: it is at most 50 % of 30 s (L31). B's full run on v2 is K14 |
+| C5 | NO-CHANGE CONSUMERS (both viewports) | `probe-head4.mjs` on the tree, compared with `b-round-474/probe/probe-head4.json` | Trigger hover, input, close hover, item hover and both `.code-4` read `rgb(236, 230, 218)`, the same as HEAD. Palette and trigger-hover screenshots are pixel-equal to HEAD (`b-round-474/probe/head-*.png`), as they are on B's sketch run (byte-equal). The 404 differs only inside the `.code-0-inner` box (`pulse404` animation). B's HEAD-vs-HEAD control differs in the same box (`probe/ctl-404-*.png`, `diffpng.mjs`: bbox 692–748 × 355–880), so it is a control pair (L37). Any diff outside that box is a FAIL |
+| C6 | BADGE (both viewports) | `probe-card.mjs` on `/`: a non-New badge ("Ambient") and the "New" badge | Non-New computed bg `oklab(0.159861 0.001029 0.00248618 / 0.7)`, which is Tailwind v4's form of `bg-background/70`; colour `rgb(236, 230, 218)` [K15]. Every badge box w/h equals HEAD's (`b-round-474/probe/probe-card-head.json`); "New" is unchanged. Contrast with `b-round-474/probe/probe-contrast.mjs`: text vs median chip pixel ≥ 4.5:1 on every visible non-New badge. B's sketch run: 8.91–8.95:1; HEAD: 8.67–8.82:1, because the covers are dark under the chip (`probe-sketch-contrast.json`, `probe-head-contrast.json`). The chip is consistency, not a contrast rescue, and the row only asserts ≥ 4.5 |
+| C7 | IMAGE WRAPPER | `b-round-474/probe/probe-rows.mjs` (images aborted) | The card image wrapper's computed bg is `rgb(22, 20, 18)` and its box is 320×320 at both viewports (B's sketch run; HEAD `rgba(0, 0, 0, 0)`) [K15] |
+| C8 | TITLE HOVER | `probe-rows.mjs`: the mouse goes to a card **inside the viewport** (bbox check first) | The h3 is `rgb(236, 230, 218)` before and after hover. The card wrapper's computed **`scale`** goes from `none` to `1.02`. Tailwind v4 `scale-*` sets `scale`, not `transform`, so a `transform` read says `none` on HEAD too. 0 elements in `article` have a `bg-`/`text-` class with `primary` or `card` |
+| C9 | NAV BAR (pending navigation) | `probe-rows.mjs`: from `/`, hold every `?_data=` request with `page.route` until released, then click the header link named "Collections". While pending, read `.nav-loading-bar` and screenshot the top 4 px | The node exists (root still renders it, K5), computed `display` is `none` and its bbox is null or 0×0. The top 4 px strip is pixel-equal to the strip just before the click. The header bbox is unchanged. Record HEAD as the control: there `display` is `block`, `background-image` is `none` and the width animates (`navLoadingProgress`), with the strip also pixel-equal (`probe-head-rows.json`) |
+| C10 | STUB COPY | `/search` and `/account/login` (`probe-rows.mjs`) | The paragraph colour is `rgb(163, 155, 142)` on both (HEAD `rgb(236, 230, 218)`). The heading and button are unchanged |
+| C11 | DEAD RULES | On `/store`, inject `<div class="artist-photo-border">` and `<div class="artist-photo-glow">` | The border colour is `rgba(201, 164, 106, 0.3)`. The background-image starts `linear-gradient(135deg, rgba(201, 164, 106, 0.2) 0%,`. The pink stop stays (P2) |
+| C12 | JOURNEY (L54) | `/` → click a ProductCard → product page → back | The product page loads with its own h1. The card badge and colours read the same after back |
+| C13 | DOC 308 + DPG rule 2 | Headings, l.4, and each claim against the test file (L26). K16 | TEMPLATE headings in order. l.4 exact. Every UT row the doc names exists. K16 = 0 |
+| C14 | AUTH | `/studio/middle-east` anonymous, and `/api/studio-token?product=middle-east&file=x` with no bearer | "Sign in required" and 0 audio `src`; 401. The real-owner path is BLOCKED (backend unavailable in cloud) |
+| C15 | CLAIMS | `bash b-round-474/claims-475.sh` | Byte-equal to `b-round-474/claims-475-allowed-deltas.txt`, the script's output on B's sketch-applied clone with a doc 308 placeholder. Against the planning output, only K1 (8 status lines), K2b (`reverse-ok`), K3b (`TOTAL 0`), K4b (`TOTAL 24`) and K10 (empty) differ. The last line is `L58 OK` |
 | gate | — | Full verify, code review, publish | Root. Not claimed |
 
 **What could break nearby:**
-- The Tailwind `@theme` compile, if a `var()` is misplaced. A's build and C5 cover this.
-- Test-helper exports used by other suites. C4 covers this; the gate runs the full suite.
-- The legacy Studio stems loader scrollbar colour changes from teal to brass, on a page that needs sign-in. C6 proves the rule. The page itself is backend-blocked.
+- **Other suites using the `@tailwindcss` compile cost:** UT2 runs about 3 s. C4 and the gate cover this.
+- **The CommandPalette and 404 colours:** C5 covers these.
+- **The legacy pages that render ProductCard** (`account.downloads.tsx`, protected): sign-in, so BLOCKED. The class change is the same component.
+- **The `TrackRow` and `ArtistBioSection` dead rules:** C11 covers these.
 
 ## 3. After this round
-1. **On C PASS:** DPG-P0-1 is C-verified. Its DPG ids become **"awaiting DP-gate re-review"**, not მზადაა (Saba's design-gate rule 4).
+1. **On C PASS:**
+   - DPG-P0-2 becomes C-verified and **awaiting the DP-gate re-review**;
+   - A-R187-PRODUCTCARD-PRIMARY-TOKEN closes;
+   - the dead UT2 files join LEGACY-DEAD.
 2. **The next planning:**
-   - if it is dated 2026-11-13 or later: REGRESSION-2026-11-13 first;
-   - then **DPG-P0-2:** the undefined tokens (`--primary-hue`, `--radius-xs`, `--color-text-primary`, and ProductCard `bg-primary`/`text-primary-foreground`). That stage needs `product-designer` and browser rows, and its docs land in the same round (DPG rule 2);
-   - then **DPG-P0-3:** SpotlightLoader and the docs, followed by root's P0 re-review.
+   - **REGRESSION-2026-11-13** first, if the date is 2026-11-13 or later (`regression-last.json` 2026-11-10);
+   - then **DPG-P0-3**: SpotlightLoader with SABA-B-16, and the docs (`DESIGN_SYSTEM.md`, plus the primitives patch via root).
+   - After P0-3, root's P0 DP-gate re-review.
 3. **Root, non-blocking:**
-   - ROOT-REQ-DPG-GATE-REPORT (now with the commit history);
-   - ROOT-REQ-DPG-PRIMITIVES-PATCH (`DESIGN_TOKENS.md` l.9, l.26 and l.108 [K14]);
-   - ROOT-REQ-DP-GATE-FIRST;
+   - ROOT-REQ-NAV-LOADING-BAR-RENDER;
+   - ROOT-REQ-DPG-PRIMITIVES-PATCH (now also C-R474-02: `.claude/**` and `docs/**` markdown emits unused teal utilities);
+   - ROOT-REQ-DPG-GATE-REPORT;
    - RETRO 480.
