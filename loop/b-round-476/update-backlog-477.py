@@ -1,0 +1,27 @@
+import json,sys
+P='/home/runner/czaba-project/tmp/studio-real-loop/backlog.json'
+DONE='/home/runner/czaba-project/tmp/studio-real-loop/b-round-476/update-backlog-477.done'
+import os
+if os.path.exists(DONE): sys.exit('already applied')
+b=json.load(open(P))
+by='2026-11-12 B round 476 -> 477 planning'
+b['updated']=by
+b['current_task']="Round 477: DPG-P0-3a re-dispatch on the preserved round-476 tree (edeba5a + sketch-476 + doc 309); R1 ruled D-29z1688 (accepted, Low, deferred); A edits only doc 309 l.4 + one R1 entry; C runs full C1-C12 incl. browser rows C5-C10 (current-task.md)"
+b['decisions_log_b'] += [
+ {"id":"D-29z1688","date":"2026-11-12","by":by,"decision":"Ruling on C-R476-STOP-R1 / A round-476 STOP (code-reviewer R1 Medium, SpotlightLoader overlay painted twice: inline backgroundColor var(--color-background) + child bg-background). Tree accepted as is. Evidence: the same two-layer structure existed at HEAD edeba5a (inline '#000' + child bg-black; claims-477 K22), sketch only recoloured; render identical (reviewer + C source check); pd-p0-3a ruling 1 names the inline style. B rates it Low (pre-existing Tailwind-first duplication, no visible/functional/a11y/security effect, not introduced by the round): A-R476-REVIEW-R1-OVERLAY-DUP to deferred_low_polish and named as a row candidate for DPG-CSS-DEDUP (P1 item 9, next SpotlightLoader owner, D-29z1686). D-29z1683 Medium STOP clause unchanged (L22: unruled Medium never publishes); R1 cited by this D-ID is not a new STOP."},
+ {"id":"D-29z1689","date":"2026-11-12","by":by,"decision":"Round 476 result: C short FAIL (L22) - C1 SOURCE-SCOPE, C2 CLAIMS, C12 AUTH (anonymous) PASS; C3-C11 not run; browserVerified/realVerified false (c-round-476.json); gate 476 skipped, HEAD stays edeba5a. DPG-P0-3a stays in_progress (not done); GATE460-2, A-R460-REVIEW-5 and the portal-test signal stay open. Reviewer Lows R2-R6 -> deferred_low_polish (A-R476-REVIEW-LOWS); R7 (doc 309 sizes claim) A fixed in its own doc, checked by C11 next round; Architecture note (signal 4, dustParticles state kept) -> architecture_signals SIG-R476-A-DUST-STATE."},
+ {"id":"D-29z1690","date":"2026-11-12","by":by,"decision":"Round 477 = re-dispatch of DPG-P0-3a on the preserved tree: A edits doc 309 only (l.4 -> C round 477 PASS per L28 re-dispatch; one R1 entry naming D-29z1688 once); C runs full C1-C12. Claims b-round-476/claims-477.sh; allowed deltas from B's scratch with the doc edit (L56). Prevention: lesson L10 gains a clause - a sketch granted byte-equal gets a code-reviewer pass by B before dispatch and the task rules each Medium (C-R476-STOP-R1, 1x); RETRO 480 input. Regression not due (2026-11-12 < 2026-11-13)."}]
+b['open_findings'].append({"id":"C-R476-STOP-R1","severity":"medium","origin":"B spec","status":"closed (D-29z1688): ruled - tree accepted; the defect itself re-rated Low as A-R476-REVIEW-R1-OVERLAY-DUP (deferred_low_polish)","title":"Round 476 not runnable: byte-equal sketch carried a reviewer Medium (R1) that B had not ruled","evidence":"c-round-476.md, c-round-476.json, a-round-476.md step 6","added":by})
+b['deferred_low_polish'] += [
+ {"id":"A-R476-REVIEW-R1-OVERLAY-DUP","severity":"low","origin":"A code-reviewer round 476 (rated Medium by reviewer; re-rated Low by B, D-29z1688)","status":"deferred_low_polish (D-29z1688); row candidate for DPG-CSS-DEDUP (P1 item 9)","title":"SpotlightLoader overlay paints its background twice: inline style backgroundColor var(--color-background) plus child div bg-background (pre-existing at HEAD as '#000' + bg-black)","evidence":"a-round-476.md R1; c-round-476.md R1 row; b-round-476/claims-477-planning-output.txt K21/K22","repro":"read app/components/loading/SpotlightLoader.tsx overlay motion.div style prop and its first child","added":by},
+ {"id":"A-R476-REVIEW-LOWS","severity":"low","origin":"A code-reviewer round 476","status":"deferred_low_polish (D-29z1689)","title":"R2 EntranceCover Georgian comment still says first frame is black; R3 English JSX comments in SpotlightLoader; R4 P3 source scan misses named white/black, hsl(0 0% 100%), uses process.cwd(); R5 P2 hard-codes 15 particles and relies on jsdom keeping var() text; R6 N3c title claims footer parity but asserts header only","evidence":"a-round-476.md step 6 table","repro":"read the named files/rows","added":by}]
+b['architecture_signals'].append({"id":"SIG-R476-A-DUST-STATE","status":"signal (A code-reviewer round 476 Architecture note): keep","note":"signal 4, new state in an existing component (dustParticles in SpotlightLoader); keep in place, value low, risk low, no task; confirms SIG-R476-DUST-KEEP","added":by})
+for r in b['rounds']:
+    if r.get('round')==476: r['status']='C FAIL short route (D-29z1689); STOP R1 ruled D-29z1688; tree preserved for round 477'
+b['rounds'].append({"round":477,"task":"current-task.md","decision":"D-29z1690","type":"DPG-P0-3a re-dispatch (R1 ruled), full C1-C12 on preserved tree","status":"dispatched","note":"baseline HEAD edeba5a + preserved round-476 tree; claims b-round-476/claims-477.sh; allowed deltas b-round-476/claims-477-allowed-deltas.txt"})
+for e in b['post_current_stage_queue']:
+    if isinstance(e,dict) and e.get('id')=='DPG-FIX':
+        e['status']='in_progress (D-29z1690): P0-3a round 476 C short FAIL on unruled reviewer Medium R1 (ruled D-29z1688, accepted); re-dispatched as round 477 with full C1-C12; P0-3b docs next (after REGRESSION-2026-11-13 if due) | '+e['status']
+json.dump(b,open(P,'w'),ensure_ascii=False,indent=1)
+open(DONE,'w').write('ok\n')
+print('ok')
