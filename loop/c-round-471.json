@@ -1,0 +1,67 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": false,
+ "realVerified": false,
+ "envStatus": {
+  "checkedUtc": "2026-11-12T16:00:57.4966250Z",
+  "round": 471,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R471-01",
+   "severity": "medium",
+   "origin": "B spec",
+   "steps": [
+    "Copy TREE (HEAD + sketch + doc) to a scratch dir with node_modules symlink",
+    "Set --font-serif: Georgia, serif in app.css (or delete l.124 --font-mono)",
+    "npx vitest run app/lib/__tests__/self-hosted-fonts.test.ts"
+   ],
+   "expected": "FN4/FN6 turn red when a store @theme font token is wrong or missing",
+   "actual": "6 passed for both mutants; obsidian block alone supplies the three families so the store @theme tokens are unguarded (HEAD's FN4 caught the Georgia mutant)",
+   "evidence": "tmp/studio-real-loop/c-round-471.md; a-round-471/mut-tree-*.log"
+  }
+ ],
+ "passed": [
+  "C11-SOURCE-SCOPE",
+  "C13-AUTH-GUARD-anonymous-and-401",
+  "C14-CLAIMS"
+ ],
+ "blocked": [
+  "C13 fake-bearer path: backend unavailable in cloud"
+ ],
+ "gate": [
+  "typecheck",
+  "lint",
+  "full verify"
+ ],
+ "notRun": [
+  "C1",
+  "C2",
+  "C3",
+  "C3b",
+  "C3c",
+  "C4",
+  "C5",
+  "C6",
+  "C7",
+  "C8",
+  "C9",
+  "C12"
+ ],
+ "manifestPaths": null,
+ "missingPaths": null,
+ "countMismatches": null,
+ "claimCheckMinutes": 1,
+ "assertsSpecified": null,
+ "mutantsRecorded": true,
+ "mutantRedOnSketch": null,
+ "mutantRedOnTree": false,
+ "gateChecksNamed": null,
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "nullReason": "Short FAIL route (L22): fields not applicable are null",
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null
+}
