@@ -1,0 +1,87 @@
+diff --git a/app/lib/__tests__/store-teal-sweep.test.ts b/app/lib/__tests__/store-teal-sweep.test.ts
+index 3ba0754..db0d022 100644
+--- a/app/lib/__tests__/store-teal-sweep.test.ts
++++ b/app/lib/__tests__/store-teal-sweep.test.ts
+@@ -1,5 +1,5 @@
+ // @vitest-environment node
+-import { describe, expect, it } from 'vitest';
++import { describe, expect, it, vi } from 'vitest';
+ import {
+   APP_ROOT,
+   allowListViolations,
+@@ -157,9 +157,21 @@ describe('store teal sweep (STORE-2b-2a, STORE-2b-2b)', () => {
+     expect(offsets.map(countZeroOffsetGlowHits)).toEqual(offsets.map(() => 0));
+   });
+ 
+-  it('TS8: the shadow pre-check skips only sources without the word shadow, in any case', () => {
+-    expect(countZeroOffsetGlowHits("margin: '0 0 12px'; padding: 0 0 8px;")).toBe(0);
+-    expect(countZeroOffsetGlowHits('.u { BOX-SHADOW: 0 0 8px red; }')).toBe(1);
+-    expect(countZeroOffsetGlowHits("style={{ TextShadow: '0 0 6px red' }}")).toBe(1);
++  it('TS8: the shadow pre-check skips the pattern scan only for sources without the word shadow, in any case', () => {
++    const scan = vi.spyOn(String.prototype, 'matchAll');
++    try {
++      const skipped = countZeroOffsetGlowHits("margin: '0 0 12px'; padding: 0 0 8px;");
++      const scansAfterSkipped = scan.mock.calls.length;
++      const upper = countZeroOffsetGlowHits('.u { BOX-SHADOW: 0 0 8px red; }');
++      const scansAfterUpper = scan.mock.calls.length;
++      const camel = countZeroOffsetGlowHits("style={{ TextShadow: '0 0 6px red' }}");
++      const scansAfterCamel = scan.mock.calls.length;
++      expect([skipped, upper, camel]).toEqual([0, 1, 1]);
++      expect(scansAfterSkipped).toBe(0);
++      expect(scansAfterUpper).toBeGreaterThan(scansAfterSkipped);
++      expect(scansAfterCamel).toBeGreaterThan(scansAfterUpper);
++    } finally {
++      scan.mockRestore();
++    }
+   });
+ });
+diff --git a/docs/implementation/2026/quarter-IV/299-store-2b-3c-2-shared-rule-reader.md b/docs/implementation/2026/quarter-IV/299-store-2b-3c-2-shared-rule-reader.md
+index 96ef6d7..9313acd 100644
+--- a/docs/implementation/2026/quarter-IV/299-store-2b-3c-2-shared-rule-reader.md
++++ b/docs/implementation/2026/quarter-IV/299-store-2b-3c-2-shared-rule-reader.md
+@@ -1,7 +1,7 @@
+ # STORE-2b-3c-2a: ერთი საერთო CSS rule reader და „dead“ teal წესების mounted consumer-ის შემოწმება
+ 
+ **თარიღი:** 2026-11-11
+-**სტატუსი:** Completed (C round 466 PASS)
++**სტატუსი:** Completed (C round 467 PASS)
+ **შეცვლილი პროექტი:** Store (მხოლოდ ტესტები: `app/lib/__tests__/helpers/style-scan.ts`, `store-live-teal.test.ts`, `store-glow-shadow.test.ts`, `store-gradient-text.test.ts`)
+ 
+ ## კონტექსტი
+diff --git a/docs/implementation/2026/quarter-IV/304-store-2b-3c-2b-glow-scanner-forms.md b/docs/implementation/2026/quarter-IV/304-store-2b-3c-2b-glow-scanner-forms.md
+index c796980..5cee7cd 100644
+--- a/docs/implementation/2026/quarter-IV/304-store-2b-3c-2b-glow-scanner-forms.md
++++ b/docs/implementation/2026/quarter-IV/304-store-2b-3c-2b-glow-scanner-forms.md
+@@ -1,7 +1,7 @@
+ # STORE-2b-3c-2b: zero-offset glow scanner-ის ყველა ფორმა
+ 
+ **თარიღი:** 2026-11-12
+-**სტატუსი:** Completed (C round 466 PASS)
++**სტატუსი:** Completed (C round 467 PASS)
+ **შეცვლილი პროექტი:** Store (2 ტესტ ფაილი, ეს დოკუმენტი)
+ 
+ ## კონტექსტი
+@@ -48,18 +48,21 @@ ZERO_OFFSET_GLOW_PATTERN_SOURCE (4 ალტერნატივა)
+   **Solution:** ეს სამი fixture `['…', '…'].join('')`-ით აიწყობა, ამიტომ Tailwind candidate წყაროში აღარ ჩანს. ამ დოკუმენტშიც ეს ფორმები სიტყვებითაა აღწერილი და არა კლასის ტექსტით. Build HEAD-ის byte-identical-ია.
+ - **Problem:** HEAD-ის TS6 fixture-ები უკვე 5 utility-ს ამატებს production CSS-ში.
+   **Solution:** ეს არის B-R465-TEST-FIXTURE-CSS-LEAK, წინასწარ არსებული და deferred Low. TS6 ამ რაუნდში არ შეხებია (ერთი ელემენტი, ერთი წესი: ახალი ფორმები მხოლოდ TS7-სა და TS8-ში).
++- **Problem:** C round 466-მა აჩვენა, რომ TS8 pre-check-ის წაშლის შემდეგაც მწვანე რჩებოდა (C-R466-01, Medium; იგივეა A-R466-REVIEW-M1 და TL-R465-L1). pre-check შედეგს არ ცვლის: ოთხივე ალტერნატივა სიტყვა shadow-ს შეიცავს, ამიტომ shadow-ის გარეშე წყარო ისედაც 0-ს იძლევა. სათაური იმაზე მეტს ამტკიცებდა, ვიდრე ტესტი.
++  **Solution:** TS8 ახლა `String.prototype.matchAll`-ზე spy-ით ითვლის pattern scan-ის გამოძახებებს: shadow-ის გარეშე წყაროზე scan-ი არ ეშვება, shadow-იან წყაროზე ეშვება. pre-check-ის წაშლა (mutant M14) TS8-ს წითლად აქცევს. ტესტების რაოდენობა უცვლელია (TS8 ერთი ტესტია).
+ 
+ ## ტესტირება
+ 
+ - **TS7:** 15 glow fixture (თითოეული 1 hit) და 8 non-glow fixture (თითოეული 0): ერთეულები, ნიშნები, ფუნქციური და concatenated blur; ასევე offset-იანი ჩრდილები, spread-ring-ები და `margin`.
+-- **TS8:** `/shadow/i` pre-check: shadow-ის გარეშე წყარო იძლევა 0-ს, ხოლო upper-case `BOX-SHADOW` და camel-case `TextShadow` იძლევა 1-ს.
++- **TS8:** `/shadow/i` pre-check: shadow-ის გარეშე წყარო იძლევა 0-ს და pattern scan-ი არ ეშვება (spy-ის გამოძახებები 0); upper-case `BOX-SHADOW` და camel-case `TextShadow` იძლევა 1-ს და თითოეულზე scan-ი ეშვება.
+ - TS1–TS6 უცვლელია.
+ - A-მ გაუშვა: `npm run typecheck` (rc 0), `npx biome check` ორ ფაილზე (rc 0), `npx vitest run` 4 covering ფაილზე: `store-teal-sweep`, `store-live-teal`, `store-glow-shadow`, `store-gradient-text` (4 ფაილი, 31 ტესტი, ყველა PASS).
+-- B-ის pre-check (`b-round-465/`): 13 mutant, ყველა წითელი; 657 წყარო ფაილზე HEAD და sketch counter-ის შედარება ტოლია, fixture ფაილის გარდა; Chromium-ის computed `box-shadow`/`filter` 22 fixture-ზე ემთხვევა TS7-ის მოსალოდნელ მნიშვნელობებს; production build HEAD-ის ტოლია.
++- B-ის pre-check (`b-round-465/`, `b-round-466/`): 14 mutant, ყველა წითელი (M14 შლის pre-check-ს და წითლად აქცევს TS8-ს); 657 წყარო ფაილზე HEAD და sketch counter-ის შედარება ტოლია, fixture ფაილის გარდა; Chromium-ის computed `box-shadow`/`filter` 22 fixture-ზე ემთხვევა TS7-ის მოსალოდნელ მნიშვნელობებს; production build HEAD-ის ტოლია.
+ - სრული suite და verify root gate-ის საქმეა.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+ - B-R465-TEST-FIXTURE-CSS-LEAK: TS6-ის fixture leak polish pass-ში (deferred Low).
+ - SYS-R465-DEAD-CSS-MATCHER: ცალკე task, საკუთარ trigger-ზე.
++- code-reviewer-ის round 466-ის Low-ები (A-R466-REVIEW-L1…L4: shadow-ის კონტექსტის გარეშე negative fixture, ნულის `.0` და `00` ფორმები, ფუნქციური და concatenated blur Tailwind ალტერნატივებში, concatenated ring) deferred polish-შია.
+ - STORE-2b ღია რჩება 2b-4-ის რიგებზე, რომლებიც STORE-3/STORE-4-ის acceptance-შია.

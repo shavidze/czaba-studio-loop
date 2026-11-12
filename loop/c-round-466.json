@@ -1,0 +1,55 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-12T10:52:24.1871795Z",
+  "round": 466,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R466-01",
+   "severity": "medium",
+   "origin": "B spec",
+   "steps": [
+    "Copy 6d321c7 + the sketch files to c-round-466/tree-mut",
+    "Delete the 3-line /shadow/i pre-check in countZeroOffsetGlowHits",
+    "Run the 4 covering vitest files"
+   ],
+   "expected": "TS8 goes red, since its title claims it pins the pre-check skip",
+   "actual": "4 files / 31 tests pass; TS8 line 161 returns 0 without the pre-check, no mutant removes it",
+   "evidence": "c-round-466/data/nopcheck-vitest.txt; a-round-466.md section 3"
+  }
+ ],
+ "passed": [
+  "C1-SOURCE-SCOPE",
+  "C3-COVERING",
+  "C8-AUTH-GUARD",
+  "C11-CLAIMS"
+ ],
+ "gate": [
+  "full suite / verify"
+ ],
+ "blocked": [
+  "Fake-bearer premium path: backend unavailable in cloud",
+  "C4-C7, C9, C10, C12 not run: short route, A STOP on an unruled Medium (lesson 22)"
+ ],
+ "notes": [
+  "Short FAIL, STOPPED, routed to B. First auth run hit a cold-start timeout (env-invalid) and was replaced."
+ ],
+ "manifestPaths": "b-round-464/r465-tree-sha256.txt (1377) + b-round-318/protected-sha256.txt (11)",
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": null,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": "not re-run; see b-round-465/mutants/summary.txt",
+ "gateChecksNamed": [],
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null,
+ "nullReasons": "Short route per lesson 22: C4-C7 not run because A stopped on an unruled Medium"
+}
