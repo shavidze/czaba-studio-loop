@@ -1,0 +1,19 @@
+# New walker forms reported by the round-458 code-reviewer (stop-loss rule 1: count in non-test app/ and verdict flips)
+# Run from /home/runner/czaba-project/store. Counts measured by A on the round-458 tree.
+
+## NWF-1 (Low, extends TL-R458-L1): string-aware arm's quote tracking desyncs without a regex literal
+## (nested template with // or /*, ${'`'}, unpaired backtick in JSX text). Names are lost only if a LATER import also has a comment in its braces.
+# (a) imports/exports with a comment inside braces, non-test app/ -> expected 1 file: app/components/animations/index.ts:1
+rg -U -c --glob '!**/__tests__/**' '(?:import|export)\s+(?:type\s+)?(?:[\w$]+\s*,\s*)?\{[^}]*(?://|/\*)[^}]*\}\s*from' app
+# (b) nested template containing // or /* in non-test app/ -> expected 0 (rg rc 1, no output). Covers only one of the three hazards.
+rg -c --glob '!**/__tests__/**' '\$\{`[^`]*(//|/\*)' app
+# Combined count 0 rests on: (a) gives one file only, and walker-forms.py on that file reports
+# brace_comment_files_with_star_or_backtick=0 (no `/*` and no backtick in components/animations/index.ts), which excludes all three hazards.
+python3 -I /home/runner/czaba-project/tmp/studio-real-loop/b-round-457/walker-forms.py /home/runner/czaba-project/store
+
+## NWF-2 (Low, label only, TL-R458-L4): a leading `_` before a dead-rule token is rejected by tokenPattern's lookbehind
+## ((?<![\w-]) / theme (?<![\w/.]) both treat `_` as \w), so such a consumer would be missed: fail-open direction, not fail-closed.
+# Full DEAD_RULE_TOKENS list (store-live-teal.test.ts l.282-311, keyframe names included). Expected 0 (rg rc 1, no output).
+rg -c --glob '!**/__tests__/**' '_(?:glow-primary|video-sync|gradient-primary|gradient-hero|gradient-glow|hover-glow|interactive-card|audio-preview-inline-button|audioPlayingPulse|playButtonPulse|is-playing|product-detail-add-to-cart|newsletter-button-large|testimonial-card|waveform-bar|track-row-waveform|loading-brand|pack-card-3d|about-image-overlay|value-card|glass-card)' app
+
+# Verdict flips: none. Covering LT7/GT5b green; reached set unchanged (claims K12 reached_v3=294 same_as_v2=yes).

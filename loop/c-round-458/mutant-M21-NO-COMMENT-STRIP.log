@@ -1,0 +1,134 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c458-scratch[39m
+
+ [32m✓[39m app/lib/__tests__/store-glow-shadow.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 108[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-teal-sweep.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 252[2mms[22m[39m
+ [31m❯[39m app/lib/__tests__/store-gradient-text.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 275[2mms[22m[39m
+     [32m✓[39m GT1: no app CSS rule paints text with a background clip, except the allow-listed dead rule at its exact count[32m 20[2mms[22m[39m
+     [32m✓[39m GT1b: no app or perf script clips text to a background (class, inline style or CSS text), except the allow-listed dead loader at its exact count[32m 29[2mms[22m[39m
+     [32m✓[39m GT2: the --gradient-text token is neither defined nor read anywhere in app[32m 26[2mms[22m[39m
+     [32m✓[39m GT3: only the allow-listed dead files name the retired text-glow or hero-title-glow class, each at its exact count[32m 25[2mms[22m[39m
+     [32m✓[39m GT4: the CSS scan is non-vacuous and its parser handles case, lists, comments, quotes and alpha-zero fills[32m 7[2mms[22m[39m
+     [32m✓[39m GT4b: the script scan finds every gradient-text spelling and is non-vacuous[32m 44[2mms[22m[39m
+     [32m✓[39m GT5: the allow-listed dead components stay unmounted (no importer outside their own file and the barrels)[32m 55[2mms[22m[39m
+[31m     [31m×[31m GT5b: the allow-listed dead modules with common names are imported by no file outside their own file and their own barrels[39m[32m 66[2mms[22m[39m
+ [31m❯[39m app/lib/__tests__/store-live-teal.test.ts [2m([22m[2m10 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 382[2mms[22m[39m
+     [32m✓[39m LT1: every live player, 404, palette and scrollbar rule is the teal-free block, exactly once[32m 71[2mms[22m[39m
+     [32m✓[39m LT2: the teal card light layer is gone and the card light keeps only neutral stops[32m 1[2mms[22m[39m
+     [32m✓[39m LT3: teal stays only in the allow-listed dead or frozen CSS, each file at its exact count[32m 15[2mms[22m[39m
+     [32m✓[39m LT5: every remaining teal line sits inside an allow-listed dead or frozen rule[32m 11[2mms[22m[39m
+     [32m✓[39m LT6: no CSS reads a teal token outside the dead allow-list and no teal hex hides behind an alpha suffix[32m 12[2mms[22m[39m
+     [32m✓[39m LT4: the scan is non-vacuous and the teal matcher sees the CSS forms this stage removed[32m 15[2mms[22m[39m
+     [32m✓[39m LT7: every dead-labelled teal rule has no mounted consumer (A-R454-REVIEW-M-DEAD-UNCHECKED)[32m 219[2mms[22m[39m
+[31m     [31m×[31m LT8: the mount walker follows routes, barrels by name, namespaces, re-export stars and dynamic imports[39m[32m 6[2mms[22m[39m
+[31m     [31m×[31m LT9: the mount walker follows every local module specifier in app source to a file (A-R456-REVIEW-M1)[39m[32m 29[2mms[22m[39m
+[31m     [31m×[31m LT10: directory specifiers follow every file a real resolver may pick, and names survive clause and comment hazards (A-R457-REVIEW-M1)[39m[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT5b: the allow-listed dead modules with common names are imported by no file outside their own file and their own barrels
+[31m[1mAssertionError[22m: expected [ true, true, true, true, false, …(9) ] to deeply equal [ true, true, true, true, true, …(9) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,11 +1,11 @@[39m
+[2m  [[22m
+[2m    true,[22m
+[2m    true,[22m
+[2m    true,[22m
+[2m    true,[22m
+[32m-   true,[39m
+[31m+   false,[39m
+[2m    true,[22m
+[2m    true,[22m
+[2m    true,[22m
+[2m    true,[22m
+[2m    true,[22m
+
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m258:74[22m[39m
+    [90m256| [39m      ["import { sendOrderEmail } from '../email.server';", 'lib/utils…
+    [90m257| [39m    ][33m;[39m
+    [90m258| [39m    expect(positive.map(([line, importer]) => usesDead(line, importer)…
+    [90m   | [39m                                                                         [31m^[39m
+    [90m259| [39m      positive[33m.[39m[34mmap[39m(() [33m=>[39m [35mtrue[39m)[33m,[39m
+    [90m260| [39m    )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-live-teal.test.ts[2m > [22mstore live teal CSS (STORE-2b-3c-1)[2m > [22mLT8: the mount walker follows routes, barrels by name, namespaces, re-export stars and dynamic imports
+[31m[1mAssertionError[22m: expected [ 'components/al/A.tsx', …(33) ] to deeply equal [ 'components/al/A.tsx', …(34) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -4,11 +4,10 @@[39m
+[2m    "components/al/Row.tsx",[22m
+[2m    "components/al/index.ts",[22m
+[2m    "components/both/index.ts",[22m
+[2m    "components/both/inner/Bv.tsx",[22m
+[2m    "components/both/inner/index.ts",[22m
+[32m-   "components/cm/Cm.tsx",[39m
+[2m    "components/cm/index.ts",[22m
+[2m    "components/hz.tsx",[22m
+[2m    "components/kit/Live.tsx",[22m
+[2m    "components/kit/index.ts",[22m
+[2m    "components/lazy.tsx",[22m
+
+[36m [2m❯[22m app/lib/__tests__/store-live-teal.test.ts:[2m738:49[22m[39m
+    [90m736| [39m      [[32m'components/nsx/other/Ot.tsx'[39m[33m,[39m [32m'export const Ot = 1;'[39m][33m,[39m
+    [90m737| [39m    ])[33m;[39m
+    [90m738| [39m    [34mexpect[39m([[33m...[39m[34mreachableScripts[39m(files)][33m.[39m[34msort[39m())[33m.[39m[34mtoEqual[39m(
+    [90m   | [39m                                                [31m^[39m
+    [90m739| [39m      [
+    [90m740| [39m        [32m'components/kit/Live.tsx'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-live-teal.test.ts[2m > [22mstore live teal CSS (STORE-2b-3c-1)[2m > [22mLT9: the mount walker follows every local module specifier in app source to a file (A-R456-REVIEW-M1)
+[31m[1mAssertionError[22m: expected [ Array(1) ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "components/animations/index.ts ./ScrollReveal",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m app/lib/__tests__/store-live-teal.test.ts:[2m795:7[22m[39m
+    [90m793| [39m    [34mexpect[39m(
+    [90m794| [39m      unfollowed.filter((entry) => !Object.hasOwn(UNFOLLOWED_SPECIFIER…
+    [90m795| [39m    )[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m      [31m^[39m
+    [90m796| [39m    [34mexpect[39m(
+    [90m797| [39m      Object.keys(UNFOLLOWED_SPECIFIER_ALLOW_LIST).filter((entry) => !…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-live-teal.test.ts[2m > [22mstore live teal CSS (STORE-2b-3c-1)[2m > [22mLT10: directory specifiers follow every file a real resolver may pick, and names survive clause and comment hazards (A-R457-REVIEW-M1)
+[31m[1mAssertionError[22m: expected [ 'kit/index.ts', 'routes/a.tsx' ] to include 'kit/Row.tsx'[39m
+[36m [2m❯[22m app/lib/__tests__/store-live-teal.test.ts:[2m891:80[22m[39m
+    [90m889| [39m        [[32m'kit/Row.tsx'[39m[33m,[39m [32m'export const Row = 1;'[39m][33m,[39m
+    [90m890| [39m      ])[33m;[39m
+    [90m891| [39m    expect(sorted(kit("export interface P {}\nexport { Row } from '~/k…
+    [90m   | [39m                                                                               [31m^[39m
+    [90m892| [39m      [32m'kit/Row.tsx'[39m[33m,[39m
+    [90m893| [39m    )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m24 passed[39m[22m[90m (28)[39m
+[2m   Start at [22m 01:07:35
+[2m   Duration [22m 637ms[2m (transform 261ms, setup 0ms, import 320ms, tests 1.02s, environment 0ms)[22m
+
+
+::error file=/tmp/c458-scratch/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT5b%3A the allow-listed dead modules with common names are imported by no file outside their own file and their own barrels,line=258,column=74::AssertionError: expected [ true, true, true, true, false, …(9) ] to deeply equal [ true, true, true, true, true, …(9) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -1,11 +1,11 @@%0A  [%0A    true,%0A    true,%0A    true,%0A    true,%0A-   true,%0A+   false,%0A    true,%0A    true,%0A    true,%0A    true,%0A    true,%0A%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:258:74%0A%0A
+
+::error file=/tmp/c458-scratch/app/lib/__tests__/store-live-teal.test.ts,title=app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT8%3A the mount walker follows routes%2C barrels by name%2C namespaces%2C re-export stars and dynamic imports,line=738,column=49::AssertionError: expected [ 'components/al/A.tsx', …(33) ] to deeply equal [ 'components/al/A.tsx', …(34) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -4,11 +4,10 @@%0A    "components/al/Row.tsx",%0A    "components/al/index.ts",%0A    "components/both/index.ts",%0A    "components/both/inner/Bv.tsx",%0A    "components/both/inner/index.ts",%0A-   "components/cm/Cm.tsx",%0A    "components/cm/index.ts",%0A    "components/hz.tsx",%0A    "components/kit/Live.tsx",%0A    "components/kit/index.ts",%0A    "components/lazy.tsx",%0A%0A ❯ app/lib/__tests__/store-live-teal.test.ts:738:49%0A%0A
+
+::error file=/tmp/c458-scratch/app/lib/__tests__/store-live-teal.test.ts,title=app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT9%3A the mount walker follows every local module specifier in app source to a file (A-R456-REVIEW-M1),line=795,column=7::AssertionError: expected [ Array(1) ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "components/animations/index.ts ./ScrollReveal",%0A+ ]%0A%0A ❯ app/lib/__tests__/store-live-teal.test.ts:795:7%0A%0A
+
+::error file=/tmp/c458-scratch/app/lib/__tests__/store-live-teal.test.ts,title=app/lib/__tests__/store-live-teal.test.ts > store live teal CSS (STORE-2b-3c-1) > LT10%3A directory specifiers follow every file a real resolver may pick%2C and names survive clause and comment hazards (A-R457-REVIEW-M1),line=891,column=80::AssertionError: expected [ 'kit/index.ts', 'routes/a.tsx' ] to include 'kit/Row.tsx'%0A ❯ app/lib/__tests__/store-live-teal.test.ts:891:80%0A%0A

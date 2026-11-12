@@ -1,0 +1,82 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [
+  {
+   "id": "C-R458-L1",
+   "severity": "low",
+   "origin": "A",
+   "steps": [
+    "rg replay of a-round-458/new-walker-forms.txt NWF-1(a)/(b), NWF-2 and walker-forms.py on tree and HEAD clone"
+   ],
+   "expected": "stop-loss rule 1: count 0 in non-test app/, no verdict flip",
+   "actual": "NWF-1 (string-aware arm quote desync, extends TL-R458-L1) is confirmed: counts 1 (animations/index.ts, no hazard chars), 0, 0; NWF-2 leading underscore 0. Stays a Low on TL-R455-WALKER-LIMITS, not a FAIL",
+   "evidence": "c-round-458/nwf-replay.txt, wf-tree.txt, wf-head.txt"
+  },
+  {
+   "id": "C-R458-L2",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "read a-round-458.md items 2,5 and the task's TL-R458-L4 / TL-R458-L1 wording"
+   ],
+   "expected": "task wording matches behaviour",
+   "actual": "TL-R458-L4 'fails closed' is wrong (leading _ rejection misses consumers = fail-open); TL-R458-L1 wording says backtick blinds both comment arms but only string-aware arm; unpinned lines style-scan.ts namespaceReExports(stringAware) and the 'form|' key have no mutant. All count 0 in app/",
+   "evidence": "a-round-458.md; for B deferred_low_polish"
+  }
+ ],
+ "passed": [
+  "C1 SOURCE-SCOPE (6 grant paths; doc 298 diff is l.4 only)",
+  "C2 CLAIMS (head clone output == claims-458-head-output.txt; tree == expected-after-A; stderr empty)",
+  "C3 APPLY (4 OK)",
+  "C4 COVERING (4 files / 28 tests; LT1-LT10, GS1-4, GT1-5b, TS1-6 passed)",
+  "C5 MUTANTS (42 lines cmp-equal to b-round-457/mutants.txt; 40 RED)",
+  "C6 NO ASSERTION LOST (expect( counts 76/21/23/10 equal expect-counts.txt; see assert-map.md)",
+  "C7 STUDIO + PURCHASE PROTECTION (real Chromium, 1440 and 1280, fresh contexts; equals c-round-457 except timings; anonymous /studio/middle-east Sign in required, audioSrc 0, media 0)",
+  "C8 WALKER CLASS (reached 294, R lines equal, ScrollReveal reachable; probe P1-P5 lines equal)",
+  "C8b WALKER LIMIT FORMS (brace_comment=1 dir_form=0 dot_spec=0 star_or_backtick=0 on tree and HEAD; A's greps replay to 1/0/0)",
+  "C9 DOCS (doc 298 l.4, doc 299 l.4 exact, K9 grep 0, pending 0, headings in order, three forms named, A-R457-REVIEW-M1 entry, cited ids exist)",
+  "C10 L57"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-12T01:06:40.0725603Z",
+  "round": 458,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": 6,
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": null,
+ "assertsSpecified": null,
+ "mutantsRecorded": 42,
+ "mutantRedOnSketch": "b-round-457/mutants/mutants.txt; C re-ran on own scratch c-round-458/mutants.txt, cmp equal",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": "b-round-457/precheck-full-raw.log",
+ "chainHeadGateRunGreen": "gate 455 published db95f40",
+ "affectedChecksNamed": [
+  "covering-458",
+  "mutants",
+  "walker class",
+  "walker limit forms",
+  "c12"
+ ],
+ "affectedChecksRunOnSketch": "b-round-457/precheck-covering.log",
+ "notes": "Test-only round; no app files changed. Ableton comparison not applicable. Premium auth not bypassed (anonymous protected route shows Sign in required, no media).",
+ "evidence": "c-round-458.md"
+}

@@ -1,0 +1,70 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b459-sketch[39m
+
+ [31m❯[39m app/lib/__tests__/store-entrance-loader.test.tsx [2m([22m[2m36 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 334[2mms[22m[39m
+     [32m✓[39m L1 renders nothing on the server and logs nothing[32m 4[2mms[22m[39m
+     [32m✓[39m L2 shows a decorative overlay with no heading on first mount[32m 128[2mms[22m[39m
+     [32m✓[39m L3 stays on screen for the 1450 ms minimum, exit fade included, never past 1900 ms[32m 12[2mms[22m[39m
+     [32m✓[39m L4 lets pointer events through during the exit fade only[32m 15[2mms[22m[39m
+     [32m✓[39m L5 a click on the overlay ends it immediately and for good[32m 10[2mms[22m[39m
+       [32m✓[39m Escape at 300 ms removes the overlay and its keydown listener[32m 8[2mms[22m[39m
+       [32m✓[39m Tab ends it like Escape without preventing the focus move[32m 8[2mms[22m[39m
+       [32m✓[39m Shift+Tab ends it like Escape without preventing the focus move[32m 14[2mms[22m[39m
+       [32m✓[39m other keys do not skip[32m 9[2mms[22m[39m
+       [32m✓[39m removes the keydown listener after the natural finish[32m 10[2mms[22m[39m
+       [32m✓[39m removes the keydown listener on unmount mid-animation[32m 10[2mms[22m[39m
+     [32m✓[39m L7 shows once per session and never writes the old localStorage key[32m 7[2mms[22m[39m
+     [32m✓[39m L8 ignores the old localStorage key and honours the session key[32m 9[2mms[22m[39m
+     [32m✓[39m L9 never renders under prefers-reduced-motion and does not claim the session[32m 1[2mms[22m[39m
+     [32m✓[39m L10 blocked storage renders nothing and does not throw[32m 1[2mms[22m[39m
+     [32m✓[39m L10b a sessionStorage write failure renders nothing and does not throw[32m 1[2mms[22m[39m
+     [32m✓[39m L11 leaves no stray timers or state updates after unmount[32m 6[2mms[22m[39m
+     [32m✓[39m E1 the server renders a disabled cover style and the boot script[32m 3[2mms[22m[39m
+     [32m✓[39m E2 on a fresh tab at / the boot script turns the cover on and claims the session[32m 7[2mms[22m[39m
+     [32m✓[39m E3 a seen tab keeps the cover off[32m 3[2mms[22m[39m
+     [32m✓[39m E3 reduced motion keeps the cover off[32m 3[2mms[22m[39m
+     [32m✓[39m E3 another path keeps the cover off[32m 2[2mms[22m[39m
+     [32m✓[39m E4 blocked storage keeps the cover off and does not throw[32m 2[2mms[22m[39m
+     [32m✓[39m E5 the animated overlay takes over in the same commit and turns the cover off[32m 9[2mms[22m[39m
+     [32m✓[39m E6 the timeline counts from the first cover frame: 1450 ms minimum, 1900 ms cap[32m 1[2mms[22m[39m
+     [32m✓[39m E7 a takeover after the failsafe never replays the entrance[32m 2[2mms[22m[39m
+[31m     [31m×[31m E8 Escape before hydration skips the cover and the entrance[39m[32m 5[2mms[22m[39m
+[31m     [31m×[31m E8 Tab before hydration skips the cover and the entrance[39m[32m 2[2mms[22m[39m
+     [32m✓[39m E8 click before hydration skips the cover and the entrance[32m 2[2mms[22m[39m
+     [32m✓[39m E8b other keys before hydration keep the cover[32m 1[2mms[22m[39m
+     [32m✓[39m E9 after the takeover the boot listeners are gone and the overlay owns the skip[32m 16[2mms[22m[39m
+     [32m✓[39m E10 a client navigation to / after a seen entrance shows nothing[32m 2[2mms[22m[39m
+     [32m✓[39m E11 the root layout renders the cover right after the stylesheet links[32m 1[2mms[22m[39m
+     [32m✓[39m E12 a client navigation to / on a fresh tab still plays, as at HEAD[32m 7[2mms[22m[39m
+     [32m✓[39m E13 a cover that is on without a start time is retired, not animated[32m 2[2mms[22m[39m
+     [32m✓[39m E14 a click between the claim and the hand-off skips the animated overlay too[32m 9[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m34 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 02:04:30
+[2m   Duration [22m 976ms[2m (transform 103ms, setup 0ms, import 259ms, tests 334ms, environment 279ms)[22m
+
+
+::error file=/tmp/b459-sketch/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SABA-B-13 static head cover and takeover > E8 Escape before hydration skips the cover and the entrance,line=442,column=25::AssertionError: expected 'all' to be 'not all' // Object.is equality%0A%0AExpected: "not all"%0AReceived: "all"%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:442:25%0A%0A
+
+::error file=/tmp/b459-sketch/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SABA-B-13 static head cover and takeover > E8 Tab before hydration skips the cover and the entrance,line=442,column=25::AssertionError: expected 'all' to be 'not all' // Object.is equality%0A%0AExpected: "not all"%0AReceived: "all"%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:442:25%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE8 Escape before hydration skips the cover and the entrance
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE8 Tab before hydration skips the cover and the entrance
+[31m[1mAssertionError[22m: expected 'all' to be 'not all' // Object.is equality[39m
+
+Expected: [32m"[7mnot [27mall"[39m
+Received: [31m"all"[39m
+
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m442:25[22m[39m
+    [90m440| [39m    notPrevented [33m=[39m [34mskip[39m()[33m;[39m
+    [90m441| [39m    [34mexpect[39m(notPrevented)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m442| [39m    [34mexpect[39m(cover[33m.[39mmedia)[33m.[39m[34mtoBe[39m([32m'not all'[39m)[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m443| [39m    [34mexpect[39m(cover[33m.[39m[34mgetAttribute[39m([32m'data-state'[39m))[33m.[39m[34mtoBe[39m([32m'skipped'[39m)[33m;[39m
+    [90m444| [39m    [35mconst[39m { container } [33m=[39m [34mrender[39m([33m<[39m[33mSpotlightLoader[39m [33m/[39m[33m>[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+

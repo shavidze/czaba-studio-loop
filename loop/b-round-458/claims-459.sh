@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Claims for round 459 (SABA-B-13). One line per claim. S defaults to the store tree.
+S=${S:-/home/runner/czaba-project/store}; L=/home/runner/czaba-project/tmp/studio-real-loop; B=$L/b-round-458
+echo "K1 $(python3 -I -c "import json;g=json.load(open('$L/gates/gate-round-458.json'));print(g['status'],g['commit'][:7])")"
+echo "K2 $(git -C $S rev-parse --short=7 HEAD) dirty=$(git -C $S status --short --untracked-files=all | wc -l)"
+echo "K3 $(grep -o 'SPOTLIGHT_ENTRANCE_TOTAL_MS = [0-9]*' $S/app/components/loading/SpotlightLoader.tsx | head -1)|$(grep -c 'czaba_entrance_seen' $S/app/components/loading/SpotlightLoader.tsx)|EntranceCover=$(test -f $S/app/components/loading/EntranceCover.tsx && echo 1 || echo 0)"
+echo "K4 links=$(grep -c '<Links />' $S/app/root.tsx) cover=$(grep -c '<EntranceCoverHead />' $S/app/root.tsx) after=$(grep -A1 '<Links />' $S/app/root.tsx | tail -1 | tr -s ' ')"
+echo "K5 $(grep -c 'opacity: 0,' $S/app/components/animations/PageTransition.tsx) $(grep -c 'y: 8,' $S/app/components/animations/PageTransition.tsx)"
+echo "K6 $(grep -c 'at most 1200 ms' $S/app/lib/__tests__/store-entrance-loader.test.tsx)"
+echo "K7 $(grep -c 'sticky top-0 z-50' $S/app/components/layout/Header.tsx) $(grep -c 'z-50' $S/app/components/common/CookieConsent.tsx)"
+echo "K8 $(ls $S/docs/implementation/2026/quarter-IV | grep -c '^300-')"
+echo "K9 $(cd $S && grep -rln 'SPOTLIGHT_ENTRANCE_TOTAL_MS' app perf e2e 2>/dev/null | sort | tr '\n' ' ')|$(cd $S && grep -rln 'entrance-loader' app perf e2e 2>/dev/null | sort | tr '\n' ' ')|$(cd $S && grep -rln 'czaba-entrance-cover\|EntranceCover' app perf e2e 2>/dev/null | sort | tr '\n' ' ')"
+echo "K10 $(for f in pd-consult.md sketch-review.md sketch-459.patch.txt sketch-459.sha256 sketch-files-sha256.txt grants-459.txt covering-459.txt mutants.py mutants/mutants.txt precheck-covering.log precheck-full-raw.log precheck-typecheck.log precheck-lint-sketch.txt precheck-lint-head.txt precheck-biome-files.txt precheck-smoke.log probe/frames.mjs probe/console.mjs probe/serve-prod.sh probe/matrix/summary.txt probe/matrix/table.txt probe/matrix/table.py probe/head-prod-1440-cpu1.txt probe/head-prod-1440-cpu4.txt probe/console-sketch-dev3.json probe/console-head-dev.json probe/entrance-timing.mjs probe/f-5191-1440-cpu1-fresh.json lessons-before-459.md; do test -f $B/$f && printf 1 || printf "0($f)"; done)"
+echo "K11 $(cd $L && sha256sum -c b-round-458/sketch-459.sha256 2>&1 | tail -1) review=$(grep -c "$(cut -c1-64 $B/sketch-459.sha256)" $B/sketch-review.md) mutants=$(wc -l < $B/mutants/mutants.txt) red=$(grep -c ' RED ' $B/mutants/mutants.txt) base=$(grep -c '^BASE green' $B/mutants/mutants.txt)"
+echo "K12 $(python3 -I $B/probe/matrix/table.py $B/probe/matrix/summary.txt | awk '$1==5190 && $4=="fresh"{print $2"/"$3, "fp"$6, "firstCov"$10, "logo"$22, "tag"$24}' | tr '\n' ';')"
+echo "K13 $(python3 -I $B/probe/matrix/table.py $B/probe/matrix/summary.txt | awk '$1==5191 && ($4=="fresh"||$4=="clientnav"){print $2"/"$3"/"$4, "remFirstCov"$16, "remStart"$18, "logo"$22, "tag"$24, $28}' | tr '\n' ';')"
+echo "K14 head=$(grep -oE '[0-9]+ warnings' $B/precheck-lint-head.txt) sketch=$(grep -oE '[0-9]+ warnings' $B/precheck-lint-sketch.txt)"
+echo "K15 $(grep -c 'bg-black' $S/app/components/loading/SpotlightLoader.tsx)"
+echo "K16 $(cd $L && python3 -I tools/l58-check.py current-task.md | tail -1)"
+echo "K17 $(grep -E 'Tests ' $B/precheck-full-raw.log | sed 's/\x1b\[[0-9;]*m//g' | tr -s ' ')|$(grep -E 'Tests ' $B/precheck-covering.log | sed 's/\x1b\[[0-9;]*m//g' | tr -s ' ')"
+echo "K18 $(grep -oE 'lint/[a-zA-Z/]+' $B/precheck-biome-files.txt | sort | uniq -c | tr -s ' ' | tr '\n' ' ')"
+echo "K19 $(cd $S && cat e2e/*.ts | grep -c "goto('/')")"
+echo "K20 $(python3 -I $B/probe/matrix/table.py $B/probe/matrix/summary.txt | awk '$1==5191 && ($4=="reload"||$4=="rm"){print $2"/"$3"/"$4, "black"$26, "firstCov"$10}' | tr '\n' ';')"
