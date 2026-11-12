@@ -1,0 +1,64 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-12T07:55:29.3320582Z",
+  "round": 463,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R463-01",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "grep -nE '^@keyframes' app/styles/app.css",
+    "grep animation:/animate-/--animate- consumers of float, grain, fadeInUp, fadeOut in app/ (non-test)"
+   ],
+   "expected": "After the dead-CSS removal no @keyframes without an animation consumer remains",
+   "actual": "4 keyframes (float app.css:193, grain :206, fadeInUp :1265, fadeOut :1276) have 0 animation consumers; DC2 and the generator count a whole-word text match (comment, variable, type field) as consumption, so they stay. Confirms A-R463-REVIEW-M1. No visible effect (C7 deadAnim 0/0, build-compare equal).",
+   "evidence": "c-round-463.md section C-R463-01; A's a-round-463.md code-reviewer M1; follow-up: DC2 counts animation declarations only, then delete the 4"
+  }
+ ],
+ "passed": [
+  "C1",
+  "C2",
+  "C3",
+  "C4",
+  "C5",
+  "C6",
+  "C7",
+  "C8",
+  "C9",
+  "C10"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "lint",
+  "verify"
+ ],
+ "blocked": [],
+ "manifestPaths": "b-round-462/grants-463.txt (7 paths)",
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": null,
+ "assertsSpecified": null,
+ "mutantsRecorded": "c-round-463/mutants/mutants.txt byte-identical to b-round-462/mutants/mutants.txt (BASE GREEN, M1-M11 RED)",
+ "mutantRedOnSketch": "b-round-462/mutants/mutants.txt",
+ "gateChecksNamed": null,
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "covering 14 files/148 tests",
+  "build-compare",
+  "dead-css-pages 26 rows",
+  "studio+protection probe"
+ ],
+ "affectedChecksRunOnSketch": "b-round-462/precheck-covering.log, b-round-462/build-compare.txt, b-round-462/probe/run1/dead-css-pages.json; C re-ran all (c-round-463/covering.log, build-compare.txt, pages/dead-css-pages.json)",
+ "abletonConformance": "not applicable: dead-CSS removal, no behaviour change"
+}

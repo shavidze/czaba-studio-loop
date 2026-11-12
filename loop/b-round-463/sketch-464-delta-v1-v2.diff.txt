@@ -1,0 +1,26 @@
+2c2
+< index 5cbc4e8..f01cab1 100644
+---
+> index 5cbc4e8..d2a7deb 100644
+5c5
+< @@ -103,32 +103,66 @@ function keyframesNames(css: string): string[] {
+---
+> @@ -103,32 +103,68 @@ function keyframesNames(css: string): string[] {
+21c21,23
+< +  return source.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:\w])\/\/[^\n]*/g, '$1');
+---
+> +  return source
+> +    .replace(/(^|[\s{};,(])\/\*[\s\S]*?\*\//g, '$1 ')
+> +    .replace(/(^|[^:\w])\/\/[^\n]*/g, '$1');
+83c85
+< @@ -150,7 +184,43 @@ describe('store dead CSS removal (STORE-2b-3d-2)', () => {
+---
+> @@ -150,7 +186,49 @@ describe('store dead CSS removal (STORE-2b-3d-2)', () => {
+105a108,112
+> +      [
+> +        '<input accept="video/*,audio/*" />',
+> +        "<div style={{ animation: 'dc-after-glob-spin 1s' }} />",
+> +        '{/* closing comment */}',
+> +      ].join('\n'),
+113a121
+> +      'dc-after-glob-spin',

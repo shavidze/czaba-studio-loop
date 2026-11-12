@@ -1,206 +1,136 @@
-# Round 463: STORE-2b-3d-2. Delete the dead Store CSS rules (and fix C-R462-01)
+# Round 464: STORE-2b-3d-3. Delete the 4 orphan keyframes and make DC2 count only real animation use (A-R463-REVIEW-M1 = C-R463-01)
 
-**Planned by:** B at the round 462 → 463 planning, 2026-11-12 (`b-round-462.md`). D-29z1632 records the round-462 result; D-29z1633 records this dispatch.
+**Planned by:** B at the round 463 → 464 planning, 2026-11-12 (`b-round-463.md`). D-29z1634 records the round-463 result; D-29z1635 records this dispatch.
 
-**Baseline:** store HEAD `eb4d6df`, the gate 462 `published` commit [K1, K2]. `context/head-sha.txt` (`a7fa78e`) is stale.
+**Baseline:** store HEAD `d55ec17`, the gate 463 `published` commit [K1, K2]. The store tree is clean. `context/head-sha.txt` (`eb4d6df`) is stale.
 
 **Advisor:** available and consulted after orientation, before any artifact was written. Its advice, all applied:
-- close round 462 only from C's files, and rule A's K23 STOP;
-- record gate-462 finding 1 (`email.server.ts`) for root, not as closed;
-- delete only rules with zero source consumers;
-- make the pre-check tree equal the delivered tree (Tailwind scans `docs/*.md`);
-- use a style-sensitive browser row, run on the sketch first.
+- read the gate-463 review and re-run the new-input check before choosing the round (done: gate review "COMMIT OK", all Lows; no new Saba or root file);
+- classify all 15 keyframes, not only the 4 (§2.1);
+- list every whole-word hit of the 4 names, including `style.animation`, multi-line declarations and pre-hydration strings (done: 0 animation uses, §2.1);
+- Tailwind scans test files and docs (no `@source` rule), so DC4's utility fixtures are built with `join()` and C6 compares the delivered tree including doc 303;
+- keep the matcher in `store-dead-css.test.ts`; `helpers/style-scan.ts` is not touched;
+- close C-R462-01 only after checking the 12 utilities are really gone (done: 0 of 12 in the `d55ec17` build, `b-round-463/c-r462-01-head-utilities.txt` [K12]).
 
-**Project agents:** `tech-lead` reviewed sketch v1: APPROVE, with 2 Mediums. Both are fixed in the dispatched v2: compound selectors must have every class rendered, and `.is-playing` is ruled dead. tech-lead then delta-reviewed v2. Both verdicts and B's rulings are in `b-round-462/sketch-review.md` [K12]. `product-designer` and the reference section do not apply: this is dead-code removal with no visible change (§3, C7). No persistent screen element is added.
+**Project agents:** `tech-lead` reviewed sketch v1: **APPROVE WITH CHANGES**, no High or Medium. Its Low on the comment stripper (`/*` or `//` inside a string, such as `accept="video/*"`, was read as a comment) is fixed in the dispatched **v3** (v2 fixed block comments, v3 line comments), with two DC4 fixtures and mutants M8 and M9. tech-lead's delta review of v3: **APPROVE**, no Medium or above. Every Low is ruled in `b-round-463/sketch-review.md`, which opens with v3's sha256 [K10, K20]. `product-designer`, `performance-optimizer` and `ableton-arrangement-expert` were not needed: no visible change, no performance path, no Studio behaviour. The reference-first section does not apply (dead-code cleanup, no UX). No persistent screen element is added.
 
 ## 1. Why this round
-- **No Medium+ that the loop can fix is open.** The open Mediums are manual checks, `awaiting_user`, `open_root` or queued in REVIEW-RECOMMENDATIONS (2026-10-23 root clarification). The new gate-462 Medium flag on `email.server.ts` is a policy question for root, not a code defect (`b-round-462.md`).
-- **Recorded order (D-29z1631):** 2b-3d-1 (done, round 462) → **2b-3d-2 (this round)** → 2b-3c-2b → 2b-4 → STORE-2c…5.
-- **Regression:** `regression-last.json` is dated 2026-11-10. It is not due today (2 days). **The next planning on or after 2026-11-13 is REGRESSION-2026-11-13.**
-- **Permission:** Saba's legacy-removal policy of 2026-11-10 ("legacy code that is not used anywhere must be removed incrementally") and the round-462 Q6 default.
-- **Promise (L55):** every Store page and `/studio-lab` look and behave exactly as now. Only CSS that no element can match is removed.
+- **Bug first.** A-R463-REVIEW-M1 (Medium, test strength; C confirmed it as C-R463-01, Low, origin B spec): DC2 counted a keyframes name as "used" when the word appeared anywhere (a comment, a JS variable, a type field). So the 4 keyframes whose only animation users round 463 deleted stayed in the shipped CSS.
+  - **B ruling (L10, L7):** the Medium stands for the test contract (DC2 could not see an orphan); there is no visible effect. C-R463-01 is recorded as `confirmedBy` on A-R463-REVIEW-M1, not as a separate bug.
+  - The fix is small and in code round 463 already owned, so it goes before 2b-3c-2b.
+- **Same root cause, three ids closed together (≤ 3 related bugs):**
+  - A-R463-REVIEW-M1 / C-R463-01: the orphans and the matcher;
+  - B-R463-DC2-UNDERSCORE: the old matcher missed `animate-[name_1s]`; DC4 now covers it;
+  - A-R463-REVIEW-L3: two comment headers left over an orphan keyframes or over nothing.
+- **Recorded order (D-29z1631, D-29z1633):** 2b-3d-2 (done, round 463) → **2b-3d-3 (this fix-up)** → 2b-3c-2b → 2b-4 → STORE-2c…5.
+- **Regression and RETRO:** `regression-last.json` is dated 2026-11-10; today is 2026-11-12, so it is not due. **RETRO 465** follows this round (15-round rule). If the round-465 planning happens on or after 2026-11-13, REGRESSION-2026-11-13 runs first (precedent D-29z1448: "first at the first planning on/after") and RETRO 465 right after it.
+- **Promise (L55):** every Store page and `/studio-lab` look and behave exactly as now. Only 4 `@keyframes` that no element can run are removed.
 
-## 2. What changes (grants: exactly 7 paths, `b-round-462/grants-463.txt`)
+## 2. What changes (grants: exactly 3 paths, `b-round-463/grants-464.txt`)
 
 ### 2.1 Sketch, applied byte for byte
-A applies `b-round-462/sketch-463.patch.txt` (sha in `b-round-462/sketch-463.sha256`) with `git apply`. It holds every code change of the round.
+A applies `b-round-463/sketch-464.patch.txt` (sha in `b-round-463/sketch-464.sha256`) with `git apply`. It holds every code change of the round. After A, the two files are byte-equal to `b-round-463/sketch-464-files-sha256.txt`.
 
-**Narrow grants on `app/styles/**` (globally forbidden):** `app/styles/app.css` and `app/styles/base/utilities.css` may change **only** by the deletions in the sketch. After A, both files are byte-equal to the sha pins in `b-round-462/sketch-463-files-sha256.txt`. The Studio obsidian block stays byte-identical [K6].
+**Narrow grant on `app/styles/app.css` (`app/styles/**` is globally forbidden [K9]).** The file may change **only** by the sketch's deletions: 45 lines deleted, 0 added [K3, K5]. It deletes:
+- `@keyframes float`, `@keyframes grain` with its "Film Grain Overlay" comment header, `@keyframes fadeInUp` and `@keyframes fadeOut`;
+- the "PREMIUM ANIMATIONS" comment header, which introduces no rule (A-R463-REVIEW-L3).
 
-**CSS deletion rule.** The generator is `b-round-462/css-prune.py`, which uses `css-inventory.py`; the full list is `b-round-462/pruned-list.txt` [K5]. It deletes:
-- every rule block, including blocks nested in `@media`, that has no live selector branch: **306 blocks** [K4, K5].
-  - A top-level comma branch is live when every class it requires is rendered. Classes inside `:not(...)` are not required.
-  - A class is rendered when it appears as a whole token in non-test app source (ts, tsx, js, md under `app/`, with `__tests__` and `*.test.*` excluded), or when the Lenis library sets it at runtime.
-  - So `.filter-pill.active` is dead even though `active` is used elsewhere;
-- `@media` wrappers left empty;
-- the comment lines that directly introduce a deleted block;
-- the **6 `@keyframes`** that no remaining CSS and no app source names [K5].
+The Studio obsidian block stays byte-identical [K6]. The missing blank line before the skeleton header (L3's last nit) is left, so the diff stays pure deletion.
 
-The diff is pure deletion: `diff --minimal` shows 0 added CSS lines.
+**Why the 4 are dead [K4, K16, K18].** A grep over `app/` (ts, tsx, css; tests excluded) for an `animation`/`animation-name` declaration, an `animate-` utility or an inline style naming them finds 0 for each. Their other whole-word hits:
+- `float`: a comment in `audio-encoder.worker.ts` and `data-video-float-*` attributes;
+- `grain`: a JSX comment in `SpotlightLoader.tsx`;
+- `fadeInUp`: framer-motion variant objects (`about.tsx`, `ScrollReveal.tsx`), which are JS, not CSS keyframes;
+- `fadeOut`: clip and SFX data fields.
 
-**What stays, on purpose:**
-- **The Lenis rules** (`.lenis.lenis-smooth` …). The library sets those classes at runtime (`node_modules/lenis/dist/lenis.mjs`).
-- **Dead-labelled rules whose class still has a source consumer in a kept, unmounted file.** These are `audio-preview-inline-button` with `audioPlayingPulse`, `waveform-bar` and `track-row-waveform`. They stay with the LEGACY-DEAD remainder, so the round deletes no TSX; the backlog keeps a task to delete the unmounted chain together with this CSS.
-- The `@theme` teal tokens (6 hits). The frozen legacy Studio `.stems-loader-list` and `slider-thumb-teal`.
+No `style.animation =`, `animationName` or template-literal animation string exists in `app/` [K16]. The built HEAD client and server bundle (bundled libraries included) has no animation consumer of the 4 names (`b-round-463/bundle-animation-grep.txt`; its single hit is the keyframes definition itself). tech-lead also checked the `root.tsx` inline scripts, the EntranceCover pre-hydration CSS string and `public/`. HEAD's computed `animation-name` on 13 pages × 2 viewports never shows them (`b-round-463/probe/run1`, `deadAnimHead` 0).
 
-**Keep-list ruling (L4).** Saba's keep-list (LeadMagnet, Free downloads, SpecialOffers, Limited badges, testimonials and stats) is untouched. Deleted rule families with keep-list-like names — special-offer, testimonial, stat, badge and newsletter — have no element that renders them: the live components use Tailwind classes [K4]. `/` and `/about` compare equal in C7. Where a name matches, the rendered element decides, not the name.
+**All 15 keyframes classified [K17, K19].** v3's DC2 run on HEAD fails with exactly the 4 names (`b-round-463/dc2-v3-on-head.log`). The 11 that stay each have a real user:
+- `insert-marker-blink`: `--animate-insert-marker-blink`;
+- `fade-in` and `slide-up`: the `.animate-fade-in`/`.animate-slide-up` rules, used by Modal, AuthModal, LeadMagnetPopup and CookieConsent;
+- `pulse`: Tailwind `animate-pulse`;
+- `navLoadingProgress`, `audioPlayingPulse`, `slideUpPlayer`, `waveform-pulse`, `shimmer`, `light-flicker-on`, `pulse404`: each named by an `animation:` declaration.
 
-**Measured effect** [K3, K4, K14, K15]:
-- `app.css` goes from 3850 to 1691 lines and `utilities.css` from 279 to 208.
-- The re-run inventory finds **0** blocks with no consumer.
-- The 5 `transition … box-shadow` rules are gone, which closes A-R453-REVIEW-L-BOXSHADOW-TRANSITION.
-- The brand-tinted `.track-card` shadow and `glow-pulse` are gone, which closes GATE453-I5.
+**Test (`store-dead-css.test.ts`):**
+- **DC2 (rewritten):** a keyframes name counts as used only when, with block and line comments stripped, it appears in
+  - a CSS `animation`, `animation-name` or `--animate-*` declaration value (all `app/**/*.css`, and the same pattern in scripts),
+  - an inline style string `animation:`/`animationName:` `'…'`,
+  - an arbitrary utility `animate-[name_…]` (underscore form included: closes B-R463-DC2-UNDERSCORE),
+  - a named utility `animate-name`.
+- **DC4 (new):**
+  - eight positive fixtures: a shorthand with the name last, a multi-line `animation-name`, `--animate-*`, an arbitrary utility, a named utility, an inline style, an inline style placed after a `video/*` attribute string and before a JSX comment, and an inline style after an `href='//…'` string (neither string may open a comment);
+  - six negative ones: a block comment, a line comment, a JSX comment, an identifier, an object field and a type field.
+  - The two utility fixtures are built with `['animate-', '…'].join('')` so Tailwind's scanner cannot emit them into the bundle.
+- Comment stripping starts a block or line comment only at the start of a source or after whitespace or one of `{ } ; , (`, so `/*` or `//` inside a string is kept (tech-lead Low, mutants M8 and M9).
+- `cssWithoutKeyframesHeaders` and DC3's text-match assertion on `animation: dc-dead-spin` are replaced by `animatedNames` [K7]. DC1 and DC3's class-rule part are unchanged.
+- **Known limit (recorded, not fixed):** a keyframes reached only through a custom property not named `--animate-*` (`--x: float 1s; animation: var(--x)`) would read as unused. None exists today, and such a false red would block a change, not delete anything. **One limit fails silently:** a comment directly after a character outside the list (`"x"/* … */`, `)// …`) is kept as text, so a commented-out use there would keep a dead keyframes alive and DC2 would stay green (the same direction as A-R463-REVIEW-M1). There are 0 such cases in `app/` today; tech-lead's v3 Low is accepted and filed as TL-R464-L1-COMMENT-AFTER-UNLISTED-CHAR (deferred). The fail-red forms are TL-R464-L2-MATCHER-FAILS-RED-FORMS. Both are in `sketch-review.md`.
 
-**Tests in the sketch:**
-- `store-live-teal.test.ts`: the allow-lists shrink to the remaining hits. `CSS_TEAL_ALLOW_LIST` becomes app.css 14 and utilities.css 3. The 14 deleted rule entries leave `TEAL_RULE_ALLOW_LIST` and `DEAD_RULE_TOKENS`: the 12 dead rules, `.audio-player-progress.is-playing` and `@keyframes playButtonPulse`. Both token-read allow-lists become `{}`. `'loading-brand'` leaves `DEAD_TOKEN_CONSUMERS`, and `playButtonPulse` leaves `DEAD_KEYFRAME_RULE_TOKENS`.
-- `store-gradient-text.test.ts`:
-  - `GRADIENT_TEXT_ALLOW_LIST` becomes `{}`, because `.loading-brand` is deleted.
-  - The `DELETED_STORE_MODULES` key `sendOrderEmail` becomes `sendOrderPaidEmail`, the real deleted export (gate-462 finding 2) [K10].
-- **New `store-dead-css.test.ts`** (kept out of `helpers/style-scan.ts` while ARCH-CHECKPOINT-STYLE-SCAN is open):
-  - **DC1:** every class rule in the two files has a selector branch whose required classes are all rendered. `RUNTIME_CLASSES` lists the 4 Lenis classes the CSS uses, each with its reason.
-  - **DC2:** every `@keyframes` in the two files is named by other CSS or by app source.
-  - **DC3:** non-vacuity. At least 150 class rules are scanned. A fixture rules on 8 cases: a dead rule inside `@media`; a compound with one dead class; a comma list with one live branch; `:not(...)`; a Lenis runtime class; an attribute value; a substring-only consumer; and a dead keyframes.
+### 2.2 Doc 303 (A writes it)
+`docs/implementation/2026/quarter-IV/303-store-2b-3d-3-orphan-keyframes.md`, Georgian, TEMPLATE order (7 `## ` headings as in doc 302).
+- Line 4 exactly: `**სტატუსი:** In Progress (stage 2b-3d-3 of STORE-2b; C round 464 PASS)`. No word "pending" (`grep -ci pending` = 0).
+- **No class, utility or `animate-…` literal, and no CSS declaration text.** Tailwind v4 scans `docs/*.md`: `app.css` has no `@source` rule [K15] (C-R462-01; SIG-R463-TAILWIND-DOCS-SOURCE). The 4 keyframes names are not Tailwind utilities, so naming them in prose is allowed; do not write `@keyframes …` code. C6 catches any leak.
+- Body: why they survived round 463 (text-match rule), the new DC2 rule, DC4, the known limits (custom-property indirection and template-built names fail red; a comment right after an unlisted character passes silently, TL-R464-L1), the note that the project's own pulse keyframes overrides Tailwind's (SIG-R464-PULSE-KEYFRAMES-SHADOW), and the 3 ids closed.
+- TODO: the remaining A-R463-REVIEW Lows (deferred), SIG-R463-TAILWIND-DOCS-SOURCE, and the shared "used" definition (architecture signal, ARCH-CHECKPOINT-STYLE-SCAN).
+- Doc 302 is **not** edited (its TODO names the follow-up in words only [K14]).
 
-**C-R462-01 fix (doc 301).** Tailwind v4 also scans `docs/*.md`. Doc 301 named the 12 retired utility strings literally, so the published round-462 CSS still carried them. The sketch replaces that paragraph with a corrected statement that cites `b-round-461/css-removed-live-grep.txt` and names no utility literal [K7, K16]. The 12 utilities then leave the bundle (§3).
-
-### 2.2 Implementation doc 302 (A writes it)
-Create `docs/implementation/2026/quarter-IV/302-store-2b-3d-2-dead-store-css.md`. The number is free [K8]. Write it in Georgian, following `docs/implementation/TEMPLATE.md`.
-- **Line 4:** exactly `**სტატუსი:** In Progress (stage 2b-3d-2 of STORE-2b; C round 463 PASS)`, the form of docs 292–301 (L28; never `pending`).
-- **No literal CSS class name, keyframes name or Tailwind utility string anywhere in the doc** (C-R462-01: Tailwind would generate a utility from it, and C6 would no longer be `cmp`-equal). Refer to the lists by file instead: `b-round-462/pruned-list.txt` and `b-round-462/build-compare.txt`. Describe the families in words, for example "the old about, music-listing, product-detail and track-card styles". File paths are allowed. Self-check: `python3 -I <loop>/b-round-462/doc-class-literals.py <doc> <loop>/b-round-462/pruned-list.txt` prints `literals=0`.
-- **Body:**
-  - the deletion rule and the permission;
-  - what stays and why (the Lenis runtime rules, the dead-labelled rules with kept consumers, `@theme`, frozen legacy Studio);
-  - that the keep-list UI is untouched (below);
-  - DC1–DC3;
-  - the doc-301 correction and its cause;
-  - the build and browser evidence (§3).
-- **TODO:**
-  - the LEGACY-DEAD remainder (the kept consumers, ArtistBioSection, TestimonialsSection, IconButton, ChatButton);
-  - TL-R462-L2;
-  - the `docs/` Tailwind-source signal (SIG-R463-TAILWIND-DOCS-SOURCE);
-  - TL-R463-L3 (the test scans ts/tsx, the generator also js/md; equal today), TL-R463-L7 (`:is`/`:where`/`:has` classes count as required) and B-R463-DC2-UNDERSCORE (a keyframes name used as `animate-[name_1s]` is not counted as a consumer; 0 such uses today);
-  - 2b-3c-2b.
-- **Checks:** `grep -ci pending` on the doc = 0, and the doc names only test rows that exist (L26).
-
-## 3. What B measured on the sketch
-The scratch is `/tmp/b463-scratch` = `eb4d6df` + the sketch + a placeholder doc 302 with the required line 4 (so the pre-check tree equals the delivered tree).
-
-**Static checks and tests:**
-- **Typecheck:** rc 0 (`precheck-typecheck.log`).
-- **Lint:** 192 warnings, equal to HEAD (`precheck-lint.log`).
-- **Covering set:** `covering-463.txt`, 14 files / 148 tests green (`precheck-covering.log`). This includes every test that reads a CSS file.
-- **Full suite (L23):** 285 files / 4185 tests passed, rc 0 (`precheck-full.log`).
-- **Mutants:** `mutants/mutants.sh` → `mutants/mutants.txt` [K12]. BASE is GREEN.
-
-  | Mutant | Rows that turn red |
-  |---|---|
-  | M1, HEAD app.css restored | DC1, DC2, GT1, LT3, LT5, LT6 |
-  | M2, dead class rule re-added (utilities.css) | DC1 |
-  | M3, orphan keyframes | DC2 |
-  | M4, dead rule inside `@media` | DC1 |
-  | M5, vacuous required-class extractor | DC3 |
-  | M6, gradient-text rule re-added | DC1, GT1 |
-  | M7, a barrel re-exports `sendOrderPaidEmail` | GT6, LT9 |
-  | M8, dead teal rule re-added | DC1, LT3, LT5 |
-  | M9, compound with a generic live class re-added (`.filter-pill.active`) | DC1 |
-  | M10, a Lenis class dropped from `RUNTIME_CLASSES` | DC1, DC3 |
-  | M11, selector list of two dead branches | DC1 |
-
-**Production build, HEAD vs sketch** (`b-round-461/build-compare.py` → `build-compare.txt`; `build-compare-explained.txt`; `root-chunk-diff.py` → `root-chunk-diff.txt`):
-- the server bundle shows 0 normalized diff lines;
-- all 101 client JS chunks are equal after normalization (`root-chunk-diff.txt`: 0 non-equal spans; an earlier v1 build showed identifier-only renames in `root`, which `root-chunk-diff.py` tolerates);
-- **CSS: 2068 → 1794 selectors, 274 removed and 0 added.** Every removed selector is explained: 262 dead-rule selectors and the 12 round-461 utilities (`unexplained 0`).
-
-**Browser (prod, mock API):** `node b-round-462/probe/dead-css-pages.cjs http://127.0.0.1:5190 http://127.0.0.1:5191 b-round-462/pruned-list.txt <out>` → `probe/run1/dead-css-pages.json`.
-- **Coverage:** 13 pages × 2 viewports = 26 rows: `/`, `/store`, `/products/middle-east`, `/free-downloads`, `/about`, `/hire-us`, `/support`, `/faq`, `/cart`, `/search`, `/account/login`, a 404 path and `/studio-lab`.
-- **What it compares:** the computed-style fingerprint of every element, HEAD vs tree, with a HEAD-HEAD control. Settings: reduced motion, a fake clock and frozen animations.
-- **Results:**
-  - The reduced fingerprint (no box, transform or opacity) is equal on all 26 rows, and so are the controls.
-  - The full fingerprint is equal on 22 rows. The 4 others are `/` and the 404 path. Their infinite hero and 404 animations move the HEAD-HEAD control as well.
-  - 0 elements match any of the 222 removed selector branches, with pseudo-classes stripped (`selectorsChecked`, `invalidSelectors` 0). A superseded v2 run that counted single classes found generic ones such as `active`, which shows the counting path is not vacuous (`probe/superseded/run1-v2-classcount/`).
-  - 0 computed `animation-name` values are a removed keyframes.
-  - No chunk 404.
-- **Non-vacuity:** injecting `h1 { letter-spacing: 3px !important }` into the tree reads of `/store` turns both the full and the reduced compare false (`probe/nonvacuity/`).
-- The v1 runs are kept in `v1-superseded/` and `probe/superseded/`.
-- `css-prune.py` re-run on a clean `eb4d6df` clone reproduces both CSS files sha-identically to the sketch pins.
-
-**Other pre-checks:**
-- No deleted class appears in `public/`, `e2e/` or `perf/`.
-- No template-literal class prefix builds any deleted family.
-- `git apply --check` on the store tree is OK.
-
-## 4. A steps
-1. **Read:** the A part of `lessons.md`, and the primitives `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`.
-2. **Claims before:** from the loop root, run `bash b-round-462/claims-463.sh 2>a-round-463/claims-before.err`. The output must be identical to `b-round-462/claims-463-planning-output.txt`, and stderr must be empty.
-3. **Apply:**
-   - `cd b-round-462 && sha256sum -c sketch-463.sha256` must give 1 OK;
-   - from the store root: `git apply /home/runner/czaba-project/tmp/studio-real-loop/b-round-462/sketch-463.patch.txt`;
-   - from the store root: `sha256sum -c /home/runner/czaba-project/tmp/studio-real-loop/b-round-462/sketch-463-files-sha256.txt` must give 6 OK.
-
-   No hand edits to these 6 files. No `git stash`, `git checkout --` or `git rm` (L60).
-4. **Doc 302:** write it as described in §2.2.
-5. **Checks:**
+## 3. Steps for A
+1. Read `lessons.md` (A part) and the primitives TAILWIND_FIRST, TESTING_QUALITY_GATES, BUG_HUNTING_TESTS and GEORGIAN_DOCS.
+2. From the loop root: `bash b-round-463/claims-464.sh > a-round-464/claims-before.txt 2> a-round-464/claims-before.err`. It must equal `b-round-463/claims-464-planning-output.txt`, and stderr must be empty. A mismatch is a STOP.
+3. `cd b-round-463 && sha256sum -c sketch-464.sha256`; then, in the store, `git apply <loop>/b-round-463/sketch-464.patch.txt`; then, inside the store, `sha256sum -c <loop>/b-round-463/sketch-464-files-sha256.txt` → 2 OK.
+4. Write doc 303 (§2.2).
+5. Checks (logs in `a-round-464/`):
    - `npm run typecheck`;
-   - `npm run lint` (192 warnings);
-   - `npx biome check` on the 3 test files;
-   - `npx vitest run $(cat <loop>/b-round-462/covering-463.txt)`: 14 files / 148 tests.
+   - `npm run lint` (192 warnings expected, as at HEAD);
+   - `npx biome check app/lib/__tests__/store-dead-css.test.ts`;
+   - `npx vitest run $(cat <loop>/b-round-463/covering-464.txt)` → 14 files / 149 tests green.
+6. Mutants: on a scratch clone at `d55ec17` with the sketch committed, `bash <loop>/b-round-463/mutants/run-mutants.sh <scratch> <loop>/a-round-464/mutants.txt`. The file must be identical to `b-round-463/mutants/mutants.txt`.
+7. **Required** doc-leak self-check, because C6 hard-fails on a leak. `a-round-463/tw-doc-leak.mjs` [K20] takes `<store root> <doc path>`. It needs the store's `node_modules`, so copy it to a temporary file at the store root, run `node <copy> . docs/implementation/2026/quarter-IV/303-store-2b-3d-3-orphan-keyframes.md`, save the output as `a-round-464/tw-doc-leak.txt` (`cssEqual true`), and **delete the temporary copy before C1** (as A did in round 463). C6 stays the real check.
+   - Note: the mutant script prints Python `SyntaxWarning` lines on stderr for M8/M9. They are harmless; only the `mutants.txt` content counts.
+8. `claims-after.txt` must equal `b-round-463/claims-464-expected-after-A.txt`, with empty stderr.
+9. code-reviewer: 3 paths change, so it is required.
+10. Not run by A (gate rows): the full suite, `verify` and `npm run build`.
 
-   **Mutants:**
-   - build a scratch: `git clone -q --shared /home/runner/czaba-project/store /tmp/a463-mut && cd /tmp/a463-mut && git checkout -q eb4d6df && git apply <sketch> && git add -A && git -c user.email=a@loop -c user.name=A commit -qm sketch && ln -s /home/runner/czaba-project/store/node_modules node_modules`;
-   - run `bash <loop>/b-round-462/mutants/mutants.sh /tmp/a463-mut <loop>/a-round-463/mutants`;
-   - `mutants.txt` must be identical to B's.
+**STOP rules:** stop and report (do not improvise) if the patch does not apply, a sha does not match, the covering set is not 14/149 green, or the mutants differ.
 
-   Run code-reviewer (≥ 3 files changed). Its Architecture note goes to B. Do not run the full suite, `verify` or the build; those are gate rows.
-6. **Claims after:** the output must be identical to `b-round-462/claims-463-expected-after-A.txt`, with empty stderr.
-7. **Scope:** `git status --short --untracked-files=all` in the store shows exactly the 7 grant paths: 5 `M`, plus `??` for `store-dead-css.test.ts` and for doc 302.
+## 4. What C checks (`c-round-464.json`, evidence in `c-round-464/`)
 
-## 5. C rows
-| Row | Command / where | PASS when |
+| Row | Command / action | PASS when |
 |---|---|---|
-| C1 SOURCE-SCOPE | `git status --short --untracked-files=all` | exactly the 7 paths of `grants-463.txt` (5 M, 2 new) |
-| C2 CLAIMS | `bash b-round-462/claims-463.sh` and the L29 grep below | output identical to `claims-463-expected-after-A.txt`, with empty stderr; every L29 hit is a grant path, a command argument, a planned change or a `[K#]` claim |
-| C3 APPLY | from the store root: `sha256sum -c …/b-round-462/sketch-463-files-sha256.txt` | 6 OK; ArtistBioSection and TestimonialsSection present [K13] |
-| C4 COVERING | `npx vitest run $(cat b-round-462/covering-463.txt)` | 14 files / 148 tests green; DC1, DC2, DC3, GT1, GT6, LT3, LT5, LT6 and LT7 listed as passed |
-| C5 MUTANTS | C's own scratch (`eb4d6df` + the sketch, committed as in A step 5), then `bash b-round-462/mutants/mutants.sh <scratch> <loop>/c-round-463/mutants` | `mutants.txt` identical to B's: BASE GREEN, M1–M11 RED with the listed rows |
-| C6 BUILD vs HEAD | `R=<store> bash b-round-459/probe/serve-prod.sh start <loop>/c-round-463/prod-head 5190 eb4d6df` and `… start <loop>/c-round-463/prod-tree 5191 TREE` (mock API on :5199), then `python3 -I b-round-461/build-compare.py <head build> <tree build> > c-round-463/build-compare.txt` and `python3 -I b-round-462/root-chunk-diff.py <head build> <tree build> > c-round-463/root-chunk-diff.txt` | `cmp` with `b-round-462/build-compare.txt` is equal (server 0 lines; JS none differing; CSS 274 removed and 0 added). If only `root` differs, the last line of `root-chunk-diff.txt` must say `non-identifier-changes=0`, and C records it. A CSS difference usually means doc 302 named a class or utility (§2.2), which is a FAIL of this row |
-| C7 STORE PAGES (browser, prod) | with both C6 servers up: `node b-round-462/probe/dead-css-pages.cjs http://127.0.0.1:5190 http://127.0.0.1:5191 b-round-462/pruned-list.txt <loop>/c-round-463/pages`, then the non-vacuity run with the extra arguments `'h1 { letter-spacing: 3px !important; }' /store` into `c-round-463/nonvacuity` | in `pages/dead-css-pages.json`, all 26 rows have: equal `status`; `reducedControlEqual` and `reducedHeadTreeEqual` true; on the 22 rows other than `/` and `/no-such-page-463`, `controlHeadHeadEqual` and `headTreeEqual` true; on `/` and `/no-such-page-463` (infinite hero/404 animations ignore reduced motion, so each read jitters independently) `headTreeDiffering` ≤ 6 (B's runs: ≤ 4, `probe/run1`, `probe/superseded/`); `removedClassElsHead` = `removedClassElsTree` = 0 (elements matching a removed selector branch); `invalidSelectors` 0; `deadAnimHead` = `deadAnimTree` = 0; an empty `chunk404`; `consoleErrorsTree` holding only the expected no-backend noise. The non-vacuity run shows `reducedHeadTreeEqual` false on both rows. A row whose reduced control is false is environment-invalid: re-run it (L37), it is not a FAIL. Keep the screenshots |
-| C8 STUDIO + PROTECTION | the round-461 C8 probe (copy `c-round-461/c8/probe.cjs`) on dev :5173 | at 1440 and 1280: `/studio-lab` opens the demo anonymously with 1 clip, goes Playing → Stopped, and `stopHeld` is true; anonymous `/studio/middle-east` shows "Sign in required" with `audioSrc` 0 and `media` 0. A first `NO-BODY` read is the dev first-compile race; re-run it up to 3 times |
-| C9 DOCS | doc 302 and doc 301 | doc 302: line 4 exact (§2.2); `grep -ci pending` = 0; TEMPLATE headings in order (L26); the body and TODO hold the §2.2 items; `python3 -I b-round-462/doc-class-literals.py <store>/docs/implementation/2026/quarter-IV/302-store-2b-3d-2-dead-store-css.md b-round-462/pruned-list.txt` prints `literals=0`. Doc 301: K7 = 0 and K16 as expected; `grep -rn 'C round [0-9]* pending' docs/implementation` = 0 |
-| C10 L57 | `python3 -I tools/l57-check.py c-round-463.json c-round-463/l57-check.txt` | rc 0 |
-| gate | full vitest, typecheck, build, Biome, lint, verify | marked `gate`, not claimed in `passed` |
+| C1 SCOPE | `git status --short --untracked-files=all` in the store | exactly the 3 paths of `b-round-463/grants-464.txt` |
+| C2 CLAIMS | `bash b-round-463/claims-464.sh` from the loop root | output `cmp`-equal to `b-round-463/claims-464-expected-after-A.txt`, stderr 0 bytes; the L29 grep of this task's file paths and lines all resolve |
+| C3 APPLY | `sha256sum -c b-round-463/sketch-464-files-sha256.txt` in the store | 2 OK |
+| C4 COVERING | `npx vitest run $(cat b-round-463/covering-464.txt)` | 14 files / 149 tests green; DC1–DC4 present and green in verbose output |
+| C5 MUTANTS | C's own scratch (`d55ec17` + the store's two changed code files, committed), `bash b-round-463/mutants/run-mutants.sh <scratch> c-round-464/mutants/mutants.txt` | byte-identical to `b-round-463/mutants/mutants.txt` (BASE all green; M1–M9 each red on the listed rows) |
+| C6 BUILD vs HEAD | `R=<store> bash b-round-459/probe/serve-prod.sh start <loop>/c-round-464/prod-head 5190 d55ec17` and `… start <loop>/c-round-464/prod-tree 5191 TREE` (mock API on :5199); then `python3 -I b-round-463/build-compare.py <head build> <tree build> > c-round-464/build-compare.txt` and `python3 -I b-round-463/root-chunk-diff.py <head build> <tree build> > c-round-464/root-chunk-diff.txt`; also list the `@keyframes` names in both built `app-*.css` | `build-compare.txt` is `cmp`-equal to `b-round-463/build-compare.txt` (server 0 lines; JS differing only in `root`; CSS 5 percent-selectors removed, 0 added). The last line of `root-chunk-diff.txt` is `non-identifier-changes=0` (B's HEAD-vs-HEAD control: `build-compare-head-head.txt`). Built keyframes: tree = HEAD minus exactly `fadeInUp`, `fadeOut`, `float` and `grain`. Any added selector means doc 303 or the test leaked a utility: FAIL |
+| C7 PAGES (browser, prod) | with both C6 servers up: `node b-round-462/probe/dead-css-pages.cjs http://127.0.0.1:5190 http://127.0.0.1:5191 b-round-463/pruned-list-464.txt <loop>/c-round-464/pages`; then the non-vacuity run with the extra arguments `'h1 { animation-name: float !important; }' /store` into `c-round-464/nonvacuity` | 26 rows, each with: equal `status`; `reducedControlEqual` and `reducedHeadTreeEqual` true; on the 22 rows other than `/` and `/no-such-page-463`, `controlHeadHeadEqual` and `headTreeEqual` true; on those two, `headTreeDiffering` ≤ 6 (B: ≤ 4, `probe/run1`); `deadAnimHead` = `deadAnimTree` = 0; `invalidSelectors` 0; an empty `chunk404`; `consoleErrorsTree` holding only the expected no-backend noise. Non-vacuity: both `/store` rows show `deadAnimTree` 1 and `reducedHeadTreeEqual` false (B: `probe/nonvacuity`). A row whose reduced control is false is environment-invalid: re-run it (L37); it is not a FAIL. Keep the screenshots |
+| C8 STUDIO + PROTECTION (dev, both viewports) | the round-461 C8 probe (copy `c-round-461/c8/probe.cjs` [K20]) on dev :5173 | at 1440 and 1280: `/studio-lab` opens the demo anonymously with 1 clip, goes Playing → Stopped, and `stopHeld` is true; anonymous `/studio/middle-east` shows "Sign in required" with `audioSrc` 0 and `media` 0. A first `NO-BODY` read is the dev first-compile race; re-run it up to 3 times |
+| C9 DOCS | doc 303 | line 4 exact (§2.2); `grep -ci pending` 0; 7 TEMPLATE `## ` headings in order; no `@keyframes`, `animate-` or `animation:` text; the body names the 3 closed ids and the custom-property limit; `grep -rn 'C round [0-9]* pending' docs/implementation` 0 |
+| C10 L57 | `python3 -I tools/l57-check.py` on `c-round-464.json` | rc 0 |
+| gate | full vitest, typecheck, build, Biome, lint, verify | gate rows, not claimed by C |
 
-**C2's L29 grep** (from the loop root):
-
-```bash
-grep -nE 'l\.[0-9]+|(app|perf|docs)/[^ `]+|data-testid|aria-[a-z-]+' current-task.md > c-round-463/l29.txt
-```
-
-B's run is `b-round-462/l29-planning.txt`.
-
-**Notes for C:**
-- `c-round-463.json` carries all L57 fields and an `origin` on every finding:
-  - `mutantRedOnSketch` = `b-round-462/mutants/mutants.txt`;
-  - `affectedChecksRunOnSketch` = `b-round-462/precheck-covering.log`, `b-round-462/build-compare.txt` and `b-round-462/probe/run1/dead-css-pages.json`.
 - **Heaviest first (L59):** run the C6 builds, then C7 on the same servers, then stop them (`serve-prod.sh stop 5190`, `stop 5191`).
-- **browserVerified** depends on C7 and C8. Both run in the cloud with the mock API.
-- **Expected environment noise:** "Failed to load cart" and `ERR_CONNECTION_REFUSED` (no backend). A chunk 404 is a failure.
-- **Hover-only rules:** a deleted `:hover` rule whose branch has an unrendered class cannot match any element, so C7's selector count covers it. C does not need a hover sweep.
+- **browserVerified** depends on C7 and C8. Both run in the cloud with the mock API. No backend-blocked rows are expected.
+- **Ableton conformance:** not applicable (no behaviour change).
 
-**What closes on C PASS:**
-- STORE-2b-3d-2 and C-R462-01.
-- A-R453-REVIEW-L-BOXSHADOW-TRANSITION [K14], GATE453-I5-BRAND-TINT-GLOWS-OUTSIDE-GRANT [K15] and gate-462 finding 2 (`sendOrderEmail` key) [K10].
-- LEGACY-DEAD-STORE-COMPONENTS stays open for its remainder.
+## 5. What could break nearby
+- An element that really animates with one of the 4 names would freeze. C7's `deadAnimHead` (0 at HEAD) and the reduced computed-style compare catch it.
+- A Tailwind leak from the DC4 fixtures or doc 303 would add CSS. C6's `added=0` and `cmp` catch it.
+- The new DC2 could miss a real consumer in future and demand a wrong deletion. DC4's positives and mutants M3–M9 guard it; the custom-property limit is documented.
+- Studio: `insert-marker-blink` is untouched. DC2 still sees it through `--animate-insert-marker-blink`, and mutant M6 shows DC4 depends on that branch.
 
-**Neighbours that could break:**
-- a page whose element relied on a deleted rule (none: DC1 and C7's class count);
-- a class that a library sets at runtime (Lenis: kept through `RUNTIME_CLASSES`, M10; C7 compares every element);
-- an animation (6 keyframes removed; C7's `deadAnim` = 0, and DC2);
-- the Studio obsidian block (byte-identical, K6) and `/studio-lab` (C7, C8);
-- the other style scanners (C4 runs all 14 CSS-reading files).
+## 6. Closes on C PASS
+A-R463-REVIEW-M1 (`confirmedBy` C-R463-01), B-R463-DC2-UNDERSCORE and A-R463-REVIEW-L3.
 
-## 6. Claims
-Run from the loop root: `bash b-round-462/claims-463.sh`. Every `b-round-462/` file this task cites exists [K12].
-- **Planning output:** `b-round-462/claims-463-planning-output.txt` (store at `eb4d6df`).
-- **After-A expectation:** `b-round-462/claims-463-expected-after-A.txt`. This is the script's output with `S=/tmp/b463-scratch` (the sketch plus the placeholder doc 302). Its K2 line is replaced with the planning value, because A does not commit and the store HEAD stays `eb4d6df`.
-- **Expected differences:** the planning and after-A outputs differ only in K3, K4, K7, K8, K9, K10, K14, K15 and K16 (`b-round-462/claims-463-diff.txt`).
-- **Stderr:** both stderr files are empty.
+Already closed by evidence at this planning: C-R462-01 (round 463 C6, plus `c-r462-01-head-utilities.txt`), A-R453-REVIEW-L-BOXSHADOW-TRANSITION, GATE453-I5 and GATE462-L2 (round 463 C PASS, gate 463 published).
+
+## 7. Claims (`[K#]`)
+Script: `b-round-463/claims-464.sh` (run from the loop root; `S=<store>` optional). Planning output: `b-round-463/claims-464-planning-output.txt`, stderr `claims-464-planning.err` (0 bytes). Expected after A: `b-round-463/claims-464-expected-after-A.txt`, which differs from the planning output only in K3, K5, K7, K8 and K17.
+- K1: gate 463 published `d55ec17`. K2: store HEAD `d55ec17`.
+- K3: 4 orphan keyframes, 15 in total, app.css 1691 lines at HEAD (after A: 0, 11, 1646).
+- K4: 0 animation consumers for each of the 4 names.
+- K5: the PREMIUM ANIMATIONS and Film Grain headers are present (after A: 0 and 0).
+- K6: obsidian block sha `e9afeed85faec382`, unchanged after A.
+- K7: DC2 text rule present, DC4 absent (after A: 0, 1, 1).
+- K8: doc 303 absent (after A: present). K9: `app/styles/**` is globally forbidden.
+- K10: 20/20 planning artifacts exist. K11: build-compare 5 removed, 0 added, root non-identifier changes 0. K12: C-R462-01 utilities, 0 of 12 at HEAD. K13: mutants 9 red, BASE 0 red.
+- K15: 0 `@source` rules in app.css. K16: 0 JS animation style assignments. K17: the keyframes names in app.css (after A: the 11 kept). K18: the non-test files with a whole-word hit of each of the 4 names. K19: v3's DC2 on HEAD lists 4 of 4 names. K20: the v2/v3 artifacts 8/8, `tw-doc-leak.mjs` and the C8 probe present. K14: doc 302 names none of the 4.

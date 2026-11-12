@@ -1,0 +1,8 @@
+34:**Narrow grant on `app/styles/app.css` (`app/styles/**` is globally forbidden [K9]).** The file may change **only** by the sketch's deletions: 45 lines deleted, 0 added [K3, K5]. It deletes:
+56:  - a CSS `animation`, `animation-name` or `--animate-*` declaration value (all `app/**/*.css`, and the same pattern in scripts),
+69:`docs/implementation/2026/quarter-IV/303-store-2b-3d-3-orphan-keyframes.md`, Georgian, TEMPLATE order (7 `## ` headings as in doc 302).
+71:- **No class, utility or `animate-…` literal, and no CSS declaration text.** Tailwind v4 scans `docs/*.md`: `app.css` has no `@source` rule [K15] (C-R462-01; SIG-R463-TAILWIND-DOCS-SOURCE). The 4 keyframes names are not Tailwind utilities, so naming them in prose is allowed; do not write `@keyframes …` code. C6 catches any leak.
+84:   - `npx biome check app/lib/__tests__/store-dead-css.test.ts`;
+87:7. **Required** doc-leak self-check, because C6 hard-fails on a leak. `a-round-463/tw-doc-leak.mjs` [K20] takes `<store root> <doc path>`. It needs the store's `node_modules`, so copy it to a temporary file at the store root, run `node <copy> . docs/implementation/2026/quarter-IV/303-store-2b-3d-3-orphan-keyframes.md`, save the output as `a-round-464/tw-doc-leak.txt` (`cssEqual true`), and **delete the temporary copy before C1** (as A did in round 463). C6 stays the real check.
+107:| C9 DOCS | doc 303 | line 4 exact (§2.2); `grep -ci pending` 0; 7 TEMPLATE `## ` headings in order; no `@keyframes`, `animate-` or `animation:` text; the body names the 3 closed ids and the custom-property limit; `grep -rn 'C round [0-9]* pending' docs/implementation` 0 |
+134:- K8: doc 303 absent (after A: present). K9: `app/styles/**` is globally forbidden.

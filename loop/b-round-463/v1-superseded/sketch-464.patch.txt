@@ -1,0 +1,196 @@
+diff --git a/app/lib/__tests__/store-dead-css.test.ts b/app/lib/__tests__/store-dead-css.test.ts
+index 5cbc4e8..f01cab1 100644
+--- a/app/lib/__tests__/store-dead-css.test.ts
++++ b/app/lib/__tests__/store-dead-css.test.ts
+@@ -103,32 +103,66 @@ function keyframesNames(css: string): string[] {
+     .filter((name): name is string => name !== undefined);
+ }
+ 
+-function cssWithoutKeyframesHeaders(css: string): string {
+-  return css.replace(/@keyframes\s+[\w-]+/g, '@keyframes');
++const ANIMATION_DECLARATION =
++  /(?<![\w-])(?:animation(?:-name)?|--animate-[\w-]+)\s*:\s*([^;{}'"`\n]*)/g;
++
++const ANIMATION_STYLE_STRING = /(?<![\w-])animation(?:Name)?\s*:\s*['"`]([^'"`\n]*)['"`]/g;
++
++const ANIMATE_ARBITRARY_UTILITY = /(?<![\w-])animate-\[([^\]\s]*)\]/g;
++
++const ANIMATE_NAMED_UTILITY = /(?<![\w-])animate-([A-Za-z_][\w-]*)/g;
++
++function withoutComments(source: string): string {
++  return source.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:\w])\/\/[^\n]*/g, '$1');
++}
++
++function animationTokens(value: string): string[] {
++  return [...value.replace(/_/g, ' ').matchAll(/-?[A-Za-z_][\w-]*/g)].map((match) => match[0]);
++}
++
++function animatedNames(sources: ReadonlyArray<string>): Set<string> {
++  const names = new Set<string>();
++  for (const source of sources.map(withoutComments)) {
++    for (const pattern of [
++      ANIMATION_DECLARATION,
++      ANIMATION_STYLE_STRING,
++      ANIMATE_ARBITRARY_UTILITY,
++    ]) {
++      for (const match of source.matchAll(pattern)) {
++        for (const token of animationTokens(match[1] ?? '')) {
++          names.add(token);
++        }
++      }
++    }
++    for (const match of source.matchAll(ANIMATE_NAMED_UTILITY)) {
++      names.add(match[1] ?? '');
++    }
++  }
++  return names;
+ }
+ 
+ function scriptSources(): string[] {
+   return [...appScriptSources().values()];
+ }
+ 
+-describe('store dead CSS removal (STORE-2b-3d-2)', () => {
++describe('store dead CSS removal (STORE-2b-3d-2, STORE-2b-3d-3)', () => {
+   it('DC1: every class rule in app.css and utilities.css has a selector branch whose classes app source renders', () => {
+     const sources = scriptSources();
+     const rules = DEAD_CSS_SCANNED_FILES.flatMap((path) => classRules(path, readApp(path)));
+     expect(rulesWithoutConsumer(rules, sources)).toEqual([]);
+   });
+ 
+-  it('DC2: every @keyframes in app.css and utilities.css is named by another CSS rule or by app source', () => {
+-    const sources = scriptSources();
+-    const otherCss = listFiles(APP_ROOT, STYLE_SOURCE_EXTENSIONS).map((path) =>
+-      cssWithoutKeyframesHeaders(readApp(path)),
+-    );
+-    const unnamed = DEAD_CSS_SCANNED_FILES.flatMap((path) =>
++  it('DC2: every @keyframes in app.css and utilities.css is used by an animation declaration, an animate utility or an inline animation style', () => {
++    const animated = animatedNames([
++      ...listFiles(APP_ROOT, STYLE_SOURCE_EXTENSIONS).map((path) => readApp(path)),
++      ...scriptSources(),
++    ]);
++    const unused = DEAD_CSS_SCANNED_FILES.flatMap((path) =>
+       keyframesNames(readApp(path))
+-        .filter((name) => !hasConsumer(name, [...otherCss, ...sources]))
++        .filter((name) => !animated.has(name))
+         .map((name) => `${path} @keyframes ${name}`),
+     );
+-    expect(unnamed).toEqual([]);
++    expect(unused).toEqual([]);
+   });
+ 
+   it('DC3: the scan is non-vacuous and rules on compounds, selector lists, :not, runtime classes and substrings', () => {
+@@ -150,7 +184,43 @@ describe('store dead CSS removal (STORE-2b-3d-2)', () => {
+       'fixture.css .dc-live-fixture.dc-state-fixture',
+     ]);
+     expect(keyframesNames(fixtureCss)).toEqual(['dc-dead-spin']);
+-    expect(hasConsumer('dc-dead-spin', [cssWithoutKeyframesHeaders(fixtureCss)])).toBe(false);
+-    expect(hasConsumer('dc-dead-spin', ['animation: dc-dead-spin 1s;'])).toBe(true);
++    expect(animatedNames([fixtureCss]).has('dc-dead-spin')).toBe(false);
++  });
++
++  it('DC4: an animation consumer is a declaration or utility, never a comment, identifier or field with the same name', () => {
++    const arbitraryUtility = ['animate-', '[dc-arb-spin_1s_ease-out]'].join('');
++    const namedUtility = ['animate-', 'dc-word-spin'].join('');
++    const animated = animatedNames([
++      '.dc-a { animation: 1s ease-out dc-shorthand-spin; }',
++      '.dc-b {\n  animation-name:\n    dc-name-spin;\n}',
++      '@theme { --animate-dc-var: dc-var-spin 2s infinite; }',
++      `<div className="${arbitraryUtility} ${namedUtility}" />`,
++      "<div style={{ animation: 'dc-inline-spin 1s' }} />",
++      '/* animation: dc-comment-spin 1s; */',
++      '// animation: dc-line-comment-spin 1s',
++      '{/* dc-jsx-comment-spin */}',
++      'const dcIdentifierSpin = { dcFieldSpin: 1 };',
++      'type Fields = { dcTypeSpin?: number };',
++    ]);
++    for (const name of [
++      'dc-shorthand-spin',
++      'dc-name-spin',
++      'dc-var-spin',
++      'dc-arb-spin',
++      'dc-word-spin',
++      'dc-inline-spin',
++    ]) {
++      expect(animated.has(name), name).toBe(true);
++    }
++    for (const name of [
++      'dc-comment-spin',
++      'dc-line-comment-spin',
++      'dc-jsx-comment-spin',
++      'dcIdentifierSpin',
++      'dcFieldSpin',
++      'dcTypeSpin',
++    ]) {
++      expect(animated.has(name), name).toBe(false);
++    }
+   });
+ });
+diff --git a/app/styles/app.css b/app/styles/app.css
+index 8254b9d..9bcac97 100644
+--- a/app/styles/app.css
++++ b/app/styles/app.css
+@@ -190,32 +190,11 @@ html.lenis, html.lenis body {
+   to { opacity: 1; transform: translateY(0); }
+ }
+ 
+-@keyframes float {
+-  0%, 100% { transform: translateY(0px); }
+-  50% { transform: translateY(-10px); }
+-}
+-
+ @keyframes pulse {
+   0%, 100% { opacity: 1; }
+   50% { opacity: 0.7; }
+ }
+ 
+-/* ============================================
+-   Film Grain Overlay - Cinematic Texture
+-   ============================================ */
+-@keyframes grain {
+-  0%, 100% { transform: translate(0, 0); }
+-  10% { transform: translate(-5%, -10%); }
+-  20% { transform: translate(-15%, 5%); }
+-  30% { transform: translate(7%, -25%); }
+-  40% { transform: translate(-5%, 25%); }
+-  50% { transform: translate(-15%, 10%); }
+-  60% { transform: translate(15%, 0%); }
+-  70% { transform: translate(0%, 15%); }
+-  80% { transform: translate(3%, 35%); }
+-  90% { transform: translate(-10%, 10%); }
+-}
+-
+ /* Navigation Loading Bar - cinematic progress */
+ .nav-loading-bar {
+   position: fixed;
+@@ -1262,30 +1241,6 @@ button { cursor:pointer }
+   animation: shimmer 2s infinite linear;
+ }
+ 
+-@keyframes fadeInUp {
+-  from {
+-    opacity: 0;
+-    transform: translateY(20px);
+-  }
+-  to {
+-    opacity: 1;
+-    transform: translateY(0);
+-  }
+-}
+-
+-@keyframes fadeOut {
+-  to {
+-    opacity: 0;
+-    visibility: hidden;
+-  }
+-}
+-
+-/* ============================================
+-   PREMIUM ANIMATIONS
+-   Only keyframes and pseudo-elements that
+-   cannot be done with Tailwind
+-   ============================================ */
+-
+ /* ============================================
+    LIGHT FLICKER ANIMATION
+    შუქის ბჟუტვა და ჩართვა ეფექტი

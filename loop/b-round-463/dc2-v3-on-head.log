@@ -1,0 +1,43 @@
+
+ RUN  v4.0.16 /tmp/b464-head
+
+ ❯ app/lib/__tests__/store-dead-css.test.ts (4 tests | 1 failed) 120ms
+     ✓ DC1: every class rule in app.css and utilities.css has a selector branch whose classes app source renders 86ms
+     × DC2: every @keyframes in app.css and utilities.css is used by an animation declaration, an animate utility or an inline animation style 30ms
+     ✓ DC3: the scan is non-vacuous and rules on compounds, selector lists, :not, runtime classes and substrings 3ms
+     ✓ DC4: an animation consumer is a declaration or utility, never a comment, identifier or field with the same name 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/store-dead-css.test.ts > store dead CSS removal (STORE-2b-3d-2, STORE-2b-3d-3) > DC2: every @keyframes in app.css and utilities.css is used by an animation declaration, an animate utility or an inline animation style
+AssertionError: expected [ …(4) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "styles/app.css @keyframes float",
++   "styles/app.css @keyframes grain",
++   "styles/app.css @keyframes fadeInUp",
++   "styles/app.css @keyframes fadeOut",
++ ]
+
+ ❯ app/lib/__tests__/store-dead-css.test.ts:167:20
+    165|         .map((name) => `${path} @keyframes ${name}`),
+    166|     );
+    167|     expect(unused).toEqual([]);
+       |                    ^
+    168|   });
+    169| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  08:41:25
+   Duration  282ms (transform 54ms, setup 0ms, import 65ms, tests 120ms, environment 0ms)
+
+
+::error file=/tmp/b464-head/app/lib/__tests__/store-dead-css.test.ts,title=app/lib/__tests__/store-dead-css.test.ts > store dead CSS removal (STORE-2b-3d-2%2C STORE-2b-3d-3) > DC2%3A every @keyframes in app.css and utilities.css is used by an animation declaration%2C an animate utility or an inline animation style,line=167,column=20::AssertionError: expected [ …(4) ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "styles/app.css @keyframes float",%0A+   "styles/app.css @keyframes grain",%0A+   "styles/app.css @keyframes fadeInUp",%0A+   "styles/app.css @keyframes fadeOut",%0A+ ]%0A%0A ❯ app/lib/__tests__/store-dead-css.test.ts:167:20%0A%0A

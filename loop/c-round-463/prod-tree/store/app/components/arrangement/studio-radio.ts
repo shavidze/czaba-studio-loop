@@ -1,0 +1,16 @@
+export const STUDIO_RADIO_CLASS = [
+  'size-4',
+  'shrink-0',
+  'appearance-none',
+  'rounded-full',
+  'border',
+  'border-outline-strong',
+  'bg-transparent',
+  'checked:border-4',
+  'checked:border-brand',
+  'checked:bg-brand-foreground',
+  'enabled:not-checked:hover:border-brand-hover',
+  'disabled:cursor-not-allowed',
+  'disabled:opacity-50',
+  'forced-colors:appearance-auto',
+].join(' ');
