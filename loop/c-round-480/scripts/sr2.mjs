@@ -1,0 +1,10 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const b = await chromium.launch();
+const p = await b.newPage({viewport:{width:1440,height:900}});
+await p.goto('http://127.0.0.1:5173/',{waitUntil:'networkidle'}); await p.waitForTimeout(2500);
+console.log("store", JSON.stringify(await p.evaluate(()=>{const a=document.querySelector("header a[href=\"/\"]");return [...a.querySelectorAll("*")].concat([a]).map(e=>({tag:e.tagName,t:e.textContent.trim().slice(0,20),color:getComputedStyle(e).color,ff:getComputedStyle(e).fontFamily.slice(0,30)}))})));
+await p.goto('http://127.0.0.1:5173/studio-lab',{waitUntil:'networkidle'}); await p.getByText('Demo collection ready').first().waitFor({timeout:120000}).catch(()=>{});
+console.log('lab', JSON.stringify(await p.evaluate(()=>{const ex=document.querySelector('[data-testid="arrangement-exit"]');const h=ex&&ex.closest('header');const out={exit:ex&&{t:ex.textContent.trim(),color:getComputedStyle(ex).color,href:ex.getAttribute('href')}};const d=[...document.querySelectorAll('header *')].filter(x=>/Demo collection/.test(x.textContent)).map(x=>({tag:x.tagName,bt:getComputedStyle(x).borderTopWidth,bc:getComputedStyle(x).borderTopColor,br:getComputedStyle(x).borderRadius,len:x.textContent.length}));out.d=d;return out})));
+await b.close();

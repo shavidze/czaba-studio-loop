@@ -1,153 +1,145 @@
-# Round 480: RETRO 480 (twentieth retrospective, rounds 465–479; trigger: 15 rounds since RETRO 465) + whole-screen and journey review. No app code. A: nothing to implement. C: checks that the retro is traceable, plus the auth guard, a short Studio smoke test and the screen capture in the browser
+# Round 481: B-R478-DEAD-MUSIC-LINK. The "Browse Music" button on the empty My Orders page leads to the 404 page; it should go to the Store catalogue (account.orders half)
 
-**Planned by:** B, at the round 479 → 480 planning, 2026-11-12 (planning started 22:43Z; `b-round-479.md`, `b-round-479/checkpoint.md`). The advisor was available and was consulted after orientation and before hand-off. The round-479 task is archived as `tasks/round-479.md`, a byte-identical copy [K15].
+**Planned by:** B, at the round 480 → 481 planning on 2026-11-12 (`b-round-480.md`, `b-round-480/checkpoint.md`).
+- **Advisor:** available. Consulted twice: after orientation, and for a closing check before hand-off. The closing check added the saved HEAD style baseline for C4, the LeadMagnet seed, the C3 scratch recipe, the C7 fallback and the root-commit note.
+- **Consult:** `tech-lead` reviewed the sketch and gave APPROVE (`b-round-480/sketch-review.md`).
+- **Archive:** the round-480 task is `tasks/round-480.md`, a byte-identical copy (`cmp`).
+- **Regression is not due yet.** `date -u` said 2026-11-12T23:14Z, and `regression-last.json` says 2026-11-10 (2 days ago). REGRESSION-2026-11-13 is round 482 (D-29z1709).
 
-## Decisions
-All are in `backlog.json` (v466 → v469) under `decisions_log_b` [K10].
-- **D-29z1700: round 479 accepted.** C PASS (`c-round-479.json`, 0 bugs, `browserVerified`/`realVerified` true); gate 479 published `bbb3193` [K1]. DPG-FOOTER-LINKS is C-verified and waits for the DP gate. Gate finding 1 becomes the open Medium GATE479-M1-ROUTE-ANNOUNCE.
-- **D-29z1701: round-479 rulings.** Seven Lows deferred (incl. B-R479-LEADMAGNET-TIMER-CLIENT-NAV, a Saba question); `ArrangementLibraryMenu.tsx:131` ruled out; SIG-R479-INTERNAL-LINK-WRAPPER.
-- **D-29z1702: order.** Round 480 = RETRO 480; round 481 = REGRESSION-2026-11-13 (not due at this planning: `regression-last.json` 2026-11-10 [K13]).
-- **D-29z1703: RETRO data**, window 465–479.
-- **D-29z1704: GATE479-M1-ROUTE-ANNOUNCE ruling** and the post-regression order.
-- **D-29z1705: L46 rulings and screen** → `user-review/questions-retro-480.md` Q1–Q7 [K22]; SR-480-1…3; FIREFOX-CHECKS, SAFARI-CHECKS, HIREUS-EMAIL-CLIENTS opened as blocked tasks.
-- **D-29z1706: lessons, candidate rulings, systemic task, counters for RETRO 495.**
-- **D-29z1707: advisor closing-check corrections** (single-runner counter 1×, non-blocking class of the three new tasks, four more inputs ruled, staleness check widened to fonts, L47 clause "once an announcer exists").
+**What this round is:** a one-line fix that closes the user-visible half of an open Medium finding. A signed-in buyer with no orders sees "No orders yet" and a brass **Browse Music** button. Today that button opens `/music`. No route matches that path, so the 404 page "Lost in the Sound" appears. After this round the button opens `/store`, the catalogue. The button's look, its text and the page are unchanged.
+
+## Decisions (`backlog.json` v470, `decisions_log_b`)
+- **D-29z1708: round 480 accepted.** C PASS, 0 bugs, browser-verified. Gate 480 was skipped because nothing changed, so HEAD stays `bbb3193`. C's three notes are ruled as accepted.
+- **D-29z1709: order.**
+  - **481:** this task. It meets the finding's L46 deadline.
+  - **482:** REGRESSION-2026-11-13.
+  - **483:** CLIENT-NAV-CONTRACT (GATE479-M1; ruling D-29z1704 is unchanged).
+  - **484:** B-R480-ORDER-CARD-KEYBOARD.
+  - **Then:** DPG-BUTTON-CLEANUP.
+- **D-29z1710: scope.** Only the `href` changes, from `/music` to `/store`:
+  - The label stays "Browse Music". Saba was told in `user-review/questions-round-478.md` Q2 that the target becomes `/store`, and no category filter is invented.
+  - The element stays a plain `<a>`, so it does a full document load. A Remix `<Link>` would add one more client navigation that screen readers do not announce (GATE479-M1). The protected `account.downloads.tsx` half goes to root as ROOT-REQ-DOWNLOADS-MUSIC-LINK, so the finding stays **open** after this round.
+- **D-29z1711: new findings from B's pre-check.** None of them is part of this round.
+  - **B-R480-ORDER-CARD-KEYBOARD** (Medium): the order cards on this page open only on a mouse click on a `<div>`. It is scheduled for round 484.
+  - **B-R480-SITEMAP-COLLECTIONS-MUSIC** (Low): deferred.
+  - **SIG-R480-E2E-STALE-MUSIC-NAV:** a signal only.
+
+## Reference: how the reference does it
+This is a Store navigation fix, so there is no Ableton reference. The reference is the Store's own behaviour, measured by B in Chromium at both viewports with the L36 stub path (`b-round-480/probe/orders-probe.mjs`):
+- **HEAD:** `orders-probe-head.json` and `orders-empty-head-*.png`.
+- **Sketch** on a scratch dev server at :5174: `orders-probe-sketch.json` and `orders-empty-sketch-*.png`.
+
+| Point | Source | Confirmed behaviour | After this round | C row |
+|---|---|---|---|---|
+| Empty-state CTA target | HEAD probe | Enter on "Browse Music" goes to `/music`. The title is "404 - Page Not Found \| CZABA" and the h1 is "Lost in the Sound" | `/store`, with title "Store \| CZABA - Cinematic Sound Collections" and h1 "Curated Sound Collections" | C4 |
+| Navigation kind | HEAD probe (`markerAfter: null`) | A full document load: the `window` marker is gone after it | Unchanged: a full load | C4 |
+| Focus after it | HEAD and sketch probe (`firstTab`) | The first Tab after the load focuses the header logo `a[href="/"]` "CZABA" | Unchanged | C4 |
+| Signed-out guard | HEAD probe, no stubs | `/account/orders` shows "Sign in required" and 0 "Browse Music" links | Unchanged | C5 |
+
+**Deviations:** none. The label is kept on purpose (D-29z1710).
 
 ## Rules
-- **Policy:** "Retrospective: stop, look back, improve" (2026-10-26), "Look back on every issue Saba finds, and guard the whole screen" (2026-10-28), the RETRO journey step (2026-10-31), DPG process rule 5 (primitive staleness at RETRO, 2026-11-12), and `backlog.json` → `retro_policy`.
-- **Read `lessons.md` first.** This planning changed it; the hunks are in [K18] and `b-round-479/lessons-diff.txt`.
-- **L57 / L22:** C's JSON carries all L57 fields. Each is `null` with the reason "RETRO: no assert specified", except `gateChecksNamed` and the four manifest fields. Every bug carries an enum `origin`. Before hand-off, C runs `python3 -I tools/l57-check.py c-round-480.json c-round-480/l57-check.txt` and gets rc 0.
-- **L29:** untagged code text below is a row id, a loop-artifact path or a description of what C runs. The only facts about `store/` are HEAD, the tree, the manifest, the protected list, the primitive counts and lines, the Header link count, the root.tsx Studio guard and the routes without `meta` [K1] [K2] [K3] [K4] [K19] [K25] [K26] [K30] [K31] [K32] [K33].
-- **L59 / L60:** run every row until it has a result, browser rows first. Write `c-round-480/progress.json` after each row. Destructive commands stay inside `c-round-480/`.
-- **Not applicable in a RETRO round:** reference-first, the Ableton conformance check, the product-designer design step and the screen budget. Nothing visible changes.
+- **Read `lessons.md` first**, especially:
+  - L10 / L11 (STOP);
+  - L12 (no class selectors in tests);
+  - L29 (claims);
+  - L36 (stubbed client path);
+  - L47 (first-Tab row);
+  - L52 / L58 (asserts must be able to fail);
+  - L57 (C's JSON fields).
+- **Claims (L29):** `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-480/claims-481.sh`. B's output:
+  - at HEAD: `b-round-480/claims-481-planning-output.txt` (stderr empty);
+  - on the sketch: `claims-481-sketch-output.txt`.
+- **Sketch (L58):**
+  - The patch is `b-round-480/sketch-481.patch.txt`, sha256 `8e1b7b6d72575086b7b7f2460c2f008630cfe32375f27865b5ef30a38d0f1362`. It was reviewed in `b-round-480/sketch-review.md` (APPROVE).
+  - On a scratch copy, B got: Biome rc 0, `tsc` rc 0 (`sketch-tsc.log`), and AO1–AO2 2/2 passing (`sketch-vitest-final.log`).
+  - Two mutants turn the tests red:
+    - **M1** sets the href back to `/music`: AO1 and AO2 fail on asserts (`mutant-M1-music-href.log`);
+    - **M2** converts the element to `<Link>`: red, but only through a "useHref outside Router" crash (`mutant-M2-router-link.log`). So AO1's `data-discover` assert is a belt and not a proven branch. The test title does not claim it.
+- **Screen budget (L39):** nothing new is visible. No text, class or element is added.
+- **Primitives:**
+  - `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md` for the test;
+  - `GEORGIAN_DOCS.md` for doc 312;
+  - `API_ERROR_HANDLING.md` (read only; the route's fetch code is unchanged).
+- **Protected files:** `b-round-318/protected-sha256.txt` (11 files, including `account.downloads.tsx`) must stay rc 0. Never touch them.
 
-## Baseline: HEAD `bbb3193`, clean tree
-- **Gate:** gate 479 published `bbb3193…` on both remotes [K1]. `context/head-sha.txt` may be stale (it said `75a6028` at planning); `git rev-parse HEAD` is the truth.
-- **Tree:** at planning, `git status --short --untracked-files=all` was empty and HEAD was `bbb3193` [K2] [K19].
-- **Frozen files:** every tracked file is in `b-round-479/r480-tree-sha256.txt`, **1,391** entries [K3]. Check from `store/` with `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-479/r480-tree-sha256.txt`; B got rc 0 [K25]. Each of the 11 protected files in `b-round-318/protected-sha256.txt` appears exactly once [K4], and that file also checks rc 0 [K25].
-- **Grants: none.** No file in `store/` may change in this round.
+## Baseline
+- **HEAD `bbb3193`.** Gate 479 published it. Gate 480 was skipped with no change. The tree is clean [claims K1, K7: 0 lines].
+- **Frozen files:** `b-round-480/r481-frozen-sha256.txt` lists all 1,390 tracked files except `app/routes/account.orders.tsx` [K8: rc 0]. The protected list is rc 0 [K9].
 
-## 0. Why this round
-- **The RETRO is due:** `retro_policy.next_due` named round 480 (D-29z1640).
-- **Nothing blocks a code-free round.** No Critical or High finding is open. The open Mediums are manual, root, Saba or scheduled items, plus GATE479-M1 (ruled D-29z1704; it is scheduled after the regression and does not need this round).
-- **REGRESSION is not due:** `regression-last.json` says 2026-11-10 [K13] and planning started 2026-11-12T22:43Z. It is round 481.
-
-## 1. What B produced (the objects under test)
-| File | Content |
+### Grants (exactly these 3 paths)
+| Path | What |
 |---|---|
-| `retros/retro-480.md` | Georgian analysis for Saba, 13 sections, window 465–479 |
-| `lessons.md` | [K7]. Before-copy `b-round-479/lessons-before-480.md`; diff `b-round-479/lessons-diff.txt` [K18]. Lesson ids unchanged [K12] |
-| `user-review/screen-review-480.md` | Line counts equal 465's; SR-480-1…3. Captures in `b-round-479/screens/`: `capture.mjs`, `capture.log`, `screen480.json`, `compare.py`, `compare-465.txt`, 12 PNGs [K5] [K6] [K9] |
-| `user-review/questions-retro-480.md` | Q1–Q7, each with a default [K22] |
-| `b-round-479/consult-tech-lead.md`, `consult-product-designer.md`, `consult-inputs.md` | Consult inputs and returned reports |
-| `b-round-479/primitive-staleness.txt` | The primitive teal and font counts, B's reading of each hit, and the SIG-R477 doc counts [K26] [K32] [K33] |
-| `b-round-479/*.py`, `misc-outputs.sh`, `stops-head.sh`, `data/*` | The scripts and data behind every number |
-| `backlog.json` (v469) | D-29z1700…D-29z1707 and the ids of [K24]. Before-copies `b-round-479/backlog-before-480.json` (before acceptance), `backlog-before-retro.json` and `backlog-before-fix.json`. Edit scripts `update-backlog-accept.py`, `update-backlog-retro.py`, `update-backlog-fix.py`, each with a `.done` marker. Retro input `b-round-479/backlog-retro-input.json` (v467) [K23] |
-| `feature-status.md` | Round 479 result; the RETRO 480 row; the RETRO 480 manual list at the top of §5. Before-copy `b-round-479/feature-status-before-480.md` |
+| `app/routes/account.orders.tsx` | Line 230: `href="/music"` becomes `href="/store"`. Nothing else changes: it stays `<a>`, and the label, classes, imports and the Biome warnings at l.59 and l.188 are untouched (they belong to round 484) |
+| `app/lib/__tests__/account-orders-empty-state.test.tsx` (new) | AO1 and AO2, exactly as in the sketch |
+| `docs/implementation/2026/quarter-IV/312-dead-music-link-orders.md` (new) | Use the `docs/implementation/TEMPLATE.md` headings, in order. Line 4 is exactly `**სტატუსი:** Completed (C round 481 PASS)`. Name D-29z1709…D-29z1711 and ROOT-REQ-DOWNLOADS-MUSIC-LINK. Cite only the test ids that exist (AO1, AO2; L26). Say that the finding stays open for the protected half |
 
-**Order of work for the scripts:**
-1. Copy `b-round-479/*.py` (except `update-*.py` and `edit-lessons*.py`), `misc-outputs.sh` and `stops-head.sh` to `c-round-480/scripts/`. Rewrite every `b-round-479/data/` output path to `c-round-480/data/`, keeping the inputs `b-round-479/backlog-retro-input.json` and `archive-findings-snapshot.json`. Run from the loop root.
-2. Run order:
-   1. `collect.py` (stdout = `collect.txt`; writes `rounds-465-479.json`);
-   2. `cost.py` (stdout = `cost.txt`; writes `cost-rows.json`);
-   3. `classify.py`, `fails-detail.py`, `gate-reviews.py`, `l57-coverage.py`, `manifest-fields.py`, `exp-fields.py`, `awaiting-user.py`, `retro480-deadlines.py`, `deferred-added.py` (each stdout = `<name>.txt`);
-   4. `stage-sums.py`;
-   5. `misc-outputs.sh c-round-480/data`;
-   6. `stops-head.sh > c-round-480/data/stops-head.txt`.
+Everything else stays unchanged. In particular: `account.downloads.tsx` (protected), `sitemap[.]xml.tsx`, `app/lib/constants.ts`, `e2e/**`, `app/root.tsx`, `app/styles/**` and `.claude/**`.
 
-   `cmp` each output with B's file of the same name; any difference is a finding. The data scripts read only `c-round-465.json` … `c-round-479.json` (and their result files), the retro input and the archive snapshot, so C's own `c-round-480.json` cannot change them.
-3. Loops: `l57-check-window.txt` = `tools/l57-check.py c-round-N.json /dev/null`, last line, N = 465…479. `l58-check-window.txt` = `tools/l58-check.py tasks/round-N.md`, last line, N = 466…479. Re-run both and `cmp`.
-4. **Do not run** `update-backlog-*.py`, `update-feature-status.py` or `edit-lessons*.py` (four lesson scripts). Their `.done` markers make them refuse.
+## 1. A: steps
+1. **STOP (L11)** if `claims-481.sh` K1–K11 differ from `b-round-480/claims-481-planning-output.txt` before your first edit. **Exception:** if root's job applied a root commit before the round (`cloud/root-commits/`) that touches only `.claude/**` or `docs/**`, then K1 shows the new HEAD and K8 may fail on those files only. That is not a STOP. Record the commit and the files in `a-round-481.md`; C applies the same exception in C1/C2. At planning, the one pending patch (`0001-primitive-add-file-size-limits…`, `.claude/primitives/REACT_CONTEXT.md`) failed `git apply --check`.
+2. **Apply the sketch:** `git apply /home/runner/czaba-project/tmp/studio-real-loop/b-round-480/sketch-481.patch.txt`. Then write doc 312.
+3. **Checks:**
+   - `npm run typecheck`;
+   - `npm run lint`;
+   - `npx vitest run app/lib/__tests__/account-orders-empty-state.test.tsx`.
 
-## 2. A: nothing to implement
-A writes `a-round-480.md` with one line: "RETRO round, no implementation." **STOP (L11):** if the frozen manifest is not rc 0, A reports the failing paths and changes nothing.
+   The expected result is 1 file and 2 tests, all passing. The full suite belongs to the gate.
+4. **Claims:** run the script into `a-round-481/claims.txt`. After the change, expect:
+   - K2: `href-music 0 href-store 1 browse-music-label 1 router-Link 0`;
+   - K5: `exists AO1 AO2`;
+   - K7: exactly the 3 granted paths;
+   - K8 and K9: rc 0;
+   - K10: `0`.
+5. **Code review:** 3 files, so run code-reviewer once. Report findings of Medium and above. An unruled Medium is a STOP (L10). A Low on the pre-existing l.59 / l.188 warnings is out of scope (round 484).
+6. **Report** in `a-round-481.md`.
 
-## 3. C: what to verify
-C writes `c-round-480.md` and `c-round-480.json` as it goes, plus `c-round-480/progress.json` after every row. Browser rows (2–4) go first.
+## 2. C: what to verify
+Write `c-round-481.md`, `c-round-481.json` and `c-round-481/progress.json` as you go (L59).
+- The JSON carries every L57 field. `mutantRedOnSketch` = `b-round-480/mutant-M1-music-href.log`.
+- Each bug has an enum `origin`.
+- Before hand-off, run `python3 -I tools/l57-check.py c-round-481.json c-round-481/l57-check.txt` (rc 0).
+
+**Browser setup.**
+- Start from B's probe; it is a starting point, not evidence.
+- The signed-in path is a **stubbed client path (L36, `C4-STUBBED-1`)**:
+  - seed `localStorage.auth_user` with an `accessToken`;
+  - `page.route` `**/api/auth/profile` → 200 profile;
+  - `**/api/downloads**` → 200 `[]`, without which the purchases fetch logs the session out;
+  - `**/api/orders/my**` → 200 empty page.
+- It proves the client path only. Ownership of real orders is backend-only and stays BLOCKED (backend unavailable in cloud).
+- Seed LeadMagnet as dismissed and submitted in every context, as in round 479: `ctx.addInitScript(() => { const d = new Date().toISOString().split('T')[0]; localStorage.setItem('czaba_lead_magnet', JSON.stringify({ viewCount: 0, lastResetDate: d, dismissed: true, submitted: true })); })`. `/account/*` is not on the popup's excluded list (`app/hooks/useLeadMagnet.ts` `isLeadMagnetExcludedPath`), so without the seed the popup can open during a slow Tab sequence.
+- Wait for "No orders yet" before acting. On a fresh dev server, warm the route once first (B's first sketch run timed out on cold optimisation).
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| 1 | **SOURCE-SCOPE** (start) | `git status --short --untracked-files=all` in `store/`; the r480 manifest and the protected manifest | 0 lines; both rc 0 |
-| 2 | **G480-AUTH (browser)** | Fresh anonymous context at 1440×900 and 1280×720: open `/studio-lab`, then `/studio/middle-east` (warm both first with one untimed browser load, L38), then `GET /api/studio-token?product=middle-east&file=stem.mp3` with no Authorization header | `localStorage.auth_user` is null and the workspace opens; "Sign in required" with 0 `audio[src]`; the token API returns 401. Fake-bearer premium path: BLOCKED (backend unavailable in cloud) |
-| 3 | **STUDIO-SMOKE-480 (browser)** | Both viewports, after `Demo collection ready`: add one library item with Enter; Play about 1.5 s, then Stop; open Export, then close it | The clip appears; the position advances and then stops; the dialog opens and closes. Screenshots under `c-round-480/` |
-| 4 | **RT-SCREEN (browser)** | Check `http://127.0.0.1:5199/api/products`; if it is not 200, start `node mock-api/server.mjs` in the background and stop it afterwards (by PID; `pkill -f` can match your own shell). Run `b-round-415/screens/warmup.mjs` from `store/`. Then, from the loop root, run `node <abs>/b-round-479/screens/capture.mjs <abs c-round-480/screens>`, and open the PNGs `screen-review-480.md` cites | Line counts equal B's [K5]: 138/168/118/144, outside 97/124/86/101; ±2 per cell for status-line timing, each delta explained. The journey: 3 clips at `left` 512 / 1152 / 1792, and the status names the fourth at 00:48.000 "(nearest free spot)" [K6]. Each SR-480-n statement matches its PNG: Store header "CZABA" brass vs Studio "← CZABA" in the text colour (SR-480-1; record the computed `color` of both); the play button over the cover's brand mark (SR-480-2); the bordered "Demo collection — no sign-in required" box (SR-480-3; record the computed `border-top-width`) |
-| 5 | **CLAIMS** | `bash b-round-479/claims-480.sh` compared with `b-round-479/claims-480-planning-output.txt` | No `MISSING`; stderr empty. Differences only where C's own work changes a value (expected: none), each explained. K10 may differ if root's optimizer rewrote `backlog.json`; check that the last D-ID is still D-29z1707 |
-| 6 | **RT-NUM** | Re-run the scripts (§1) and `cmp`. Recompute every number in `retro-480.md` §1, §2, §4 and §9 from its named file, at least the list below | Every number matches its source. A number without a source is a finding (origin `B spec`) |
-| 7 | **RT-CAUSE** | For each fact in §3, §5, §6, §7 and §8, open the quoted source, at least the list below | Each fact is in its source. Each opinion is labelled as `tech-lead`'s or `product-designer`'s. No invented cause |
-| 8 | **RT-IDS** | [K24]; in `backlog.json`: `retro_runs` round 480; `retro_policy.next_due` names round 495; every RETRO480-* and RC-R47x entry in `retro_candidates` has a status starting `ruled (D-29z1706)` (RETRO480-SINGLE-RUNNER-CONTROL then says "still 1x", D-29z1707); FIREFOX-CHECKS starts `open_root`, SAFARI-CHECKS and HIREUS-EMAIL-CLIENTS start `open_tech_lead_manual`; FIREFOX-CHECKS, SAFARI-CHECKS and HIREUS-EMAIL-CLIENTS each list the TLM ids that retro §8 names | All present, with the status the retro states |
-| 9 | **RT-LESSONS** | `lessons.md` against `b-round-479/lessons-before-480.md` | ≤ 60 lines and ≤ 57,500 bytes [K7], three parts. The diff touches only the hunks of [K18]. Each change is the one retro §10 describes: removed text is evidence or explanation only (no finding id disappears; the only id that leaves is D-29z1639, the RETRO 465 note in the l.3 pointer, kept in the before-copy; compare the id lists, `b-round-479/lesson-finding-ids.txt`), and added clauses are word for word those quoted in retro §10. Read `edit-lessons.log` and `edit-lessons-2.log` for the exact removed spans. l.3 is a pointer that names `retro-480.md`, `465–479` and `b-round-479/lessons-before-480.md` |
-| 10 | **RT-CHECKERS** | The L57 and L58 loops (§1.3); `python3 -I tools/l58-check.py current-task.md` [K28] | The loops equal B's files: L57 OK 10/15 (INCOMPLETE 469, 470, 472, 475, 477); L58 OK 13/14 (471 INCOMPLETE) [K21]. l58 on this task gives rc 0 |
-| 11 | **RT-SABA** | `retro-480.md` §12, `screen-review-480.md`, `questions-retro-480.md` | Every rule change and screen item is information, a proposal or a question; nothing is presented as Saba's decision. Each question has a default. Q2 states that LeadMagnet is on the keep-list and its behaviour is unchanged until Saba answers. Q3/Q4 state which task opens and what blocks it |
-| 12 | **RT-PRIMITIVES** | From `store/`, re-run the K26, K32 and K33 commands and open each hit | Counts and lines equal [K26] [K32] [K33]. B's reading in `b-round-479/primitive-staleness.txt` matches each hit (teal: DESIGN_TOKENS l.9 and l.108 stale, l.26 inline example; TAILWIND_FIRST l.15 and l.18 bad-example hex; DESIGN_SYSTEM l.1536 changelog. Fonts: DESIGN_TOKENS l.57–59, TAILWIND_FIRST l.101/105 and DESIGN_SYSTEM l.750–761 name Playfair Display / Inter while app.css l.113–115 has Instrument Sans / IBM Plex Mono) |
-| 13 | **SOURCE-SCOPE** (end) + **L57** | As row 1; then `l57-check` on `c-round-480.json` | 0 lines and both rc 0; then rc 0 |
+| C1 | SOURCE-SCOPE | `git status --short --untracked-files=all`, and from `store/`: `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-480/r481-frozen-sha256.txt` and the protected list | Exactly the 3 granted paths, with both checks rc 0 |
+| C2 | CLAIMS | `bash b-round-480/claims-481.sh` | The post-change values of A step 4, 0 `MISSING`, and K1 `bbb3193` |
+| C3 | TESTS MEAN SOMETHING | Run the AO file on the tree. Then, on your own scratch copy under `c-round-481/` (not `store/`), apply M1 (`href="/music"`) and rerun. Make the copy the way B did: `store/` minus `.git`, `docs`, `public` and `node_modules` (tar with excludes), then symlink `node_modules` and `public` back to `store/`'s, so the vitest config resolves | 2/2 pass on the tree, and M1 gives 2 failed on asserts, not a crash. The real tree is green again |
+| C4 | BROWSER: CTA LANDS ON THE STORE (`C4-STUBBED-1`) | At 1440×900 and 1280×720, signed in through the stubs with an empty order list: screenshot the empty state, set `window.__probeMarker`, focus "Browse Music" with **Tab** (not `.focus()`), check that it has a visible focus ring (`:focus-visible` true; computed outline equal to HEAD's), press **Enter**, and wait for the load. Then press Tab once | The `href` is `/store`; the URL path is `/store`; the title is "Store \| CZABA - Cinematic Sound Collections"; the h1 is "Curated Sound Collections"; the marker is gone (full load). The first Tab focuses the header logo `a[href="/"]` (L47). The button's computed values equal B's saved HEAD baseline `b-round-480/probe/ring-probe-head.json` (run C's copy of `ring-probe.mjs`): background `rgb(201, 164, 106)`, colour `rgb(14, 13, 12)`, `500 16px`, radius `12px`, box 151×50 at y 727 (x 645 at 1440, 565 at 1280; ±1 px); focus outline `solid 1px` brass at 0.8 alpha, offset 2px; 0 open dialogs. The Tab count to reach the button (12 at both viewports on HEAD) is a record, not a pin. **Control:** B's HEAD run landed on the 404 "Lost in the Sound" |
+| C5 | BROWSER: GUARD UNCHANGED | Fresh context, no stubs, both viewports: `/account/orders` | "Sign in required" and 0 "Browse Music" links |
+| C6 | AUTH + STUDIO OPENS | `/studio/middle-east` anonymously; `/api/studio-token?product=middle-east&file=x` with no bearer; `/studio-lab` in a fresh context, both viewports | "Sign in required" with 0 audio `src`; 401; `/studio-lab` opens as the demo with the timeline visible. The real-owner path is BLOCKED (backend unavailable in cloud) |
+| C7 | PROTECTED HALF STILL OPEN (record) | The stubbed `/account/downloads` with an empty list (same stubs) | Record the empty-state link target. `/music` is expected (protected file; ROOT-REQ-DOWNLOADS-MUSIC-LINK). B did not run this row; if the empty state does not render under these stubs, record what renders instead. **Not a FAIL either way** |
+| C8 | DOC 312 | Headings, line 4, D-IDs and test ids | TEMPLATE headings in order; line 4 exact; it names D-29z1709…D-29z1711 and ROOT-REQ-DOWNLOADS-MUSIC-LINK; every test id it cites exists (grep) |
+| gate | — | Full verify, code review, publish | Root's job; C does not claim it |
 
-**RT-NUM, at least:**
-- **Totals [K16]:** $214.36; B $133.40, A $68.69, C $12.27; B share 62.2 % [K29].
-- **Medians and averages (`data/cost.txt`):** round $15.29; B $9.38; B min/max 1.95/13.45; A average FAIL 4.90, PASS 4.43; FAIL rounds $60.45 and the top five.
-- **Stage sums (`data/stage-sums.txt`):** the nine stage values of retro §2.
-- **Retro 465 comparison:** $282.31, $20.25 and 71.7 % come from `retros/retro-465.md` §1/§2; "24 % cheaper" = 1 − 214.36/282.31.
-- **Verdicts [K20]:** 10 PASS, FAIL [466, 471, 472, 476], BLOCKED [469], gate skipped [465, 466, 468, 469, 471, 472, 476], `browserVerified` 13/15.
-- **STOPs [K17]:** 466, 471, 472, 475, 476 (`data/stops-head.txt` and `data/stops-count.txt`). Also read the first 3 lines of each `a-round-N.md`, N = 465…479, and confirm the five by hand.
-- **Findings:** C bugs 11 with severities (`data/fails-detail.txt`); new deferred 43 and its split by method (a 43, b 36, c 40) and prefix (`data/deferred-added.txt`); 7 of the 43 carry `added` "2026-11-12 B round 479 -> 480 planning"; classify window open 6, deferred 31, archive 8 (`data/classify.txt`).
-- **Gate reviews:** 8 reviews, 35 items: low 15, info 6, unlabelled 13, medium 1 (`data/gate-reviews.txt`).
-- **Checkers:** L57 10/15; L58 13/14.
-- **Fix-up chains (retro §4):** 466→467, 469→470, 471→472→473, 476→477, from `data/task-titles.txt`.
-- **Lesson sizes [K7] [K14]:** after 57,487 B; before 59,870 B (`b-round-479/lessons-before-480.md`), L23 4,622 and L58 5,400 (bytes of the line without its newline; `wc -c` on `grep -m1` adds 1).
-- **Screen counts [K5].**
+**What could break nearby:**
+- the signed-in orders fetch, if the test's mocks leak (C3);
+- the guard (C5);
+- the button's look, if A touches more than the `href` (C4 box, C1).
 
-**RT-CAUSE, at least:**
-- 466: `a-round-466.md` l.3–4 and `c-round-466.json` (C-R466-01);
-- 469/470: `c-round-469.json` (C-R469-01) and `tasks/round-470.md` "Why we missed it";
-- 471: `a-round-471.md` l.3, `c-round-471.json` (C-R471-01), `backlog.json` RC-R471-L58-SKIPPED;
-- 472: `a-round-472.md` l.3 and `c-round-472.json` (C-R472-01), RC-R472-DOC-GRANT-LINES;
-- 475: `a-round-475.md` l.3 and `c-round-475.json` (C-R475-01), RC-R475-STOP-CLAUSE;
-- 476: `a-round-476.md` l.3 and `c-round-476.json` (C-R476-STOP-R1);
-- 479 gate Medium: `gates/round-479/review.md` finding 1; the Header link count at `75a6028`, the root.tsx Studio guard and the routes without `meta` [K30] [K31];
-- the Saba-found issues: `tasks/round-468.md` l.62–65 and the L18 "Scroll frames" clause; the SABA-B-16 status in `backlog.json`;
-- the consults: `b-round-479/consult-tech-lead.md` and `consult-product-designer.md`.
-
-## 4. Claims
-The script is `b-round-479/claims-480.sh`. B's run is saved in `b-round-479/claims-480-planning-output.txt`, with stderr in `b-round-479/claims-480-planning.err` (empty).
-
-| Claim | What it checks |
-|---|---|
-| K1 | Gate 479 |
-| K2 | The tree at planning |
-| K3 | The manifest count |
-| K4 | Each protected file appears once in the manifest |
-| K5 | Screen line counts |
-| K6 | Journey clips |
-| K7 | `lessons.md` lines and bytes |
-| K8 | Every artifact in `b-round-479/cited-artifacts.txt` exists |
-| K9 | PNG count |
-| K10 | Backlog version and last D-ID |
-| K11 | l57 check on `c-round-479.json` |
-| K12 | Lesson ids equal the before-copy |
-| K13 | Regression date |
-| K14 | L23, L58, L29 and L37 byte counts |
-| K15 | The archived task equals B's copy |
-| K16 | Cost medians and totals |
-| K17 | STOP rounds (new and old method) |
-| K18 | Lessons diff hunks |
-| K19 | HEAD and status now |
-| K20 | Fail, blocked, gate-skipped and browser counts |
-| K21 | l58-check on tasks 466–479 |
-| K22 | The questions file has 7 questions |
-| K23 | The retro input is v467 |
-| K24 | New ids, `retro_runs` 480, `next_due` |
-| K25 | r480 manifest and protected manifest rc |
-| K26 | Primitive teal counts |
-| K27 | Installed Playwright browsers (the Q3 premise) |
-| K28 | l58-check on this task |
-| K29 | B share |
-| K30 | Header `<Link>` count at `75a6028`; root.tsx `isStudioPage` lines; root.tsx `meta` count |
-| K31 | `meta` count in the 7 routes retro §7 names |
-| K32 | Teal hit lines in the 3 primitive/design files |
-| K33 | Font hit lines; DESIGN_SYSTEM l.750–761; app.css l.113–115 |
-
-## 5. After this round (D-29z1704)
-1. **Round 481:** REGRESSION-2026-11-13, with any `scope_additions` from `regression_rounds`.
-2. Then GATE479-M1-ROUTE-ANNOUNCE (ruling D-29z1704) and B-R478-DEAD-MUSIC-LINK (`account.orders` only).
-3. Then DPG-BUTTON-CLEANUP and the rest of DPG P1, the DP-gate findings when root publishes them, SYS-R465-DEAD-CSS-MATCHER, STORE-2c…5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2 under the skip rule.
-4. **STEM-LANES** jumps ahead as soon as Saba answers AGREE-STEM-LANES.
-5. **Next RETRO:** round 495.
+## 3. After this round
+1. **On C PASS:**
+   - the `account.orders` half of B-R478-DEAD-MUSIC-LINK is C-verified;
+   - the finding stays open (status: awaiting ROOT-REQ-DOWNLOADS-MUSIC-LINK);
+   - root may publish.
+2. **Next planning:**
+   1. REGRESSION-2026-11-13 (round 482, due), with every `scope_additions` entry (L6);
+   2. CLIENT-NAV-CONTRACT (round 483);
+   3. B-R480-ORDER-CARD-KEYBOARD (round 484);
+   4. DPG-BUTTON-CLEANUP.
+3. **Root, non-blocking:**
+   - ROOT-REQ-DOWNLOADS-MUSIC-LINK;
+   - the DP-gate re-run after P0;
+   - ROOT-REQ-DPG-PRIMITIVES-PATCH.
+4. **Saba:** `user-review/questions-retro-480.md` Q1–Q7 and `questions-round-478.md` Q1 (the licence page).

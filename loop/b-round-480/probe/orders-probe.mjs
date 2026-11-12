@@ -1,0 +1,36 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const BASE = process.env.BASE ?? 'http://127.0.0.1:5173';
+const out = { rows: [] };
+const browser = await chromium.launch();
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  const guard = await ctx.newPage();
+  await guard.goto(`${BASE}/account/orders`, { waitUntil: 'load' }); await guard.getByText('Sign in required').waitFor({ timeout: 15000 });
+  const guardH1 = await guard.locator('h1').first().textContent();
+  out.rows.push({ vp: `${w}x${h}`, row: 'UNSTUBBED-GUARD', h1: guardH1, browseLinks: await guard.getByRole('link', { name: 'Browse Music' }).count() });
+  await guard.close();
+  const page = await ctx.newPage();
+  await page.addInitScript(() => localStorage.setItem('auth_user', JSON.stringify({ id: 7, email: 'probe@example.invalid', accessToken: 'stub-token', refreshToken: 'stub-refresh' })));
+  await page.route('**/api/auth/profile', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, data: { id: 7, email: 'probe@example.invalid', firstName: 'Probe', lastName: 'User' } }) }));
+  await page.route('**/api/downloads**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, data: [] }) }));
+  await page.route('**/api/orders/my**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, data: { items: [], totalCount: 0, pageNumber: 1, pageSize: 50 } }) }));
+  await page.goto(`${BASE}/account/orders`, { waitUntil: 'load' });
+  await page.getByText('No orders yet').waitFor({ timeout: 15000 });
+  const link = page.getByRole('link', { name: 'Browse Music' });
+  const href = await link.getAttribute('href');
+  const tag = await link.evaluate((el) => el.tagName);
+  await page.screenshot({ path: `/home/runner/czaba-project/tmp/studio-real-loop/b-round-480/probe/orders-empty-${process.env.TAG ?? 'head'}-${w}x${h}.png` });
+  await page.evaluate(() => { window.__probeMarker = 1; });
+  await link.focus();
+  await page.keyboard.press('Enter');
+  await page.waitForURL((u) => !u.pathname.startsWith('/account'), { timeout: 15000 }); await page.waitForTimeout(1500);
+  const markerAfter = await page.evaluate(() => window.__probeMarker ?? null);
+  await page.keyboard.press('Tab');
+  const firstTab = await page.evaluate(() => { const a = document.activeElement; return a ? `${a.tagName} ${a.getAttribute('href') ?? ''} ${(a.textContent ?? '').trim().slice(0, 30)}` : null; });
+  out.rows.push({ vp: `${w}x${h}`, row: 'STUBBED-EMPTY', markerAfter, firstTab, h1: await page.locator('h1').first().textContent().catch(() => null), href, tag, landedUrl: page.url(), landedTitle: await page.title() });
+  await ctx.close();
+}
+await browser.close();
+console.log(JSON.stringify(out, null, 1));

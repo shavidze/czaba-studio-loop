@@ -1,0 +1,45 @@
+app/routes/account.orders.tsx:59:7 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    57 │   return (
+    58 │     <div className="bg-elevated border border-outline rounded-lg overflow-hidden">
+  > 59 │       <div
+       │       ^^^^
+  > 60 │         onClick={() => setIsExpanded(!isExpanded)}
+  > 61 │         className="p-4 md:p-6 cursor-pointer hover:bg-surface/50 transition-colors"
+  > 62 │       >
+       │       ^
+    63 │         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    64 │           <div className="flex items-start gap-4">
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/routes/account.orders.tsx:188:25 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    186 │           <div className="space-y-4">
+    187 │             {Array.from({ length: 3 }).map((_, i) => (
+  > 188 │               <div key={i} className="skeleton-shimmer h-32 rounded-lg" />
+        │                         ^
+    189 │             ))}
+    190 │           </div>
+  
+  i This is the source of the key value.
+  
+    185 │           </div>
+    186 │           <div className="space-y-4">
+  > 187 │             {Array.from({ length: 3 }).map((_, i) => (
+        │                                                ^
+    188 │               <div key={i} className="skeleton-shimmer h-32 rounded-lg" />
+    189 │             ))}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+Checked 2 files in 7ms. No fixes applied.
+Found 2 warnings.
