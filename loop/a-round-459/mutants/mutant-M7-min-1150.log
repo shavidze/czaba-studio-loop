@@ -1,0 +1,251 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a459-mut[39m
+
+ [31m❯[39m app/lib/__tests__/store-entrance-loader.test.tsx [2m([22m[2m36 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 400[2mms[22m[39m
+     [32m✓[39m L1 renders nothing on the server and logs nothing[32m 4[2mms[22m[39m
+     [32m✓[39m L2 shows a decorative overlay with no heading on first mount[32m 162[2mms[22m[39m
+[31m     [31m×[31m L3 stays on screen for the 1450 ms minimum, exit fade included, never past 1900 ms[39m[32m 6[2mms[22m[39m
+     [32m✓[39m L4 lets pointer events through during the exit fade only[32m 15[2mms[22m[39m
+     [32m✓[39m L5 a click on the overlay ends it immediately and for good[32m 19[2mms[22m[39m
+       [32m✓[39m Escape at 300 ms removes the overlay and its keydown listener[32m 12[2mms[22m[39m
+       [32m✓[39m Tab ends it like Escape without preventing the focus move[32m 10[2mms[22m[39m
+       [32m✓[39m Shift+Tab ends it like Escape without preventing the focus move[32m 10[2mms[22m[39m
+       [32m✓[39m other keys do not skip[32m 15[2mms[22m[39m
+[31m       [31m×[31m removes the keydown listener after the natural finish[39m[32m 16[2mms[22m[39m
+       [32m✓[39m removes the keydown listener on unmount mid-animation[32m 10[2mms[22m[39m
+     [32m✓[39m L7 shows once per session and never writes the old localStorage key[32m 8[2mms[22m[39m
+     [32m✓[39m L8 ignores the old localStorage key and honours the session key[32m 8[2mms[22m[39m
+[31m     [31m×[31m L9 never renders under prefers-reduced-motion and does not claim the session[39m[32m 2[2mms[22m[39m
+     [32m✓[39m L10 blocked storage renders nothing and does not throw[32m 1[2mms[22m[39m
+     [32m✓[39m L10b a sessionStorage write failure renders nothing and does not throw[32m 4[2mms[22m[39m
+     [32m✓[39m L11 leaves no stray timers or state updates after unmount[32m 9[2mms[22m[39m
+     [32m✓[39m E1 the server renders a disabled cover style and the boot script[32m 3[2mms[22m[39m
+     [32m✓[39m E2 on a fresh tab at / the boot script turns the cover on and claims the session[32m 9[2mms[22m[39m
+     [32m✓[39m E3 a seen tab keeps the cover off[32m 3[2mms[22m[39m
+     [32m✓[39m E3 reduced motion keeps the cover off[32m 3[2mms[22m[39m
+     [32m✓[39m E3 another path keeps the cover off[32m 3[2mms[22m[39m
+     [32m✓[39m E4 blocked storage keeps the cover off and does not throw[32m 2[2mms[22m[39m
+     [32m✓[39m E5 the animated overlay takes over in the same commit and turns the cover off[32m 10[2mms[22m[39m
+[31m     [31m×[31m E6 the timeline counts from the first cover frame: 1450 ms minimum, 1900 ms cap[39m[32m 2[2mms[22m[39m
+     [32m✓[39m E7 a takeover after the failsafe never replays the entrance[32m 2[2mms[22m[39m
+     [32m✓[39m E8 Escape before hydration skips the cover and the entrance[32m 2[2mms[22m[39m
+     [32m✓[39m E8 Tab before hydration skips the cover and the entrance[32m 2[2mms[22m[39m
+     [32m✓[39m E8 click before hydration skips the cover and the entrance[32m 3[2mms[22m[39m
+     [32m✓[39m E8b other keys before hydration keep the cover[32m 2[2mms[22m[39m
+     [32m✓[39m E9 after the takeover the boot listeners are gone and the overlay owns the skip[32m 10[2mms[22m[39m
+     [32m✓[39m E10 a client navigation to / after a seen entrance shows nothing[32m 4[2mms[22m[39m
+     [32m✓[39m E11 the root layout renders the cover right after the stylesheet links[32m 1[2mms[22m[39m
+     [32m✓[39m E12 a client navigation to / on a fresh tab still plays, as at HEAD[32m 12[2mms[22m[39m
+     [32m✓[39m E13 a cover that is on without a start time is retired, not animated[32m 2[2mms[22m[39m
+     [32m✓[39m E14 a click between the claim and the hand-off skips the animated overlay too[32m 12[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m32 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 02:34:24
+[2m   Duration [22m 1.22s[2m (transform 112ms, setup 0ms, import 315ms, tests 400ms, environment 380ms)[22m
+
+
+::error file=/tmp/a459-mut/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SpotlightLoader entrance (STORE-1d D10%2C SABA-B-13 minimum) > L3 stays on screen for the 1450 ms minimum%2C exit fade included%2C never past 1900 ms,line=93,column=19::AssertionError: expected 1150 to be 1450 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1450%0A+ 1150%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:93:19%0A%0A
+
+::error file=/tmp/a459-mut/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SpotlightLoader entrance (STORE-1d D10%2C SABA-B-13 minimum) > L6 Escape skip and keydown listener hygiene > removes the keydown listener after the natural finish,line=215,column=38::AssertionError: expected <div …(4)>…(8)</div> to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A<div%0A  aria-hidden="true"%0A  class="fixed inset-0 z-50 overflow-hidden pointer-events-none"%0A  data-testid="entrance-loader"%0A  style="background-color: rgb(0, 0, 0); opacity: 1;"%0A>%0A  <div%0A    class="absolute inset-0 bg-black"%0A  />%0A  <div%0A    class="absolute top-0 left-1/2 -translate-x-1/2"%0A    style="width: 200%25; height: 120%25; background: conic-gradient(from 270deg at 50%25 0%25, transparent 0deg, transparent 70deg, rgba(255, 255, 255, 0.03) 85deg, rgba(255, 255, 255, 0.08) 90deg, rgba(255, 255, 255, 0.03) 95deg, transparent 110deg, transparent 360deg); opacity: 0; transform: scale(0.5);"%0A  />%0A  <div%0A    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"%0A    style="width: 500px; height: 500px; background: radial-gradient(rgba(255, 255, 255, 0.15) 0%25, rgba(255, 255, 255, 0.05) 40%25, transparent 70%25); filter: blur(40px); opacity: 0; transform: scale(0.3);"%0A  />%0A  <div%0A    class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[400px] h-[150px]"%0A    style="background: radial-gradient(top, rgba(255, 255, 255, 0.1) 0%25, transparent 70%25); filter: blur(20px); opacity: 0;"%0A  />%0A  <div%0A    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10"%0A    style="opacity: 0; transform: translateY(30px) scale(0.9);"%0A  >%0A    <span%0A      class="block text-5xl md:text-7xl font-bold text-foreground"%0A      style="letter-spacing: 0.3em;"%0A    >%0A      CZABA%0A    </span>%0A    <div%0A      class="h-[1px] mx-auto mt-4 mb-4 bg-brand/50"%0A      style="opacity: 0; width: 0px;"%0A    />%0A    <p%0A      class="text-sm text-muted tracking-[0.3em] uppercase"%0A      style="opacity: 0; transform: translateY(10px);"%0A    >%0A      Cinematic Sound Design%0A    </p>%0A  </div>%0A  <div%0A    class="absolute inset-0 pointer-events-none overflow-hidden"%0A  >%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(53.31887134496336%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(42.18154385775602%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(52.32357745750242%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(56.353713829195634%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(48.915611608156105%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(56.68794098001837%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(44.318122146700865%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(46.000406810942096%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(41.644022902059326%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(40.747810013578516%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(56.19574932575373%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(41.136911632549115%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(54.881220930612926%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(56.57075935262756%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(44.20418254164832%25) translateY(-10%25);"%0A    />%0A  </div>%0A  <div%0A    class="absolute inset-0 pointer-events-none"%0A    style="background: radial-gradient(transparent 30%25, rgba(0, 0, 0, 0.8) 100%25);"%0A  />%0A  <div%0A    class="absolute inset-0 pointer-events-none opacity-[0.04]"%0A    style="background-image: url(\"data:image/svg+xml,%253Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%253E%253Cfilter id='noise'%253E%253CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%253E%253C/filter%253E%253Crect width='100%2525' height='100%2525' filter='url(%2523noise)'/%253E%253C/svg%253E\");"%0A  />%0A</div>%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:215:38%0A%0A
+
+::error file=/tmp/a459-mut/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SpotlightLoader entrance (STORE-1d D10%2C SABA-B-13 minimum) > L9 never renders under prefers-reduced-motion and does not claim the session,line=53,column=8::TypeError: Negative ticks are not supported%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:53:8%0A ❯ ../../home/runner/czaba-project/store/node_modules/@testing-library/react/dist/act-compat.js:47:24%0A ❯ act ../../home/runner/czaba-project/store/node_modules/react/cjs/react.development.js:2512:16%0A ❯ ../../home/runner/czaba-project/store/node_modules/@testing-library/react/dist/act-compat.js:46:25%0A ❯ advanceTo app/lib/__tests__/store-entrance-loader.test.tsx:52:3%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:260:7%0A%0A
+
+::error file=/tmp/a459-mut/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SABA-B-13 static head cover and takeover > E6 the timeline counts from the first cover frame%3A 1450 ms minimum%2C 1900 ms cap,line=403,column=33::AssertionError: expected { logoInMs: 120, holdInMs: 300, …(2) } to deeply equal { logoInMs: 120, holdInMs: 300, …(2) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "endInMs": 1450,%0A-   "exitInMs": 1200,%0A+   "endInMs": 1300,%0A+   "exitInMs": 1050,%0A    "holdInMs": 300,%0A    "logoInMs": 120,%0A  }%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:403:33%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSpotlightLoader entrance (STORE-1d D10, SABA-B-13 minimum)[2m > [22mL3 stays on screen for the 1450 ms minimum, exit fade included, never past 1900 ms
+[31m[1mAssertionError[22m: expected 1150 to be 1450 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1450[39m
+[31m+ 1150[39m
+
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m93:19[22m[39m
+    [90m 91| [39m
+    [90m 92| [39m  it('L3 stays on screen for the 1450 ms minimum, exit fade included, …
+    [90m 93| [39m    [34mexpect[39m([33mTOTAL[39m)[33m.[39m[34mtoBe[39m([34m1450[39m)[33m;[39m
+    [90m   | [39m                  [31m^[39m
+    [90m 94| [39m    [34mexpect[39m([33mENTRANCE_MAX_TOTAL_MS[39m)[33m.[39m[34mtoBe[39m([34m1900[39m)[33m;[39m
+    [90m 95| [39m    [35mconst[39m clock [33m=[39m { ms[33m:[39m [34m0[39m }[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSpotlightLoader entrance (STORE-1d D10, SABA-B-13 minimum)[2m > [22mL6 Escape skip and keydown listener hygiene[2m > [22mremoves the keydown listener after the natural finish
+[31m[1mAssertionError[22m: expected <div …(4)>…(8)</div> to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+<div
+  aria-hidden="true"
+  class="fixed inset-0 z-50 overflow-hidden pointer-events-none"
+  data-testid="entrance-loader"
+  style="background-color: rgb(0, 0, 0); opacity: 1;"
+>
+  <div
+    class="absolute inset-0 bg-black"
+  />
+  <div
+    class="absolute top-0 left-1/2 -translate-x-1/2"
+    style="width: 200%; height: 120%; background: conic-gradient(from 270deg at 50% 0%, transparent 0deg, transparent 70deg, rgba(255, 255, 255, 0.03) 85deg, rgba(255, 255, 255, 0.08) 90deg, rgba(255, 255, 255, 0.03) 95deg, transparent 110deg, transparent 360deg); opacity: 0; transform: scale(0.5);"
+  />
+  <div
+    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+    style="width: 500px; height: 500px; background: radial-gradient(rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 40%, transparent 70%); filter: blur(40px); opacity: 0; transform: scale(0.3);"
+  />
+  <div
+    class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[400px] h-[150px]"
+    style="background: radial-gradient(top, rgba(255, 255, 255, 0.1) 0%, transparent 70%); filter: blur(20px); opacity: 0;"
+  />
+  <div
+    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10"
+    style="opacity: 0; transform: translateY(30px) scale(0.9);"
+  >
+    <span
+      class="block text-5xl md:text-7xl font-bold text-foreground"
+      style="letter-spacing: 0.3em;"
+    >
+      CZABA
+    </span>
+    <div
+      class="h-[1px] mx-auto mt-4 mb-4 bg-brand/50"
+      style="opacity: 0; width: 0px;"
+    />
+    <p
+      class="text-sm text-muted tracking-[0.3em] uppercase"
+      style="opacity: 0; transform: translateY(10px);"
+    >
+      Cinematic Sound Design
+    </p>
+  </div>
+  <div
+    class="absolute inset-0 pointer-events-none overflow-hidden"
+  >
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(53.31887134496336%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(42.18154385775602%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(52.32357745750242%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(56.353713829195634%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(48.915611608156105%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(56.68794098001837%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(44.318122146700865%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(46.000406810942096%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(41.644022902059326%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(40.747810013578516%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(56.19574932575373%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(41.136911632549115%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(54.881220930612926%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(56.57075935262756%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(44.20418254164832%) translateY(-10%);"
+    />
+  </div>
+  <div
+    class="absolute inset-0 pointer-events-none"
+    style="background: radial-gradient(transparent 30%, rgba(0, 0, 0, 0.8) 100%);"
+  />
+  <div
+    class="absolute inset-0 pointer-events-none opacity-[0.04]"
+    style="background-image: url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\");"
+  />
+</div>
+
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m215:38[22m[39m
+    [90m213| [39m      [35mconst[39m { container } [33m=[39m [34mmountEntranceLoader[39m()[33m;[39m
+    [90m214| [39m      [34madvanceTo[39m(clock[33m,[39m [33mTOTAL[39m)[33m;[39m
+    [90m215| [39m      [34mexpect[39m([34mfindOverlay[39m(container))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m216| [39m      listeners[33m.[39m[34mexpectAllRemoved[39m()[33m;[39m
+    [90m217| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSpotlightLoader entrance (STORE-1d D10, SABA-B-13 minimum)[2m > [22mL9 never renders under prefers-reduced-motion and does not claim the session
+[31m[1mTypeError[22m: Negative ticks are not supported[39m
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m53:8[22m[39m
+    [90m 51| [39m[35mfunction[39m [34madvanceTo[39m(current[33m:[39m { ms[33m:[39m number }[33m,[39m target[33m:[39m number) {
+    [90m 52| [39m  [34mact[39m(() [33m=>[39m {
+    [90m 53| [39m    vi[33m.[39m[34madvanceTimersByTime[39m(target [33m-[39m current[33m.[39mms)[33m;[39m
+    [90m   | [39m       [31m^[39m
+    [90m 54| [39m  })[33m;[39m
+    [90m 55| [39m  current[33m.[39mms [33m=[39m target[33m;[39m
+[90m [2m❯[22m ../../home/runner/czaba-project/store/node_modules/@testing-library/react/dist/act-compat.js:[2m47:24[22m[39m
+[90m [2m❯[22m act ../../home/runner/czaba-project/store/node_modules/react/cjs/react.development.js:[2m2512:16[22m[39m
+[90m [2m❯[22m ../../home/runner/czaba-project/store/node_modules/@testing-library/react/dist/act-compat.js:[2m46:25[22m[39m
+[90m [2m❯[22m advanceTo app/lib/__tests__/store-entrance-loader.test.tsx:[2m52:3[22m[39m
+[90m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m260:7[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE6 the timeline counts from the first cover frame: 1450 ms minimum, 1900 ms cap
+[31m[1mAssertionError[22m: expected { logoInMs: 120, holdInMs: 300, …(2) } to deeply equal { logoInMs: 120, holdInMs: 300, …(2) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "endInMs": 1450,[39m
+[32m-   "exitInMs": 1200,[39m
+[31m+   "endInMs": 1300,[39m
+[31m+   "exitInMs": 1050,[39m
+[2m    "holdInMs": 300,[22m
+[2m    "logoInMs": 120,[22m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m403:33[22m[39m
+    [90m401| [39m
+    [90m402| [39m  it('E6 the timeline counts from the first cover frame: 1450 ms minim…
+    [90m403| [39m    [34mexpect[39m([34mentranceTimeline[39m([34m0[39m))[33m.[39m[34mtoEqual[39m({
+    [90m   | [39m                                [31m^[39m
+    [90m404| [39m      logoInMs[33m:[39m [34m120[39m[33m,[39m
+    [90m405| [39m      holdInMs[33m:[39m [34m300[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+

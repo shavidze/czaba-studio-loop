@@ -1,0 +1,292 @@
+diff --git a/app/components/loading/EntranceCover.tsx b/app/components/loading/EntranceCover.tsx
+index ea7e980..85075ae 100644
+--- a/app/components/loading/EntranceCover.tsx
++++ b/app/components/loading/EntranceCover.tsx
+@@ -8,19 +8,42 @@ export const ENTRANCE_EXIT_MS = 250;
+ export const ENTRANCE_TAKEOVER_EVENT = 'czaba-entrance-takeover';
+ export const ENTRANCE_REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+ 
++export type EntranceHandshakeState = 'pending' | 'live' | 'skipped' | 'expired';
++
++export interface EntranceHandshake {
++  start: number;
++  state: EntranceHandshakeState;
++}
++
++declare global {
++  interface Window {
++    __czabaEntrance?: EntranceHandshake;
++  }
++}
++
+ export const ENTRANCE_COVER_CSS = `@media (prefers-reduced-motion: no-preference){body::before{content:"";position:fixed;inset:0;z-index:60;background:var(--color-black);animation:czaba-entrance-failsafe ${ENTRANCE_EXIT_MS}ms ease-in-out ${ENTRANCE_FAILSAFE_MS}ms forwards}}@keyframes czaba-entrance-failsafe{to{opacity:0;visibility:hidden}}`;
+ 
+ // ერთხელ tab-ზე (D10): ამ ხაზის წაშლით ანიმაცია ყოველ ჩატვირთვაზე ითამაშებს (SABA-Q-ENTRANCE-RELOAD)
+ const sessionGate = `if(sessionStorage.getItem('${ENTRANCE_SESSION_KEY}')==='1')return;sessionStorage.setItem('${ENTRANCE_SESSION_KEY}','1');`;
+ 
+-export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var c=document.getElementById('${ENTRANCE_COVER_ID}');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('${ENTRANCE_REDUCED_MOTION_QUERY}').matches)return;${sessionGate}c.setAttribute('data-start',String(performance.now()));c.media='all';var off=function(){document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);window.removeEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);};var end=function(){off();c.setAttribute('data-state','skipped');c.media='not all';};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);window.addEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);}catch(e){}})();`;
++// მდგომარეობა window-ზეა: hydration-ის შეცდომისას React <style>-ს ცვლის, window კი რჩება (A-R459-REVIEW-R1)
++export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var c=document.getElementById('${ENTRANCE_COVER_ID}');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('${ENTRANCE_REDUCED_MOTION_QUERY}').matches)return;${sessionGate}var h={start:performance.now(),state:'pending'};window.__czabaEntrance=h;c.setAttribute('data-start',String(h.start));c.media='all';var t;var off=function(){clearTimeout(t);document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);window.removeEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);};var end=function(){off();if(h.state==='pending')h.state='skipped';var n=document.getElementById('${ENTRANCE_COVER_ID}');if(n){n.setAttribute('data-state',h.state);n.media='not all';}};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);window.addEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);t=setTimeout(off,${ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS});}catch(e){}})();`;
++
++// client re-render (hydration-ის შეცდომა) ფარდას ჩართულს ტოვებს, სანამ SpotlightLoader არ ჩაიბარებს
++function isEntrancePending(): boolean {
++  if (typeof window === 'undefined') return false;
++  const handshake = window.__czabaEntrance;
++  return (
++    handshake?.state === 'pending' && performance.now() - handshake.start < ENTRANCE_FAILSAFE_MS
++  );
++}
+ 
+ export function EntranceCoverHead() {
+   return (
+     <>
+       <style
+         id={ENTRANCE_COVER_ID}
+-        media="not all"
++        media={isEntrancePending() ? 'all' : 'not all'}
+         suppressHydrationWarning
+         dangerouslySetInnerHTML={{ __html: ENTRANCE_COVER_CSS }}
+       />
+diff --git a/app/components/loading/SpotlightLoader.tsx b/app/components/loading/SpotlightLoader.tsx
+index 3e7662a..2509533 100644
+--- a/app/components/loading/SpotlightLoader.tsx
++++ b/app/components/loading/SpotlightLoader.tsx
+@@ -11,6 +11,8 @@ import {
+   ENTRANCE_REDUCED_MOTION_QUERY,
+   ENTRANCE_SESSION_KEY,
+   ENTRANCE_TAKEOVER_EVENT,
++  type EntranceHandshake,
++  type EntranceHandshakeState,
+ } from './EntranceCover';
+ 
+ const LOGO_AFTER_TAKEOVER_MS = 120;
+@@ -64,17 +66,33 @@ function claimEntranceForSession(): boolean {
+   }
+ }
+ 
+-function claimEntranceStart(cover: HTMLStyleElement | null): number | null {
+-  if (cover && cover.media === 'all' && !cover.getAttribute('data-state')) {
+-    const start = Number(cover.getAttribute('data-start') ?? Number.NaN);
+-    const elapsed = performance.now() - start;
+-    if (Number.isFinite(elapsed) && elapsed < ENTRANCE_FAILSAFE_MS) return start;
+-    cover.setAttribute('data-state', 'expired');
+-    cover.media = 'not all';
+-    window.dispatchEvent(new Event(ENTRANCE_TAKEOVER_EVENT));
++function syncEntranceCover(state: EntranceHandshakeState) {
++  const cover = findEntranceCover();
++  if (!cover) return;
++  cover.setAttribute('data-state', state);
++  cover.media = 'not all';
++}
++
++function retireEntrance(handshake: EntranceHandshake | null) {
++  if (handshake) handshake.state = 'expired';
++  syncEntranceCover('expired');
++  window.dispatchEvent(new Event(ENTRANCE_TAKEOVER_EVENT));
++}
++
++function claimEntranceStart(): number | null {
++  const handshake = window.__czabaEntrance ?? null;
++  if (handshake) {
++    if (handshake.state !== 'pending') return null;
++    const elapsed = performance.now() - handshake.start;
++    if (Number.isFinite(elapsed) && elapsed < ENTRANCE_FAILSAFE_MS) return handshake.start;
++    retireEntrance(handshake);
++    return null;
++  }
++  const cover = findEntranceCover();
++  if (cover && cover.media === 'all') {
++    retireEntrance(null);
+     return null;
+   }
+-  if (cover?.getAttribute('data-state')) return null;
+   return claimEntranceForSession() ? performance.now() : null;
+ }
+ 
+@@ -87,7 +105,7 @@ export function SpotlightLoader() {
+   const overlayRef = useRef<HTMLDivElement>(null);
+ 
+   useEffect(() => {
+-    const claimed = claimEntranceStart(findEntranceCover());
++    const claimed = claimEntranceStart();
+     if (claimed === null) return;
+     setStartMs(claimed);
+     setIsVisible(true);
+@@ -110,12 +128,12 @@ export function SpotlightLoader() {
+     const overlay = overlayRef.current;
+     document.addEventListener('keydown', handleEntranceSkipKey);
+     overlay?.addEventListener('click', hideEntrance);
+-    const cover = findEntranceCover();
+-    if (cover?.getAttribute('data-state') === 'skipped') {
++    const handshake = window.__czabaEntrance;
++    if (handshake?.state === 'skipped') {
+       hideEntrance();
+-    } else if (cover?.media === 'all') {
+-      cover.setAttribute('data-state', 'live');
+-      cover.media = 'not all';
++    } else if (handshake?.state === 'pending') {
++      handshake.state = 'live';
++      syncEntranceCover('live');
+     }
+     window.dispatchEvent(new Event(ENTRANCE_TAKEOVER_EVENT));
+ 
+diff --git a/app/lib/__tests__/store-entrance-loader.test.tsx b/app/lib/__tests__/store-entrance-loader.test.tsx
+index cd8a8a0..738e8f9 100644
+--- a/app/lib/__tests__/store-entrance-loader.test.tsx
++++ b/app/lib/__tests__/store-entrance-loader.test.tsx
+@@ -57,6 +57,7 @@ function advanceTo(current: { ms: number }, target: number) {
+ 
+ describe('SpotlightLoader entrance (STORE-1d D10, SABA-B-13 minimum)', () => {
+   beforeEach(() => {
++    window.__czabaEntrance = undefined;
+     vi.useFakeTimers();
+     window.sessionStorage.clear();
+     window.localStorage.clear();
+@@ -316,8 +317,41 @@ function runBootScript() {
+   new Function(ENTRANCE_BOOT_SCRIPT)();
+ }
+ 
++function reinsertCoverHeadHtml() {
++  return installHeadCover();
++}
++
++function watchOverlayMounts() {
++  const observer = new MutationObserver(() => {});
++  observer.observe(document.body, { childList: true, subtree: true });
++  return () => {
++    const records = observer.takeRecords();
++    observer.disconnect();
++    return records.some((record) =>
++      [...record.addedNodes].some(
++        (node) =>
++          node instanceof HTMLElement &&
++          (node.matches('[data-testid="entrance-loader"]') ||
++            node.querySelector('[data-testid="entrance-loader"]') !== null),
++      ),
++    );
++  };
++}
++
++function trackBootCaptureListeners() {
++  const added = new Set<EventListenerOrEventListenerObject>();
++  const addSpy = vi.spyOn(document, 'addEventListener');
++  const removeSpy = vi.spyOn(document, 'removeEventListener');
++  return () => {
++    for (const call of addSpy.mock.calls) if (call[2] === true) added.add(call[1]);
++    for (const call of removeSpy.mock.calls) if (call[2] === true) added.delete(call[1]);
++    return added.size;
++  };
++}
++
+ describe('SABA-B-13 static head cover and takeover', () => {
+   beforeEach(() => {
++    window.__czabaEntrance = undefined;
+     vi.useFakeTimers();
+     window.sessionStorage.clear();
+     stubMatchMedia(false);
+@@ -333,6 +367,7 @@ describe('SABA-B-13 static head cover and takeover', () => {
+     vi.unstubAllGlobals();
+     vi.restoreAllMocks();
+     document.head.innerHTML = '';
++    window.__czabaEntrance = undefined;
+     window.sessionStorage.clear();
+     window.history.replaceState(null, '', '/');
+   });
+@@ -441,8 +476,10 @@ describe('SABA-B-13 static head cover and takeover', () => {
+     expect(notPrevented).toBe(true);
+     expect(cover.media).toBe('not all');
+     expect(cover.getAttribute('data-state')).toBe('skipped');
++    const overlayMounted = watchOverlayMounts();
+     const { container } = render(<SpotlightLoader />);
+     expect(findOverlay(container)).toBeNull();
++    expect(overlayMounted()).toBe(false);
+   });
+ 
+   it('E8b other keys before hydration keep the cover', () => {
+@@ -519,4 +556,86 @@ describe('SABA-B-13 static head cover and takeover', () => {
+     expect(cover.media).toBe('not all');
+     expect(findOverlay(container)).toBeNull();
+   });
++
++  it('E15 a client re-render that replaces the cover style still plays the entrance and frees the boot listeners', () => {
++    const bootListenersLeft = trackBootCaptureListeners();
++    vi.advanceTimersByTime(500);
++    installHeadCover();
++    runBootScript();
++    expect(bootListenersLeft()).toBe(2);
++    vi.advanceTimersByTime(160);
++    const replaced = reinsertCoverHeadHtml();
++    expect(replaced.media).toBe('all');
++    expect(replaced.getAttribute('data-start')).toBeNull();
++    const { container } = render(<SpotlightLoader />);
++    expect(replaced.media).toBe('not all');
++    expect(findOverlay(container)).not.toBeNull();
++    expect(window.__czabaEntrance?.state).toBe('live');
++    expect(replaced.getAttribute('data-state')).toBe('live');
++    expect(bootListenersLeft()).toBe(0);
++    act(() => {
++      vi.advanceTimersByTime(entranceTimeline(160).endInMs - 1);
++    });
++    expect(findOverlay(container)).not.toBeNull();
++    act(() => {
++      vi.advanceTimersByTime(1);
++    });
++    expect(findOverlay(container)).toBeNull();
++  });
++
++  it('E16 a skip after the style was replaced turns the new style off and skips the entrance', () => {
++    installHeadCover();
++    runBootScript();
++    const replaced = reinsertCoverHeadHtml();
++    expect(replaced.media).toBe('all');
++    fireEvent.keyDown(document, { key: 'Escape' });
++    expect(window.__czabaEntrance?.state).toBe('skipped');
++    expect(replaced.getAttribute('data-state')).toBe('skipped');
++    expect(replaced.media).toBe('not all');
++    const overlayMounted = watchOverlayMounts();
++    const { container } = render(<SpotlightLoader />);
++    expect(findOverlay(container)).toBeNull();
++    expect(overlayMounted()).toBe(false);
++  });
++
++  it('E17 a takeover after the failsafe frees the boot listeners', () => {
++    const bootListenersLeft = trackBootCaptureListeners();
++    installHeadCover();
++    runBootScript();
++    vi.advanceTimersByTime(ENTRANCE_FAILSAFE_MS - 1);
++    expect(bootListenersLeft()).toBe(2);
++    vi.advanceTimersByTime(1);
++    const { container } = render(<SpotlightLoader />);
++    expect(findOverlay(container)).toBeNull();
++    expect(window.__czabaEntrance?.state).toBe('expired');
++    expect(bootListenersLeft()).toBe(0);
++  });
++
++  it('E18 with no takeover the boot listeners remove themselves after the failsafe fade', () => {
++    const bootListenersLeft = trackBootCaptureListeners();
++    const cover = installHeadCover();
++    runBootScript();
++    vi.advanceTimersByTime(ENTRANCE_FAILSAFE_MS + 250 - 1);
++    expect(bootListenersLeft()).toBe(2);
++    vi.advanceTimersByTime(1);
++    expect(bootListenersLeft()).toBe(0);
++    fireEvent.keyDown(document, { key: 'Escape' });
++    expect(window.__czabaEntrance?.state).toBe('pending');
++    expect(cover.getAttribute('data-state')).toBeNull();
++  });
++
++  it('E19 a re-render after the failsafe keeps the cover off on a visible page', () => {
++    installHeadCover();
++    runBootScript();
++    vi.advanceTimersByTime(ENTRANCE_FAILSAFE_MS - 1);
++    expect(reinsertCoverHeadHtml().media).toBe('all');
++    vi.advanceTimersByTime(1);
++    const replaced = reinsertCoverHeadHtml();
++    expect(window.__czabaEntrance?.state).toBe('pending');
++    expect(replaced.media).toBe('not all');
++    const { container } = render(<SpotlightLoader />);
++    expect(findOverlay(container)).toBeNull();
++    expect(window.__czabaEntrance?.state).toBe('expired');
++    expect(replaced.media).toBe('not all');
++  });
+ });

@@ -1,0 +1,759 @@
+diff --git a/app/components/loading/EntranceCover.tsx b/app/components/loading/EntranceCover.tsx
+new file mode 100644
+index 0000000..85075ae
+--- /dev/null
++++ b/app/components/loading/EntranceCover.tsx
+@@ -0,0 +1,53 @@
++// შესასვლელის სტატიკური ფარდა: <head>-ში, რომ პირველივე კადრი შავი იყოს (SABA-B-13)
++export const ENTRANCE_COVER_ID = 'czaba-entrance-cover';
++export const ENTRANCE_SESSION_KEY = 'czaba_entrance_seen';
++export const ENTRANCE_MIN_TOTAL_MS = 1450;
++export const ENTRANCE_MAX_TOTAL_MS = 1900;
++export const ENTRANCE_FAILSAFE_MS = 1000;
++export const ENTRANCE_EXIT_MS = 250;
++export const ENTRANCE_TAKEOVER_EVENT = 'czaba-entrance-takeover';
++export const ENTRANCE_REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
++
++export type EntranceHandshakeState = 'pending' | 'live' | 'skipped' | 'expired';
++
++export interface EntranceHandshake {
++  start: number;
++  state: EntranceHandshakeState;
++}
++
++declare global {
++  interface Window {
++    __czabaEntrance?: EntranceHandshake;
++  }
++}
++
++export const ENTRANCE_COVER_CSS = `@media (prefers-reduced-motion: no-preference){body::before{content:"";position:fixed;inset:0;z-index:60;background:var(--color-black);animation:czaba-entrance-failsafe ${ENTRANCE_EXIT_MS}ms ease-in-out ${ENTRANCE_FAILSAFE_MS}ms forwards}}@keyframes czaba-entrance-failsafe{to{opacity:0;visibility:hidden}}`;
++
++// ერთხელ tab-ზე (D10): ამ ხაზის წაშლით ანიმაცია ყოველ ჩატვირთვაზე ითამაშებს (SABA-Q-ENTRANCE-RELOAD)
++const sessionGate = `if(sessionStorage.getItem('${ENTRANCE_SESSION_KEY}')==='1')return;sessionStorage.setItem('${ENTRANCE_SESSION_KEY}','1');`;
++
++// მდგომარეობა window-ზეა: hydration-ის შეცდომისას React <style>-ს ცვლის, window კი რჩება (A-R459-REVIEW-R1)
++export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var c=document.getElementById('${ENTRANCE_COVER_ID}');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('${ENTRANCE_REDUCED_MOTION_QUERY}').matches)return;${sessionGate}var h={start:performance.now(),state:'pending'};window.__czabaEntrance=h;c.setAttribute('data-start',String(h.start));c.media='all';var t;var off=function(){clearTimeout(t);document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);window.removeEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);};var end=function(){off();if(h.state==='pending')h.state='skipped';var n=document.getElementById('${ENTRANCE_COVER_ID}');if(n){n.setAttribute('data-state',h.state);n.media='not all';}};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);window.addEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);t=setTimeout(off,${ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS});}catch(e){}})();`;
++
++// client re-render (hydration-ის შეცდომა) ფარდას ჩართულს ტოვებს, სანამ SpotlightLoader არ ჩაიბარებს
++function isEntrancePending(): boolean {
++  if (typeof window === 'undefined') return false;
++  const handshake = window.__czabaEntrance;
++  return (
++    handshake?.state === 'pending' && performance.now() - handshake.start < ENTRANCE_FAILSAFE_MS
++  );
++}
++
++export function EntranceCoverHead() {
++  return (
++    <>
++      <style
++        id={ENTRANCE_COVER_ID}
++        media={isEntrancePending() ? 'all' : 'not all'}
++        suppressHydrationWarning
++        dangerouslySetInnerHTML={{ __html: ENTRANCE_COVER_CSS }}
++      />
++      <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: ENTRANCE_BOOT_SCRIPT }} />
++    </>
++  );
++}
+diff --git a/app/components/loading/SpotlightLoader.tsx b/app/components/loading/SpotlightLoader.tsx
+index c674826..2509533 100644
+--- a/app/components/loading/SpotlightLoader.tsx
++++ b/app/components/loading/SpotlightLoader.tsx
+@@ -2,23 +2,59 @@ import { AnimatePresence, motion } from 'framer-motion';
+ import { useEffect, useRef, useState } from 'react';
+ import { createPortal } from 'react-dom';
+ import { cn } from '~/lib/utils';
++import {
++  ENTRANCE_COVER_ID,
++  ENTRANCE_EXIT_MS,
++  ENTRANCE_FAILSAFE_MS,
++  ENTRANCE_MAX_TOTAL_MS,
++  ENTRANCE_MIN_TOTAL_MS,
++  ENTRANCE_REDUCED_MOTION_QUERY,
++  ENTRANCE_SESSION_KEY,
++  ENTRANCE_TAKEOVER_EVENT,
++  type EntranceHandshake,
++  type EntranceHandshakeState,
++} from './EntranceCover';
+ 
+-// შესასვლელი ანიმაცია: სრული ხანგრძლივობა mount-იდან unmount-მდე, exit fade-ის ჩათვლით
+-export const SPOTLIGHT_ENTRANCE_TOTAL_MS = 1150;
+-const SPOTLIGHT_AT_MS = 100;
+-const REVEAL_AT_MS = 250;
+-const HOLD_AT_MS = 450;
+-const EXIT_AT_MS = 900;
++const LOGO_AFTER_TAKEOVER_MS = 120;
++const HOLD_AFTER_TAKEOVER_MS = 300;
++const EXIT_AFTER_TAKEOVER_MIN_MS = 1050;
+ const SPOTLIGHT_DURATION = 0.3;
+ const LOGO_FADE_DURATION = 0.25;
+-const EXIT_DURATION = (SPOTLIGHT_ENTRANCE_TOTAL_MS - EXIT_AT_MS) / 1000;
++const EXIT_DURATION = ENTRANCE_EXIT_MS / 1000;
+ 
+-const ENTRANCE_SESSION_KEY = 'czaba_entrance_seen';
+-const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
++export interface EntranceTimeline {
++  logoInMs: number;
++  holdInMs: number;
++  exitInMs: number;
++  endInMs: number;
++}
++
++// დრო ითვლება ფარდის ჩართვიდან (data-start): მოცილება >= 1450 ms, <= 1900 ms
++export function entranceTimeline(elapsedAtTakeoverMs: number): EntranceTimeline {
++  const elapsed = Math.max(0, elapsedAtTakeoverMs);
++  const exitAt = Math.min(
++    Math.max(ENTRANCE_MIN_TOTAL_MS - ENTRANCE_EXIT_MS, elapsed + EXIT_AFTER_TAKEOVER_MIN_MS),
++    ENTRANCE_MAX_TOTAL_MS - ENTRANCE_EXIT_MS,
++  );
++  const exitInMs = exitAt - elapsed;
++  return {
++    logoInMs: Math.min(LOGO_AFTER_TAKEOVER_MS, exitInMs),
++    holdInMs: Math.min(HOLD_AFTER_TAKEOVER_MS, exitInMs),
++    exitInMs,
++    endInMs: exitInMs + ENTRANCE_EXIT_MS,
++  };
++}
++
++function findEntranceCover(): HTMLStyleElement | null {
++  const cover = document.getElementById(ENTRANCE_COVER_ID);
++  return cover instanceof HTMLStyleElement ? cover : null;
++}
+ 
+ function claimEntranceForSession(): boolean {
+-  if (typeof window === 'undefined') return false;
+-  if (typeof window.matchMedia === 'function' && window.matchMedia(REDUCED_MOTION_QUERY).matches) {
++  if (
++    typeof window.matchMedia === 'function' &&
++    window.matchMedia(ENTRANCE_REDUCED_MOTION_QUERY).matches
++  ) {
+     return false;
+   }
+   try {
+@@ -30,27 +66,61 @@ function claimEntranceForSession(): boolean {
+   }
+ }
+ 
+-type Phase = 'dark' | 'spotlight' | 'reveal' | 'holding' | 'exit';
++function syncEntranceCover(state: EntranceHandshakeState) {
++  const cover = findEntranceCover();
++  if (!cover) return;
++  cover.setAttribute('data-state', state);
++  cover.media = 'not all';
++}
++
++function retireEntrance(handshake: EntranceHandshake | null) {
++  if (handshake) handshake.state = 'expired';
++  syncEntranceCover('expired');
++  window.dispatchEvent(new Event(ENTRANCE_TAKEOVER_EVENT));
++}
++
++function claimEntranceStart(): number | null {
++  const handshake = window.__czabaEntrance ?? null;
++  if (handshake) {
++    if (handshake.state !== 'pending') return null;
++    const elapsed = performance.now() - handshake.start;
++    if (Number.isFinite(elapsed) && elapsed < ENTRANCE_FAILSAFE_MS) return handshake.start;
++    retireEntrance(handshake);
++    return null;
++  }
++  const cover = findEntranceCover();
++  if (cover && cover.media === 'all') {
++    retireEntrance(null);
++    return null;
++  }
++  return claimEntranceForSession() ? performance.now() : null;
++}
++
++type Phase = 'spotlight' | 'reveal' | 'holding' | 'exit';
+ 
+ export function SpotlightLoader() {
++  const [startMs, setStartMs] = useState<number | null>(null);
+   const [isVisible, setIsVisible] = useState(false);
+-  const [phase, setPhase] = useState<Phase>('dark');
++  const [phase, setPhase] = useState<Phase>('spotlight');
+   const overlayRef = useRef<HTMLDivElement>(null);
+ 
+   useEffect(() => {
+-    if (claimEntranceForSession()) setIsVisible(true);
++    const claimed = claimEntranceStart();
++    if (claimed === null) return;
++    setStartMs(claimed);
++    setIsVisible(true);
+   }, []);
+ 
+   useEffect(() => {
+-    if (!isVisible) return;
++    if (!isVisible || startMs === null) return;
+ 
++    const timeline = entranceTimeline(performance.now() - startMs);
+     const hideEntrance = () => setIsVisible(false);
+     const timers: ReturnType<typeof setTimeout>[] = [
+-      setTimeout(() => setPhase('spotlight'), SPOTLIGHT_AT_MS),
+-      setTimeout(() => setPhase('reveal'), REVEAL_AT_MS),
+-      setTimeout(() => setPhase('holding'), HOLD_AT_MS),
+-      setTimeout(() => setPhase('exit'), EXIT_AT_MS),
+-      setTimeout(hideEntrance, SPOTLIGHT_ENTRANCE_TOTAL_MS),
++      setTimeout(() => setPhase('reveal'), timeline.logoInMs),
++      setTimeout(() => setPhase('holding'), timeline.holdInMs),
++      setTimeout(() => setPhase('exit'), timeline.exitInMs),
++      setTimeout(hideEntrance, timeline.endInMs),
+     ];
+     const handleEntranceSkipKey = (event: KeyboardEvent) => {
+       if (event.key === 'Escape' || event.key === 'Tab') hideEntrance();
+@@ -58,17 +128,24 @@ export function SpotlightLoader() {
+     const overlay = overlayRef.current;
+     document.addEventListener('keydown', handleEntranceSkipKey);
+     overlay?.addEventListener('click', hideEntrance);
++    const handshake = window.__czabaEntrance;
++    if (handshake?.state === 'skipped') {
++      hideEntrance();
++    } else if (handshake?.state === 'pending') {
++      handshake.state = 'live';
++      syncEntranceCover('live');
++    }
++    window.dispatchEvent(new Event(ENTRANCE_TAKEOVER_EVENT));
+ 
+     return () => {
+       for (const timer of timers) clearTimeout(timer);
+       document.removeEventListener('keydown', handleEntranceSkipKey);
+       overlay?.removeEventListener('click', hideEntrance);
+     };
+-  }, [isVisible]);
++  }, [isVisible, startMs]);
+ 
+   if (!isVisible) return null;
+ 
+-  const showSpotlight = phase !== 'dark';
+   const showLogo = phase === 'reveal' || phase === 'holding' || phase === 'exit';
+   const isExit = phase === 'exit';
+ 
+@@ -91,8 +168,8 @@ export function SpotlightLoader() {
+         <motion.div
+           initial={{ opacity: 0, scale: 0.5 }}
+           animate={{
+-            opacity: showSpotlight ? 1 : 0,
+-            scale: showSpotlight ? 1 : 0.5,
++            opacity: 1,
++            scale: 1,
+           }}
+           transition={{
+             duration: SPOTLIGHT_DURATION,
+@@ -121,8 +198,8 @@ export function SpotlightLoader() {
+         <motion.div
+           initial={{ opacity: 0, scale: 0.3 }}
+           animate={{
+-            opacity: showSpotlight ? 0.8 : 0,
+-            scale: showSpotlight ? 1 : 0.3,
++            opacity: 0.8,
++            scale: 1,
+           }}
+           transition={{
+             duration: SPOTLIGHT_DURATION * 0.8,
+@@ -142,7 +219,7 @@ export function SpotlightLoader() {
+         <motion.div
+           initial={{ opacity: 0 }}
+           animate={{
+-            opacity: showSpotlight ? 0.3 : 0,
++            opacity: 0.3,
+           }}
+           transition={{
+             duration: SPOTLIGHT_DURATION,
+@@ -205,31 +282,29 @@ export function SpotlightLoader() {
+         </motion.div>
+ 
+         {/* Dust particles in spotlight */}
+-        {showSpotlight && (
+-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+-            {[...Array(15)].map((_, i) => (
+-              <motion.div
+-                key={i}
+-                initial={{
+-                  opacity: 0,
+-                  x: `${40 + Math.random() * 20}%`,
+-                  y: '-10%',
+-                }}
+-                animate={{
+-                  opacity: [0, 0.6, 0],
+-                  y: '110%',
+-                }}
+-                transition={{
+-                  duration: 1 + Math.random() * 0.8,
+-                  delay: Math.random() * 0.3,
+-                  repeat: Infinity,
+-                  ease: 'linear',
+-                }}
+-                className="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+-              />
+-            ))}
+-          </div>
+-        )}
++        <div className="absolute inset-0 pointer-events-none overflow-hidden">
++          {[...Array(15)].map((_, i) => (
++            <motion.div
++              key={i}
++              initial={{
++                opacity: 0,
++                x: `${40 + Math.random() * 20}%`,
++                y: '-10%',
++              }}
++              animate={{
++                opacity: [0, 0.6, 0],
++                y: '110%',
++              }}
++              transition={{
++                duration: 1 + Math.random() * 0.8,
++                delay: Math.random() * 0.3,
++                repeat: Infinity,
++                ease: 'linear',
++              }}
++              className="absolute w-[2px] h-[2px] rounded-full bg-white/50"
++            />
++          ))}
++        </div>
+ 
+         {/* Vignette */}
+         <div
+diff --git a/app/lib/__tests__/store-entrance-loader.test.tsx b/app/lib/__tests__/store-entrance-loader.test.tsx
+index 72404c0..738e8f9 100644
+--- a/app/lib/__tests__/store-entrance-loader.test.tsx
++++ b/app/lib/__tests__/store-entrance-loader.test.tsx
+@@ -1,12 +1,23 @@
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
+ import { act, cleanup, fireEvent, render } from '@testing-library/react';
++import { useEffect } from 'react';
+ import { renderToString } from 'react-dom/server';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+-import { SPOTLIGHT_ENTRANCE_TOTAL_MS, SpotlightLoader } from '~/components/loading/SpotlightLoader';
++import {
++  ENTRANCE_BOOT_SCRIPT,
++  ENTRANCE_COVER_ID,
++  ENTRANCE_FAILSAFE_MS,
++  ENTRANCE_MAX_TOTAL_MS,
++  ENTRANCE_MIN_TOTAL_MS,
++  EntranceCoverHead,
++} from '~/components/loading/EntranceCover';
++import { entranceTimeline, SpotlightLoader } from '~/components/loading/SpotlightLoader';
+ 
+ const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+ const SESSION_KEY = 'czaba_entrance_seen';
+ const OLD_LOCAL_KEY = 'czaba_spotlight_last_shown';
+-const TOTAL = SPOTLIGHT_ENTRANCE_TOTAL_MS;
++const TOTAL = ENTRANCE_MIN_TOTAL_MS;
+ 
+ function stubMatchMedia(prefersReducedMotion: boolean) {
+   const matchMedia = vi.fn(
+@@ -44,8 +55,9 @@ function advanceTo(current: { ms: number }, target: number) {
+   current.ms = target;
+ }
+ 
+-describe('SpotlightLoader entrance (STORE-1d D10)', () => {
++describe('SpotlightLoader entrance (STORE-1d D10, SABA-B-13 minimum)', () => {
+   beforeEach(() => {
++    window.__czabaEntrance = undefined;
+     vi.useFakeTimers();
+     window.sessionStorage.clear();
+     window.localStorage.clear();
+@@ -61,8 +73,10 @@ describe('SpotlightLoader entrance (STORE-1d D10)', () => {
+     window.localStorage.clear();
+   });
+ 
+-  it('L1 renders nothing on the server', () => {
++  it('L1 renders nothing on the server and logs nothing', () => {
++    const consoleError = vi.spyOn(console, 'error');
+     expect(renderToString(<SpotlightLoader />)).toBe('');
++    expect(consoleError).not.toHaveBeenCalled();
+   });
+ 
+   it('L2 shows a decorative overlay with no heading on first mount', () => {
+@@ -76,8 +90,9 @@ describe('SpotlightLoader entrance (STORE-1d D10)', () => {
+     expect(overlay?.textContent).toContain('CZABA');
+   });
+ 
+-  it('L3 stays on screen at most 1200 ms, exit fade included', () => {
+-    expect(TOTAL).toBeLessThanOrEqual(1200);
++  it('L3 stays on screen for the 1450 ms minimum, exit fade included, never past 1900 ms', () => {
++    expect(TOTAL).toBe(1450);
++    expect(ENTRANCE_MAX_TOTAL_MS).toBe(1900);
+     const clock = { ms: 0 };
+     const { container } = mountEntranceLoader();
+ 
+@@ -87,7 +102,7 @@ describe('SpotlightLoader entrance (STORE-1d D10)', () => {
+     expect(findOverlay(container)).not.toBeNull();
+     advanceTo(clock, TOTAL);
+     expect(findOverlay(container)).toBeNull();
+-    advanceTo(clock, 1200 + 5000);
++    advanceTo(clock, ENTRANCE_MAX_TOTAL_MS + 5000);
+     expect(findOverlay(container)).toBeNull();
+   });
+ 
+@@ -242,7 +257,7 @@ describe('SpotlightLoader entrance (STORE-1d D10)', () => {
+     const { container } = render(<SpotlightLoader />);
+     expect(findOverlay(container)).toBeNull();
+ 
+-    for (const step of [0, 100, 1200]) {
++    for (const step of [0, 100, 1200, TOTAL]) {
+       advanceTo(clock, step);
+       expect(findOverlay(container)).toBeNull();
+     }
+@@ -290,3 +305,337 @@ describe('SpotlightLoader entrance (STORE-1d D10)', () => {
+     expect(consoleError).not.toHaveBeenCalled();
+   });
+ });
++
++function installHeadCover() {
++  document.head.innerHTML = renderToString(<EntranceCoverHead />);
++  const cover = document.getElementById(ENTRANCE_COVER_ID);
++  if (!(cover instanceof HTMLStyleElement)) throw new Error('cover style missing');
++  return cover;
++}
++
++function runBootScript() {
++  new Function(ENTRANCE_BOOT_SCRIPT)();
++}
++
++function reinsertCoverHeadHtml() {
++  return installHeadCover();
++}
++
++function watchOverlayMounts() {
++  const observer = new MutationObserver(() => {});
++  observer.observe(document.body, { childList: true, subtree: true });
++  return () => {
++    const records = observer.takeRecords();
++    observer.disconnect();
++    return records.some((record) =>
++      [...record.addedNodes].some(
++        (node) =>
++          node instanceof HTMLElement &&
++          (node.matches('[data-testid="entrance-loader"]') ||
++            node.querySelector('[data-testid="entrance-loader"]') !== null),
++      ),
++    );
++  };
++}
++
++function trackBootCaptureListeners() {
++  const added = new Set<EventListenerOrEventListenerObject>();
++  const addSpy = vi.spyOn(document, 'addEventListener');
++  const removeSpy = vi.spyOn(document, 'removeEventListener');
++  return () => {
++    for (const call of addSpy.mock.calls) if (call[2] === true) added.add(call[1]);
++    for (const call of removeSpy.mock.calls) if (call[2] === true) added.delete(call[1]);
++    return added.size;
++  };
++}
++
++describe('SABA-B-13 static head cover and takeover', () => {
++  beforeEach(() => {
++    window.__czabaEntrance = undefined;
++    vi.useFakeTimers();
++    window.sessionStorage.clear();
++    stubMatchMedia(false);
++    window.history.replaceState(null, '', '/');
++  });
++
++  afterEach(() => {
++    cleanup();
++    act(() => {
++      vi.runOnlyPendingTimers();
++    });
++    vi.useRealTimers();
++    vi.unstubAllGlobals();
++    vi.restoreAllMocks();
++    document.head.innerHTML = '';
++    window.__czabaEntrance = undefined;
++    window.sessionStorage.clear();
++    window.history.replaceState(null, '', '/');
++  });
++
++  it('E1 the server renders a disabled cover style and the boot script', () => {
++    const html = renderToString(<EntranceCoverHead />);
++    expect(html).toContain(`<style id="${ENTRANCE_COVER_ID}" media="not all">`);
++    expect(html).toContain('body::before');
++    expect(html).toContain('z-index:60');
++    expect(html).toContain('background:var(--color-black)');
++    expect(html).toContain(`250ms ease-in-out ${ENTRANCE_FAILSAFE_MS}ms forwards`);
++    expect(html).toContain('prefers-reduced-motion: no-preference');
++    expect(html).toContain('<script>');
++    expect(ENTRANCE_FAILSAFE_MS).toBe(1000);
++  });
++
++  it('E2 on a fresh tab at / the boot script turns the cover on and claims the session', () => {
++    const cover = installHeadCover();
++    runBootScript();
++    expect(cover.media).toBe('all');
++    expect(Number.isFinite(Number(cover.getAttribute('data-start')))).toBe(true);
++    expect(cover.getAttribute('data-start')).not.toBeNull();
++    expect(window.sessionStorage.getItem(SESSION_KEY)).toBe('1');
++  });
++
++  it.each([
++    ['a seen tab', () => window.sessionStorage.setItem(SESSION_KEY, '1')],
++    ['reduced motion', () => stubMatchMedia(true)],
++    ['another path', () => window.history.replaceState(null, '', '/store')],
++  ])('E3 %s keeps the cover off', (_label, arrange) => {
++    arrange();
++    const before = window.sessionStorage.getItem(SESSION_KEY);
++    const cover = installHeadCover();
++    runBootScript();
++    expect(cover.media).toBe('not all');
++    expect(cover.getAttribute('data-start')).toBeNull();
++    expect(window.sessionStorage.getItem(SESSION_KEY)).toBe(before);
++  });
++
++  it('E4 blocked storage keeps the cover off and does not throw', () => {
++    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
++      throw new DOMException('blocked', 'SecurityError');
++    });
++    const cover = installHeadCover();
++    expect(runBootScript).not.toThrow();
++    expect(cover.media).toBe('not all');
++  });
++
++  it('E5 the animated overlay takes over in the same commit and turns the cover off', () => {
++    const cover = installHeadCover();
++    runBootScript();
++    vi.advanceTimersByTime(160);
++    const { container } = render(<SpotlightLoader />);
++    expect(findOverlay(container)).not.toBeNull();
++    expect(cover.media).toBe('not all');
++    expect(cover.getAttribute('data-state')).toBe('live');
++    act(() => {
++      vi.advanceTimersByTime(entranceTimeline(160).endInMs - 1);
++    });
++    expect(findOverlay(container)).not.toBeNull();
++    act(() => {
++      vi.advanceTimersByTime(1);
++    });
++    expect(findOverlay(container)).toBeNull();
++  });
++
++  it('E6 the timeline counts from the first cover frame: 1450 ms minimum, 1900 ms cap', () => {
++    expect(entranceTimeline(0)).toEqual({
++      logoInMs: 120,
++      holdInMs: 300,
++      exitInMs: 1200,
++      endInMs: 1450,
++    });
++    expect(entranceTimeline(160)).toEqual({
++      logoInMs: 120,
++      holdInMs: 300,
++      exitInMs: 1050,
++      endInMs: 1300,
++    });
++    expect(160 + entranceTimeline(160).endInMs).toBe(1460);
++    expect(900 + entranceTimeline(900).endInMs).toBe(ENTRANCE_MAX_TOTAL_MS);
++    expect(999 + entranceTimeline(999).endInMs).toBe(ENTRANCE_MAX_TOTAL_MS);
++    expect(entranceTimeline(-50)).toEqual(entranceTimeline(0));
++  });
++
++  it('E7 a takeover after the failsafe never replays the entrance', () => {
++    const cover = installHeadCover();
++    runBootScript();
++    vi.advanceTimersByTime(ENTRANCE_FAILSAFE_MS);
++    const { container } = render(<SpotlightLoader />);
++    expect(findOverlay(container)).toBeNull();
++    expect(cover.getAttribute('data-state')).toBe('expired');
++    expect(cover.media).toBe('not all');
++    expect(window.sessionStorage.getItem(SESSION_KEY)).toBe('1');
++  });
++
++  it.each([
++    ['Escape', () => fireEvent.keyDown(document, { key: 'Escape' })],
++    ['Tab', () => fireEvent.keyDown(document, { key: 'Tab' })],
++    ['click', () => fireEvent.click(document.body)],
++  ])('E8 %s before hydration skips the cover and the entrance', (_label, skip) => {
++    const cover = installHeadCover();
++    runBootScript();
++    let notPrevented = false;
++    notPrevented = skip();
++    expect(notPrevented).toBe(true);
++    expect(cover.media).toBe('not all');
++    expect(cover.getAttribute('data-state')).toBe('skipped');
++    const overlayMounted = watchOverlayMounts();
++    const { container } = render(<SpotlightLoader />);
++    expect(findOverlay(container)).toBeNull();
++    expect(overlayMounted()).toBe(false);
++  });
++
++  it('E8b other keys before hydration keep the cover', () => {
++    const cover = installHeadCover();
++    runBootScript();
++    for (const key of ['a', 'ArrowDown', 'Shift', 'Enter']) fireEvent.keyDown(document, { key });
++    expect(cover.media).toBe('all');
++    expect(cover.getAttribute('data-state')).toBeNull();
++  });
++
++  it('E9 after the takeover the boot listeners are gone and the overlay owns the skip', () => {
++    const cover = installHeadCover();
++    runBootScript();
++    const { container } = render(<SpotlightLoader />);
++    expect(cover.getAttribute('data-state')).toBe('live');
++    act(() => {
++      fireEvent.keyDown(document, { key: 'Escape' });
++    });
++    expect(cover.getAttribute('data-state')).toBe('live');
++    expect(findOverlay(container)).toBeNull();
++  });
++
++  it('E10 a client navigation to / after a seen entrance shows nothing', () => {
++    const cover = installHeadCover();
++    window.sessionStorage.setItem(SESSION_KEY, '1');
++    const { container } = render(<SpotlightLoader />);
++    act(() => {
++      vi.advanceTimersByTime(TOTAL);
++    });
++    expect(findOverlay(container)).toBeNull();
++    expect(cover.media).toBe('not all');
++  });
++
++  it('E11 the root layout renders the cover right after the stylesheet links', () => {
++    const root = readFileSync(resolve(__dirname, '../../root.tsx'), 'utf8');
++    expect(root).toMatch(/<Links \/>\n\s*<EntranceCoverHead \/>\n/);
++    expect(root.match(/<EntranceCoverHead \/>/g)).toHaveLength(1);
++  });
++
++  it('E12 a client navigation to / on a fresh tab still plays, as at HEAD', () => {
++    const cover = installHeadCover();
++    const { container } = render(<SpotlightLoader />);
++    expect(findOverlay(container)).not.toBeNull();
++    expect(cover.media).toBe('not all');
++    expect(cover.getAttribute('data-state')).toBeNull();
++    expect(window.sessionStorage.getItem(SESSION_KEY)).toBe('1');
++  });
++
++  it('E13 a cover that is on without a start time is retired, not animated', () => {
++    const cover = installHeadCover();
++    cover.media = 'all';
++    const { container } = render(<SpotlightLoader />);
++    expect(findOverlay(container)).toBeNull();
++    expect(cover.getAttribute('data-state')).toBe('expired');
++    expect(cover.media).toBe('not all');
++  });
++
++  it('E14 a click between the claim and the hand-off skips the animated overlay too', () => {
++    function ClickDuringMount() {
++      useEffect(() => {
++        document.body.click();
++      }, []);
++      return null;
++    }
++    const cover = installHeadCover();
++    runBootScript();
++    const { container } = render(
++      <>
++        <SpotlightLoader />
++        <ClickDuringMount />
++      </>,
++    );
++    expect(cover.getAttribute('data-state')).toBe('skipped');
++    expect(cover.media).toBe('not all');
++    expect(findOverlay(container)).toBeNull();
++  });
++
++  it('E15 a client re-render that replaces the cover style still plays the entrance and frees the boot listeners', () => {
++    const bootListenersLeft = trackBootCaptureListeners();
++    vi.advanceTimersByTime(500);
++    installHeadCover();
++    runBootScript();
++    expect(bootListenersLeft()).toBe(2);
++    vi.advanceTimersByTime(160);
++    const replaced = reinsertCoverHeadHtml();
++    expect(replaced.media).toBe('all');
++    expect(replaced.getAttribute('data-start')).toBeNull();
++    const { container } = render(<SpotlightLoader />);
++    expect(replaced.media).toBe('not all');
++    expect(findOverlay(container)).not.toBeNull();
++    expect(window.__czabaEntrance?.state).toBe('live');
++    expect(replaced.getAttribute('data-state')).toBe('live');
++    expect(bootListenersLeft()).toBe(0);
++    act(() => {
++      vi.advanceTimersByTime(entranceTimeline(160).endInMs - 1);
++    });
++    expect(findOverlay(container)).not.toBeNull();
++    act(() => {
++      vi.advanceTimersByTime(1);
++    });
++    expect(findOverlay(container)).toBeNull();
++  });
++
++  it('E16 a skip after the style was replaced turns the new style off and skips the entrance', () => {
++    installHeadCover();
++    runBootScript();
++    const replaced = reinsertCoverHeadHtml();
++    expect(replaced.media).toBe('all');
++    fireEvent.keyDown(document, { key: 'Escape' });
++    expect(window.__czabaEntrance?.state).toBe('skipped');
++    expect(replaced.getAttribute('data-state')).toBe('skipped');
++    expect(replaced.media).toBe('not all');
++    const overlayMounted = watchOverlayMounts();
++    const { container } = render(<SpotlightLoader />);
++    expect(findOverlay(container)).toBeNull();
++    expect(overlayMounted()).toBe(false);
++  });
++
++  it('E17 a takeover after the failsafe frees the boot listeners', () => {
++    const bootListenersLeft = trackBootCaptureListeners();
++    installHeadCover();
++    runBootScript();
++    vi.advanceTimersByTime(ENTRANCE_FAILSAFE_MS - 1);
++    expect(bootListenersLeft()).toBe(2);
++    vi.advanceTimersByTime(1);
++    const { container } = render(<SpotlightLoader />);
++    expect(findOverlay(container)).toBeNull();
++    expect(window.__czabaEntrance?.state).toBe('expired');
++    expect(bootListenersLeft()).toBe(0);
++  });
++
++  it('E18 with no takeover the boot listeners remove themselves after the failsafe fade', () => {
++    const bootListenersLeft = trackBootCaptureListeners();
++    const cover = installHeadCover();
++    runBootScript();
++    vi.advanceTimersByTime(ENTRANCE_FAILSAFE_MS + 250 - 1);
++    expect(bootListenersLeft()).toBe(2);
++    vi.advanceTimersByTime(1);
++    expect(bootListenersLeft()).toBe(0);
++    fireEvent.keyDown(document, { key: 'Escape' });
++    expect(window.__czabaEntrance?.state).toBe('pending');
++    expect(cover.getAttribute('data-state')).toBeNull();
++  });
++
++  it('E19 a re-render after the failsafe keeps the cover off on a visible page', () => {
++    installHeadCover();
++    runBootScript();
++    vi.advanceTimersByTime(ENTRANCE_FAILSAFE_MS - 1);
++    expect(reinsertCoverHeadHtml().media).toBe('all');
++    vi.advanceTimersByTime(1);
++    const replaced = reinsertCoverHeadHtml();
++    expect(window.__czabaEntrance?.state).toBe('pending');
++    expect(replaced.media).toBe('not all');
++    const { container } = render(<SpotlightLoader />);
++    expect(findOverlay(container)).toBeNull();
++    expect(window.__czabaEntrance?.state).toBe('expired');
++    expect(replaced.media).toBe('not all');
++  });
++});
+diff --git a/app/root.tsx b/app/root.tsx
+index af1e886..d7c312c 100644
+--- a/app/root.tsx
++++ b/app/root.tsx
+@@ -13,6 +13,7 @@ import { AudioPlayer, StemsPlayerModal } from '~/components/audio';
+ import { AuthModal } from '~/components/auth';
+ import { CookieConsent } from '~/components/common';
+ import { Header } from '~/components/layout';
++import { EntranceCoverHead } from '~/components/loading/EntranceCover';
+ import { LeadMagnetPopup } from '~/components/marketing';
+ import { ToastContainer } from '~/components/ui';
+ import { useAuth, useCart, useSmoothScroll, useToast } from '~/hooks';
+@@ -43,6 +44,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
+         <meta name="viewport" content="width=device-width, initial-scale=1" />
+         <Meta />
+         <Links />
++        <EntranceCoverHead />
+         {/* GA4 Script - ყოველთვის ჩაიტვირთება, consent mode აკონტროლებს tracking-ს */}
+         {GA4_MEASUREMENT_ID && (
+           <>

@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-12T01:13:46.977Z",
-  "current_task": "Round 458: STORE-2b-3c-2a re-dispatch v3, walker ruling A-R457-REVIEW-M1 (current-task.md, D-29z1623)",
+  "_generatedUtc": "2026-11-12T02:58:19.411Z",
+  "current_task": "Round 459: SABA-B-13 STORE-2b-ENTRANCE, head cover + minimum entrance time (current-task.md, D-29z1625)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6703,25 +6703,6 @@
       "title": "brand-tinted box-shadow rules (app.css ~2269-2275) and glow-pulse keyframes remain"
     },
     {
-      "id": "SABA-B-13",
-      "severity": "medium",
-      "origin": "Saba 2026-11-11 (policy section \"Store first-load animation too fast\")",
-      "status": "scheduled (D-29z1623): STORE-2b-ENTRANCE after 2b-3c-2a passes C (round 458 re-dispatch); REGRESSION-2026-11-13 first if planned on/after 11-13 | scheduled (D-29z1621): STORE-2b-ENTRANCE right after 2b-3c-2a passes C (round 457 re-dispatch); REGRESSION-2026-11-13 first if planned on/after 11-13 | sc …[see backlog.json]",
-      "title": "Store entrance animation flashes instead of playing through; needs a minimum display duration (Saba: e.g. 1.2-1.5 s)",
-      "evidence": "b-round-454/probe/entrance-head-1440.txt (dev server, fresh tab: FCP 496 ms, entrance overlay mounts at 1522 ms, i.e. after the page content painted; same-tab reload: no entrance at all, czaba_entrance_seen in sessionStorage); SpotlightLoader.tsx SPOTLIGHT_ENTRANCE_TOTAL_MS = 1150, logo visible ~650 …[see backlog.json]",
-      "b_facts": "timer-driven (content speed does not shorten it); mounts in useEffect after hydration, so SSR content paints first and the black overlay drops over it; once per tab session (spec D10 / R61). Production-build timing not yet measured (planning of the stage).",
-      "ruling_d29z1616": "Saba's minimum supersedes spec D10 \"<= 1.2 s\" for the display time; once-per-session stays (Saba did not ask to change it) -> question SABA-Q-ENTRANCE-RELOAD"
-    },
-    {
-      "id": "A-R454-REVIEW-M-DEAD-UNCHECKED",
-      "severity": "medium",
-      "origin": "A code-reviewer round 454",
-      "status": "in_progress (D-29z1623): round 458 re-dispatch | in_progress (D-29z1621): round 457 re-dispatch (round 456 C FAIL on A-R456-REVIEW-M1; LT7 verdicts held at HEAD, walker made sound + LT9) | in_progress (D-29z1619): round 456 LT7 (token consumers + name-precise mount walker) and LT8 (walker self-test) …[see backlog.json]",
-      "title": "store-live-teal LT3/LT5/LT6 trust the \"dead\" label of allow-listed rules; nothing asserts that those classes have no mounted consumer",
-      "evidence": "a-round-454.md code-reviewer findings; audio-preview-inline-button / waveform-bar / track-row-waveform / loading-brand appear in TSX of components that are unmounted today",
-      "note": "test-strength gap, no behaviour defect (C round 454); confirmedBy gate 454 review suggestion 6"
-    },
-    {
       "id": "SABA-Q-ENTRANCE-RELOAD",
       "severity": "info",
       "status": "awaiting_user (D-29z1616): non-blocking; default (a) keep on",
@@ -6752,42 +6733,31 @@
       "title": "b-round-454/probe altleft-5173/5181 files are named for the opposite trees; the task text matched wh"
     },
     {
-      "id": "A-R456-REVIEW-M1",
-      "severity": "medium",
-      "origin": "B spec (LT7 unmounted verdict new in the round-456 sketch; matcher pre-existing)",
-      "confirmedBy": "C round 456 (c-round-456.json, flip-probe-c.log)",
-      "status": "in_progress (D-29z1623): round 458 re-dispatch (round 457 C FAIL on A-R457-REVIEW-M1; round-457 delta stays applied) | ruled + in_progress (D-29z1621): accepted Medium; fix in the walker only (mountGraphImports = raw + comment-stripped matcher union, side-effect imports, import.meta.url workers, exp …[see backlog.json]",
-      "title": "Mount walker drops import/export statements with a comment inside the braces (ScrollReveal reported unmounted); same class: worker new URL edges, side-effect imports, export * as N",
-      "evidence": "a-round-456.md STOP; c-round-456/flip-probe-c.log; b-round-456/probe/sweep-sketch456.txt, flips-288-to-v2.txt",
-      "added": "2026-11-11 B round 456 -> 457 planning"
-    },
-    {
       "id": "INFO-A-R456-PREFLIGHT-LATE",
       "severity": "info",
       "status": "logged (D-29z1620)",
       "title": "A read the pre-flight skill after applying the sketch, not first"
     },
     {
-      "id": "A-R457-REVIEW-M1",
-      "severity": "medium",
-      "origin": "B spec (walker resolution from the round-456 sketch; trailing-slash strip from the round-457 delta; /index strip at HEAD)",
-      "confirmedBy": "C round 457 (c-round-457.json, c-round-457/probe-replay.txt)",
-      "status": "ruled + in_progress (D-29z1623): accepted Medium; three-form resolution (module / directory = file and index / index = index only) measured against Vite (b-round-457/probe/vite-resolution.txt) and tsc (A round 457); string-aware comment arm + clause grammar fallback close P4b/P5 (reviewer Low #2); l …[see backlog.json]",
-      "title": "Mount walker resolves a directory specifier (~/lib/u/ or ~/lib/u/index) to a same-name sibling file; leaves of the directory barrel unreached with LT9 green (latent: one sibling pair lib/utils, no importer); same class P4b/P5 name loss",
-      "evidence": "a-round-457.md STOP; a-round-457/probe-dir-slash.txt; c-round-457/probe-replay.txt; b-round-457/probe/probe-457-on-sketch458.txt",
-      "added": "2026-11-12 B round 457 -> 458 planning"
+      "id": "SABA-Q-ENTRANCE-WORDMARK",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1625): non-blocking; default no static w",
+      "title": "Static CZABA wordmark on the black cover before hydration?"
+    },
+    {
+      "id": "SABA-Q-ENTRANCE-ARRIVE",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1625): non-blocking; default HEAD behavi",
+      "title": "Play the entrance when / is first reached by in-app navigation from another page?"
+    },
+    {
+      "id": "SABA-Q-ENTRANCE-HERO",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1625): non-blocking; default leave hero ",
+      "title": "Hero stagger animations finish under the entrance cover; delay them until the cover lifts?"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 449,
-      "task": "current-task.md",
-      "decision": "D-29z1595",
-      "type": "STORE-2b-3a (gradient text leaves the Store; emphasised heading word = light ink)",
-      "status": "c_pass_published",
-      "note": "baseline 48e16b8 (gate 448 published); B sketch b-round-448/sketch-449.patch.txt (sha256 in sketch-review.md); claims b-round-448/claims-449.sh; grants b-round-448/grants-449.txt; covering b-round-448/covering-449.txt",
-      "result": "C round 449 PASS (c-round-449.json, browserVerified/realVerified true, C1-C7 + C9-C13 PASS, C8 WebKit BLOCKED no WebKit on the cloud runner, 0 bugs, l57-check OK b-round-449/l57-check-c449.txt), gate 449 published a8599a2 (review COMMIT OK, score 9/10, verify green) (D-29z1597)"
-    },
     {
       "round": 450,
       "task": "current-task.md",
@@ -6861,8 +6831,16 @@
       "task": "current-task.md",
       "decision": "D-29z1623",
       "type": "STORE-2b-3c-2a re-dispatch v3: walker ruling A-R457-REVIEW-M1 (test-only)",
-      "status": "dispatched",
+      "status": "done (D-29z1624): C round 458 PASS (c-round-458.json: C1-C10 PASS, C4 covering 4 files/28 tests LT1-LT10 GS1-4 GT1-5b TS1-6, C5 mutants 42 lines cmp-equal 40 RED, C8/C8b walker class + limit forms, C9 docs; browserVerified/realVerified true); gate 458 published 891dc0f (verify green, review COMMIT OK 8/10)",
       "note": "baseline db95f40 (gate 455 commit; gates 456/457 skipped); tree has round-456 sketch + round-457 delta + docs; delta b-round-457/sketch-458-delta.patch.txt sha 39839288; grants b-round-457/grants-458.txt (6)"
+    },
+    {
+      "round": 459,
+      "task": "current-task.md",
+      "decision": "D-29z1625",
+      "type": "SABA-B-13 STORE-2b-ENTRANCE: head cover (black first frame) + 1450 ms minimum entrance, CSS failsafe, skip before hydration",
+      "status": "dispatched",
+      "note": "baseline 891dc0f (gate 458 commit); sketch b-round-458/sketch-459.patch.txt sha f499b724 (tech-lead APPROVE review 2); grants b-round-458/grants-459.txt (5, incl. narrow root.tsx 2 lines)"
     }
   ],
   "other_keys": [

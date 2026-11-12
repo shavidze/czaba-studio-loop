@@ -1,0 +1,67 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a459-mut[39m
+
+ [31m❯[39m app/lib/__tests__/store-entrance-loader.test.tsx [2m([22m[2m36 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 413[2mms[22m[39m
+     [32m✓[39m L1 renders nothing on the server and logs nothing[32m 4[2mms[22m[39m
+     [32m✓[39m L2 shows a decorative overlay with no heading on first mount[32m 166[2mms[22m[39m
+     [32m✓[39m L3 stays on screen for the 1450 ms minimum, exit fade included, never past 1900 ms[32m 16[2mms[22m[39m
+     [32m✓[39m L4 lets pointer events through during the exit fade only[32m 17[2mms[22m[39m
+     [32m✓[39m L5 a click on the overlay ends it immediately and for good[32m 13[2mms[22m[39m
+       [32m✓[39m Escape at 300 ms removes the overlay and its keydown listener[32m 11[2mms[22m[39m
+       [32m✓[39m Tab ends it like Escape without preventing the focus move[32m 11[2mms[22m[39m
+       [32m✓[39m Shift+Tab ends it like Escape without preventing the focus move[32m 17[2mms[22m[39m
+       [32m✓[39m other keys do not skip[32m 12[2mms[22m[39m
+       [32m✓[39m removes the keydown listener after the natural finish[32m 12[2mms[22m[39m
+       [32m✓[39m removes the keydown listener on unmount mid-animation[32m 10[2mms[22m[39m
+     [32m✓[39m L7 shows once per session and never writes the old localStorage key[32m 8[2mms[22m[39m
+     [32m✓[39m L8 ignores the old localStorage key and honours the session key[32m 11[2mms[22m[39m
+     [32m✓[39m L9 never renders under prefers-reduced-motion and does not claim the session[32m 1[2mms[22m[39m
+     [32m✓[39m L10 blocked storage renders nothing and does not throw[32m 1[2mms[22m[39m
+     [32m✓[39m L10b a sessionStorage write failure renders nothing and does not throw[32m 1[2mms[22m[39m
+     [32m✓[39m L11 leaves no stray timers or state updates after unmount[32m 8[2mms[22m[39m
+[31m     [31m×[31m E1 the server renders a disabled cover style and the boot script[39m[32m 13[2mms[22m[39m
+     [32m✓[39m E2 on a fresh tab at / the boot script turns the cover on and claims the session[32m 9[2mms[22m[39m
+     [32m✓[39m E3 a seen tab keeps the cover off[32m 3[2mms[22m[39m
+     [32m✓[39m E3 reduced motion keeps the cover off[32m 3[2mms[22m[39m
+     [32m✓[39m E3 another path keeps the cover off[32m 3[2mms[22m[39m
+     [32m✓[39m E4 blocked storage keeps the cover off and does not throw[32m 2[2mms[22m[39m
+     [32m✓[39m E5 the animated overlay takes over in the same commit and turns the cover off[32m 10[2mms[22m[39m
+     [32m✓[39m E6 the timeline counts from the first cover frame: 1450 ms minimum, 1900 ms cap[32m 1[2mms[22m[39m
+     [32m✓[39m E7 a takeover after the failsafe never replays the entrance[32m 2[2mms[22m[39m
+     [32m✓[39m E8 Escape before hydration skips the cover and the entrance[32m 2[2mms[22m[39m
+     [32m✓[39m E8 Tab before hydration skips the cover and the entrance[32m 3[2mms[22m[39m
+     [32m✓[39m E8 click before hydration skips the cover and the entrance[32m 3[2mms[22m[39m
+     [32m✓[39m E8b other keys before hydration keep the cover[32m 2[2mms[22m[39m
+     [32m✓[39m E9 after the takeover the boot listeners are gone and the overlay owns the skip[32m 14[2mms[22m[39m
+     [32m✓[39m E10 a client navigation to / after a seen entrance shows nothing[32m 2[2mms[22m[39m
+     [32m✓[39m E11 the root layout renders the cover right after the stylesheet links[32m 1[2mms[22m[39m
+     [32m✓[39m E12 a client navigation to / on a fresh tab still plays, as at HEAD[32m 9[2mms[22m[39m
+     [32m✓[39m E13 a cover that is on without a start time is retired, not animated[32m 2[2mms[22m[39m
+     [32m✓[39m E14 a click between the claim and the hand-off skips the animated overlay too[32m 11[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m35 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 02:34:27
+[2m   Duration [22m 1.22s[2m (transform 112ms, setup 0ms, import 322ms, tests 413ms, environment 372ms)[22m
+
+
+::error file=/tmp/a459-mut/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SABA-B-13 static head cover and takeover > E1 the server renders a disabled cover style and the boot script,line=346,column=18::AssertionError: expected '<style id="czaba-entrance-cover" medi…' to contain '250ms ease-in-out 1000ms forwards'%0A%0AExpected: "250ms ease-in-out 1000ms forwards"%0AReceived: "<style id="czaba-entrance-cover" media="not all">@media (prefers-reduced-motion: no-preference){body::before{content:"";position:fixed;inset:0;z-index:60;background:var(--color-black);animation:czaba-entrance-failsafe 250ms ease-in-out 3000ms forwards}}@keyframes czaba-entrance-failsafe{to{opacity:0;visibility:hidden}}</style><script>(function(){try{var c=document.getElementById('czaba-entrance-cover');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;if(sessionStorage.getItem('czaba_entrance_seen')==='1')return;sessionStorage.setItem('czaba_entrance_seen','1');c.setAttribute('data-start',String(performance.now()));c.media='all';var off=function(){document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);window.removeEventListener('czaba-entrance-takeover',off);};var end=function(){off();c.setAttribute('data-state','skipped');c.media='not all';};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);window.addEventListener('czaba-entrance-takeover',off);}catch(e){}})();</script>"%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:346:18%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE1 the server renders a disabled cover style and the boot script
+[31m[1mAssertionError[22m: expected '<style id="czaba-entrance-cover" medi…' to contain '250ms ease-in-out 1000ms forwards'[39m
+
+Expected: [32m"250ms ease-in-out [7m1[27m000ms forwards"[39m
+Received: [31m"[7m<style id="czaba-entrance-cover" media="not all">@media (prefers-reduced-motion: no-preference){body::before{content:"";position:fixed;inset:0;z-index:60;background:var(--color-black);animation:czaba-entrance-failsafe [27m250ms ease-in-out [7m3[27m000ms forwards[7m}}@keyframes czaba-entrance-failsafe{to{opacity:0;visibility:hidden}}</style><script>(function(){try{var c=document.getElementById('czaba-entrance-cover');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;if(sessionStorage.getItem('czaba_entrance_seen')==='1')return;sessionStorage.setItem('czaba_entrance_seen','1');c.setAttribute('data-start',String(performance.now()));c.media='all';var off=function(){document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);window.removeEventListener('czaba-entrance-takeover',off);};var end=function(){off();c.setAttribute('data-state','skipped');c.media='not all';};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);window.addEventListener('czaba-entrance-takeover',off);}catch(e){}})();</script>[27m"[39m
+
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m346:18[22m[39m
+    [90m344| [39m    [34mexpect[39m(html)[33m.[39m[34mtoContain[39m([32m'z-index:60'[39m)[33m;[39m
+    [90m345| [39m    [34mexpect[39m(html)[33m.[39m[34mtoContain[39m([32m'background:var(--color-black)'[39m)[33m;[39m
+    [90m346| [39m    expect(html).toContain(`250ms ease-in-out ${ENTRANCE_FAILSAFE_MS}m…
+    [90m   | [39m                 [31m^[39m
+    [90m347| [39m    [34mexpect[39m(html)[33m.[39m[34mtoContain[39m([32m'prefers-reduced-motion: no-preference'[39m)[33m;[39m
+    [90m348| [39m    [34mexpect[39m(html)[33m.[39m[34mtoContain[39m([32m'<script>'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

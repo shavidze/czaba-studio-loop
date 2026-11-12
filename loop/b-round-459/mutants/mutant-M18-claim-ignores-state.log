@@ -1,0 +1,102 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b460[39m
+
+ [31m❯[39m app/lib/__tests__/store-entrance-loader.test.tsx [2m([22m[2m41 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 461[2mms[22m[39m
+     [32m✓[39m L1 renders nothing on the server and logs nothing[32m 4[2mms[22m[39m
+     [32m✓[39m L2 shows a decorative overlay with no heading on first mount[32m 158[2mms[22m[39m
+     [32m✓[39m L3 stays on screen for the 1450 ms minimum, exit fade included, never past 1900 ms[32m 17[2mms[22m[39m
+     [32m✓[39m L4 lets pointer events through during the exit fade only[32m 18[2mms[22m[39m
+     [32m✓[39m L5 a click on the overlay ends it immediately and for good[32m 14[2mms[22m[39m
+       [32m✓[39m Escape at 300 ms removes the overlay and its keydown listener[32m 10[2mms[22m[39m
+       [32m✓[39m Tab ends it like Escape without preventing the focus move[32m 12[2mms[22m[39m
+       [32m✓[39m Shift+Tab ends it like Escape without preventing the focus move[32m 16[2mms[22m[39m
+       [32m✓[39m other keys do not skip[32m 12[2mms[22m[39m
+       [32m✓[39m removes the keydown listener after the natural finish[32m 12[2mms[22m[39m
+       [32m✓[39m removes the keydown listener on unmount mid-animation[32m 11[2mms[22m[39m
+     [32m✓[39m L7 shows once per session and never writes the old localStorage key[32m 8[2mms[22m[39m
+     [32m✓[39m L8 ignores the old localStorage key and honours the session key[32m 10[2mms[22m[39m
+     [32m✓[39m L9 never renders under prefers-reduced-motion and does not claim the session[32m 1[2mms[22m[39m
+     [32m✓[39m L10 blocked storage renders nothing and does not throw[32m 1[2mms[22m[39m
+     [32m✓[39m L10b a sessionStorage write failure renders nothing and does not throw[32m 1[2mms[22m[39m
+     [32m✓[39m L11 leaves no stray timers or state updates after unmount[32m 8[2mms[22m[39m
+     [32m✓[39m E1 the server renders a disabled cover style and the boot script[32m 3[2mms[22m[39m
+     [32m✓[39m E2 on a fresh tab at / the boot script turns the cover on and claims the session[32m 9[2mms[22m[39m
+     [32m✓[39m E3 a seen tab keeps the cover off[32m 3[2mms[22m[39m
+     [32m✓[39m E3 reduced motion keeps the cover off[32m 3[2mms[22m[39m
+     [32m✓[39m E3 another path keeps the cover off[32m 3[2mms[22m[39m
+     [32m✓[39m E4 blocked storage keeps the cover off and does not throw[32m 2[2mms[22m[39m
+     [32m✓[39m E5 the animated overlay takes over in the same commit and turns the cover off[32m 10[2mms[22m[39m
+     [32m✓[39m E6 the timeline counts from the first cover frame: 1450 ms minimum, 1900 ms cap[32m 1[2mms[22m[39m
+     [32m✓[39m E7 a takeover after the failsafe never replays the entrance[32m 2[2mms[22m[39m
+[31m     [31m×[31m E8 Escape before hydration skips the cover and the entrance[39m[32m 18[2mms[22m[39m
+[31m     [31m×[31m E8 Tab before hydration skips the cover and the entrance[39m[32m 13[2mms[22m[39m
+[31m     [31m×[31m E8 click before hydration skips the cover and the entrance[39m[32m 12[2mms[22m[39m
+     [32m✓[39m E8b other keys before hydration keep the cover[32m 2[2mms[22m[39m
+     [32m✓[39m E9 after the takeover the boot listeners are gone and the overlay owns the skip[32m 9[2mms[22m[39m
+     [32m✓[39m E10 a client navigation to / after a seen entrance shows nothing[32m 2[2mms[22m[39m
+     [32m✓[39m E11 the root layout renders the cover right after the stylesheet links[32m 1[2mms[22m[39m
+     [32m✓[39m E12 a client navigation to / on a fresh tab still plays, as at HEAD[32m 10[2mms[22m[39m
+     [32m✓[39m E13 a cover that is on without a start time is retired, not animated[32m 2[2mms[22m[39m
+     [32m✓[39m E14 a click between the claim and the hand-off skips the animated overlay too[32m 14[2mms[22m[39m
+     [32m✓[39m E15 a client re-render that replaces the cover style still plays the entrance and frees the boot listeners[32m 11[2mms[22m[39m
+[31m     [31m×[31m E16 a skip after the style was replaced turns the new style off and skips the entrance[39m[32m 11[2mms[22m[39m
+     [32m✓[39m E17 a takeover after the failsafe frees the boot listeners[32m 2[2mms[22m[39m
+     [32m✓[39m E18 with no takeover the boot listeners remove themselves after the failsafe fade[32m 1[2mms[22m[39m
+     [32m✓[39m E19 a re-render after the failsafe keeps the cover off on a visible page[32m 3[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m37 passed[39m[22m[90m (41)[39m
+[2m   Start at [22m 03:39:36
+[2m   Duration [22m 1.28s[2m (transform 97ms, setup 0ms, import 315ms, tests 461ms, environment 380ms)[22m
+
+
+::error file=/tmp/b460/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SABA-B-13 static head cover and takeover > E8 Escape before hydration skips the cover and the entrance,line=482,column=30::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:482:30%0A%0A
+
+::error file=/tmp/b460/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SABA-B-13 static head cover and takeover > E8 Tab before hydration skips the cover and the entrance,line=482,column=30::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:482:30%0A%0A
+
+::error file=/tmp/b460/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SABA-B-13 static head cover and takeover > E8 click before hydration skips the cover and the entrance,line=482,column=30::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:482:30%0A%0A
+
+::error file=/tmp/b460/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SABA-B-13 static head cover and takeover > E16 a skip after the style was replaced turns the new style off and skips the entrance,line=598,column=30::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:598:30%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE8 Escape before hydration skips the cover and the entrance
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE8 Tab before hydration skips the cover and the entrance
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE8 click before hydration skips the cover and the entrance
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m482:30[22m[39m
+    [90m480| [39m    [35mconst[39m { container } [33m=[39m [34mrender[39m([33m<[39m[33mSpotlightLoader[39m [33m/[39m[33m>[39m)[33m;[39m
+    [90m481| [39m    [34mexpect[39m([34mfindOverlay[39m(container))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m482| [39m    [34mexpect[39m([34moverlayMounted[39m())[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m483| [39m  })[33m;[39m
+    [90m484| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE16 a skip after the style was replaced turns the new style off and skips the entrance
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m598:30[22m[39m
+    [90m596| [39m    [35mconst[39m { container } [33m=[39m [34mrender[39m([33m<[39m[33mSpotlightLoader[39m [33m/[39m[33m>[39m)[33m;[39m
+    [90m597| [39m    [34mexpect[39m([34mfindOverlay[39m(container))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m598| [39m    [34mexpect[39m([34moverlayMounted[39m())[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m599| [39m  })[33m;[39m
+    [90m600| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+

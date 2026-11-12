@@ -1,0 +1,14 @@
+# B round 459->460 checkpoint
+- 2026-11-12: read current-task, a-round-459 (STOP R1), c-round-459 (FAIL C-R459-01 Medium, -02/-03 Low). Gate 459 skipped (C FAIL). Baseline stays 891dc0f; tree holds the 459 patch + doc 300 (uncommitted).
+- tasks/round-459.md archived (cmp OK). backups: backlog-before-460.json, b-next-before-460.json, feature-status-before-460.md.
+- Plan: round 460 = SABA-B-13 fix-up: window handshake (R1), boot listener self-timeout (R2), node-replacement + listener tests (R8), ruled C6 CPU4 floors, C9 click timing, C11 SSR half via L1, doc l.4 -> round 460.
+- v2b sketch in /tmp/b460 (window handshake, boot self-timeout 1250, pending-aware media, E15-E18 + overlay-mount watch). 40 tests green, tsc 0, biome 6 warnings. mutants 26 RED + BASE green (b-round-459/mutants/mutants.txt).
+- patches: sketch-460-delta.patch.txt (store tree v1 -> v2b, sha 624ae2ba), sketch-460-full.patch.txt (891dc0f -> v2b), files sha in sketch-460-files-sha256.txt; both verified.
+- R1 browser: probe/r1/r1-b.txt (v2 3/3 play, v1 0/3, HEAD 3/3); v2b r1 quick check overlaySeen true.
+- matrix on v2b running (probe/matrix/summary.txt; v2a partial in matrix/v2a-partial). tech-lead review running.
+- servers: 5190 HEAD prod, 5191 v1 prod, 5192 v2b prod (stop them at the end).
+- tech-lead review 1 on v2b: REQUEST CHANGES (TL-R460-1 Medium stale pending; -2, -3 Low). All applied -> v2c: delta sha 2c99e2b6, full sha 2a374f3e; 41 tests; mutants 27 RED + BASE (28 lines). v2c built on :5192.
+- final matrix on v2c running (probe/matrix/summary.txt); v2a/v2b partials archived. tech-lead review 2 running.
+- TODO after matrix: r1-repro x3 on 5190/5191/5192 (r1-b.txt refresh), precheck covering/typecheck/lint/biome on /tmp/b460, claims run, write task + b-round-459.md + b-next + backlog + feature-status, stop servers 5190-5192.
+- DONE: current-task.md (round 460), claims outputs, backlog v452 (D-29z1626/1627), feature-status, b-next.json, b-round-459.md, sketch-review (APPROVE v2c). Servers 5190-5192 stopped. Store tree untouched.
+- advisor pass 2 fixes applied: rerender proof rows (summary-rerender.txt), L29 fenced, pending grep, React doc fetched, reopen TL-R460-1/3 + R6/R7, C6/C12 bounds, K10/K12/K17; claims regenerated (stable), servers 5190/5192/5174 stopped.

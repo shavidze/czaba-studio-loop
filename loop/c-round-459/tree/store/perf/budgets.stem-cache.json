@@ -1,0 +1,529 @@
+[
+  {
+    "id": "stem.harness.cold-body-live",
+    "scenario": "a. cold open",
+    "metric": "cold-body-live",
+    "unit": "boolean (1 = true)",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 1
+    },
+    "owner": "PERF-9b",
+    "note": "1 when the cold open read more than 1,000,000 stem body bytes through Resource Timing: proves the byte counter is live, so warm body-bytes 0 is not vacuous."
+  },
+  {
+    "id": "stem.cold.ready-ms",
+    "scenario": "a. cold open",
+    "metric": "ready-ms",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "performance.now() when the library Add button is enabled and the preview waveform is drawn (waitForLibraryReady)."
+  },
+  {
+    "id": "stem.cold.fetch-requests",
+    "scenario": "a. cold open",
+    "metric": "fetch-requests",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Resource Timing entries with initiatorType fetch for the two stem paths."
+  },
+  {
+    "id": "stem.cold.audio-requests",
+    "scenario": "a. cold open",
+    "metric": "audio-requests",
+    "unit": "count",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Resource Timing entries with initiatorType audio for the two stem paths (B-R364-DEMO-DOUBLE-FETCH). Wallclock: the hidden narrow-screen <audio preload=\"metadata\"> entry appears only when its load finishes or is cancelled, so its presence at read time depends on timing."
+  },
+  {
+    "id": "stem.cold.body-bytes",
+    "scenario": "a. cold open",
+    "metric": "body-bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Network body bytes: sum of encodedBodySize over the fetch-initiator stem entries whose transferSize > 0 (a 304 and an HTTP-cache hit count 0). Wallclock: a plain fetch can reuse the partial HTTP-cache entry of the concurrent <audio> 206 request, so the byte total varies (B cache-off mutant: 7,664,757 / 7,515,518 / 7,517,018)."
+  },
+  {
+    "id": "stem.cold.transfer-bytes",
+    "scenario": "a. cold open",
+    "metric": "transfer-bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Sum of transferSize (headers + body) over the fetch-initiator stem entries. Wallclock: a plain fetch can reuse the partial HTTP-cache entry of the concurrent <audio> 206 request, so the byte total varies (B cache-off mutant: 7,664,757 / 7,515,518 / 7,517,018)."
+  },
+  {
+    "id": "stem.cold.status-200",
+    "scenario": "a. cold open",
+    "metric": "status-200",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "fetch-initiator stem entries with responseStatus 200."
+  },
+  {
+    "id": "stem.cold.status-304",
+    "scenario": "a. cold open",
+    "metric": "status-304",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "fetch-initiator stem entries with responseStatus 304."
+  },
+  {
+    "id": "stem.cold.stem-window-ms",
+    "scenario": "a. cold open",
+    "metric": "stem-window-ms",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "max(responseEnd) - min(startTime) over the fetch-initiator stem entries."
+  },
+  {
+    "id": "stem.cold.cdp-mp3-bytes",
+    "scenario": "a. cold open",
+    "metric": "cdp-mp3-bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "CDP Network.dataReceived encodedDataLength summed over every *.mp3 request from this open's navigation until just before the next navigation (fetch and media, aborted ones included; dataReceived rather than loadingFinished so aborted requests count). A record of all mp3 traffic, not an independent check of body-bytes. Wallclock because an aborted media request stops at a timing-dependent byte count."
+  },
+  {
+    "id": "stem.cold.cdp-media-bytes",
+    "scenario": "a. cold open",
+    "metric": "cdp-media-bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "The Media-type part of cdp-mp3-bytes, over the same window: the narrow-screen <audio preload=\"metadata\"> request (B-R364-DEMO-DOUBLE-FETCH), which the stem cache does not cover."
+  },
+  {
+    "id": "stem.warm.ready-ms",
+    "scenario": "b. warm reopen, HTTP cache evicted",
+    "metric": "ready-ms",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "performance.now() when the library Add button is enabled and the preview waveform is drawn (waitForLibraryReady)."
+  },
+  {
+    "id": "stem.warm.fetch-requests",
+    "scenario": "b. warm reopen, HTTP cache evicted",
+    "metric": "fetch-requests",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Resource Timing entries with initiatorType fetch for the two stem paths."
+  },
+  {
+    "id": "stem.warm.audio-requests",
+    "scenario": "b. warm reopen, HTTP cache evicted",
+    "metric": "audio-requests",
+    "unit": "count",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Resource Timing entries with initiatorType audio for the two stem paths (B-R364-DEMO-DOUBLE-FETCH). Wallclock: the hidden narrow-screen <audio preload=\"metadata\"> entry appears only when its load finishes or is cancelled, so its presence at read time depends on timing."
+  },
+  {
+    "id": "stem.warm.body-bytes",
+    "scenario": "b. warm reopen, HTTP cache evicted",
+    "metric": "body-bytes",
+    "unit": "bytes",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 0
+    },
+    "owner": "PERF-9b",
+    "note": "Network body bytes: sum of encodedBodySize over the fetch-initiator stem entries whose transferSize > 0 (a 304 and an HTTP-cache hit count 0)."
+  },
+  {
+    "id": "stem.warm.transfer-bytes",
+    "scenario": "b. warm reopen, HTTP cache evicted",
+    "metric": "transfer-bytes",
+    "unit": "bytes",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Sum of transferSize (headers + body) over the fetch-initiator stem entries."
+  },
+  {
+    "id": "stem.warm.status-200",
+    "scenario": "b. warm reopen, HTTP cache evicted",
+    "metric": "status-200",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "fetch-initiator stem entries with responseStatus 200."
+  },
+  {
+    "id": "stem.warm.status-304",
+    "scenario": "b. warm reopen, HTTP cache evicted",
+    "metric": "status-304",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 2
+    },
+    "owner": "PERF-9b",
+    "note": "fetch-initiator stem entries with responseStatus 304."
+  },
+  {
+    "id": "stem.warm.stem-window-ms",
+    "scenario": "b. warm reopen, HTTP cache evicted",
+    "metric": "stem-window-ms",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "max(responseEnd) - min(startTime) over the fetch-initiator stem entries."
+  },
+  {
+    "id": "stem.warm.cdp-mp3-bytes",
+    "scenario": "b. warm reopen, HTTP cache evicted",
+    "metric": "cdp-mp3-bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "CDP Network.dataReceived encodedDataLength summed over every *.mp3 request from this open's navigation until just before the next navigation (fetch and media, aborted ones included; dataReceived rather than loadingFinished so aborted requests count). A record of all mp3 traffic, not an independent check of body-bytes. Wallclock because an aborted media request stops at a timing-dependent byte count."
+  },
+  {
+    "id": "stem.warm.cdp-media-bytes",
+    "scenario": "b. warm reopen, HTTP cache evicted",
+    "metric": "cdp-media-bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "The Media-type part of cdp-mp3-bytes, over the same window: the narrow-screen <audio preload=\"metadata\"> request (B-R364-DEMO-DOUBLE-FETCH), which the stem cache does not cover."
+  },
+  {
+    "id": "stem.warm-http.ready-ms",
+    "scenario": "c. warm reopen, HTTP cache kept",
+    "metric": "ready-ms",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "performance.now() when the library Add button is enabled and the preview waveform is drawn (waitForLibraryReady)."
+  },
+  {
+    "id": "stem.warm-http.fetch-requests",
+    "scenario": "c. warm reopen, HTTP cache kept",
+    "metric": "fetch-requests",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Resource Timing entries with initiatorType fetch for the two stem paths."
+  },
+  {
+    "id": "stem.warm-http.audio-requests",
+    "scenario": "c. warm reopen, HTTP cache kept",
+    "metric": "audio-requests",
+    "unit": "count",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Resource Timing entries with initiatorType audio for the two stem paths (B-R364-DEMO-DOUBLE-FETCH). Wallclock: the hidden narrow-screen <audio preload=\"metadata\"> entry appears only when its load finishes or is cancelled, so its presence at read time depends on timing."
+  },
+  {
+    "id": "stem.warm-http.body-bytes",
+    "scenario": "c. warm reopen, HTTP cache kept",
+    "metric": "body-bytes",
+    "unit": "bytes",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Network body bytes: sum of encodedBodySize over the fetch-initiator stem entries whose transferSize > 0 (a 304 and an HTTP-cache hit count 0)."
+  },
+  {
+    "id": "stem.warm-http.transfer-bytes",
+    "scenario": "c. warm reopen, HTTP cache kept",
+    "metric": "transfer-bytes",
+    "unit": "bytes",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Sum of transferSize (headers + body) over the fetch-initiator stem entries."
+  },
+  {
+    "id": "stem.warm-http.status-200",
+    "scenario": "c. warm reopen, HTTP cache kept",
+    "metric": "status-200",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "fetch-initiator stem entries with responseStatus 200."
+  },
+  {
+    "id": "stem.warm-http.status-304",
+    "scenario": "c. warm reopen, HTTP cache kept",
+    "metric": "status-304",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "fetch-initiator stem entries with responseStatus 304."
+  },
+  {
+    "id": "stem.warm-http.stem-window-ms",
+    "scenario": "c. warm reopen, HTTP cache kept",
+    "metric": "stem-window-ms",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "max(responseEnd) - min(startTime) over the fetch-initiator stem entries."
+  },
+  {
+    "id": "stem.warm-http.cdp-mp3-bytes",
+    "scenario": "c. warm reopen, HTTP cache kept",
+    "metric": "cdp-mp3-bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "CDP Network.dataReceived encodedDataLength summed over every *.mp3 request from this open's navigation until just before the next navigation (fetch and media, aborted ones included; dataReceived rather than loadingFinished so aborted requests count). A record of all mp3 traffic, not an independent check of body-bytes. Wallclock because an aborted media request stops at a timing-dependent byte count."
+  },
+  {
+    "id": "stem.warm-http.cdp-media-bytes",
+    "scenario": "c. warm reopen, HTTP cache kept",
+    "metric": "cdp-media-bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "The Media-type part of cdp-mp3-bytes, over the same window: the narrow-screen <audio preload=\"metadata\"> request (B-R364-DEMO-DOUBLE-FETCH), which the stem cache does not cover."
+  },
+  {
+    "id": "stem.warm-nocache.ready-ms",
+    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
+    "metric": "ready-ms",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "performance.now() when the library Add button is enabled and the preview waveform is drawn (waitForLibraryReady)."
+  },
+  {
+    "id": "stem.warm-nocache.fetch-requests",
+    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
+    "metric": "fetch-requests",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Resource Timing entries with initiatorType fetch for the two stem paths."
+  },
+  {
+    "id": "stem.warm-nocache.audio-requests",
+    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
+    "metric": "audio-requests",
+    "unit": "count",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Resource Timing entries with initiatorType audio for the two stem paths (B-R364-DEMO-DOUBLE-FETCH). Wallclock: the hidden narrow-screen <audio preload=\"metadata\"> entry appears only when its load finishes or is cancelled, so its presence at read time depends on timing."
+  },
+  {
+    "id": "stem.warm-nocache.body-bytes",
+    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
+    "metric": "body-bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Network body bytes: sum of encodedBodySize over the fetch-initiator stem entries whose transferSize > 0 (a 304 and an HTTP-cache hit count 0). Wallclock by the same B v4 ruling as the cold byte rows: no A or B run has shown variance here (A round 366: 3 equal samples), but the open repeats the cold byte path with the HTTP cache bypassed, so the exact-match rule is not applied to a record row."
+  },
+  {
+    "id": "stem.warm-nocache.transfer-bytes",
+    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
+    "metric": "transfer-bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "Sum of transferSize (headers + body) over the fetch-initiator stem entries. Wallclock by the same B v4 ruling as the cold byte rows: no A or B run has shown variance here (A round 366: 3 equal samples), but the open repeats the cold byte path with the HTTP cache bypassed, so the exact-match rule is not applied to a record row."
+  },
+  {
+    "id": "stem.warm-nocache.status-200",
+    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
+    "metric": "status-200",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "fetch-initiator stem entries with responseStatus 200."
+  },
+  {
+    "id": "stem.warm-nocache.status-304",
+    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
+    "metric": "status-304",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "fetch-initiator stem entries with responseStatus 304."
+  },
+  {
+    "id": "stem.warm-nocache.stem-window-ms",
+    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
+    "metric": "stem-window-ms",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "max(responseEnd) - min(startTime) over the fetch-initiator stem entries."
+  },
+  {
+    "id": "stem.warm-nocache.cdp-mp3-bytes",
+    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
+    "metric": "cdp-mp3-bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "CDP Network.dataReceived encodedDataLength summed over every *.mp3 request from this open's navigation until just before the next navigation (fetch and media, aborted ones included; dataReceived rather than loadingFinished so aborted requests count). A record of all mp3 traffic, not an independent check of body-bytes. Wallclock because an aborted media request stops at a timing-dependent byte count."
+  },
+  {
+    "id": "stem.warm-nocache.cdp-media-bytes",
+    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
+    "metric": "cdp-media-bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "The Media-type part of cdp-mp3-bytes, over the same window: the narrow-screen <audio preload=\"metadata\"> request (B-R364-DEMO-DOUBLE-FETCH), which the stem cache does not cover."
+  },
+  {
+    "id": "stem.cold.entries-stored",
+    "scenario": "a. cold open",
+    "metric": "entries-stored",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 2
+    },
+    "owner": "PERF-9b",
+    "note": "czaba-stem-cache-v2 entries record count after the cold open (polled up to 30 s)."
+  },
+  {
+    "id": "stem.warm-ready-ratio",
+    "scenario": "b / a",
+    "metric": "warm-ready-ratio",
+    "unit": "ratio",
+    "kind": "wallclock",
+    "mode": "assert",
+    "budget": {
+      "op": "<=",
+      "value": 0.5
+    },
+    "owner": "PERF-9b",
+    "note": "warm ready-ms / cold ready-ms under the fixed throttle (plan target <= 0.5)."
+  },
+  {
+    "id": "stem.warm-window-ratio",
+    "scenario": "b / a",
+    "metric": "warm-window-ratio",
+    "unit": "ratio",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-9b",
+    "note": "warm stem-window-ms / cold stem-window-ms under the fixed throttle."
+  },
+  {
+    "id": "stem.blocked.ready",
+    "scenario": "e. *.mp3 blocked",
+    "metric": "blocked-ready",
+    "unit": "boolean (1 = true)",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 1
+    },
+    "owner": "PERF-9b",
+    "note": "1 when the library reaches ready with every .mp3 request blocked (the audio came from the stem cache)."
+  },
+  {
+    "id": "stem.blocked.entries",
+    "scenario": "e. *.mp3 blocked",
+    "metric": "blocked-entries",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 2
+    },
+    "owner": "PERF-9b",
+    "note": "czaba-stem-cache-v2 entries record count after the blocked open: a network error keeps the entries (blocked.ready alone cannot tell ready-from-cache from ready-then-dropped)."
+  }
+]

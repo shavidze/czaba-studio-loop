@@ -1,14 +1,14 @@
-# Active loop summary (2026-11-12T01:13:46.977Z)
+# Active loop summary (2026-11-12T02:58:19.411Z)
 
-- backlog.json 3305 KB -> active view 298 KB
-- status: G_ROOT_GATE round 458
-- servers: `{"checkedUtc":"2026-11-12T01:06:40.0725603Z","round":458,"attempt":1,"store":200}`
+- backlog.json 3311 KB -> active view 294 KB
+- status: G_ROOT_GATE round 459
+- servers: `{"checkedUtc":"2026-11-12T02:41:21.9846084Z","round":459,"attempt":1,"store":200}`
 - last publication: 891dc0f5a8b718be2ba886ff59ec9fe6e9de3680 (rounds 456-458)
-- last root gate: round 458 published - commit 891dc0f5a8b718be2ba886ff59ec9fe6e9de3680 pushed
+- last root gate: round 459 skipped - C taskStatus FAIL
 
 ## Current items: -
 
-## Open findings: 968 (11 Critical/High/Medium)
+## Open findings: 967 (7 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the cloud runner (same class as GATE97-S2); Tech Lead manual check, does not block T12 per the 2026-10-23 rule / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
@@ -16,8 +16,4 @@
 - **GATE304-M1-PERF-LIB-NOT-IN-GATE** / medium / open_root (D-29z800): = ROOT-REQ-VITEST-PERF-INCLUDE (vitest.config.ts is outside loop grants); non-blocking for the loop (as the 2026-10-23 root clarification for root/manual-only Mediums); until root lands it, every PERF task cites the scratch-config command for perf/lib tests as an A and C row / vitest.config.ts includes app/** only, so perf/lib/report.test.ts and zoom-probe.test.ts (ZP1-ZP6) never run in the gate; only scratch-confi
 - **STUDIO-VIS-5** / medium / scheduled (D-29z1512): REVIEW-RECOMMENDATIONS (Saba: defer) / Detail panel spacing (gap-0.5 -> gap-1, px-3 -> px-4)
 - **SABA-B-12** / medium / in_progress (D-29z1515, D-29z1521, D-29z1523, D-29z1527, D-29z1532, D-29z1536, D-29z1538): stages 1, 2a, 2b, 3, 3b passed C and are published (5a30894, 1197dcb, 1a417fb, 0c22ac9, 8233840); stage 4 (selects, STUDIO-VIS-3) in REVIEW-RECOMMENDATIONS / Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cance
-- **SABA-B-13** / medium / scheduled (D-29z1623): STORE-2b-ENTRANCE after 2b-3c-2a passes C (round 458 re-dispatch); REGRESSION-2026-11-13 first if planned on/after 11-13 | scheduled (D-29z1621): STORE-2b-ENTRANCE right after 2b-3c-2a passes C (round 457 re-dispatch); REGRESSION-2026-11-13 first if planned on/after 11-13 | sc …[see backlog.json] / Store entrance animation flashes instead of playing through; needs a minimum display duration (Saba: e.g. 1.2-1.5 s)
-- **A-R454-REVIEW-M-DEAD-UNCHECKED** / medium / in_progress (D-29z1623): round 458 re-dispatch | in_progress (D-29z1621): round 457 re-dispatch (round 456 C FAIL on A-R456-REVIEW-M1; LT7 verdicts held at HEAD, walker made sound + LT9) | in_progress (D-29z1619): round 456 LT7 (token consumers + name-precise mount walker) and LT8 (walker self-test) …[see backlog.json] / store-live-teal LT3/LT5/LT6 trust the "dead" label of allow-listed rules; nothing asserts that those classes have no mounted consumer
-- **A-R456-REVIEW-M1** / medium / in_progress (D-29z1623): round 458 re-dispatch (round 457 C FAIL on A-R457-REVIEW-M1; round-457 delta stays applied) | ruled + in_progress (D-29z1621): accepted Medium; fix in the walker only (mountGraphImports = raw + comment-stripped matcher union, side-effect imports, import.meta.url workers, exp …[see backlog.json] / Mount walker drops import/export statements with a comment inside the braces (ScrollReveal reported unmounted); same class: worker new URL e
-- **A-R457-REVIEW-M1** / medium / ruled + in_progress (D-29z1623): accepted Medium; three-form resolution (module / directory = file and index / index = index only) measured against Vite (b-round-457/probe/vite-resolution.txt) and tsc (A round 457); string-aware comment arm + clause grammar fallback close P4b/P5 (reviewer Low #2); l …[see backlog.json] / Mount walker resolves a directory specifier (~/lib/u/ or ~/lib/u/index) to a same-name sibling file; leaves of the directory barrel unreache
-- ... and 957 Low/info (see backlog.json)
+- ... and 960 Low/info (see backlog.json)

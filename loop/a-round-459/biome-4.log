@@ -1,0 +1,97 @@
+app/components/loading/EntranceCover.tsx:25:9 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    23 │         media="not all"
+    24 │         suppressHydrationWarning
+  > 25 │         dangerouslySetInnerHTML={{ __html: ENTRANCE_COVER_CSS }}
+       │         ^^^^^^^^^^^^^^^^^^^^^^^
+    26 │       />
+    27 │       <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: ENTRANCE_BOOT_SCRIPT }} />
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+app/components/loading/EntranceCover.tsx:27:40 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    25 │         dangerouslySetInnerHTML={{ __html: ENTRANCE_COVER_CSS }}
+    26 │       />
+  > 27 │       <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: ENTRANCE_BOOT_SCRIPT }} />
+       │                                        ^^^^^^^^^^^^^^^^^^^^^^^
+    28 │     </>
+    29 │   );
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+app/components/loading/SpotlightLoader.tsx:270:20 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    268 │           {[...Array(15)].map((_, i) => (
+    269 │             <motion.div
+  > 270 │               key={i}
+        │                    ^
+    271 │               initial={{
+    272 │                 opacity: 0,
+  
+  i This is the source of the key value.
+  
+    266 │         {/* Dust particles in spotlight */}
+    267 │         <div className="absolute inset-0 pointer-events-none overflow-hidden">
+  > 268 │           {[...Array(15)].map((_, i) => (
+        │                                   ^
+    269 │             <motion.div
+    270 │               key={i}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/root.tsx:52:15 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    50 │           <>
+    51 │             <script
+  > 52 │               dangerouslySetInnerHTML={{
+       │               ^^^^^^^^^^^^^^^^^^^^^^^
+    53 │                 __html: `
+    54 │                   window.dataLayer = window.dataLayer || [];
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+app/root.tsx:79:15 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    77 │             />
+    78 │             <script
+  > 79 │               dangerouslySetInnerHTML={{
+       │               ^^^^^^^^^^^^^^^^^^^^^^^
+    80 │                 __html: `
+    81 │                   gtag('js', new Date());
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+app/root.tsx:93:13 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    91 │         {FB_PIXEL_ID && (
+    92 │           <script
+  > 93 │             dangerouslySetInnerHTML={{
+       │             ^^^^^^^^^^^^^^^^^^^^^^^
+    94 │               __html: `
+    95 │                 !function(f,b,e,v,n,t,s)
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+Checked 4 files in 15ms. No fixes applied.
+Found 6 warnings.
