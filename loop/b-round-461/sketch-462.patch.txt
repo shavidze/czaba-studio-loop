@@ -1,0 +1,1476 @@
+diff --git a/app/components/audio/Timeline.tsx b/app/components/audio/Timeline.tsx
+deleted file mode 100644
+index 81f00bf..0000000
+--- a/app/components/audio/Timeline.tsx
++++ /dev/null
+@@ -1,121 +0,0 @@
+-import { useEffect, useRef, useState } from 'react';
+-
+-interface TimelineProps {
+-  currentTime: number;
+-  duration: number;
+-  onSeek: (time: number) => void;
+-  isPlaying: boolean;
+-}
+-
+-export function Timeline({ currentTime, duration, onSeek, isPlaying }: TimelineProps) {
+-  const timelineRef = useRef<HTMLDivElement>(null);
+-  const [isDragging, setIsDragging] = useState(false);
+-
+-  // Format time as MM:SS:ms
+-  const formatTime = (seconds: number): string => {
+-    if (!Number.isFinite(seconds)) return '00:00:000';
+-
+-    const mins = Math.floor(seconds / 60);
+-    const secs = Math.floor(seconds % 60);
+-    const ms = Math.floor((seconds % 1) * 1000);
+-
+-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${ms.toString().padStart(3, '0')}`;
+-  };
+-
+-  // Handle click/drag on timeline
+-  const handleTimelineInteraction = (e: React.MouseEvent<HTMLDivElement>) => {
+-    if (!timelineRef.current) return;
+-
+-    const rect = timelineRef.current.getBoundingClientRect();
+-    const x = e.clientX - rect.left;
+-    const percentage = Math.max(0, Math.min(1, x / rect.width));
+-    const newTime = percentage * duration;
+-
+-    onSeek(newTime);
+-  };
+-
+-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+-    setIsDragging(true);
+-    handleTimelineInteraction(e);
+-  };
+-
+-  const handleMouseMove = (e: MouseEvent) => {
+-    if (isDragging && timelineRef.current) {
+-      const rect = timelineRef.current.getBoundingClientRect();
+-      const x = e.clientX - rect.left;
+-      const percentage = Math.max(0, Math.min(1, x / rect.width));
+-      const newTime = percentage * duration;
+-      onSeek(newTime);
+-    }
+-  };
+-
+-  const handleMouseUp = () => {
+-    setIsDragging(false);
+-  };
+-
+-  // Add global mouse listeners for dragging
+-  useEffect(() => {
+-    if (isDragging) {
+-      window.addEventListener('mousemove', handleMouseMove);
+-      window.addEventListener('mouseup', handleMouseUp);
+-
+-      return () => {
+-        window.removeEventListener('mousemove', handleMouseMove);
+-        window.removeEventListener('mouseup', handleMouseUp);
+-      };
+-    }
+-  }, [isDragging, handleMouseMove, handleMouseUp]);
+-
+-  // Calculate playhead position
+-  const playheadPosition = duration > 0 ? (currentTime / duration) * 100 : 0;
+-
+-  return (
+-    <div className="w-full bg-elevated border-b border-outline">
+-      {/* Time Display */}
+-      <div className="flex items-center justify-between px-6 py-2 text-xs font-mono">
+-        <span className="text-teal-400 font-semibold">{formatTime(currentTime)}</span>
+-        <span className="text-dim">{formatTime(duration)}</span>
+-      </div>
+-
+-      {/* Timeline Bar */}
+-      <div
+-        ref={timelineRef}
+-        className="relative h-12 bg-surface cursor-pointer hover:bg-elevated transition-colors"
+-        onMouseDown={handleMouseDown}
+-      >
+-        {/* Progress Bar */}
+-        <div
+-          className="absolute top-0 left-0 h-full bg-teal-500/20 pointer-events-none"
+-          style={{ width: `${playheadPosition}%` }}
+-        />
+-
+-        {/* Playhead Cursor */}
+-        <div
+-          className="absolute top-0 h-full w-0.5 bg-teal-400 pointer-events-none shadow-lg shadow-teal-500/50"
+-          style={{ left: `${playheadPosition}%` }}
+-        >
+-          {/* Playhead Handle */}
+-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-teal-400 rounded-full shadow-md" />
+-        </div>
+-
+-        {/* Time Markers (every 5 seconds for demo) */}
+-        {Array.from({ length: Math.floor(duration / 5) + 1 }).map((_, i) => {
+-          const time = i * 5;
+-          const position = (time / duration) * 100;
+-
+-          return (
+-            <div
+-              key={i}
+-              className="absolute top-0 h-full w-px bg-outline"
+-              style={{ left: `${position}%` }}
+-            >
+-              <span className="absolute top-full mt-1 -translate-x-1/2 text-[10px] text-dim font-mono">
+-                {formatTime(time).slice(0, 5)}
+-              </span>
+-            </div>
+-          );
+-        })}
+-      </div>
+-    </div>
+-  );
+-}
+diff --git a/app/components/audio/index.ts b/app/components/audio/index.ts
+index a468047..ef86f9f 100644
+--- a/app/components/audio/index.ts
++++ b/app/components/audio/index.ts
+@@ -4,5 +4,4 @@ export { AudioPlayer } from './AudioPlayer';
+ export { AudioPreviewButton } from './AudioPreviewButton';
+ export { StemControl } from './StemControl';
+ export { StemsPlayerModal } from './StemsPlayerModal';
+-export { Timeline } from './Timeline';
+ export { WaveForm } from './WaveForm';
+diff --git a/app/components/common/index.ts b/app/components/common/index.ts
+index b96dea1..13816e1 100644
+--- a/app/components/common/index.ts
++++ b/app/components/common/index.ts
+@@ -1,8 +1,5 @@
+ // Barrel export for common components
+ 
+-export { CinemaCurtainLoader } from '../loading/CinemaCurtainLoader';
+-export { PianoCurtainLoader } from '../loading/PianoCurtainLoader';
+-export { PianoLoadingAnimation } from '../loading/PianoLoadingAnimation';
+ export { SpotlightLoader } from '../loading/SpotlightLoader';
+ export { Carousel } from './Carousel';
+ export { CookieConsent } from './CookieConsent';
+diff --git a/app/components/home/VideoShowcase.tsx b/app/components/home/VideoShowcase.tsx
+deleted file mode 100644
+index 64c25e5..0000000
+--- a/app/components/home/VideoShowcase.tsx
++++ /dev/null
+@@ -1,183 +0,0 @@
+-import { Pause, Play, Volume2, VolumeX } from 'lucide-react';
+-import { useRef, useState } from 'react';
+-import { PageContainer } from '../layout';
+-
+-export function VideoShowcase() {
+-  const videoRef = useRef<HTMLVideoElement>(null);
+-  const [isPlaying, setIsPlaying] = useState(false);
+-  const [isMuted, setIsMuted] = useState(false);
+-  const [currentTime, setCurrentTime] = useState(0);
+-  const [duration, setDuration] = useState(0);
+-  const [volume, setVolume] = useState(1);
+-
+-  const togglePlay = () => {
+-    if (!videoRef.current) return;
+-
+-    if (isPlaying) {
+-      videoRef.current.pause();
+-    } else {
+-      videoRef.current.play();
+-    }
+-    setIsPlaying(!isPlaying);
+-  };
+-
+-  const toggleMute = () => {
+-    if (!videoRef.current) return;
+-    videoRef.current.muted = !isMuted;
+-    setIsMuted(!isMuted);
+-  };
+-
+-  const handleTimeUpdate = () => {
+-    if (!videoRef.current) return;
+-    setCurrentTime(videoRef.current.currentTime);
+-  };
+-
+-  const handleLoadedMetadata = () => {
+-    if (!videoRef.current) return;
+-    setDuration(videoRef.current.duration);
+-  };
+-
+-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+-    if (!videoRef.current) return;
+-    const time = parseFloat(e.target.value);
+-    videoRef.current.currentTime = time;
+-    setCurrentTime(time);
+-  };
+-
+-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+-    if (!videoRef.current) return;
+-    const vol = parseFloat(e.target.value);
+-    videoRef.current.volume = vol;
+-    setVolume(vol);
+-    if (vol === 0) {
+-      setIsMuted(true);
+-    } else if (isMuted) {
+-      setIsMuted(false);
+-    }
+-  };
+-
+-  const formatTime = (seconds: number) => {
+-    if (Number.isNaN(seconds)) return '0:00';
+-    const mins = Math.floor(seconds / 60);
+-    const secs = Math.floor(seconds % 60);
+-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+-  };
+-
+-  return (
+-    <section className="bg-background py-16 md:py-24">
+-      <PageContainer>
+-        {/* Header */}
+-        <div className="mb-12 text-center">
+-          <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+-            Music <span className="text-glow">In Action</span>
+-          </h2>
+-          <p className="mx-auto max-w-2xl text-lg text-muted">
+-            See how our tracks bring projects to life
+-          </p>
+-        </div>
+-
+-        {/* Video Player */}
+-        <div className="max-w-5xl mx-auto">
+-          <div className="relative aspect-video rounded-xl overflow-hidden bg-card border border-outline group">
+-            {/* Video Element - placeholder for now, will use actual video later */}
+-            <video
+-              ref={videoRef}
+-              className="w-full h-full object-cover"
+-              onTimeUpdate={handleTimeUpdate}
+-              onLoadedMetadata={handleLoadedMetadata}
+-              poster="/hero-bg.jpg"
+-            >
+-              <source src="/middle-east.mp3" type="audio/mpeg" />
+-              Your browser does not support the video tag.
+-            </video>
+-
+-            {/* Play Overlay */}
+-            {!isPlaying && (
+-              <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center">
+-                <button
+-                  onClick={togglePlay}
+-                  className="w-20 h-20 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:scale-110 transition-transform shadow-glow"
+-                >
+-                  <Play className="h-10 w-10 ml-1" />
+-                </button>
+-              </div>
+-            )}
+-
+-            {/* Controls */}
+-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent p-4 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+-              {/* Progress Bar */}
+-              <div className="flex items-center gap-3 mb-3">
+-                <span className="text-xs text-muted font-mono">{formatTime(currentTime)}</span>
+-                <input
+-                  type="range"
+-                  min="0"
+-                  max={duration || 0}
+-                  value={currentTime}
+-                  onChange={handleSeek}
+-                  className="video-player-slider flex-1"
+-                  style={
+-                    {
+-                      '--progress': `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
+-                    } as React.CSSProperties
+-                  }
+-                />
+-                <span className="text-xs text-muted font-mono">{formatTime(duration)}</span>
+-              </div>
+-
+-              {/* Buttons */}
+-              <div className="flex items-center justify-between">
+-                <div className="flex items-center gap-2">
+-                  {/* Play/Pause */}
+-                  <button
+-                    onClick={togglePlay}
+-                    className="w-10 h-10 rounded-full bg-foreground/10 hover:bg-foreground/20 flex items-center justify-center transition-colors"
+-                  >
+-                    {isPlaying ? (
+-                      <Pause className="h-5 w-5 text-foreground" />
+-                    ) : (
+-                      <Play className="h-5 w-5 text-foreground ml-0.5" />
+-                    )}
+-                  </button>
+-
+-                  {/* Volume */}
+-                  <div className="flex items-center gap-2">
+-                    <button
+-                      onClick={toggleMute}
+-                      className="w-10 h-10 rounded-full bg-foreground/10 hover:bg-foreground/20 flex items-center justify-center transition-colors"
+-                    >
+-                      {isMuted || volume === 0 ? (
+-                        <VolumeX className="h-5 w-5 text-foreground" />
+-                      ) : (
+-                        <Volume2 className="h-5 w-5 text-foreground" />
+-                      )}
+-                    </button>
+-                    <input
+-                      type="range"
+-                      min="0"
+-                      max="1"
+-                      step="0.1"
+-                      value={volume}
+-                      onChange={handleVolumeChange}
+-                      className="video-volume-slider"
+-                      style={
+-                        {
+-                          '--volume-progress': `${volume * 100}%`,
+-                        } as React.CSSProperties
+-                      }
+-                    />
+-                  </div>
+-                </div>
+-              </div>
+-            </div>
+-          </div>
+-
+-          {/* Video Info */}
+-          <div className="mt-6 text-center">
+-            <h3 className="mb-2 text-xl font-semibold text-foreground">Middle East - Demo Track</h3>
+-            <p className="text-muted">Premium License Available • Perfect for cinematic projects</p>
+-          </div>
+-        </div>
+-      </PageContainer>
+-    </section>
+-  );
+-}
+diff --git a/app/components/home/index.ts b/app/components/home/index.ts
+index 1ea18ee..6d16572 100644
+--- a/app/components/home/index.ts
++++ b/app/components/home/index.ts
+@@ -8,4 +8,3 @@ export { SpecialOffersSection } from './SpecialOffersSection';
+ export { StudioMockup } from './StudioMockup';
+ export { StudioShowcase } from './StudioShowcase';
+ export { TestimonialsSection } from './TestimonialsSection';
+-export { VideoShowcase } from './VideoShowcase';
+diff --git a/app/components/loading/CinemaCurtainLoader.tsx b/app/components/loading/CinemaCurtainLoader.tsx
+deleted file mode 100644
+index 1e207d9..0000000
+--- a/app/components/loading/CinemaCurtainLoader.tsx
++++ /dev/null
+@@ -1,240 +0,0 @@
+-import { AnimatePresence, motion } from 'framer-motion';
+-import { useEffect, useState } from 'react';
+-
+-const CURTAIN_DELAY = 500; // დაყოვნება დაწყებამდე
+-const CURTAIN_DURATION = 1.8; // ფარდის გახსნა
+-const LOGO_HOLD = 2000; // ლოგოს ჩვენება
+-const FADE_DURATION = 0.8; // საბოლოო fade
+-
+-// ანიმაციის ინტერვალი (5-7 საათი)
+-const MIN_INTERVAL = 5 * 60 * 60 * 1000;
+-const MAX_INTERVAL = 7 * 60 * 60 * 1000;
+-const STORAGE_KEY = 'czaba_curtain_last_shown';
+-
+-function shouldShowAnimation(): boolean {
+-  if (typeof window === 'undefined') return false;
+-  const lastShown = localStorage.getItem(STORAGE_KEY);
+-  if (!lastShown) return true;
+-  const lastShownTime = parseInt(lastShown, 10);
+-  const randomInterval = MIN_INTERVAL + Math.random() * (MAX_INTERVAL - MIN_INTERVAL);
+-  return Date.now() - lastShownTime >= randomInterval;
+-}
+-
+-function markAnimationShown(): void {
+-  if (typeof window === 'undefined') return;
+-  localStorage.setItem(STORAGE_KEY, Date.now().toString());
+-}
+-
+-type Phase = 'waiting' | 'opening' | 'holding' | 'fading' | 'done';
+-
+-export function CinemaCurtainLoader() {
+-  const [shouldShow, setShouldShow] = useState(false);
+-  const [phase, setPhase] = useState<Phase>('waiting');
+-
+-  useEffect(() => {
+-    const show = shouldShowAnimation();
+-    setShouldShow(show);
+-    if (show) markAnimationShown();
+-  }, []);
+-
+-  useEffect(() => {
+-    if (!shouldShow) return;
+-
+-    const timers: NodeJS.Timeout[] = [];
+-    let elapsed = CURTAIN_DELAY;
+-
+-    // Start opening
+-    timers.push(setTimeout(() => setPhase('opening'), elapsed));
+-    elapsed += CURTAIN_DURATION * 1000;
+-
+-    // Hold with logo visible
+-    timers.push(setTimeout(() => setPhase('holding'), elapsed));
+-    elapsed += LOGO_HOLD;
+-
+-    // Fade out
+-    timers.push(setTimeout(() => setPhase('fading'), elapsed));
+-    elapsed += FADE_DURATION * 1000;
+-
+-    // Done
+-    timers.push(setTimeout(() => setPhase('done'), elapsed));
+-
+-    return () => timers.forEach(clearTimeout);
+-  }, [shouldShow]);
+-
+-  if (!shouldShow || phase === 'done') return null;
+-
+-  const isOpening = phase === 'opening' || phase === 'holding' || phase === 'fading';
+-  const isFading = phase === 'fading';
+-
+-  return (
+-    <AnimatePresence>
+-      <motion.div
+-        initial={{ opacity: 1 }}
+-        animate={{ opacity: isFading ? 0 : 1 }}
+-        transition={{ duration: FADE_DURATION }}
+-        className="fixed inset-0 z-50 overflow-hidden"
+-        style={{ backgroundColor: '#000' }}
+-      >
+-        {/* Background - dark stage */}
+-        <div
+-          className="absolute inset-0"
+-          style={{
+-            background: 'radial-gradient(ellipse at center, #1a1a1a 0%, #000 70%)',
+-          }}
+-        />
+-
+-        {/* Subtle spotlight glow behind curtains */}
+-        <motion.div
+-          initial={{ opacity: 0, scale: 0.8 }}
+-          animate={{
+-            opacity: isOpening ? 0.4 : 0,
+-            scale: isOpening ? 1.2 : 0.8,
+-          }}
+-          transition={{ duration: 1.5, ease: 'easeOut' }}
+-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full"
+-          style={{
+-            background: 'radial-gradient(ellipse, rgba(19, 217, 204, 0.15) 0%, transparent 70%)',
+-            filter: 'blur(60px)',
+-          }}
+-        />
+-
+-        {/* Left Curtain */}
+-        <motion.div
+-          initial={{ x: 0 }}
+-          animate={{ x: isOpening ? '-100%' : 0 }}
+-          transition={{
+-            duration: CURTAIN_DURATION,
+-            ease: [0.4, 0, 0.2, 1],
+-          }}
+-          className="absolute top-0 left-0 w-1/2 h-full"
+-          style={{
+-            background: 'linear-gradient(90deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%)',
+-            boxShadow: '10px 0 60px rgba(0,0,0,0.8)',
+-          }}
+-        >
+-          {/* Curtain folds */}
+-          <div className="absolute inset-0 opacity-30">
+-            {[...Array(8)].map((_, i) => (
+-              <div
+-                key={i}
+-                className="absolute top-0 bottom-0 w-[2px]"
+-                style={{
+-                  left: `${12 + i * 12}%`,
+-                  background:
+-                    'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.1) 20%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.1) 80%, transparent 100%)',
+-                }}
+-              />
+-            ))}
+-          </div>
+-
+-          {/* Curtain edge highlight */}
+-          <div
+-            className="absolute top-0 right-0 bottom-0 w-[3px]"
+-            style={{
+-              background:
+-                'linear-gradient(180deg, transparent, rgba(19, 217, 204, 0.3), transparent)',
+-            }}
+-          />
+-        </motion.div>
+-
+-        {/* Right Curtain */}
+-        <motion.div
+-          initial={{ x: 0 }}
+-          animate={{ x: isOpening ? '100%' : 0 }}
+-          transition={{
+-            duration: CURTAIN_DURATION,
+-            ease: [0.4, 0, 0.2, 1],
+-          }}
+-          className="absolute top-0 right-0 w-1/2 h-full"
+-          style={{
+-            background: 'linear-gradient(270deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%)',
+-            boxShadow: '-10px 0 60px rgba(0,0,0,0.8)',
+-          }}
+-        >
+-          {/* Curtain folds */}
+-          <div className="absolute inset-0 opacity-30">
+-            {[...Array(8)].map((_, i) => (
+-              <div
+-                key={i}
+-                className="absolute top-0 bottom-0 w-[2px]"
+-                style={{
+-                  right: `${12 + i * 12}%`,
+-                  background:
+-                    'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.1) 20%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.1) 80%, transparent 100%)',
+-                }}
+-              />
+-            ))}
+-          </div>
+-
+-          {/* Curtain edge highlight */}
+-          <div
+-            className="absolute top-0 left-0 bottom-0 w-[3px]"
+-            style={{
+-              background:
+-                'linear-gradient(180deg, transparent, rgba(19, 217, 204, 0.3), transparent)',
+-            }}
+-          />
+-        </motion.div>
+-
+-        {/* Center seam line (visible when closed) */}
+-        <motion.div
+-          initial={{ opacity: 0.6 }}
+-          animate={{ opacity: isOpening ? 0 : 0.6 }}
+-          transition={{ duration: 0.3 }}
+-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full"
+-          style={{
+-            background:
+-              'linear-gradient(180deg, transparent 5%, rgba(19, 217, 204, 0.4) 50%, transparent 95%)',
+-          }}
+-        />
+-
+-        {/* CZABA Logo - revealed behind curtains */}
+-        <motion.div
+-          initial={{ opacity: 0, scale: 0.9 }}
+-          animate={{
+-            opacity: phase === 'holding' || phase === 'fading' ? 1 : phase === 'opening' ? 0.5 : 0,
+-            scale: phase === 'holding' ? 1 : 0.95,
+-          }}
+-          transition={{
+-            duration: 0.8,
+-            ease: 'easeOut',
+-          }}
+-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+-        >
+-          <h1
+-            className="text-5xl md:text-7xl font-bold tracking-[0.2em]"
+-            style={{
+-              background: 'linear-gradient(135deg, hsl(220, 10%, 94%) 0%, hsl(175, 85%, 50%) 100%)',
+-              WebkitBackgroundClip: 'text',
+-              WebkitTextFillColor: 'transparent',
+-              backgroundClip: 'text',
+-              filter:
+-                'drop-shadow(0 0 60px rgba(19, 217, 204, 0.5)) drop-shadow(0 0 120px rgba(19, 217, 204, 0.2))',
+-            }}
+-          >
+-            CZABA
+-          </h1>
+-          <motion.p
+-            initial={{ opacity: 0, y: 10 }}
+-            animate={{
+-              opacity: phase === 'holding' ? 1 : 0,
+-              y: phase === 'holding' ? 0 : 10,
+-            }}
+-            transition={{ duration: 0.5, delay: 0.3 }}
+-            className="text-center text-sm text-muted mt-4 tracking-widest uppercase"
+-          >
+-            Cinematic Sound Design
+-          </motion.p>
+-        </motion.div>
+-
+-        {/* Film grain overlay */}
+-        <div
+-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
+-          style={{
+-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+-          }}
+-        />
+-      </motion.div>
+-    </AnimatePresence>
+-  );
+-}
+diff --git a/app/components/loading/PianoCurtainLoader.tsx b/app/components/loading/PianoCurtainLoader.tsx
+deleted file mode 100644
+index 0fe65b6..0000000
+--- a/app/components/loading/PianoCurtainLoader.tsx
++++ /dev/null
+@@ -1,393 +0,0 @@
+-import { AnimatePresence, motion } from 'framer-motion';
+-import { useEffect, useMemo, useState } from 'react';
+-
+-// Constants for animation timing
+-// მანიფესტი: ელეგანტური, არა ზედმეტად სწრაფი ანიმაციები
+-const GROW_DURATION = 1.6; // კლავიშების გაზრდა
+-const HOLD_DURATION = 1000; // ლოგოს ჩვენება
+-const CRACK_DURATION = 600; // ბზარების გაჩენა
+-const FALL_DURATION = 2.2; // ნატეხების ვარდნა
+-
+-// ანიმაციის ინტერვალი (5-7 საათი)
+-const MIN_INTERVAL = 5 * 60 * 60 * 1000;
+-const MAX_INTERVAL = 7 * 60 * 60 * 1000;
+-const STORAGE_KEY = 'czaba_piano_last_shown';
+-
+-function shouldShowAnimation(): boolean {
+-  if (typeof window === 'undefined') return false;
+-  const lastShown = localStorage.getItem(STORAGE_KEY);
+-  if (!lastShown) return true;
+-  const lastShownTime = parseInt(lastShown, 10);
+-  const randomInterval = MIN_INTERVAL + Math.random() * (MAX_INTERVAL - MIN_INTERVAL);
+-  return Date.now() - lastShownTime >= randomInterval;
+-}
+-
+-function markAnimationShown(): void {
+-  if (typeof window === 'undefined') return;
+-  localStorage.setItem(STORAGE_KEY, Date.now().toString());
+-}
+-
+-// თითოეული კლავიში იმსხვრევა 3-4 ნატეხად
+-// მანიფესტი: რეალისტური მსხვრევა, არა უბრალო 2 ნაწილად გაყოფა
+-interface KeyPiece {
+-  clipPath: string; // პოლიგონის ფორმა
+-  fallX: number;
+-  fallY: number;
+-  rotation: number;
+-  delay: number;
+-  scale: number;
+-}
+-
+-// შემთხვევითი მსხვრევის პატერნის გენერაცია
+-function generateShatterPieces(keyIndex: number, totalKeys: number): KeyPiece[] {
+-  const centerOffset = (keyIndex - totalKeys / 2) / (totalKeys / 2);
+-  const pieces: KeyPiece[] = [];
+-
+-  // 3-4 ნატეხი თითო კლავიშზე - არაწესიერი ფორმები
+-  const pieceCount = 3 + Math.floor(Math.random() * 2);
+-
+-  // მსხვრევის წერტილები (შემთხვევითი)
+-  const breakPointY = 30 + Math.random() * 40; // 30-70%
+-  const breakPointX = 20 + Math.random() * 60; // 20-80%
+-
+-  // ზედა მარცხენა ნატეხი
+-  pieces.push({
+-    clipPath: `polygon(0 0, ${breakPointX}% 0, ${breakPointX * 0.7}% ${breakPointY}%, 0 ${breakPointY * 1.2}%)`,
+-    fallX: centerOffset * 150 - 80 + Math.random() * 40,
+-    fallY: 400 + Math.random() * 300,
+-    rotation: -15 - Math.random() * 20,
+-    delay: Math.random() * 0.15,
+-    scale: 0.95 + Math.random() * 0.1,
+-  });
+-
+-  // ზედა მარჯვენა ნატეხი
+-  pieces.push({
+-    clipPath: `polygon(${breakPointX}% 0, 100% 0, 100% ${breakPointY * 0.8}%, ${breakPointX * 1.1}% ${breakPointY}%)`,
+-    fallX: centerOffset * 150 + 60 + Math.random() * 50,
+-    fallY: 350 + Math.random() * 250,
+-    rotation: 10 + Math.random() * 25,
+-    delay: Math.random() * 0.2,
+-    scale: 0.9 + Math.random() * 0.15,
+-  });
+-
+-  // ქვედა დიდი ნატეხი
+-  pieces.push({
+-    clipPath: `polygon(0 ${breakPointY * 1.2}%, ${breakPointX * 0.7}% ${breakPointY}%, ${breakPointX * 1.1}% ${breakPointY}%, 100% ${breakPointY * 0.8}%, 100% 100%, 0 100%)`,
+-    fallX: centerOffset * 200 + (Math.random() - 0.5) * 60,
+-    fallY: 500 + Math.random() * 400,
+-    rotation: centerOffset * 15 + (Math.random() - 0.5) * 10,
+-    delay: 0.1 + Math.random() * 0.15,
+-    scale: 1,
+-  });
+-
+-  // დამატებითი პატარა ნატეხი (50% შანსი)
+-  if (pieceCount > 3) {
+-    pieces.push({
+-      clipPath: `polygon(${breakPointX * 0.5}% ${breakPointY * 0.5}%, ${breakPointX}% ${breakPointY * 0.3}%, ${breakPointX * 0.8}% ${breakPointY}%)`,
+-      fallX: centerOffset * 100 + (Math.random() - 0.5) * 100,
+-      fallY: 300 + Math.random() * 200,
+-      rotation: 30 + Math.random() * 60,
+-      delay: Math.random() * 0.1,
+-      scale: 0.8,
+-    });
+-  }
+-
+-  return pieces;
+-}
+-
+-type Phase = 'growing' | 'holding' | 'cracking' | 'falling' | 'done';
+-
+-export function PianoCurtainLoader() {
+-  const [shouldShow, setShouldShow] = useState(false);
+-  const [phase, setPhase] = useState<Phase>('growing');
+-
+-  // მანიფესტი: ნაკლები კლავიში, უფრო განიერი - პრემიუმ იერსახე
+-  // 9 თეთრი კლავიში (1 ოქტავა + 2) ნაცვლად 21-ისა
+-  const whiteKeyCount = 9;
+-  const whiteKeys = Array.from({ length: whiteKeyCount });
+-
+-  // შავი კლავიშები: C#, D#, F#, G#, A# (5 ცალი)
+-  const blackKeyPositions = [0, 1, 3, 4, 5]; // პოზიციები თეთრ კლავიშებთან მიმართებაში
+-
+-  // მსხვრევის ნატეხები - useMemo სტაბილურობისთვის
+-  const whiteKeyPieces = useMemo(
+-    () => whiteKeys.map((_, i) => generateShatterPieces(i, whiteKeyCount)),
+-    [whiteKeys.map],
+-  );
+-
+-  const blackKeyPieces = useMemo(
+-    () => blackKeyPositions.map((_, i) => generateShatterPieces(i, blackKeyPositions.length)),
+-    [],
+-  );
+-
+-  useEffect(() => {
+-    const show = shouldShowAnimation();
+-    setShouldShow(show);
+-    if (show) markAnimationShown();
+-  }, []);
+-
+-  useEffect(() => {
+-    if (!shouldShow) return;
+-
+-    const timers: NodeJS.Timeout[] = [];
+-    let elapsed = GROW_DURATION * 1000;
+-
+-    timers.push(setTimeout(() => setPhase('holding'), elapsed));
+-    elapsed += HOLD_DURATION;
+-
+-    timers.push(setTimeout(() => setPhase('cracking'), elapsed));
+-    elapsed += CRACK_DURATION;
+-
+-    timers.push(setTimeout(() => setPhase('falling'), elapsed));
+-    elapsed += FALL_DURATION * 1000;
+-
+-    timers.push(setTimeout(() => setPhase('done'), elapsed));
+-
+-    return () => timers.forEach(clearTimeout);
+-  }, [shouldShow]);
+-
+-  if (!shouldShow || phase === 'done') return null;
+-
+-  const isCracking = phase === 'cracking';
+-  const isFalling = phase === 'falling';
+-
+-  return (
+-    <AnimatePresence>
+-      <motion.div
+-        initial={{ opacity: 1 }}
+-        animate={{ opacity: isFalling ? 0 : 1 }}
+-        transition={{ duration: 0.8, delay: isFalling ? FALL_DURATION - 0.8 : 0 }}
+-        className="fixed inset-0 z-50"
+-        style={{ backgroundColor: 'var(--color-background)' }}
+-      >
+-        {/* თეთრი კლავიშები - განიერი, პრემიუმ */}
+-        <div className="relative flex w-full h-full">
+-          {whiteKeys.map((_, keyIndex) => {
+-            const pieces = whiteKeyPieces[keyIndex];
+-
+-            return (
+-              <div key={`white-${keyIndex}`} className="flex-1 relative overflow-visible">
+-                {isFalling ? (
+-                  // მსხვრევის ნატეხები - clipPath-ით
+-                  pieces.map((piece, pieceIndex) => (
+-                    <motion.div
+-                      key={`white-${keyIndex}-piece-${pieceIndex}`}
+-                      initial={{ x: 0, y: 0, rotate: 0, opacity: 1, scale: 1 }}
+-                      animate={{
+-                        x: piece.fallX,
+-                        y: piece.fallY,
+-                        rotate: piece.rotation,
+-                        opacity: 0,
+-                        scale: piece.scale,
+-                      }}
+-                      transition={{
+-                        duration: FALL_DURATION,
+-                        delay: piece.delay,
+-                        ease: [0.33, 0, 0.67, 1], // გრავიტაციის მსგავსი
+-                      }}
+-                      className="absolute inset-0"
+-                      style={{
+-                        clipPath: piece.clipPath,
+-                        backgroundColor: 'white',
+-                        boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+-                        borderRight: '1px solid var(--color-outline)',
+-                      }}
+-                    />
+-                  ))
+-                ) : (
+-                  // მთლიანი კლავიში + ბზარი
+-                  <motion.div
+-                    initial={{ height: 0 }}
+-                    animate={{ height: '100%' }}
+-                    transition={{
+-                      duration: GROW_DURATION,
+-                      delay: keyIndex * 0.06, // უფრო ნელი ტალღა
+-                      ease: [0.4, 0, 0.2, 1],
+-                    }}
+-                    className="absolute inset-0 border-r origin-top"
+-                    style={{
+-                      borderColor: 'var(--color-outline)',
+-                      backgroundColor: 'white',
+-                      boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
+-                    }}
+-                  >
+-                    {/* ბზარის ხაზები */}
+-                    {isCracking && (
+-                      <>
+-                        <motion.div
+-                          initial={{ scaleX: 0, opacity: 0 }}
+-                          animate={{ scaleX: 1, opacity: 0.6 }}
+-                          transition={{ duration: 0.3, delay: keyIndex * 0.03 }}
+-                          className="absolute h-[1px]"
+-                          style={{
+-                            top: '35%',
+-                            left: '10%',
+-                            right: '20%',
+-                            background: 'linear-gradient(90deg, rgba(0,0,0,0.5), rgba(0,0,0,0.2))',
+-                            transformOrigin: 'left',
+-                          }}
+-                        />
+-                        <motion.div
+-                          initial={{ scaleY: 0, opacity: 0 }}
+-                          animate={{ scaleY: 1, opacity: 0.4 }}
+-                          transition={{ duration: 0.25, delay: keyIndex * 0.03 + 0.1 }}
+-                          className="absolute w-[1px]"
+-                          style={{
+-                            top: '35%',
+-                            left: '45%',
+-                            height: '30%',
+-                            background: 'linear-gradient(180deg, rgba(0,0,0,0.4), transparent)',
+-                            transformOrigin: 'top',
+-                          }}
+-                        />
+-                      </>
+-                    )}
+-                  </motion.div>
+-                )}
+-              </div>
+-            );
+-          })}
+-        </div>
+-
+-        {/* შავი კლავიშები */}
+-        <div className="absolute inset-0 pointer-events-none">
+-          {blackKeyPositions.map((position, keyIndex) => {
+-            // 9 თეთრ კლავიშზე გაანგარიშება
+-            const leftPosition = ((position + 0.65) / whiteKeyCount) * 100;
+-            const pieces = blackKeyPieces[keyIndex];
+-
+-            return (
+-              <div
+-                key={`black-${keyIndex}`}
+-                className="absolute overflow-visible"
+-                style={{
+-                  left: `${leftPosition}%`,
+-                  width: `${(100 / whiteKeyCount) * 0.55}%`, // განიერი შავი კლავიშები
+-                  height: '58%',
+-                  zIndex: 10,
+-                }}
+-              >
+-                {isFalling ? (
+-                  pieces.map((piece, pieceIndex) => (
+-                    <motion.div
+-                      key={`black-${keyIndex}-piece-${pieceIndex}`}
+-                      initial={{ x: 0, y: 0, rotate: 0, opacity: 1, scale: 1 }}
+-                      animate={{
+-                        x: piece.fallX * 0.6,
+-                        y: piece.fallY * 0.5,
+-                        rotate: piece.rotation * 1.2,
+-                        opacity: 0,
+-                        scale: piece.scale,
+-                      }}
+-                      transition={{
+-                        duration: FALL_DURATION,
+-                        delay: piece.delay + 0.08,
+-                        ease: [0.33, 0, 0.67, 1],
+-                      }}
+-                      className="absolute inset-0"
+-                      style={{
+-                        clipPath: piece.clipPath,
+-                        backgroundColor: 'var(--color-elevated)',
+-                        boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+-                      }}
+-                    />
+-                  ))
+-                ) : (
+-                  <motion.div
+-                    initial={{ height: 0 }}
+-                    animate={{ height: '100%' }}
+-                    transition={{
+-                      duration: GROW_DURATION,
+-                      delay: position * 0.06 + 0.03,
+-                      ease: [0.4, 0, 0.2, 1],
+-                    }}
+-                    className="absolute inset-0 origin-top rounded-b-sm"
+-                    style={{
+-                      backgroundColor: 'var(--color-elevated)',
+-                      boxShadow: '0 4px 20px rgba(0,0,0,0.45)',
+-                    }}
+-                  >
+-                    {isCracking && (
+-                      <motion.div
+-                        initial={{ scaleX: 0, opacity: 0 }}
+-                        animate={{ scaleX: 1, opacity: 0.5 }}
+-                        transition={{ duration: 0.25, delay: keyIndex * 0.04 }}
+-                        className="absolute left-[15%] right-[15%] h-[1px]"
+-                        style={{
+-                          top: '40%',
+-                          background: 'rgba(255,255,255,0.4)',
+-                          transformOrigin: 'left',
+-                        }}
+-                      />
+-                    )}
+-                  </motion.div>
+-                )}
+-              </div>
+-            );
+-          })}
+-        </div>
+-
+-        {/* CZABA Logo */}
+-        <motion.div
+-          initial={{ opacity: 0, y: 20 }}
+-          animate={
+-            isFalling
+-              ? {
+-                  opacity: 0,
+-                  y: -100,
+-                  scale: 1.1,
+-                }
+-              : {
+-                  opacity: phase === 'growing' ? 0 : 1,
+-                  y: 0,
+-                  scale: 1,
+-                }
+-          }
+-          transition={{
+-            duration: isFalling ? 1 : 0.6,
+-            delay: isFalling ? 0 : 0.3,
+-            ease: [0.4, 0, 0.2, 1],
+-          }}
+-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl md:text-7xl font-bold z-20 tracking-wider"
+-          style={{
+-            color: 'var(--color-brand)',
+-            textShadow: '0 4px 30px rgba(0,0,0,0.3)',
+-          }}
+-        >
+-          CZABA
+-        </motion.div>
+-
+-        {/* Subtle dust particles when falling */}
+-        {isFalling && (
+-          <div className="absolute inset-0 pointer-events-none z-30">
+-            {[...Array(20)].map((_, i) => (
+-              <motion.div
+-                key={`dust-${i}`}
+-                initial={{
+-                  opacity: 0.6,
+-                  x: `${10 + i * 4}%`,
+-                  y: '50%',
+-                  scale: 1,
+-                }}
+-                animate={{
+-                  opacity: 0,
+-                  y: '120%',
+-                  scale: 0.5,
+-                }}
+-                transition={{
+-                  duration: FALL_DURATION * 0.8,
+-                  delay: 0.2 + i * 0.05,
+-                  ease: [0.45, 0, 0.55, 1],
+-                }}
+-                className="absolute w-1 h-1 rounded-full"
+-                style={{
+-                  backgroundColor: 'rgba(255,255,255,0.8)',
+-                }}
+-              />
+-            ))}
+-          </div>
+-        )}
+-      </motion.div>
+-    </AnimatePresence>
+-  );
+-}
+diff --git a/app/components/loading/PianoLoadingAnimation.tsx b/app/components/loading/PianoLoadingAnimation.tsx
+deleted file mode 100644
+index 468c3d4..0000000
+--- a/app/components/loading/PianoLoadingAnimation.tsx
++++ /dev/null
+@@ -1,58 +0,0 @@
+-import { useEffect, useState } from 'react';
+-
+-export function PianoLoadingAnimation() {
+-  const [isVisible, setIsVisible] = useState(true);
+-
+-  // Piano keys configuration (simplified - one octave + extras for visual appeal)
+-  const whiteKeys = 8; // C, D, E, F, G, A, B, C
+-  const blackKeyPositions = [1, 2, 4, 5, 6]; // Position after white keys
+-
+-  useEffect(() => {
+-    // Auto-hide after animation completes (adjust timing as needed)
+-    const timer = setTimeout(() => {
+-      setIsVisible(false);
+-    }, 2500); // Animation duration + slight delay
+-
+-    return () => clearTimeout(timer);
+-  }, []);
+-
+-  if (!isVisible) return null;
+-
+-  return (
+-    <div className="piano-loading-overlay">
+-      <div className="piano-keys-container">
+-        {/* White Keys */}
+-        {Array.from({ length: whiteKeys }).map((_, index) => (
+-          <div
+-            key={`white-${index}`}
+-            className="piano-key white-key"
+-            style={{
+-              animationDelay: `${index * 0.08}s`,
+-            }}
+-          />
+-        ))}
+-
+-        {/* Black Keys */}
+-        {blackKeyPositions.map((position, index) => (
+-          <div
+-            key={`black-${index}`}
+-            className="piano-key black-key"
+-            style={{
+-              left: `${position * 12.5 - 4}%`,
+-              animationDelay: `${position * 0.08 + 0.04}s`,
+-            }}
+-          />
+-        ))}
+-
+-        {/* CZABA Logo/Text (optional) */}
+-        <div className="piano-loading-text">
+-          <div className="loading-brand">
+-            CZ<span style={{ color: '#ff3333' }}>A</span>B
+-            <span style={{ color: '#ff3333' }}>A</span>
+-          </div>
+-          <div className="loading-subtitle">Loading your music...</div>
+-        </div>
+-      </div>
+-    </div>
+-  );
+-}
+diff --git a/app/components/loading/index.ts b/app/components/loading/index.ts
+index 55b3da6..a5df767 100644
+--- a/app/components/loading/index.ts
++++ b/app/components/loading/index.ts
+@@ -1,10 +1,6 @@
+ // Barrel export for loading/skeleton components
+ 
+-export { CinemaCurtainLoader } from './CinemaCurtainLoader';
+ export { DownloadCardSkeleton } from './DownloadCardSkeleton';
+-export { PianoCurtainLoader } from './PianoCurtainLoader';
+-// Page Loaders
+-export { PianoLoadingAnimation } from './PianoLoadingAnimation';
+ 
+ // Component Skeletons
+ export { ProductCardSkeleton } from './ProductCardSkeleton';
+diff --git a/app/lib/__tests__/store-glow-shadow.test.ts b/app/lib/__tests__/store-glow-shadow.test.ts
+index 435179e..0448d44 100644
+--- a/app/lib/__tests__/store-glow-shadow.test.ts
++++ b/app/lib/__tests__/store-glow-shadow.test.ts
+@@ -45,10 +45,6 @@ const RETIRED_UTILITY_ALLOW_LIST: StyleScanAllowList = {
+     hits: 1,
+     reason: 'LEGACY-DEAD-STORE-COMPONENTS (0 importers outside the ui barrel)',
+   },
+-  'components/home/VideoShowcase.tsx': {
+-    hits: 1,
+-    reason: 'LEGACY-DEAD-STORE-COMPONENTS (0 importers outside the barrel)',
+-  },
+ };
+ 
+ const PRIMARY_BUTTON_SELECTORS: ReadonlyArray<string> = [
+diff --git a/app/lib/__tests__/store-gradient-text.test.ts b/app/lib/__tests__/store-gradient-text.test.ts
+index 889989a..6f2f6ed 100644
+--- a/app/lib/__tests__/store-gradient-text.test.ts
++++ b/app/lib/__tests__/store-gradient-text.test.ts
+@@ -30,42 +30,45 @@ const RETIRED_TOKEN_PATTERN = /--gradient-text(?![\w-])/;
+ const RETIRED_CLASS_ALLOW_LIST: StyleScanAllowList = {
+   'components/home/ArtistBioSection.tsx': {
+     hits: 1,
+-    reason: 'LEGACY-DEAD-STORE-COMPONENTS (0 importers outside the barrel)',
++    reason:
++      'LEGACY-DEAD-STORE-COMPONENTS (0 importers outside the barrel; keep-list stats, Saba rules)',
+   },
+   'components/home/TestimonialsSection.tsx': {
+     hits: 1,
+     reason:
+       'LEGACY-DEAD-STORE-COMPONENTS (0 importers outside the barrel; keep-list content, Saba rules)',
+   },
+-  'components/home/VideoShowcase.tsx': {
+-    hits: 1,
+-    reason: 'LEGACY-DEAD-STORE-COMPONENTS (0 importers outside the barrel)',
+-  },
+ };
+ 
+ const GRADIENT_TEXT_ALLOW_LIST: StyleScanAllowList = {
+   'styles/app.css .loading-brand': {
+     hits: 3,
+-    reason: 'LEGACY-DEAD-STORE-COMPONENTS (PianoLoadingAnimation has 0 importers)',
++    reason: 'dead rule: its only consumer PianoLoadingAnimation was deleted (STORE-2b-3d-1)',
+   },
+ };
+ 
+-const SCRIPT_GRADIENT_TEXT_ALLOW_LIST: StyleScanAllowList = {
+-  'app/components/loading/CinemaCurtainLoader.tsx': {
+-    hits: 3,
+-    reason:
+-      'LEGACY-DEAD-STORE-COMPONENTS (CinemaCurtainLoader has 0 importers outside the barrels)',
+-  },
+-};
++const SCRIPT_GRADIENT_TEXT_ALLOW_LIST: StyleScanAllowList = {};
+ 
+ const DEAD_COMPONENTS: Readonly<Record<string, string>> = {
+   ArtistBioSection: 'components/home/ArtistBioSection.tsx',
+   TestimonialsSection: 'components/home/TestimonialsSection.tsx',
++};
++
++const DELETED_STORE_MODULES: Readonly<Record<string, string>> = {
+   VideoShowcase: 'components/home/VideoShowcase.tsx',
+   PianoLoadingAnimation: 'components/loading/PianoLoadingAnimation.tsx',
++  PianoCurtainLoader: 'components/loading/PianoCurtainLoader.tsx',
+   CinemaCurtainLoader: 'components/loading/CinemaCurtainLoader.tsx',
++  Timeline: 'components/audio/Timeline.tsx',
++  sendOrderEmail: 'lib/email.server.ts',
+ };
+ 
++const DELETED_MODULE_BARRELS: ReadonlyArray<string> = [
++  ...BARREL_FILES,
++  'components/audio/index.ts',
++  'components/index.ts',
++];
++
+ interface DeadModule {
+   file: string;
+   module: string;
+@@ -73,7 +76,7 @@ interface DeadModule {
+   exportName: string;
+ }
+ 
+-const DEAD_MODULES: ReadonlyArray<DeadModule> = [
++const FIXTURE_DEAD_MODULES: ReadonlyArray<DeadModule> = [
+   {
+     file: 'components/audio/Timeline.tsx',
+     module: 'components/audio/Timeline',
+@@ -83,10 +86,6 @@ const DEAD_MODULES: ReadonlyArray<DeadModule> = [
+   { file: 'lib/email.server.ts', module: 'lib/email.server', barrels: [], exportName: '' },
+ ];
+ 
+-function deadModuleBarrelFiles(dead: DeadModule): ReadonlyArray<string> {
+-  return dead.barrels.map((barrel) => `${barrel}/index.ts`);
+-}
+-
+ function importsDeadModule(source: string, importer: string, dead: DeadModule): boolean {
+   return mountGraphImports(source, importer).some(
+     (entry) =>
+@@ -125,13 +124,14 @@ describe('store gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)',
+     expect(drifted).toEqual([]);
+   });
+ 
+-  it('GT1b: no app or perf script clips text to a background (class, inline style or CSS text), except the allow-listed dead loader at its exact count', () => {
++  it('GT1b: no app or perf script clips text to a background (class, inline style or CSS text); the script allow-list is empty', () => {
+     const { unexpected, drifted } = allowListViolations(
+       scriptGradientTextHitsByFile(),
+       SCRIPT_GRADIENT_TEXT_ALLOW_LIST,
+     );
+     expect(unexpected).toEqual([]);
+     expect(drifted).toEqual([]);
++    expect(Object.keys(SCRIPT_GRADIENT_TEXT_ALLOW_LIST)).toEqual([]);
+   });
+ 
+   it('GT2: the --gradient-text token is neither defined nor read anywhere in app', () => {
+@@ -207,9 +207,14 @@ describe('store gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)',
+       "style={{ WebkitTextFillColor: 'rgba(0,0,0,0.5)' }}",
+     ];
+     expect(misses.map(countScriptGradientTextHits)).toEqual([0, 0, 0, 0]);
+-    expect(Object.keys(scriptGradientTextHitsByFile())).toContain(
+-      'app/components/loading/CinemaCurtainLoader.tsx',
++    const everyScript = Object.keys(
++      hitsByRootedFile(SCRIPT_SCAN_ROOTS, SCRIPT_SOURCE_EXTENSIONS, () => 1),
++    );
++    expect(everyScript.length).toBeGreaterThanOrEqual(MIN_SCANNED_SOURCES);
++    expect(everyScript).toEqual(
++      expect.arrayContaining(['app/root.tsx', 'app/components/loading/SpotlightLoader.tsx']),
+     );
++    expect(everyScript.some((path) => path.startsWith('perf/'))).toBe(true);
+     expect(SCRIPT_SCAN_ROOTS.map((root) => root.prefix)).toEqual(['app', 'perf']);
+   });
+ 
+@@ -226,19 +231,9 @@ describe('store gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)',
+     expect(importers).toEqual([]);
+   });
+ 
+-  it('GT5b: the allow-listed dead modules with common names are imported by no file outside their own file and their own barrels', () => {
+-    const sources = listFiles(APP_ROOT, SCRIPT_SOURCE_EXTENSIONS);
+-    const importers = DEAD_MODULES.flatMap((dead) => {
+-      expect(sources).toContain(dead.file);
+-      const ownBarrels = deadModuleBarrelFiles(dead);
+-      return sources
+-        .filter((path) => path !== dead.file && !ownBarrels.includes(path))
+-        .filter((path) => importsDeadModule(readApp(path), path, dead))
+-        .map((path) => `${dead.file} <- ${path}`);
+-    });
+-    expect(importers).toEqual([]);
++  it('GT5b: the dead-module import matcher still recognises every import form of a common-named module (fixture modules)', () => {
+     const usesDead = (line: string, importer: string) =>
+-      DEAD_MODULES.some((dead) => importsDeadModule(line, importer, dead));
++      FIXTURE_DEAD_MODULES.some((dead) => importsDeadModule(line, importer, dead));
+     const positive: ReadonlyArray<readonly [string, string]> = [
+       ["import { Timeline } from '~/components/audio';", 'routes/x.tsx'],
+       ["import {\n  WaveForm,\n  Timeline as T,\n} from '~/components/audio';", 'routes/x.tsx'],
+@@ -271,4 +266,22 @@ describe('store gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)',
+       negative.map(() => false),
+     );
+   });
++
++  it('GT6: the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1)', () => {
++    const sources = listFiles(APP_ROOT, SCRIPT_SOURCE_EXTENSIONS);
++    for (const kept of Object.values(DEAD_COMPONENTS)) {
++      expect(sources).toContain(kept);
++    }
++    for (const path of Object.values(DELETED_STORE_MODULES)) {
++      expect(sources, path).not.toContain(path);
++    }
++    const reExports = DELETED_MODULE_BARRELS.filter((barrel) => sources.includes(barrel)).flatMap(
++      (barrel) =>
++        Object.keys(DELETED_STORE_MODULES)
++          .filter((name) => new RegExp(`(?<![\\w$])${name}(?![\\w$])`).test(readApp(barrel)))
++          .map((name) => `${name} <- ${barrel}`),
++    );
++    expect(reExports).toEqual([]);
++    expect(DELETED_MODULE_BARRELS.filter((barrel) => sources.includes(barrel)).length).toBe(5);
++  });
+ });
+diff --git a/app/lib/__tests__/store-live-teal.test.ts b/app/lib/__tests__/store-live-teal.test.ts
+index 2279085..b0c3ce9 100644
+--- a/app/lib/__tests__/store-live-teal.test.ts
++++ b/app/lib/__tests__/store-live-teal.test.ts
+@@ -216,7 +216,7 @@ const TEAL_RULE_ALLOW_LIST: StyleScanAllowList = {
+   'styles/app.css .track-row-waveform:hover': { hits: 1, reason: 'dead (STORE-2b-3d)' },
+   'styles/app.css .loading-brand': {
+     hits: 1,
+-    reason: 'dead: PianoLoadingAnimation has no importer outside its barrel (STORE-2b-3d)',
++    reason: 'dead: its only consumer PianoLoadingAnimation was deleted (STORE-2b-3d-1)',
+   },
+   'styles/app.css .pack-card-3d:hover > div': { hits: 1, reason: 'dead (STORE-2b-3d)' },
+   'styles/app.css .about-image-overlay': { hits: 1, reason: 'dead (STORE-2b-3d)' },
+@@ -325,7 +325,7 @@ const DEAD_TOKEN_CONSUMERS: Readonly<Record<string, Readonly<Record<string, Dead
+       'components/loading/TrackRowSkeleton.tsx': 'unmounted',
+       'components/product/TrackRow.tsx': 'unmounted',
+     },
+-    'loading-brand': { 'components/loading/PianoLoadingAnimation.tsx': 'unmounted' },
++    'loading-brand': {},
+   };
+ 
+ const DEAD_KEYFRAME_RULE_TOKENS: Readonly<Record<string, string>> = {
+diff --git a/app/lib/__tests__/store-teal-sweep.test.ts b/app/lib/__tests__/store-teal-sweep.test.ts
+index 9d793d7..4217b13 100644
+--- a/app/lib/__tests__/store-teal-sweep.test.ts
++++ b/app/lib/__tests__/store-teal-sweep.test.ts
+@@ -35,12 +35,6 @@ const TEAL_ALLOW_LIST: StyleScanAllowList = {
+     hits: 1,
+     reason: 'frozen legacy Studio (SRW-21 / legacy removal)',
+   },
+-  'lib/email.server.ts': { hits: 5, reason: 'LEGACY-DEAD-STORE-COMPONENTS (0 importers)' },
+-  'components/audio/Timeline.tsx': { hits: 5, reason: 'LEGACY-DEAD-STORE-COMPONENTS' },
+-  'components/loading/CinemaCurtainLoader.tsx': {
+-    hits: 7,
+-    reason: 'LEGACY-DEAD-STORE-COMPONENTS',
+-  },
+   'components/audio/StemsPlayerModal.tsx': { hits: 1, reason: 'STORE-4 stems modal' },
+   'components/audio/StemControl.tsx': { hits: 1, reason: 'STORE-4 stems modal' },
+ };
+diff --git a/app/lib/email.server.ts b/app/lib/email.server.ts
+deleted file mode 100644
+index f44edd4..0000000
+--- a/app/lib/email.server.ts
++++ /dev/null
+@@ -1,183 +0,0 @@
+-/**
+- * Email Service
+- * Brevo transactional emails
+- */
+-
+-import { debug } from './debug';
+-import { getDownloadUrl } from './r2-tokens.server';
+-
+-const BREVO_API_KEY = process.env.BREVO_API_KEY;
+-const APP_URL = process.env.APP_URL || 'https://czaba.store';
+-
+-interface OrderLineItem {
+-  productId: string;
+-  title: string;
+-  variantTitle?: string;
+-  quantity: number;
+-  price: { amount: string; currencyCode: string };
+-}
+-
+-interface OrderEmailData {
+-  orderName: string;
+-  customerEmail: string;
+-  customerName: string;
+-  lineItems: OrderLineItem[];
+-  totalPrice: { amount: string; currencyCode: string };
+-}
+-
+-/**
+- * გაგზავნე Order Paid email download link-ებით
+- */
+-export async function sendOrderPaidEmail(order: OrderEmailData): Promise<boolean> {
+-  if (!BREVO_API_KEY) {
+-    debug.error('Brevo API key missing for order email');
+-    return false;
+-  }
+-
+-  const downloadLinks = order.lineItems.map((item) => {
+-    const productHandle = extractHandleFromId(item.productId);
+-    const downloadUrl = getDownloadUrl(productHandle, 'premium.zip', order.customerEmail);
+-    const accountUrl = `${APP_URL}/account/downloads`;
+-
+-    return {
+-      title: item.title,
+-      variantTitle: item.variantTitle,
+-      downloadUrl,
+-      accountUrl,
+-    };
+-  });
+-
+-  const htmlContent = generateOrderEmailHtml(order, downloadLinks);
+-
+-  try {
+-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+-      method: 'POST',
+-      headers: {
+-        Accept: 'application/json',
+-        'Content-Type': 'application/json',
+-        'api-key': BREVO_API_KEY,
+-      },
+-      body: JSON.stringify({
+-        sender: { name: 'CZABA', email: 'noreply@czaba.store' },
+-        to: [{ email: order.customerEmail, name: order.customerName }],
+-        subject: `🎬 Your CZABA Downloads are Ready - ${order.orderName}`,
+-        htmlContent,
+-      }),
+-    });
+-
+-    if (!response.ok) {
+-      debug.error('Order email failed:', response.status);
+-      return false;
+-    }
+-
+-    debug.log(`Order email sent: ${order.orderName} to ${order.customerEmail}`);
+-    return true;
+-  } catch (error) {
+-    debug.error('Order email error:', error);
+-    return false;
+-  }
+-}
+-
+-/**
+- * Product ID-დან handle-ის ამოღება
+- */
+-function extractHandleFromId(productId: string): string {
+-  const numericId = productId.replace(/\D/g, '');
+-  return numericId || productId;
+-}
+-
+-/**
+- * Order email HTML გენერაცია
+- */
+-function generateOrderEmailHtml(
+-  order: OrderEmailData,
+-  downloadLinks: Array<{
+-    title: string;
+-    variantTitle?: string;
+-    downloadUrl: string;
+-    accountUrl: string;
+-  }>,
+-): string {
+-  const productsHtml = downloadLinks
+-    .map(
+-      (item) => `
+-        <tr>
+-          <td style="padding: 16px; border-bottom: 1px solid #333;">
+-            <div style="font-weight: 600; color: #fff; margin-bottom: 4px;">${item.title}</div>
+-            ${item.variantTitle ? `<div style="color: #888; font-size: 14px;">${item.variantTitle}</div>` : ''}
+-          </td>
+-          <td style="padding: 16px; border-bottom: 1px solid #333; text-align: right;">
+-            <a href="${item.downloadUrl}" style="display: inline-block; padding: 10px 20px; background: #13D9CC; color: #000; text-decoration: none; border-radius: 6px; font-weight: 600;">
+-              Download
+-            </a>
+-          </td>
+-        </tr>
+-      `,
+-    )
+-    .join('');
+-
+-  return `
+-    <!DOCTYPE html>
+-    <html>
+-    <head>
+-      <meta charset="utf-8">
+-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-    </head>
+-    <body style="margin: 0; padding: 0; background: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+-      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+-
+-        <!-- Header -->
+-        <div style="text-align: center; margin-bottom: 40px;">
+-          <h1 style="color: #13D9CC; font-size: 28px; margin: 0;">CZABA</h1>
+-        </div>
+-
+-        <!-- Main Content -->
+-        <div style="background: #111; border-radius: 12px; padding: 32px; border: 1px solid #222;">
+-
+-          <h2 style="color: #fff; font-size: 24px; margin: 0 0 8px 0;">Thank You for Your Purchase!</h2>
+-          <p style="color: #888; margin: 0 0 24px 0;">Order ${order.orderName}</p>
+-
+-          <p style="color: #ccc; line-height: 1.6; margin-bottom: 24px;">
+-            Your cinematic sound packs are ready to download. Click the buttons below to get your files, or access them anytime from your account.
+-          </p>
+-
+-          <!-- Downloads Table -->
+-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+-            <thead>
+-              <tr>
+-                <th style="padding: 12px 16px; text-align: left; color: #888; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #333;">Product</th>
+-                <th style="padding: 12px 16px; text-align: right; color: #888; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #333;">Action</th>
+-              </tr>
+-            </thead>
+-            <tbody>
+-              ${productsHtml}
+-            </tbody>
+-          </table>
+-
+-          <!-- Account Link -->
+-          <div style="background: #1a1a1a; border-radius: 8px; padding: 20px; text-align: center;">
+-            <p style="color: #888; margin: 0 0 12px 0; font-size: 14px;">
+-              Download links expire in 30 minutes. For permanent access:
+-            </p>
+-            <a href="${APP_URL}/account/downloads" style="display: inline-block; padding: 12px 24px; background: transparent; color: #13D9CC; text-decoration: none; border: 1px solid #13D9CC; border-radius: 6px; font-weight: 600;">
+-              Go to My Downloads
+-            </a>
+-          </div>
+-
+-        </div>
+-
+-        <!-- Footer -->
+-        <div style="text-align: center; margin-top: 32px; color: #666; font-size: 12px;">
+-          <p style="margin: 0 0 8px 0;">
+-            Need help? Reply to this email or visit <a href="${APP_URL}/faq" style="color: #13D9CC;">our FAQ</a>
+-          </p>
+-          <p style="margin: 0;">
+-            © ${new Date().getFullYear()} CZABA. All rights reserved.
+-          </p>
+-        </div>
+-
+-      </div>
+-    </body>
+-    </html>
+-  `;
+-}

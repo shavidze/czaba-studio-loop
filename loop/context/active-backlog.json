@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-12T04:53:39.331Z",
-  "current_task": "Round 460: SABA-B-13 fix-up, entrance handshake survives a hydration re-render (current-task.md, D-29z1627)",
+  "_generatedUtc": "2026-11-12T05:38:22.864Z",
+  "current_task": "Round 461: SABA-B-13 test hardening, real hydrateRoot rows (current-task.md, D-29z1629)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6757,63 +6757,34 @@
       "title": "Hero stagger animations finish under the entrance cover; delay them until the cover lifts?"
     },
     {
-      "id": "A-R459-REVIEW-R1",
-      "severity": "medium",
-      "origin": "B spec",
-      "status": "scheduled round 460 (D-29z1627); closes on C round 460 PASS of the R1/inject rows",
-      "title": "Whole-document client re-render after a hydration mismatch loses the entrance handshake: no entrance plays (HEAD plays), boot capture listeners leak, cover drops",
-      "confirmedBy": [
-        "C-R459-01 (c-round-459.json, r1-c.txt)"
-      ],
-      "evidence": "a-round-459.md, a-round-459/r1/, c-round-459/r1-c.txt, b-round-459/probe/r1/r1-b.txt",
-      "added": "2026-11-12 B round 459 -> 460 planning"
-    },
-    {
-      "id": "A-R459-REVIEW-R2",
-      "severity": "low",
-      "status": "scheduled round 460 (D-29z1627): boot listeners self-remove ",
-      "title": "Boot capture listeners have no self-timeout if SpotlightLoader never mounts"
-    },
-    {
-      "id": "C-R459-02",
-      "severity": "low",
-      "status": "criterion ruled (D-29z1626); closes on C round 460 PASS of C",
-      "title": "C6 logo/tag floors (600/400) missed at 1440 CPU 4 (cap 1900 compresses the logo phase under throttli"
-    },
-    {
-      "id": "C-R459-03",
-      "severity": "low",
-      "status": "criterion ruled (D-29z1626): measured from the input event; ",
-      "title": "C9 click50 at 1440 CPU 1 measured 311-373 ms from firstCovered (probe latency: click issued after a "
-    },
-    {
       "id": "SABA-Q-ENTRANCE-BACKGROUND-TAB",
       "severity": "info",
       "status": "awaiting_user (D-29z1626): non-blocking; default keep once p",
       "title": "A / opened in a background tab plays the entrance unseen and uses up the once-per-tab entrance"
     },
     {
-      "id": "A-R459-REVIEW-R7",
-      "severity": "info",
-      "status": "covered by C9 browser row; closes on C round 460 PASS of C9 ",
-      "title": "Doc claim \"click does not reach the page\" has no jsdom test (browser-only)"
+      "id": "A-R460-REVIEW-1",
+      "severity": "medium",
+      "origin": "A (code-reviewer, round 460)",
+      "status": "scheduled round 461 (D-29z1629); closes on C round 461 PASS of rows C4/C5",
+      "title": "No unit test runs a real hydrateRoot: (a) mismatch re-render recreates the cover <style> with render-time media, (b) clean hydration keeps the boot node and media=all; only browser rows C11-C13 cover them",
+      "evidence": "a-round-460.md (code-reviewer findings); b-round-460/sketch-461.patch.txt; b-round-460/mutants/mutants.txt",
+      "added": "2026-11-12 B round 460 -> 461 planning"
     },
     {
-      "id": "TL-R460-3",
+      "id": "A-R460-REVIEW-6",
       "severity": "low",
-      "status": "applied in sketch v2c (helper renamed reinsertCoverHeadHtml)",
-      "title": "Test helper name implied React hydration behaviour"
+      "status": "scheduled round 461 (D-29z1629) with A-R460-REVIEW-1 (same f",
+      "title": "E9 can false-pass: removal of the window takeover listener and of the boot capture listeners is not "
+    },
+    {
+      "id": "A-R460-REVIEW-7",
+      "severity": "low",
+      "status": "scheduled round 461 (D-29z1629) with A-R460-REVIEW-1; closes",
+      "title": "Server branch of isEntrancePending (typeof window === undefined) never exercised"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 451,
-      "task": "current-task.md",
-      "decision": "D-29z1603",
-      "type": "SYS-R450-STORE-STYLE-SCAN (test-only)",
-      "status": "done: C short FAIL (STOPPED on A-R451-REVIEW-M1-GT5-BARREL-SCOPE), gate skipped (D-29z1605)",
-      "note": "baseline a8599a2; manifest b-round-450/r451-tree-sha256.txt (1366); grants b-round-450/grants-451.txt; claims b-round-450/claims-451.sh"
-    },
     {
       "round": 452,
       "task": "current-task.md",
@@ -6887,8 +6858,16 @@
       "task": "current-task.md",
       "decision": "D-29z1627",
       "type": "SABA-B-13 fix-up: entrance survives a hydration re-render (C-R459-01), boot listener self-timeout, ruled C6/C9/C11",
-      "status": "dispatched",
+      "status": "C PASS (c-round-460.json, browserVerified/realVerified true, 0 bugs); gate 460 published ffd0c7c (D-29z1628)",
       "note": "baseline 891dc0f (gate 458 commit; gate 459 skipped); tree holds round-459 v1 + doc 300; A applies b-round-459/sketch-460-delta.patch.txt sha 2c99e2b6 (tech-lead APPROVE review 2); grants = b-round-458/grants-459.txt (5 paths, root.tsx unchanged vs v1)"
+    },
+    {
+      "round": 461,
+      "task": "current-task.md",
+      "decision": "D-29z1629",
+      "type": "SABA-B-13 test hardening (test-only): real hydrateRoot rows (A-R460-REVIEW-1), E9 listener asserts (-6), server branch (-7)",
+      "status": "dispatched",
+      "note": "baseline ffd0c7c (gate 460 published), clean tree; A applies b-round-460/sketch-461.patch.txt sha b154ff5396da0d16; grants = b-round-460/grants-461.txt (2 paths)"
     }
   ],
   "other_keys": [

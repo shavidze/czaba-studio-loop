@@ -1,0 +1,93 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b462-mut[39m
+
+ [31m❯[39m app/lib/__tests__/store-glow-shadow.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 121[2mms[22m[39m
+     [32m✓[39m GS1: the retired --shadow-glow and --shadow-glow-accent tokens are neither defined nor read anywhere in app[32m 22[2mms[22m[39m
+[31m     [31m×[31m GS2: only the allow-listed frozen or dead files name the shadow-glow utility, each at its exact count[39m[32m 23[2mms[22m[39m
+     [32m✓[39m GS3: the primary button rules carry no glow, no teal and no teal gradient[32m 62[2mms[22m[39m
+     [32m✓[39m GS4: the scan is non-vacuous and reads every granted file[32m 12[2mms[22m[39m
+ [31m❯[39m app/lib/__tests__/store-gradient-text.test.ts [2m([22m[2m9 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 156[2mms[22m[39m
+     [32m✓[39m GT1: no app CSS rule paints text with a background clip, except the allow-listed dead rule at its exact count[32m 18[2mms[22m[39m
+     [32m✓[39m GT1b: no app or perf script clips text to a background (class, inline style or CSS text); the script allow-list is empty[32m 34[2mms[22m[39m
+     [32m✓[39m GT2: the --gradient-text token is neither defined nor read anywhere in app[32m 19[2mms[22m[39m
+[31m     [31m×[31m GT3: only the allow-listed dead files name the retired text-glow or hero-title-glow class, each at its exact count[39m[32m 31[2mms[22m[39m
+     [32m✓[39m GT4: the CSS scan is non-vacuous and its parser handles case, lists, comments, quotes and alpha-zero fills[32m 8[2mms[22m[39m
+     [32m✓[39m GT4b: the script scan finds every gradient-text spelling and is non-vacuous[32m 19[2mms[22m[39m
+     [32m✓[39m GT5: the allow-listed dead components stay unmounted (no importer outside their own file and the barrels)[32m 13[2mms[22m[39m
+     [32m✓[39m GT5b: the dead-module import matcher still recognises every import form of a common-named module (fixture modules)[32m 3[2mms[22m[39m
+[31m     [31m×[31m GT6: the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1)[39m[32m 9[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-teal-sweep.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 244[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-live-teal.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 655[2mms[22m[39m
+     [33m[2m✓[22m[39m LT7: every dead-labelled teal rule has no mounted consumer (A-R454-REVIEW-M-DEAD-UNCHECKED) [33m 312[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-glow-shadow.test.ts[2m > [22mstore glow shadows (STORE-2b-3b)[2m > [22mGS2: only the allow-listed frozen or dead files name the shadow-glow utility, each at its exact count
+[31m[1mAssertionError[22m: expected { …(2) } to deeply equal { unexpected: [], drifted: [] }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "drifted": [],[22m
+[32m-   "unexpected": [],[39m
+[31m+   "unexpected": [[39m
+[31m+     "components/home/VideoShowcase.tsx",[39m
+[31m+   ],[39m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/__tests__/store-glow-shadow.test.ts:[2m78:67[22m[39m
+    [90m 76| [39m      [34mcountMatches[39m([33mRETIRED_UTILITY_PATTERN[39m)[33m,[39m
+    [90m 77| [39m    )[33m;[39m
+    [90m 78| [39m    expect(allowListViolations(hits, RETIRED_UTILITY_ALLOW_LIST)).toEq…
+    [90m   | [39m                                                                  [31m^[39m
+    [90m 79| [39m      unexpected[33m:[39m [][33m,[39m
+    [90m 80| [39m      drifted[33m:[39m [][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT3: only the allow-listed dead files name the retired text-glow or hero-title-glow class, each at its exact count
+[31m[1mAssertionError[22m: expected [ 'components/home/VideoShowcase.tsx' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "components/home/VideoShowcase.tsx",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m146:24[22m[39m
+    [90m144| [39m    )[33m;[39m
+    [90m145| [39m    const { unexpected, drifted } = allowListViolations(counts, RETIRE…
+    [90m146| [39m    [34mexpect[39m(unexpected)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m147| [39m    [34mexpect[39m(drifted)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m148| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT6: the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1)
+[31m[1mAssertionError[22m: components/home/VideoShowcase.tsx: expected [ …(344) ] to not include 'components/home/VideoShowcase.tsx'[39m
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m269:33[22m[39m
+    [90m267| [39m    expect(sources).toContain('components/home/TestimonialsSection.tsx…
+    [90m268| [39m    [35mfor[39m ([35mconst[39m path [35mof[39m [33mObject[39m[33m.[39m[34mvalues[39m([33mDELETED_STORE_MODULES[39m)) {
+    [90m269| [39m      [34mexpect[39m(sources[33m,[39m path)[33m.[39mnot[33m.[39m[34mtoContain[39m(path)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m270| [39m    }
+    [90m271| [39m    const reExports = DELETED_MODULE_BARRELS.filter((barrel) => source…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m26 passed[39m[22m[90m (29)[39m
+[2m   Start at [22m 05:50:37
+[2m   Duration [22m 964ms[2m (transform 319ms, setup 0ms, import 405ms, tests 1.18s, environment 1ms)[22m
+
+
+::error file=/tmp/b462-mut/app/lib/__tests__/store-glow-shadow.test.ts,title=app/lib/__tests__/store-glow-shadow.test.ts > store glow shadows (STORE-2b-3b) > GS2%3A only the allow-listed frozen or dead files name the shadow-glow utility%2C each at its exact count,line=78,column=67::AssertionError: expected { …(2) } to deeply equal { unexpected: [], drifted: [] }%0A%0A- Expected%0A+ Received%0A%0A  {%0A    "drifted": [],%0A-   "unexpected": [],%0A+   "unexpected": [%0A+     "components/home/VideoShowcase.tsx",%0A+   ],%0A  }%0A%0A ❯ app/lib/__tests__/store-glow-shadow.test.ts:78:67%0A%0A
+
+::error file=/tmp/b462-mut/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT3%3A only the allow-listed dead files name the retired text-glow or hero-title-glow class%2C each at its exact count,line=146,column=24::AssertionError: expected [ 'components/home/VideoShowcase.tsx' ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "components/home/VideoShowcase.tsx",%0A+ ]%0A%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:146:24%0A%0A
+
+::error file=/tmp/b462-mut/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT6%3A the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1),line=269,column=33::AssertionError: components/home/VideoShowcase.tsx: expected [ …(344) ] to not include 'components/home/VideoShowcase.tsx'%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:269:33%0A%0A

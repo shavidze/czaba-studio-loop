@@ -1,0 +1,82 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b462-mut[39m
+
+ [32m✓[39m app/lib/__tests__/store-glow-shadow.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 252[2mms[22m[39m
+ [31m❯[39m app/lib/__tests__/store-gradient-text.test.ts [2m([22m[2m9 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 330[2mms[22m[39m
+     [32m✓[39m GT1: no app CSS rule paints text with a background clip, except the allow-listed dead rule at its exact count[32m 52[2mms[22m[39m
+     [32m✓[39m GT1b: no app or perf script clips text to a background (class, inline style or CSS text); the script allow-list is empty[32m 89[2mms[22m[39m
+     [32m✓[39m GT2: the --gradient-text token is neither defined nor read anywhere in app[32m 42[2mms[22m[39m
+[31m     [31m×[31m GT3: only the allow-listed dead files name the retired text-glow or hero-title-glow class, each at its exact count[39m[32m 60[2mms[22m[39m
+     [32m✓[39m GT4: the CSS scan is non-vacuous and its parser handles case, lists, comments, quotes and alpha-zero fills[32m 32[2mms[22m[39m
+     [32m✓[39m GT4b: the script scan finds every gradient-text spelling and is non-vacuous[32m 28[2mms[22m[39m
+[31m     [31m×[31m GT5: the allow-listed dead components stay unmounted (no importer outside their own file and the barrels)[39m[32m 9[2mms[22m[39m
+     [32m✓[39m GT5b: the dead-module import matcher still recognises every import form of a common-named module (fixture modules)[32m 3[2mms[22m[39m
+[31m     [31m×[31m GT6: the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1)[39m[32m 7[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-teal-sweep.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 913[2mms[22m[39m
+     [33m[2m✓[22m[39m TS1: every remaining teal hit in app sources sits in an allow-listed file [33m 448[2mms[22m[39m
+     [33m[2m✓[22m[39m TS2: the scan is non-vacuous and every allow-list entry keeps its exact hit count [33m 427[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-live-teal.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 1455[2mms[22m[39m
+     [33m[2m✓[22m[39m LT1: every live player, 404, palette and scrollbar rule is the teal-free block, exactly once [33m 307[2mms[22m[39m
+     [33m[2m✓[22m[39m LT7: every dead-labelled teal rule has no mounted consumer (A-R454-REVIEW-M-DEAD-UNCHECKED) [33m 691[2mms[22m[39m
+     [33m[2m✓[22m[39m LT9: the mount walker follows every local module specifier in app source to a file (A-R456-REVIEW-M1) [33m 335[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT3: only the allow-listed dead files name the retired text-glow or hero-title-glow class, each at its exact count
+[31m[1mAssertionError[22m: expected [ Array(1) ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "components/home/TestimonialsSection.tsx: 0 != 1",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m147:21[22m[39m
+    [90m145| [39m    const { unexpected, drifted } = allowListViolations(counts, RETIRE…
+    [90m146| [39m    [34mexpect[39m(unexpected)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m147| [39m    [34mexpect[39m(drifted)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m148| [39m  })[33m;[39m
+    [90m149| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT5: the allow-listed dead components stay unmounted (no importer outside their own file and the barrels)
+[31m[1mAssertionError[22m: expected [ …(342) ] to include 'components/home/TestimonialsSection.t…'[39m
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m219:23[22m[39m
+    [90m217| [39m    [35mconst[39m sources [33m=[39m [34mlistFiles[39m([33mAPP_ROOT[39m[33m,[39m [33mSCRIPT_SOURCE_EXTENSIONS[39m)[33m;[39m
+    [90m218| [39m    const importers = Object.entries(DEAD_COMPONENTS).flatMap(([name, …
+    [90m219| [39m      [34mexpect[39m(sources)[33m.[39m[34mtoContain[39m(ownFile)[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m220| [39m      [35mconst[39m word [33m=[39m [35mnew[39m [33mRegExp[39m([32m`(?<![\\w$])[39m[36m${[39mname[36m}[39m[32m(?![\\w$])`[39m)[33m;[39m
+    [90m221| [39m      [35mreturn[39m sources
+[90m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m218:55[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT6: the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1)
+[31m[1mAssertionError[22m: expected [ …(342) ] to include 'components/home/TestimonialsSection.t…'[39m
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m267:21[22m[39m
+    [90m265| [39m  it('GT6: the deleted dead Store modules stay deleted and no barrel r…
+    [90m266| [39m    [35mconst[39m sources [33m=[39m [34mlistFiles[39m([33mAPP_ROOT[39m[33m,[39m [33mSCRIPT_SOURCE_EXTENSIONS[39m)[33m;[39m
+    [90m267| [39m    expect(sources).toContain('components/home/TestimonialsSection.tsx…
+    [90m   | [39m                    [31m^[39m
+    [90m268| [39m    [35mfor[39m ([35mconst[39m path [35mof[39m [33mObject[39m[33m.[39m[34mvalues[39m([33mDELETED_STORE_MODULES[39m)) {
+    [90m269| [39m      [34mexpect[39m(sources[33m,[39m path)[33m.[39mnot[33m.[39m[34mtoContain[39m(path)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m26 passed[39m[22m[90m (29)[39m
+[2m   Start at [22m 05:44:18
+[2m   Duration [22m 2.17s[2m (transform 973ms, setup 0ms, import 1.17s, tests 2.95s, environment 1ms)[22m
+
+
+::error file=/tmp/b462-mut/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT3%3A only the allow-listed dead files name the retired text-glow or hero-title-glow class%2C each at its exact count,line=147,column=21::AssertionError: expected [ Array(1) ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "components/home/TestimonialsSection.tsx: 0 != 1",%0A+ ]%0A%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:147:21%0A%0A
+
+::error file=/tmp/b462-mut/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT5%3A the allow-listed dead components stay unmounted (no importer outside their own file and the barrels),line=219,column=23::AssertionError: expected [ …(342) ] to include 'components/home/TestimonialsSection.t…'%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:219:23%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:218:55%0A%0A
+
+::error file=/tmp/b462-mut/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT6%3A the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1),line=267,column=21::AssertionError: expected [ …(342) ] to include 'components/home/TestimonialsSection.t…'%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:267:21%0A%0A

@@ -1,0 +1,271 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a461-scratch[39m
+
+ [31m❯[39m app/lib/__tests__/store-entrance-loader.test.tsx [2m([22m[2m46 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 509[2mms[22m[39m
+     [32m✓[39m L1 renders nothing on the server and logs nothing[32m 4[2mms[22m[39m
+     [32m✓[39m L2 shows a decorative overlay with no heading on first mount[32m 165[2mms[22m[39m
+     [32m✓[39m L3 stays on screen for the 1450 ms minimum, exit fade included, never past 1900 ms[32m 18[2mms[22m[39m
+     [32m✓[39m L4 lets pointer events through during the exit fade only[32m 19[2mms[22m[39m
+     [32m✓[39m L5 a click on the overlay ends it immediately and for good[32m 14[2mms[22m[39m
+       [32m✓[39m Escape at 300 ms removes the overlay and its keydown listener[32m 12[2mms[22m[39m
+       [32m✓[39m Tab ends it like Escape without preventing the focus move[32m 13[2mms[22m[39m
+       [32m✓[39m Shift+Tab ends it like Escape without preventing the focus move[32m 20[2mms[22m[39m
+       [32m✓[39m other keys do not skip[32m 13[2mms[22m[39m
+       [32m✓[39m removes the keydown listener after the natural finish[32m 12[2mms[22m[39m
+       [32m✓[39m removes the keydown listener on unmount mid-animation[32m 11[2mms[22m[39m
+     [32m✓[39m L7 shows once per session and never writes the old localStorage key[32m 9[2mms[22m[39m
+     [32m✓[39m L8 ignores the old localStorage key and honours the session key[32m 12[2mms[22m[39m
+     [32m✓[39m L9 never renders under prefers-reduced-motion and does not claim the session[32m 2[2mms[22m[39m
+     [32m✓[39m L10 blocked storage renders nothing and does not throw[32m 2[2mms[22m[39m
+     [32m✓[39m L10b a sessionStorage write failure renders nothing and does not throw[32m 1[2mms[22m[39m
+     [32m✓[39m L11 leaves no stray timers or state updates after unmount[32m 10[2mms[22m[39m
+     [32m✓[39m E1 the server renders a disabled cover style and the boot script[32m 4[2mms[22m[39m
+     [32m✓[39m E1b the server render keeps the cover off even when a pending handshake exists[32m 1[2mms[22m[39m
+     [32m✓[39m E2 on a fresh tab at / the boot script turns the cover on and claims the session[32m 10[2mms[22m[39m
+     [32m✓[39m E3 a seen tab keeps the cover off[32m 4[2mms[22m[39m
+     [32m✓[39m E3 reduced motion keeps the cover off[32m 5[2mms[22m[39m
+     [32m✓[39m E3 another path keeps the cover off[32m 3[2mms[22m[39m
+     [32m✓[39m E4 blocked storage keeps the cover off and does not throw[32m 2[2mms[22m[39m
+     [32m✓[39m E5 the animated overlay takes over in the same commit and turns the cover off[32m 13[2mms[22m[39m
+     [32m✓[39m E6 the timeline counts from the first cover frame: 1450 ms minimum, 1900 ms cap[32m 1[2mms[22m[39m
+     [32m✓[39m E7 a takeover after the failsafe never replays the entrance[32m 3[2mms[22m[39m
+     [32m✓[39m E8 Escape before hydration skips the cover and the entrance[32m 5[2mms[22m[39m
+     [32m✓[39m E8 Tab before hydration skips the cover and the entrance[32m 4[2mms[22m[39m
+     [32m✓[39m E8 click before hydration skips the cover and the entrance[32m 4[2mms[22m[39m
+     [32m✓[39m E8b other keys before hydration keep the cover[32m 2[2mms[22m[39m
+     [32m✓[39m E9 after the takeover the boot listeners are gone and the overlay owns the skip[32m 16[2mms[22m[39m
+     [32m✓[39m E10 a client navigation to / after a seen entrance shows nothing[32m 2[2mms[22m[39m
+[31m     [31m×[31m E11 the root layout renders the cover right after the stylesheet links[39m[32m 5[2mms[22m[39m
+     [32m✓[39m E12 a client navigation to / on a fresh tab still plays, as at HEAD[32m 10[2mms[22m[39m
+     [32m✓[39m E13 a cover that is on without a start time is retired, not animated[32m 3[2mms[22m[39m
+     [32m✓[39m E14 a click between the claim and the hand-off skips the animated overlay too[32m 14[2mms[22m[39m
+     [32m✓[39m E15 a client re-render that replaces the cover style still plays the entrance and frees the boot listeners[32m 18[2mms[22m[39m
+     [32m✓[39m E16 a skip after the style was replaced turns the new style off and skips the entrance[32m 4[2mms[22m[39m
+     [32m✓[39m E17 a takeover after the failsafe frees the boot listeners[32m 3[2mms[22m[39m
+     [32m✓[39m E18 with no takeover the boot listeners remove themselves after the failsafe fade[32m 2[2mms[22m[39m
+     [32m✓[39m E19 a re-render after the failsafe keeps the cover off on a visible page[32m 6[2mms[22m[39m
+     [32m✓[39m E21 a clean hydration keeps the boot-script cover node, its media and its start time[32m 4[2mms[22m[39m
+     [32m✓[39m E21b a clean hydration after the failsafe leaves the boot-script media in place (React keeps hydrated attributes)[32m 2[2mms[22m[39m
+     [32m✓[39m E20 a real hydration mismatch replaces the cover style, which takes the pending media and is handed over[32m 15[2mms[22m[39m
+     [32m✓[39m E20b a real hydration mismatch after the failsafe renders the cover off[32m 5[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m45 passed[39m[22m[90m (46)[39m
+[2m   Start at [22m 05:18:23
+[2m   Duration [22m 1.38s[2m (transform 124ms, setup 0ms, import 350ms, tests 509ms, environment 390ms)[22m
+
+
+::error file=/tmp/a461-scratch/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SABA-B-13 static head cover and takeover > E11 the root layout renders the cover right after the stylesheet links,line=591,column=18::AssertionError: expected 'import type { LinksFunction } from \'…' to match /<Links \/>\s*…/>\s*<EntranceCoverHead \%0A%0A- Expected: %0A/<Links \/>\s*<EntranceCoverHead \/>/%0A%0A+ Received: %0A"import type { LinksFunction } from '@remix-run/node';%0Aimport {%0A  Links,%0A  Meta,%0A  Outlet,%0A  Scripts,%0A  ScrollRestoration,%0A  useLocation,%0A  useNavigation,%0A} from '@remix-run/react';%0Aimport { RouteTransition } from '~/components/animations';%0Aimport { AudioPlayer, StemsPlayerModal } from '~/components/audio';%0Aimport { AuthModal } from '~/components/auth';%0Aimport { CookieConsent } from '~/components/common';%0Aimport { Header } from '~/components/layout';%0Aimport { EntranceCoverHead } from '~/components/loading/EntranceCover';%0Aimport { LeadMagnetPopup } from '~/components/marketing';%0Aimport { ToastContainer } from '~/components/ui';%0Aimport { useAuth, useCart, useSmoothScroll, useToast } from '~/hooks';%0Aimport { GA4_MEASUREMENT_ID } from '~/lib/analytics';%0Aimport { FB_PIXEL_ID } from '~/lib/facebook-pixel';%0Aimport { useFocusSourceAttribute } from '~/lib/focus-source';%0Aimport fontStyles from './assets/fonts/fonts.css?url';%0Aimport { AudioProvider } from './contexts/AudioContext';%0Aimport { AuthProvider } from './contexts/AuthContext';%0Aimport { CartProvider } from './contexts/CartContext';%0Aimport { ChatProvider } from './contexts/ChatContext';%0Aimport { FiltersProvider } from './contexts/FiltersContext';%0Aimport { PurchasesProvider } from './contexts/PurchasesContext';%0Aimport { StemsProvider } from './contexts/StemsContext';%0Aimport { ToastProvider } from './contexts/ToastContext';%0Aimport appStyles from './styles/app.css?url';%0A%0Aexport const links: LinksFunction = () => [%0A  { rel: 'stylesheet', href: fontStyles },%0A  { rel: 'stylesheet', href: appStyles },%0A];%0A%0Aexport function Layout({ children }: { children: React.ReactNode }) {%0A  return (%0A    <html lang=\"en\">%0A      <head>%0A        <meta charSet=\"utf-8\" />%0A        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />%0A        <Meta />%0A        <EntranceCoverHead />%0A        <Links />%0A        {/* GA4 Script - ყოველთვის ჩაიტვირთება, consent mode აკონტროლებს tracking-ს */}%0A        {GA4_MEASUREMENT_ID && (%0A          <>%0A            <script%0A              dangerouslySetInnerHTML={{%0A                __html: `%0A                  window.dataLayer = window.dataLayer || [];%0A                  function gtag(){dataLayer.push(arguments);}%0A%0A                  // Default consent - denied სანამ მომხმარებელი არ დათანხმდება%0A                  gtag('consent', 'default', {%0A                    'analytics_storage': 'denied',%0A                    'ad_storage': 'denied',%0A                    'ad_user_data': 'denied',%0A                    'ad_personalization': 'denied',%0A                  });%0A%0A                  // თუ უკვე აქვს consent, განაახლე%0A                  if (typeof localStorage !== 'undefined' && localStorage.getItem('czaba_analytics_consent') === 'granted') {%0A                    gtag('consent', 'update', {%0A                      'analytics_storage': 'granted',%0A                    });%0A                  }%0A                `,%0A              }}%0A            />%0A            <script%0A              async%0A              src={`https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`}%0A            />%0A            <script%0A              dangerouslySetInnerHTML={{%0A                __html: `%0A                  gtag('js', new Date());%0A                  gtag('config', '${GA4_MEASUREMENT_ID}', {%0A                    page_path: window.location.pathname,%0A                  });%0A                `,%0A              }}%0A            />%0A          </>%0A        )}%0A        {/* Facebook Pixel */}%0A        {FB_PIXEL_ID && (%0A          <script%0A            dangerouslySetInnerHTML={{%0A              __html: `%0A                !function(f,b,e,v,n,t,s)%0A                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?%0A                n.callMethod.apply(n,arguments):n.queue.push(arguments)};%0A                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';%0A                n.queue=[];t=b.createElement(e);t.async=!0;%0A                t.src=v;s=b.getElementsByTagName(e)[0];%0A                s.parentNode.insertBefore(t,s)}(window, document,'script',%0A                'https://connect.facebook.net/en_US/fbevents.js');%0A                fbq('consent', 'revoke');%0A                fbq('init', '${FB_PIXEL_ID}');%0A%0A                // თუ უკვე აქვს consent%0A                if (typeof localStorage !== 'undefined' && localStorage.getItem('czaba_analytics_consent') === 'granted') {%0A                  fbq('consent', 'grant');%0A                  fbq('track', 'PageView');%0A                }%0A              `,%0A            }}%0A          />%0A        )}%0A      </head>%0A      <body>%0A        {children}%0A        <ScrollRestoration />%0A        <Scripts />%0A      </body>%0A    </html>%0A  );%0A}%0A%0Afunction AppContent() {%0A  const { isAuthenticated } = useAuth();%0A  const { cartCount } = useCart();%0A  const location = useLocation();%0A  const navigation = useNavigation();%0A%0A  // Smooth scroll - premium scrolling experience%0A  useSmoothScroll();%0A  useFocusSourceAttribute();%0A%0A  // Hide header and other UI elements for studio page (full-screen DAW experience)%0A  const isStudioPage = location.pathname.startsWith('/studio');%0A%0A  // Show loading indicator during navigation%0A  const isNavigating = navigation.state === 'loading';%0A%0A  return (%0A    <>%0A      {!isStudioPage && <Header cartCount={cartCount} />}%0A      {/* Navigation loading bar */}%0A      {isNavigating && <div className=\"nav-loading-bar\" />}%0A      <RouteTransition pathname={location.pathname} isStudioPage={isStudioPage}>%0A        <Outlet />%0A      </RouteTransition>%0A      {!isStudioPage && (%0A        <>%0A          <AudioPlayer />%0A          <StemsPlayerModal />%0A          <LeadMagnetPopup isLoggedIn={isAuthenticated} />%0A        </>%0A      )}%0A      <AuthModal />%0A      <ToastContainer />%0A      <CookieConsent />%0A    </>%0A  );%0A}%0A%0A// Wrapper component that connects CartProvider to ToastProvider%0Afunction CartWithToast({ children }: { children: React.ReactNode }) {%0A  const { showToast } = useToast();%0A  return <CartProvider onToast={showToast}>{children}</CartProvider>;%0A}%0A%0Aexport default function App() {%0A  return (%0A    <AuthProvider>%0A      <PurchasesProvider>%0A        <ToastProvider>%0A          <CartWithToast>%0A            <AudioProvider>%0A              <StemsProvider>%0A                <FiltersProvider>%0A                  <ChatProvider>%0A                    <AppContent />%0A                  </ChatProvider>%0A                </FiltersProvider>%0A              </StemsProvider>%0A            </AudioProvider>%0A          </CartWithToast>%0A        </ToastProvider>%0A      </PurchasesProvider>%0A    </AuthProvider>%0A  );%0A}%0A%0Aexport { RootErrorBoundary as ErrorBoundary } from '~/components/errors';%0A"%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:591:18%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE11 the root layout renders the cover right after the stylesheet links
+[31m[1mAssertionError[22m: expected 'import type { LinksFunction } from \'…' to match /<Links \/>\s*…/>\s*<EntranceCoverHead \[39m
+
+[32m- Expected:[39m 
+/<Links \/>\s*<EntranceCoverHead \/>/
+
+[31m+ Received:[39m 
+"import type { LinksFunction } from '@remix-run/node';
+import {
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useLocation,
+  useNavigation,
+} from '@remix-run/react';
+import { RouteTransition } from '~/components/animations';
+import { AudioPlayer, StemsPlayerModal } from '~/components/audio';
+import { AuthModal } from '~/components/auth';
+import { CookieConsent } from '~/components/common';
+import { Header } from '~/components/layout';
+import { EntranceCoverHead } from '~/components/loading/EntranceCover';
+import { LeadMagnetPopup } from '~/components/marketing';
+import { ToastContainer } from '~/components/ui';
+import { useAuth, useCart, useSmoothScroll, useToast } from '~/hooks';
+import { GA4_MEASUREMENT_ID } from '~/lib/analytics';
+import { FB_PIXEL_ID } from '~/lib/facebook-pixel';
+import { useFocusSourceAttribute } from '~/lib/focus-source';
+import fontStyles from './assets/fonts/fonts.css?url';
+import { AudioProvider } from './contexts/AudioContext';
+import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
+import { ChatProvider } from './contexts/ChatContext';
+import { FiltersProvider } from './contexts/FiltersContext';
+import { PurchasesProvider } from './contexts/PurchasesContext';
+import { StemsProvider } from './contexts/StemsContext';
+import { ToastProvider } from './contexts/ToastContext';
+import appStyles from './styles/app.css?url';
+
+export const links: LinksFunction = () => [
+  { rel: 'stylesheet', href: fontStyles },
+  { rel: 'stylesheet', href: appStyles },
+];
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang=\"en\">
+      <head>
+        <meta charSet=\"utf-8\" />
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
+        <Meta />
+        <EntranceCoverHead />
+        <Links />
+        {/* GA4 Script - ყოველთვის ჩაიტვირთება, consent mode აკონტროლებს tracking-ს */}
+        {GA4_MEASUREMENT_ID && (
+          <>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+
+                  // Default consent - denied სანამ მომხმარებელი არ დათანხმდება
+                  gtag('consent', 'default', {
+                    'analytics_storage': 'denied',
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                  });
+
+                  // თუ უკვე აქვს consent, განაახლე
+                  if (typeof localStorage !== 'undefined' && localStorage.getItem('czaba_analytics_consent') === 'granted') {
+                    gtag('consent', 'update', {
+                      'analytics_storage': 'granted',
+                    });
+                  }
+                `,
+              }}
+            />
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`}
+            />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  gtag('js', new Date());
+                  gtag('config', '${GA4_MEASUREMENT_ID}', {
+                    page_path: window.location.pathname,
+                  });
+                `,
+              }}
+            />
+          </>
+        )}
+        {/* Facebook Pixel */}
+        {FB_PIXEL_ID && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('consent', 'revoke');
+                fbq('init', '${FB_PIXEL_ID}');
+
+                // თუ უკვე აქვს consent
+                if (typeof localStorage !== 'undefined' && localStorage.getItem('czaba_analytics_consent') === 'granted') {
+                  fbq('consent', 'grant');
+                  fbq('track', 'PageView');
+                }
+              `,
+            }}
+          />
+        )}
+      </head>
+      <body>
+        {children}
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+function AppContent() {
+  const { isAuthenticated } = useAuth();
+  const { cartCount } = useCart();
+  const location = useLocation();
+  const navigation = useNavigation();
+
+  // Smooth scroll - premium scrolling experience
+  useSmoothScroll();
+  useFocusSourceAttribute();
+
+  // Hide header and other UI elements for studio page (full-screen DAW experience)
+  const isStudioPage = location.pathname.startsWith('/studio');
+
+  // Show loading indicator during navigation
+  const isNavigating = navigation.state === 'loading';
+
+  return (
+    <>
+      {!isStudioPage && <Header cartCount={cartCount} />}
+      {/* Navigation loading bar */}
+      {isNavigating && <div className=\"nav-loading-bar\" />}
+      <RouteTransition pathname={location.pathname} isStudioPage={isStudioPage}>
+        <Outlet />
+      </RouteTransition>
+      {!isStudioPage && (
+        <>
+          <AudioPlayer />
+          <StemsPlayerModal />
+          <LeadMagnetPopup isLoggedIn={isAuthenticated} />
+        </>
+      )}
+      <AuthModal />
+      <ToastContainer />
+      <CookieConsent />
+    </>
+  );
+}
+
+// Wrapper component that connects CartProvider to ToastProvider
+function CartWithToast({ children }: { children: React.ReactNode }) {
+  const { showToast } = useToast();
+  return <CartProvider onToast={showToast}>{children}</CartProvider>;
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <PurchasesProvider>
+        <ToastProvider>
+          <CartWithToast>
+            <AudioProvider>
+              <StemsProvider>
+                <FiltersProvider>
+                  <ChatProvider>
+                    <AppContent />
+                  </ChatProvider>
+                </FiltersProvider>
+              </StemsProvider>
+            </AudioProvider>
+          </CartWithToast>
+        </ToastProvider>
+      </PurchasesProvider>
+    </AuthProvider>
+  );
+}
+
+export { RootErrorBoundary as ErrorBoundary } from '~/components/errors';
+"
+
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m591:18[22m[39m
+    [90m589| [39m  it('E11 the root layout renders the cover right after the stylesheet…
+    [90m590| [39m    const root = readFileSync(resolve(__dirname, '../../root.tsx'), 'u…
+    [90m591| [39m    [34mexpect[39m(root)[33m.[39m[34mtoMatch[39m([36m/<Links \/>\s*<EntranceCoverHead \/>/[39m)[33m;[39m
+    [90m   | [39m                 [31m^[39m
+    [90m592| [39m    [34mexpect[39m(root[33m.[39m[34mmatch[39m([36m/<EntranceCoverHead \/>/g[39m))[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+    [90m593| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

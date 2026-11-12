@@ -1,0 +1,41 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b462-mut[39m
+
+ [32m✓[39m app/lib/__tests__/store-glow-shadow.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 249[2mms[22m[39m
+ [31m❯[39m app/lib/__tests__/store-gradient-text.test.ts [2m([22m[2m9 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 375[2mms[22m[39m
+     [32m✓[39m GT1: no app CSS rule paints text with a background clip, except the allow-listed dead rule at its exact count[32m 52[2mms[22m[39m
+     [32m✓[39m GT1b: no app or perf script clips text to a background (class, inline style or CSS text); the script allow-list is empty[32m 91[2mms[22m[39m
+     [32m✓[39m GT2: the --gradient-text token is neither defined nor read anywhere in app[32m 45[2mms[22m[39m
+     [32m✓[39m GT3: only the allow-listed dead files name the retired text-glow or hero-title-glow class, each at its exact count[32m 53[2mms[22m[39m
+     [32m✓[39m GT4: the CSS scan is non-vacuous and its parser handles case, lists, comments, quotes and alpha-zero fills[32m 21[2mms[22m[39m
+     [32m✓[39m GT4b: the script scan finds every gradient-text spelling and is non-vacuous[32m 45[2mms[22m[39m
+     [32m✓[39m GT5: the allow-listed dead components stay unmounted (no importer outside their own file and the barrels)[32m 28[2mms[22m[39m
+     [32m✓[39m GT5b: the dead-module import matcher still recognises every import form of a common-named module (fixture modules)[32m 6[2mms[22m[39m
+[31m     [31m×[31m GT6: the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1)[39m[32m 31[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-teal-sweep.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 585[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-live-teal.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 1802[2mms[22m[39m
+     [33m[2m✓[22m[39m LT7: every dead-labelled teal rule has no mounted consumer (A-R454-REVIEW-M-DEAD-UNCHECKED) [33m 950[2mms[22m[39m
+     [33m[2m✓[22m[39m LT9: the mount walker follows every local module specifier in app source to a file (A-R456-REVIEW-M1) [33m 409[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-gradient-text.test.ts[2m > [22mstore gradient text removal (STORE-2b-3a, SYS-R450-STORE-STYLE-SCAN)[2m > [22mGT6: the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1)
+[31m[1mAssertionError[22m: components/loading/PianoCurtainLoader.tsx: expected [ …(344) ] to not include 'components/loading/PianoCurtainLoader…'[39m
+[36m [2m❯[22m app/lib/__tests__/store-gradient-text.test.ts:[2m269:33[22m[39m
+    [90m267| [39m    expect(sources).toContain('components/home/TestimonialsSection.tsx…
+    [90m268| [39m    [35mfor[39m ([35mconst[39m path [35mof[39m [33mObject[39m[33m.[39m[34mvalues[39m([33mDELETED_STORE_MODULES[39m)) {
+    [90m269| [39m      [34mexpect[39m(sources[33m,[39m path)[33m.[39mnot[33m.[39m[34mtoContain[39m(path)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m270| [39m    }
+    [90m271| [39m    const reExports = DELETED_MODULE_BARRELS.filter((barrel) => source…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m28 passed[39m[22m[90m (29)[39m
+[2m   Start at [22m 05:44:07
+[2m   Duration [22m 2.50s[2m (transform 927ms, setup 0ms, import 1.08s, tests 3.01s, environment 3ms)[22m
+
+
+::error file=/tmp/b462-mut/app/lib/__tests__/store-gradient-text.test.ts,title=app/lib/__tests__/store-gradient-text.test.ts > store gradient text removal (STORE-2b-3a%2C SYS-R450-STORE-STYLE-SCAN) > GT6%3A the deleted dead Store modules stay deleted and no barrel re-exports them (STORE-2b-3d-1),line=269,column=33::AssertionError: components/loading/PianoCurtainLoader.tsx: expected [ …(344) ] to not include 'components/loading/PianoCurtainLoader…'%0A ❯ app/lib/__tests__/store-gradient-text.test.ts:269:33%0A%0A
