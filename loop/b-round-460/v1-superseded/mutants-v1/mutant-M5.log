@@ -1,0 +1,79 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b461-scratch[39m
+
+ [31m❯[39m app/lib/__tests__/store-entrance-loader.test.tsx [2m([22m[2m45 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m44 skipped[39m[2m)[22m[32m 43[2mms[22m[39m
+     [2m[90m↓[39m[22m L1 renders nothing on the server and logs nothing
+     [2m[90m↓[39m[22m L2 shows a decorative overlay with no heading on first mount
+     [2m[90m↓[39m[22m L3 stays on screen for the 1450 ms minimum, exit fade included, never past 1900 ms
+     [2m[90m↓[39m[22m L4 lets pointer events through during the exit fade only
+     [2m[90m↓[39m[22m L5 a click on the overlay ends it immediately and for good
+       [2m[90m↓[39m[22m Escape at 300 ms removes the overlay and its keydown listener
+       [2m[90m↓[39m[22m Tab ends it like Escape without preventing the focus move
+       [2m[90m↓[39m[22m Shift+Tab ends it like Escape without preventing the focus move
+       [2m[90m↓[39m[22m other keys do not skip
+       [2m[90m↓[39m[22m removes the keydown listener after the natural finish
+       [2m[90m↓[39m[22m removes the keydown listener on unmount mid-animation
+     [2m[90m↓[39m[22m L7 shows once per session and never writes the old localStorage key
+     [2m[90m↓[39m[22m L8 ignores the old localStorage key and honours the session key
+     [2m[90m↓[39m[22m L9 never renders under prefers-reduced-motion and does not claim the session
+     [2m[90m↓[39m[22m L10 blocked storage renders nothing and does not throw
+     [2m[90m↓[39m[22m L10b a sessionStorage write failure renders nothing and does not throw
+     [2m[90m↓[39m[22m L11 leaves no stray timers or state updates after unmount
+     [2m[90m↓[39m[22m E1 the server renders a disabled cover style and the boot script
+     [2m[90m↓[39m[22m E1b the server render keeps the cover off even when a pending handshake exists
+     [2m[90m↓[39m[22m E2 on a fresh tab at / the boot script turns the cover on and claims the session
+     [2m[90m↓[39m[22m E3 a seen tab keeps the cover off
+     [2m[90m↓[39m[22m E3 reduced motion keeps the cover off
+     [2m[90m↓[39m[22m E3 another path keeps the cover off
+     [2m[90m↓[39m[22m E4 blocked storage keeps the cover off and does not throw
+     [2m[90m↓[39m[22m E5 the animated overlay takes over in the same commit and turns the cover off
+     [2m[90m↓[39m[22m E6 the timeline counts from the first cover frame: 1450 ms minimum, 1900 ms cap
+     [2m[90m↓[39m[22m E7 a takeover after the failsafe never replays the entrance
+     [2m[90m↓[39m[22m E8 Escape before hydration skips the cover and the entrance
+     [2m[90m↓[39m[22m E8 Tab before hydration skips the cover and the entrance
+     [2m[90m↓[39m[22m E8 click before hydration skips the cover and the entrance
+     [2m[90m↓[39m[22m E8b other keys before hydration keep the cover
+     [2m[90m↓[39m[22m E9 after the takeover the boot listeners are gone and the overlay owns the skip
+     [2m[90m↓[39m[22m E10 a client navigation to / after a seen entrance shows nothing
+     [2m[90m↓[39m[22m E11 the root layout renders the cover right after the stylesheet links
+     [2m[90m↓[39m[22m E12 a client navigation to / on a fresh tab still plays, as at HEAD
+     [2m[90m↓[39m[22m E13 a cover that is on without a start time is retired, not animated
+     [2m[90m↓[39m[22m E14 a click between the claim and the hand-off skips the animated overlay too
+     [2m[90m↓[39m[22m E15 a client re-render that replaces the cover style still plays the entrance and frees the boot listeners
+     [2m[90m↓[39m[22m E16 a skip after the style was replaced turns the new style off and skips the entrance
+     [2m[90m↓[39m[22m E17 a takeover after the failsafe frees the boot listeners
+     [2m[90m↓[39m[22m E18 with no takeover the boot listeners remove themselves after the failsafe fade
+     [2m[90m↓[39m[22m E19 a re-render after the failsafe keeps the cover off on a visible page
+     [2m[90m↓[39m[22m E20 a real hydration mismatch replaces the cover style, which takes the pending media and is handed over
+     [2m[90m↓[39m[22m E20b a real hydration mismatch after the failsafe renders the cover off
+[31m     [31m×[31m E21 a clean hydration keeps the boot-script cover node, its media and its start time[39m[32m 42[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m44 skipped[39m[90m (45)[39m
+[2m   Start at [22m 04:58:58
+[2m   Duration [22m 886ms[2m (transform 112ms, setup 0ms, import 333ms, tests 43ms, environment 387ms)[22m
+
+
+::error file=/tmp/b461-scratch/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SABA-B-13 static head cover and takeover > E21 a clean hydration keeps the boot-script cover node%2C its media and its start time,line=741,column=27::AssertionError: expected 1 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:741:27%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE21 a clean hydration keeps the boot-script cover node, its media and its start time
+[31m[1mAssertionError[22m: expected 1 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m741:27[22m[39m
+    [90m739| [39m      [34mhydrateHeadCover[39m({ foreignNode[33m:[39m [35mfalse[39m[33m,[39m elapsedMs[33m:[39m [34m160[39m })[33m;[39m
+    [90m740| [39m    [34mexpect[39m(recoverableErrors)[33m.[39m[34mtoHaveLength[39m([34m0[39m)[33m;[39m
+    [90m741| [39m    [34mexpect[39m(consoleErrors)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m742| [39m    [34mexpect[39m(hydratedCover)[33m.[39m[34mtoBe[39m(serverCover)[33m;[39m
+    [90m743| [39m    [34mexpect[39m(hydratedCover[33m.[39mmedia)[33m.[39m[34mtoBe[39m([32m'all'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

@@ -1,0 +1,136 @@
+2c2
+< index 738e8f9..1ab9104 100644
+---
+> index 738e8f9..861a766 100644
+21c21
+< @@ -349,6 +351,50 @@ function trackBootCaptureListeners() {
+---
+> @@ -349,6 +351,57 @@ function trackBootCaptureListeners() {
+37a38,45
+> +let hydratedHeadRoot: Root | null = null;
+> +
+> +function unmountHydratedHead() {
+> +  const root = hydratedHeadRoot;
+> +  hydratedHeadRoot = null;
+> +  if (root) act(() => root.unmount());
+> +}
+> +
+47d54
+< +  window.addEventListener('error', silenceReportedError);
+49,57c56,57
+< +  const roots: Root[] = [];
+< +  act(() => {
+< +    roots.push(
+< +      hydrateRoot(document.head, <EntranceCoverHead />, {
+< +        onRecoverableError: (error) => recoverableErrors.push(error),
+< +      }),
+< +    );
+< +  });
+< +  const unmountHead = () =>
+---
+> +  window.addEventListener('error', silenceReportedError);
+> +  try {
+59c59,61
+< +      for (const root of roots) root.unmount();
+---
+> +      hydratedHeadRoot = hydrateRoot(document.head, <EntranceCoverHead />, {
+> +        onRecoverableError: (error) => recoverableErrors.push(error),
+> +      });
+61c63,65
+< +  window.removeEventListener('error', silenceReportedError);
+---
+> +  } finally {
+> +    window.removeEventListener('error', silenceReportedError);
+> +  }
+66c70,73
+< +  return { serverCover, hydratedCover, recoverableErrors, consoleErrors, unmountHead };
+---
+> +  const hydrationMismatches = recoverableErrors.filter(
+> +    (error) => error instanceof Error && /hydrat/i.test(error.message),
+> +  ).length;
+> +  return { serverCover, hydratedCover, recoverableErrors, hydrationMismatches, consoleErrors };
+72c79,87
+< @@ -384,6 +430,16 @@ describe('SABA-B-13 static head cover and takeover', () => {
+---
+> @@ -359,6 +412,7 @@ describe('SABA-B-13 static head cover and takeover', () => {
+>    });
+>  
+>    afterEach(() => {
+> +    unmountHydratedHead();
+>      cleanup();
+>      act(() => {
+>        vi.runOnlyPendingTimers();
+> @@ -384,6 +438,20 @@ describe('SABA-B-13 static head cover and takeover', () => {
+80,83c95,102
+< +    expect(typeof window).toBe('undefined');
+< +    expect(renderToString(<EntranceCoverHead />)).toContain(
+< +      `<style id="${ENTRANCE_COVER_ID}" media="not all">`,
+< +    );
+---
+> +    try {
+> +      expect(typeof window).toBe('undefined');
+> +      expect(renderToString(<EntranceCoverHead />)).toContain(
+> +        `<style id="${ENTRANCE_COVER_ID}" media="not all">`,
+> +      );
+> +    } finally {
+> +      vi.unstubAllGlobals();
+> +    }
+89c108
+< @@ -471,8 +527,7 @@ describe('SABA-B-13 static head cover and takeover', () => {
+---
+> @@ -471,8 +539,7 @@ describe('SABA-B-13 static head cover and takeover', () => {
+99c118
+< @@ -491,10 +546,16 @@ describe('SABA-B-13 static head cover and takeover', () => {
+---
+> @@ -491,10 +558,16 @@ describe('SABA-B-13 static head cover and takeover', () => {
+116c135
+< @@ -515,7 +576,7 @@ describe('SABA-B-13 static head cover and takeover', () => {
+---
+> @@ -515,7 +588,7 @@ describe('SABA-B-13 static head cover and takeover', () => {
+125c144
+< @@ -638,4 +699,49 @@ describe('SABA-B-13 static head cover and takeover', () => {
+---
+> @@ -638,4 +711,60 @@ describe('SABA-B-13 static head cover and takeover', () => {
+132c151
+< +    const { serverCover, hydratedCover, recoverableErrors, unmountHead } = hydrateHeadCover({
+---
+> +    const { serverCover, hydratedCover, hydrationMismatches } = hydrateHeadCover({
+136c155
+< +    expect(recoverableErrors.length).toBeGreaterThan(0);
+---
+> +    expect(hydrationMismatches).toBeGreaterThan(0);
+147d165
+< +    unmountHead();
+152c170
+< +    const { serverCover, hydratedCover, recoverableErrors, unmountHead } = hydrateHeadCover({
+---
+> +    const { serverCover, hydratedCover, hydrationMismatches } = hydrateHeadCover({
+157c175
+< +    expect(recoverableErrors.length).toBeGreaterThan(0);
+---
+> +    expect(hydrationMismatches).toBeGreaterThan(0);
+160d177
+< +    unmountHead();
+165,166c182,185
+< +    const { serverCover, hydratedCover, recoverableErrors, consoleErrors, unmountHead } =
+< +      hydrateHeadCover({ foreignNode: false, elapsedMs: 160 });
+---
+> +    const { serverCover, hydratedCover, recoverableErrors, consoleErrors } = hydrateHeadCover({
+> +      foreignNode: false,
+> +      elapsedMs: 160,
+> +    });
+172c191,202
+< +    unmountHead();
+---
+> +  });
+> +
+> +  it('E21b a clean hydration after the failsafe leaves the boot-script media in place (React keeps hydrated attributes)', () => {
+> +    vi.advanceTimersByTime(500);
+> +    const { serverCover, hydratedCover, recoverableErrors, consoleErrors } = hydrateHeadCover({
+> +      foreignNode: false,
+> +      elapsedMs: ENTRANCE_FAILSAFE_MS,
+> +    });
+> +    expect(recoverableErrors).toHaveLength(0);
+> +    expect(consoleErrors).toBe(0);
+> +    expect(hydratedCover).toBe(serverCover);
+> +    expect(hydratedCover.media).toBe('all');

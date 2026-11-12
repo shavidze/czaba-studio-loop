@@ -1,0 +1,459 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c460-scratch[39m
+
+ [31m❯[39m app/lib/__tests__/store-entrance-loader.test.tsx [2m([22m[2m41 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 487[2mms[22m[39m
+     [32m✓[39m L1 renders nothing on the server and logs nothing[32m 4[2mms[22m[39m
+     [32m✓[39m L2 shows a decorative overlay with no heading on first mount[32m 165[2mms[22m[39m
+     [32m✓[39m L3 stays on screen for the 1450 ms minimum, exit fade included, never past 1900 ms[32m 16[2mms[22m[39m
+     [32m✓[39m L4 lets pointer events through during the exit fade only[32m 18[2mms[22m[39m
+     [32m✓[39m L5 a click on the overlay ends it immediately and for good[32m 15[2mms[22m[39m
+       [32m✓[39m Escape at 300 ms removes the overlay and its keydown listener[32m 12[2mms[22m[39m
+       [32m✓[39m Tab ends it like Escape without preventing the focus move[32m 13[2mms[22m[39m
+       [32m✓[39m Shift+Tab ends it like Escape without preventing the focus move[32m 21[2mms[22m[39m
+       [32m✓[39m other keys do not skip[32m 14[2mms[22m[39m
+       [32m✓[39m removes the keydown listener after the natural finish[32m 14[2mms[22m[39m
+       [32m✓[39m removes the keydown listener on unmount mid-animation[32m 12[2mms[22m[39m
+     [32m✓[39m L7 shows once per session and never writes the old localStorage key[32m 9[2mms[22m[39m
+     [32m✓[39m L8 ignores the old localStorage key and honours the session key[32m 11[2mms[22m[39m
+     [32m✓[39m L9 never renders under prefers-reduced-motion and does not claim the session[32m 1[2mms[22m[39m
+     [32m✓[39m L10 blocked storage renders nothing and does not throw[32m 1[2mms[22m[39m
+     [32m✓[39m L10b a sessionStorage write failure renders nothing and does not throw[32m 1[2mms[22m[39m
+     [32m✓[39m L11 leaves no stray timers or state updates after unmount[32m 9[2mms[22m[39m
+     [32m✓[39m E1 the server renders a disabled cover style and the boot script[32m 3[2mms[22m[39m
+     [32m✓[39m E2 on a fresh tab at / the boot script turns the cover on and claims the session[32m 9[2mms[22m[39m
+     [32m✓[39m E3 a seen tab keeps the cover off[32m 4[2mms[22m[39m
+     [32m✓[39m E3 reduced motion keeps the cover off[32m 4[2mms[22m[39m
+     [32m✓[39m E3 another path keeps the cover off[32m 3[2mms[22m[39m
+     [32m✓[39m E4 blocked storage keeps the cover off and does not throw[32m 2[2mms[22m[39m
+     [32m✓[39m E5 the animated overlay takes over in the same commit and turns the cover off[32m 11[2mms[22m[39m
+     [32m✓[39m E6 the timeline counts from the first cover frame: 1450 ms minimum, 1900 ms cap[32m 1[2mms[22m[39m
+[31m     [31m×[31m E7 a takeover after the failsafe never replays the entrance[39m[32m 17[2mms[22m[39m
+     [32m✓[39m E8 Escape before hydration skips the cover and the entrance[32m 7[2mms[22m[39m
+     [32m✓[39m E8 Tab before hydration skips the cover and the entrance[32m 3[2mms[22m[39m
+     [32m✓[39m E8 click before hydration skips the cover and the entrance[32m 3[2mms[22m[39m
+     [32m✓[39m E8b other keys before hydration keep the cover[32m 2[2mms[22m[39m
+     [32m✓[39m E9 after the takeover the boot listeners are gone and the overlay owns the skip[32m 9[2mms[22m[39m
+     [32m✓[39m E10 a client navigation to / after a seen entrance shows nothing[32m 2[2mms[22m[39m
+     [32m✓[39m E11 the root layout renders the cover right after the stylesheet links[32m 1[2mms[22m[39m
+     [32m✓[39m E12 a client navigation to / on a fresh tab still plays, as at HEAD[32m 12[2mms[22m[39m
+     [32m✓[39m E13 a cover that is on without a start time is retired, not animated[32m 3[2mms[22m[39m
+     [32m✓[39m E14 a click between the claim and the hand-off skips the animated overlay too[32m 13[2mms[22m[39m
+     [32m✓[39m E15 a client re-render that replaces the cover style still plays the entrance and frees the boot listeners[32m 15[2mms[22m[39m
+     [32m✓[39m E16 a skip after the style was replaced turns the new style off and skips the entrance[32m 3[2mms[22m[39m
+[31m     [31m×[31m E17 a takeover after the failsafe frees the boot listeners[39m[32m 10[2mms[22m[39m
+     [32m✓[39m E18 with no takeover the boot listeners remove themselves after the failsafe fade[32m 2[2mms[22m[39m
+[31m     [31m×[31m E19 a re-render after the failsafe keeps the cover off on a visible page[39m[32m 11[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m38 passed[39m[22m[90m (41)[39m
+[2m   Start at [22m 04:45:51
+[2m   Duration [22m 1.31s[2m (transform 112ms, setup 0ms, import 331ms, tests 487ms, environment 376ms)[22m
+
+
+::error file=/tmp/c460-scratch/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SABA-B-13 static head cover and takeover > E7 a takeover after the failsafe never replays the entrance,line=461,column=36::AssertionError: expected <div …(4)>…(8)</div> to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A<div%0A  aria-hidden="true"%0A  class="fixed inset-0 z-50 overflow-hidden"%0A  data-testid="entrance-loader"%0A  style="background-color: rgb(0, 0, 0); opacity: 1;"%0A>%0A  <div%0A    class="absolute inset-0 bg-black"%0A  />%0A  <div%0A    class="absolute top-0 left-1/2 -translate-x-1/2"%0A    style="width: 200%25; height: 120%25; background: conic-gradient(from 270deg at 50%25 0%25, transparent 0deg, transparent 70deg, rgba(255, 255, 255, 0.03) 85deg, rgba(255, 255, 255, 0.08) 90deg, rgba(255, 255, 255, 0.03) 95deg, transparent 110deg, transparent 360deg); opacity: 0; transform: scale(0.5);"%0A  />%0A  <div%0A    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"%0A    style="width: 500px; height: 500px; background: radial-gradient(rgba(255, 255, 255, 0.15) 0%25, rgba(255, 255, 255, 0.05) 40%25, transparent 70%25); filter: blur(40px); opacity: 0; transform: scale(0.3);"%0A  />%0A  <div%0A    class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[400px] h-[150px]"%0A    style="background: radial-gradient(top, rgba(255, 255, 255, 0.1) 0%25, transparent 70%25); filter: blur(20px); opacity: 0;"%0A  />%0A  <div%0A    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10"%0A    style="opacity: 0; transform: translateY(30px) scale(0.9);"%0A  >%0A    <span%0A      class="block text-5xl md:text-7xl font-bold text-foreground"%0A      style="letter-spacing: 0.3em;"%0A    >%0A      CZABA%0A    </span>%0A    <div%0A      class="h-[1px] mx-auto mt-4 mb-4 bg-brand/50"%0A      style="opacity: 0; width: 0px;"%0A    />%0A    <p%0A      class="text-sm text-muted tracking-[0.3em] uppercase"%0A      style="opacity: 0; transform: translateY(10px);"%0A    >%0A      Cinematic Sound Design%0A    </p>%0A  </div>%0A  <div%0A    class="absolute inset-0 pointer-events-none overflow-hidden"%0A  >%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(51.57034066611412%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(57.03175193641295%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(51.56266088916592%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(46.64268820028123%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(46.595639809505435%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(42.18876182676513%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(50.422587908787854%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(55.80214371191394%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(40.05377427258348%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(59.113893610027446%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(58.201712557683045%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(56.43062087194225%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(58.10367464888209%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(59.59323215100049%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(50.17045265756467%25) translateY(-10%25);"%0A    />%0A  </div>%0A  <div%0A    class="absolute inset-0 pointer-events-none"%0A    style="background: radial-gradient(transparent 30%25, rgba(0, 0, 0, 0.8) 100%25);"%0A  />%0A  <div%0A    class="absolute inset-0 pointer-events-none opacity-[0.04]"%0A    style="background-image: url(\"data:image/svg+xml,%253Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%253E%253Cfilter id='noise'%253E%253CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%253E%253C/filter%253E%253Crect width='100%2525' height='100%2525' filter='url(%2523noise)'/%253E%253C/svg%253E\");"%0A  />%0A</div>%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:461:36%0A%0A
+
+::error file=/tmp/c460-scratch/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SABA-B-13 static head cover and takeover > E17 a takeover after the failsafe frees the boot listeners,line=609,column=36::AssertionError: expected <div …(4)>…(8)</div> to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A<div%0A  aria-hidden="true"%0A  class="fixed inset-0 z-50 overflow-hidden"%0A  data-testid="entrance-loader"%0A  style="background-color: rgb(0, 0, 0); opacity: 1;"%0A>%0A  <div%0A    class="absolute inset-0 bg-black"%0A  />%0A  <div%0A    class="absolute top-0 left-1/2 -translate-x-1/2"%0A    style="width: 200%25; height: 120%25; background: conic-gradient(from 270deg at 50%25 0%25, transparent 0deg, transparent 70deg, rgba(255, 255, 255, 0.03) 85deg, rgba(255, 255, 255, 0.08) 90deg, rgba(255, 255, 255, 0.03) 95deg, transparent 110deg, transparent 360deg); opacity: 0; transform: scale(0.5);"%0A  />%0A  <div%0A    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"%0A    style="width: 500px; height: 500px; background: radial-gradient(rgba(255, 255, 255, 0.15) 0%25, rgba(255, 255, 255, 0.05) 40%25, transparent 70%25); filter: blur(40px); opacity: 0; transform: scale(0.3);"%0A  />%0A  <div%0A    class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[400px] h-[150px]"%0A    style="background: radial-gradient(top, rgba(255, 255, 255, 0.1) 0%25, transparent 70%25); filter: blur(20px); opacity: 0;"%0A  />%0A  <div%0A    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10"%0A    style="opacity: 0; transform: translateY(30px) scale(0.9);"%0A  >%0A    <span%0A      class="block text-5xl md:text-7xl font-bold text-foreground"%0A      style="letter-spacing: 0.3em;"%0A    >%0A      CZABA%0A    </span>%0A    <div%0A      class="h-[1px] mx-auto mt-4 mb-4 bg-brand/50"%0A      style="opacity: 0; width: 0px;"%0A    />%0A    <p%0A      class="text-sm text-muted tracking-[0.3em] uppercase"%0A      style="opacity: 0; transform: translateY(10px);"%0A    >%0A      Cinematic Sound Design%0A    </p>%0A  </div>%0A  <div%0A    class="absolute inset-0 pointer-events-none overflow-hidden"%0A  >%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(57.00626143259039%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(47.39540108717192%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(50.805727938258244%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(55.91968092605999%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(46.7305386365498%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(58.35131035159932%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(46.22568987296211%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(47.02003489828188%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(52.886441456612225%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(47.8075513186424%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(52.52188587100463%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(58.38191345472728%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(57.29032838178539%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(41.13139754974837%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(55.00708457477404%25) translateY(-10%25);"%0A    />%0A  </div>%0A  <div%0A    class="absolute inset-0 pointer-events-none"%0A    style="background: radial-gradient(transparent 30%25, rgba(0, 0, 0, 0.8) 100%25);"%0A  />%0A  <div%0A    class="absolute inset-0 pointer-events-none opacity-[0.04]"%0A    style="background-image: url(\"data:image/svg+xml,%253Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%253E%253Cfilter id='noise'%253E%253CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%253E%253C/filter%253E%253Crect width='100%2525' height='100%2525' filter='url(%2523noise)'/%253E%253C/svg%253E\");"%0A  />%0A</div>%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:609:36%0A%0A
+
+::error file=/tmp/c460-scratch/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SABA-B-13 static head cover and takeover > E19 a re-render after the failsafe keeps the cover off on a visible page,line=637,column=36::AssertionError: expected <div …(4)>…(8)</div> to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A<div%0A  aria-hidden="true"%0A  class="fixed inset-0 z-50 overflow-hidden"%0A  data-testid="entrance-loader"%0A  style="background-color: rgb(0, 0, 0); opacity: 1;"%0A>%0A  <div%0A    class="absolute inset-0 bg-black"%0A  />%0A  <div%0A    class="absolute top-0 left-1/2 -translate-x-1/2"%0A    style="width: 200%25; height: 120%25; background: conic-gradient(from 270deg at 50%25 0%25, transparent 0deg, transparent 70deg, rgba(255, 255, 255, 0.03) 85deg, rgba(255, 255, 255, 0.08) 90deg, rgba(255, 255, 255, 0.03) 95deg, transparent 110deg, transparent 360deg); opacity: 0; transform: scale(0.5);"%0A  />%0A  <div%0A    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"%0A    style="width: 500px; height: 500px; background: radial-gradient(rgba(255, 255, 255, 0.15) 0%25, rgba(255, 255, 255, 0.05) 40%25, transparent 70%25); filter: blur(40px); opacity: 0; transform: scale(0.3);"%0A  />%0A  <div%0A    class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[400px] h-[150px]"%0A    style="background: radial-gradient(top, rgba(255, 255, 255, 0.1) 0%25, transparent 70%25); filter: blur(20px); opacity: 0;"%0A  />%0A  <div%0A    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10"%0A    style="opacity: 0; transform: translateY(30px) scale(0.9);"%0A  >%0A    <span%0A      class="block text-5xl md:text-7xl font-bold text-foreground"%0A      style="letter-spacing: 0.3em;"%0A    >%0A      CZABA%0A    </span>%0A    <div%0A      class="h-[1px] mx-auto mt-4 mb-4 bg-brand/50"%0A      style="opacity: 0; width: 0px;"%0A    />%0A    <p%0A      class="text-sm text-muted tracking-[0.3em] uppercase"%0A      style="opacity: 0; transform: translateY(10px);"%0A    >%0A      Cinematic Sound Design%0A    </p>%0A  </div>%0A  <div%0A    class="absolute inset-0 pointer-events-none overflow-hidden"%0A  >%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(52.973998082279714%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(45.5296360752719%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(44.21468436848613%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(58.847038733693736%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(45.78983976528188%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(40.61597359037308%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(49.36864826212016%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(47.87873102499211%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(54.072663974639724%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(49.216633727483696%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(45.789514303233226%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(45.891481236700095%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(54.85454378851813%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(49.245295823374924%25) translateY(-10%25);"%0A    />%0A    <div%0A      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"%0A      style="opacity: 0; transform: translateX(48.75143827099915%25) translateY(-10%25);"%0A    />%0A  </div>%0A  <div%0A    class="absolute inset-0 pointer-events-none"%0A    style="background: radial-gradient(transparent 30%25, rgba(0, 0, 0, 0.8) 100%25);"%0A  />%0A  <div%0A    class="absolute inset-0 pointer-events-none opacity-[0.04]"%0A    style="background-image: url(\"data:image/svg+xml,%253Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%253E%253Cfilter id='noise'%253E%253CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%253E%253C/filter%253E%253Crect width='100%2525' height='100%2525' filter='url(%2523noise)'/%253E%253C/svg%253E\");"%0A  />%0A</div>%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:637:36%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE7 a takeover after the failsafe never replays the entrance
+[31m[1mAssertionError[22m: expected <div …(4)>…(8)</div> to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+<div
+  aria-hidden="true"
+  class="fixed inset-0 z-50 overflow-hidden"
+  data-testid="entrance-loader"
+  style="background-color: rgb(0, 0, 0); opacity: 1;"
+>
+  <div
+    class="absolute inset-0 bg-black"
+  />
+  <div
+    class="absolute top-0 left-1/2 -translate-x-1/2"
+    style="width: 200%; height: 120%; background: conic-gradient(from 270deg at 50% 0%, transparent 0deg, transparent 70deg, rgba(255, 255, 255, 0.03) 85deg, rgba(255, 255, 255, 0.08) 90deg, rgba(255, 255, 255, 0.03) 95deg, transparent 110deg, transparent 360deg); opacity: 0; transform: scale(0.5);"
+  />
+  <div
+    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+    style="width: 500px; height: 500px; background: radial-gradient(rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 40%, transparent 70%); filter: blur(40px); opacity: 0; transform: scale(0.3);"
+  />
+  <div
+    class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[400px] h-[150px]"
+    style="background: radial-gradient(top, rgba(255, 255, 255, 0.1) 0%, transparent 70%); filter: blur(20px); opacity: 0;"
+  />
+  <div
+    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10"
+    style="opacity: 0; transform: translateY(30px) scale(0.9);"
+  >
+    <span
+      class="block text-5xl md:text-7xl font-bold text-foreground"
+      style="letter-spacing: 0.3em;"
+    >
+      CZABA
+    </span>
+    <div
+      class="h-[1px] mx-auto mt-4 mb-4 bg-brand/50"
+      style="opacity: 0; width: 0px;"
+    />
+    <p
+      class="text-sm text-muted tracking-[0.3em] uppercase"
+      style="opacity: 0; transform: translateY(10px);"
+    >
+      Cinematic Sound Design
+    </p>
+  </div>
+  <div
+    class="absolute inset-0 pointer-events-none overflow-hidden"
+  >
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(51.57034066611412%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(57.03175193641295%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(51.56266088916592%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(46.64268820028123%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(46.595639809505435%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(42.18876182676513%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(50.422587908787854%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(55.80214371191394%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(40.05377427258348%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(59.113893610027446%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(58.201712557683045%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(56.43062087194225%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(58.10367464888209%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(59.59323215100049%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(50.17045265756467%) translateY(-10%);"
+    />
+  </div>
+  <div
+    class="absolute inset-0 pointer-events-none"
+    style="background: radial-gradient(transparent 30%, rgba(0, 0, 0, 0.8) 100%);"
+  />
+  <div
+    class="absolute inset-0 pointer-events-none opacity-[0.04]"
+    style="background-image: url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\");"
+  />
+</div>
+
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m461:36[22m[39m
+    [90m459| [39m    vi[33m.[39m[34madvanceTimersByTime[39m([33mENTRANCE_FAILSAFE_MS[39m)[33m;[39m
+    [90m460| [39m    [35mconst[39m { container } [33m=[39m [34mrender[39m([33m<[39m[33mSpotlightLoader[39m [33m/[39m[33m>[39m)[33m;[39m
+    [90m461| [39m    [34mexpect[39m([34mfindOverlay[39m(container))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m462| [39m    [34mexpect[39m(cover[33m.[39m[34mgetAttribute[39m([32m'data-state'[39m))[33m.[39m[34mtoBe[39m([32m'expired'[39m)[33m;[39m
+    [90m463| [39m    [34mexpect[39m(cover[33m.[39mmedia)[33m.[39m[34mtoBe[39m([32m'not all'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE17 a takeover after the failsafe frees the boot listeners
+[31m[1mAssertionError[22m: expected <div …(4)>…(8)</div> to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+<div
+  aria-hidden="true"
+  class="fixed inset-0 z-50 overflow-hidden"
+  data-testid="entrance-loader"
+  style="background-color: rgb(0, 0, 0); opacity: 1;"
+>
+  <div
+    class="absolute inset-0 bg-black"
+  />
+  <div
+    class="absolute top-0 left-1/2 -translate-x-1/2"
+    style="width: 200%; height: 120%; background: conic-gradient(from 270deg at 50% 0%, transparent 0deg, transparent 70deg, rgba(255, 255, 255, 0.03) 85deg, rgba(255, 255, 255, 0.08) 90deg, rgba(255, 255, 255, 0.03) 95deg, transparent 110deg, transparent 360deg); opacity: 0; transform: scale(0.5);"
+  />
+  <div
+    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+    style="width: 500px; height: 500px; background: radial-gradient(rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 40%, transparent 70%); filter: blur(40px); opacity: 0; transform: scale(0.3);"
+  />
+  <div
+    class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[400px] h-[150px]"
+    style="background: radial-gradient(top, rgba(255, 255, 255, 0.1) 0%, transparent 70%); filter: blur(20px); opacity: 0;"
+  />
+  <div
+    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10"
+    style="opacity: 0; transform: translateY(30px) scale(0.9);"
+  >
+    <span
+      class="block text-5xl md:text-7xl font-bold text-foreground"
+      style="letter-spacing: 0.3em;"
+    >
+      CZABA
+    </span>
+    <div
+      class="h-[1px] mx-auto mt-4 mb-4 bg-brand/50"
+      style="opacity: 0; width: 0px;"
+    />
+    <p
+      class="text-sm text-muted tracking-[0.3em] uppercase"
+      style="opacity: 0; transform: translateY(10px);"
+    >
+      Cinematic Sound Design
+    </p>
+  </div>
+  <div
+    class="absolute inset-0 pointer-events-none overflow-hidden"
+  >
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(57.00626143259039%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(47.39540108717192%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(50.805727938258244%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(55.91968092605999%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(46.7305386365498%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(58.35131035159932%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(46.22568987296211%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(47.02003489828188%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(52.886441456612225%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(47.8075513186424%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(52.52188587100463%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(58.38191345472728%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(57.29032838178539%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(41.13139754974837%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(55.00708457477404%) translateY(-10%);"
+    />
+  </div>
+  <div
+    class="absolute inset-0 pointer-events-none"
+    style="background: radial-gradient(transparent 30%, rgba(0, 0, 0, 0.8) 100%);"
+  />
+  <div
+    class="absolute inset-0 pointer-events-none opacity-[0.04]"
+    style="background-image: url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\");"
+  />
+</div>
+
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m609:36[22m[39m
+    [90m607| [39m    vi[33m.[39m[34madvanceTimersByTime[39m([34m1[39m)[33m;[39m
+    [90m608| [39m    [35mconst[39m { container } [33m=[39m [34mrender[39m([33m<[39m[33mSpotlightLoader[39m [33m/[39m[33m>[39m)[33m;[39m
+    [90m609| [39m    [34mexpect[39m([34mfindOverlay[39m(container))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m610| [39m    [34mexpect[39m(window[33m.[39m__czabaEntrance[33m?.[39mstate)[33m.[39m[34mtoBe[39m([32m'expired'[39m)[33m;[39m
+    [90m611| [39m    [34mexpect[39m([34mbootListenersLeft[39m())[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE19 a re-render after the failsafe keeps the cover off on a visible page
+[31m[1mAssertionError[22m: expected <div …(4)>…(8)</div> to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+<div
+  aria-hidden="true"
+  class="fixed inset-0 z-50 overflow-hidden"
+  data-testid="entrance-loader"
+  style="background-color: rgb(0, 0, 0); opacity: 1;"
+>
+  <div
+    class="absolute inset-0 bg-black"
+  />
+  <div
+    class="absolute top-0 left-1/2 -translate-x-1/2"
+    style="width: 200%; height: 120%; background: conic-gradient(from 270deg at 50% 0%, transparent 0deg, transparent 70deg, rgba(255, 255, 255, 0.03) 85deg, rgba(255, 255, 255, 0.08) 90deg, rgba(255, 255, 255, 0.03) 95deg, transparent 110deg, transparent 360deg); opacity: 0; transform: scale(0.5);"
+  />
+  <div
+    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+    style="width: 500px; height: 500px; background: radial-gradient(rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 40%, transparent 70%); filter: blur(40px); opacity: 0; transform: scale(0.3);"
+  />
+  <div
+    class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[400px] h-[150px]"
+    style="background: radial-gradient(top, rgba(255, 255, 255, 0.1) 0%, transparent 70%); filter: blur(20px); opacity: 0;"
+  />
+  <div
+    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10"
+    style="opacity: 0; transform: translateY(30px) scale(0.9);"
+  >
+    <span
+      class="block text-5xl md:text-7xl font-bold text-foreground"
+      style="letter-spacing: 0.3em;"
+    >
+      CZABA
+    </span>
+    <div
+      class="h-[1px] mx-auto mt-4 mb-4 bg-brand/50"
+      style="opacity: 0; width: 0px;"
+    />
+    <p
+      class="text-sm text-muted tracking-[0.3em] uppercase"
+      style="opacity: 0; transform: translateY(10px);"
+    >
+      Cinematic Sound Design
+    </p>
+  </div>
+  <div
+    class="absolute inset-0 pointer-events-none overflow-hidden"
+  >
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(52.973998082279714%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(45.5296360752719%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(44.21468436848613%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(58.847038733693736%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(45.78983976528188%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(40.61597359037308%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(49.36864826212016%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(47.87873102499211%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(54.072663974639724%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(49.216633727483696%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(45.789514303233226%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(45.891481236700095%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(54.85454378851813%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(49.245295823374924%) translateY(-10%);"
+    />
+    <div
+      class="absolute w-[2px] h-[2px] rounded-full bg-white/50"
+      style="opacity: 0; transform: translateX(48.75143827099915%) translateY(-10%);"
+    />
+  </div>
+  <div
+    class="absolute inset-0 pointer-events-none"
+    style="background: radial-gradient(transparent 30%, rgba(0, 0, 0, 0.8) 100%);"
+  />
+  <div
+    class="absolute inset-0 pointer-events-none opacity-[0.04]"
+    style="background-image: url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\");"
+  />
+</div>
+
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m637:36[22m[39m
+    [90m635| [39m    [34mexpect[39m(replaced[33m.[39mmedia)[33m.[39m[34mtoBe[39m([32m'not all'[39m)[33m;[39m
+    [90m636| [39m    [35mconst[39m { container } [33m=[39m [34mrender[39m([33m<[39m[33mSpotlightLoader[39m [33m/[39m[33m>[39m)[33m;[39m
+    [90m637| [39m    [34mexpect[39m([34mfindOverlay[39m(container))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m638| [39m    [34mexpect[39m(window[33m.[39m__czabaEntrance[33m?.[39mstate)[33m.[39m[34mtoBe[39m([32m'expired'[39m)[33m;[39m
+    [90m639| [39m    [34mexpect[39m(replaced[33m.[39mmedia)[33m.[39m[34mtoBe[39m([32m'not all'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+

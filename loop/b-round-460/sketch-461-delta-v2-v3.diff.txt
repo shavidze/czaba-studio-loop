@@ -1,0 +1,61 @@
+2c2
+< index 738e8f9..861a766 100644
+---
+> index 738e8f9..c1ad553 100644
+144c144
+< @@ -638,4 +711,60 @@ describe('SABA-B-13 static head cover and takeover', () => {
+---
+> @@ -638,4 +711,61 @@ describe('SABA-B-13 static head cover and takeover', () => {
+148a149,174
+> +  // React-ის dev build hydration-ის გაფრთხილებას მოდულზე ერთხელ ბეჭდავს: სუფთა hydration-ის რიგები mismatch-ის რიგებამდე უნდა იყოს (M5)
+> +  it('E21 a clean hydration keeps the boot-script cover node, its media and its start time', () => {
+> +    vi.advanceTimersByTime(500);
+> +    const { serverCover, hydratedCover, recoverableErrors, consoleErrors } = hydrateHeadCover({
+> +      foreignNode: false,
+> +      elapsedMs: 160,
+> +    });
+> +    expect(recoverableErrors).toHaveLength(0);
+> +    expect(consoleErrors).toBe(0);
+> +    expect(hydratedCover).toBe(serverCover);
+> +    expect(hydratedCover.media).toBe('all');
+> +    expect(hydratedCover.getAttribute('data-start')).toBe(String(window.__czabaEntrance?.start));
+> +  });
+> +
+> +  it('E21b a clean hydration after the failsafe leaves the boot-script media in place (React keeps hydrated attributes)', () => {
+> +    vi.advanceTimersByTime(500);
+> +    const { serverCover, hydratedCover, recoverableErrors, consoleErrors } = hydrateHeadCover({
+> +      foreignNode: false,
+> +      elapsedMs: ENTRANCE_FAILSAFE_MS,
+> +    });
+> +    expect(recoverableErrors).toHaveLength(0);
+> +    expect(consoleErrors).toBe(0);
+> +    expect(hydratedCover).toBe(serverCover);
+> +    expect(hydratedCover.media).toBe('all');
+> +  });
+> +
+178,202d203
+< +  });
+< +
+< +  it('E21 a clean hydration keeps the boot-script cover node, its media and its start time', () => {
+< +    vi.advanceTimersByTime(500);
+< +    const { serverCover, hydratedCover, recoverableErrors, consoleErrors } = hydrateHeadCover({
+< +      foreignNode: false,
+< +      elapsedMs: 160,
+< +    });
+< +    expect(recoverableErrors).toHaveLength(0);
+< +    expect(consoleErrors).toBe(0);
+< +    expect(hydratedCover).toBe(serverCover);
+< +    expect(hydratedCover.media).toBe('all');
+< +    expect(hydratedCover.getAttribute('data-start')).toBe(String(window.__czabaEntrance?.start));
+< +  });
+< +
+< +  it('E21b a clean hydration after the failsafe leaves the boot-script media in place (React keeps hydrated attributes)', () => {
+< +    vi.advanceTimersByTime(500);
+< +    const { serverCover, hydratedCover, recoverableErrors, consoleErrors } = hydrateHeadCover({
+< +      foreignNode: false,
+< +      elapsedMs: ENTRANCE_FAILSAFE_MS,
+< +    });
+< +    expect(recoverableErrors).toHaveLength(0);
+< +    expect(consoleErrors).toBe(0);
+< +    expect(hydratedCover).toBe(serverCover);
+< +    expect(hydratedCover.media).toBe('all');
