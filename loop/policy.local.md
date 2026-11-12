@@ -701,12 +701,12 @@ The white circle (seek thumb) on the Store's audio player jumps ahead of the bra
 **Fix:** Ensure thumb position and progress bar width update in the same animation frame. This is likely a CSS transition timing mismatch — the thumb uses no transition while the bar uses a CSS transition with a delay.
 **Priority:** Medium — visible on every product page.
 
-## Saba feedback, 2026-11-12: Ctrl+K menu items visible in header
+## Saba feedback, 2026-11-12: Ctrl+K menu needs more content than header + Gift Cards in header
 
-The Ctrl+K (command palette / search) keyboard shortcut menus should NOT be visible in the Store header. They are showing when they shouldn't be.
-
-**Where:** Store header / navigation component
-**Priority:** Medium — visible to all users.
+Ctrl+K ჰედერში ჩანს და ეს ნორმალურია. მაგრამ:
+- Ctrl+K მენიუში მეტი content/options უნდა იყოს ვიდრე ჰედერში (search, recent, shortcuts, etc.)
+- **Gift Cards-ს ჰედერში ცალკე ადგილი არ აქვს** — Saba-ს კითხვა: უნდა ჰქონდეს?
+**Status:** Pending Saba's decision + design review
 
 ## Saba feedback, 2026-11-12: Scroll is not smooth on main page / free-downloads
 
