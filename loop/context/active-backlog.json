@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-12T16:36:08.292Z",
-  "current_task": "Round 472: STORE-2c-1 fix-up - scope FN4 to the store @theme and pin the font tokens (C-R471-01), then the full round-471 verification (current-task.md, D-29z1665)",
+  "_generatedUtc": "2026-11-12T16:59:29.577Z",
+  "current_task": "Round 473: STORE-2c-1 doc fix-up - doc 306 l.4/l.78/l.79/l.90 exact text + whole-doc accuracy grant (C-R472-01); C short route (scope, doc vs test, smoke, claims) (current-task.md, D-29z1671)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -255,6 +255,48 @@
     {
       "id": "STUDIO-PERFORMANCE",
       "status": "done"
+    },
+    {
+      "id": "DPG-FIX",
+      "status": "queued, next feature block after STORE-2c-1 closes (D-29z1669); not dispatched in round 473 because P0 rewrites app.css, which carries the unpublished 2c-1 change",
+      "source": "Saba 2026-11-12 policy section 'Design philosophy acceptance gate' / 'DPG-FIX block - IMMEDIATE PRIORITY (before STORE-3)'; first gate 3.5/10 (design-philosopher), 4/10 (product-designer)",
+      "priority": "Saba: takes priority over STORE-2c/3/4/5 and all other work; loop does not advance to STORE-3 until both agents score 10/10",
+      "order": {
+        "P0": [
+          "DPG-TEAL-PURGE",
+          "DPG-GRADIENT-TOKENS",
+          "DPG-SPOTLIGHT-FIX",
+          "DPG-DOCS-UPDATE",
+          "DPG-UNDEFINED-TOKENS"
+        ],
+        "P1": [
+          "DPG-LOGO",
+          "DPG-BUTTON-CLEANUP",
+          "DPG-FOOTER-LINKS",
+          "DPG-CSS-DEDUP",
+          "DPG-FONT-RESOLVE",
+          "DPG-COLOR-CONSOLIDATE"
+        ],
+        "P2": [
+          "DPG-HERO-SIMPLIFY",
+          "DPG-SCROLL-ANIM",
+          "DPG-INTERACTION-FIX",
+          "DPG-SKELETON-WARM",
+          "DPG-DECORATIVE-PURGE",
+          "DPG-FONT-SIZES",
+          "DPG-COPY-VOICE"
+        ]
+      },
+      "re_review": "root re-runs design-philosopher + product-designer after each of P0, P1, P2; findings below 10/10 become loop tasks",
+      "rulings_d29z1669": {
+        "vs_2c2_cap": "DPG P0 goes before STORE-2c-2; Saba's later DPG priority overrides the D-29z1660 3-round cap on the 2c-1 intermediate state (headings at 700 render the 600 face without fake bold, C round 472 C5)",
+        "vs_regression": "REGRESSION-2026-11-13 still runs first when the planning date is on/after 2026-11-13 (standing user rule; guards published state; one round); root may override",
+        "font_resolve": "DPG-FONT-RESOLVE (Inter vs Instrument Sans) = STORE-2c-1..2c-4; 2c-1 is the token half; 2c-2..2c-4 are scheduled inside DPG P1 at that slot",
+        "keep_list": "binding: restyle only (LeadMagnet, Free Samples, SpecialOffers, Limited, testimonials and stats)",
+        "root_only": "DPG-DOCS-UPDATE edits to .claude/primitives/* are proposals for Saba (retro rule); public/** (logo assets) is root-only; email.server.ts was deleted in round 462; legacy /studio CSS frozen per 2026-11-10 legacy policy unless root says otherwise (ROOT-REQ-DPG-GATE-REPORT)",
+        "inventory": "b-round-472/teal-inventory.txt (exact-value grep; the next B planning must run a hue-range scan (160-200 deg) for every colour literal and Tailwind teal-/cyan- classes and read app/lib/__tests__/store-live-teal.test.ts before sizing P0)"
+      },
+      "added": "2026-11-12 B round 472 -> 473 planning"
     },
     {
       "id": "STORE-REDESIGN",
@@ -6813,23 +6855,33 @@
       ],
       "severity": "medium",
       "origin": "B spec",
-      "status": "fix dispatched round 472 (D-29z1662, D-29z1665)",
+      "status": "fix verified C round 472 C10 (FN4 red on georgia-serif/no-mono/commented-mono/head-css); closes when STORE-2c-1 is published (D-29z1667)",
       "title": "Round-471 FN4 scanned all of app.css; the obsidian block alone supplied the three families, so wrong store @theme font tokens (--font-serif: Georgia; --font-mono deleted) passed",
       "evidence": "c-round-471.md C10, a-round-471/mut-tree-*.log",
       "repro": "c-round-471.json bugs[0].steps",
       "added": "2026-11-12 B round 471 -> 472 planning"
+    },
+    {
+      "id": "C-R472-01",
+      "aliases": [
+        "A-R472-REVIEW-M1"
+      ],
+      "severity": "medium",
+      "origin": "B grant scope",
+      "status": "fix dispatched round 473 (D-29z1668, D-29z1671)",
+      "title": "Doc 306 l.79 still describes the round-471 FN4 (whole file, obsidian included); l.78 misses INSTRUMENT_SANS_STACK/STORE_THEME_FONT_TOKENS; l.90 says FN6 forbids only single quotes",
+      "evidence": "c-round-472.md C12, c-round-472.json bugs[0], a-round-472.md STOP",
+      "repro": "c-round-472.json bugs[0].steps",
+      "added": "2026-11-12 B round 472 -> 473 planning"
+    },
+    {
+      "id": "C-R472-EVID-SPECIALOFFERS",
+      "severity": "info",
+      "status": "open evidence (D-29z1672): unverifiable on mock data; owner ",
+      "title": "Home SpecialOffers shows no text on the cloud mock (HEAD and TREE); keep-list row cannot be seen in "
     }
   ],
   "recent_rounds": [
-    {
-      "round": 463,
-      "task": "current-task.md",
-      "decision": "D-29z1633",
-      "type": "STORE-2b-3d-2: delete dead Store CSS rules (306 blocks + 6 keyframes) + C-R462-01 doc-301 fix",
-      "status": "c_pass_published",
-      "note": "baseline eb4d6df (gate 462 published); A applies b-round-462/sketch-463.patch.txt v2 sha f299877b; grants = b-round-462/grants-463.txt (7 paths)",
-      "result": "C round 463 PASS (c-round-463.json C1-C10, browserVerified/realVerified true; 1 Low C-R463-01 origin B spec = confirmedBy on A-R463-REVIEW-M1); gate 463 published d55ec17 (review COMMIT OK, all Lows) (D-29z1634)"
-    },
     {
       "round": 464,
       "task": "current-task.md",
@@ -6902,8 +6954,17 @@
       "task": "current-task.md",
       "decision": "D-29z1665",
       "type": "STORE-2c-1 fix-up: FN4 scoped to store @theme + exact token pins, FN6 hardened (C-R471-01); doc 306 rewrite; full C1-C14",
+      "status": "C FAIL (C-R472-01 doc only); gate skipped",
+      "note": "baseline = HEAD 5cd9645 + round-471 tree (3 paths, diff sha 60a7043de64c22c8); A applies b-round-471/sketch-472.patch.txt; claims b-round-471/claims-472.sh",
+      "result": "c-round-472.json: browserVerified true, C1-C11/C13/C14 PASS, C12 FAIL (D-29z1667)"
+    },
+    {
+      "round": 473,
+      "task": "current-task.md",
+      "decision": "D-29z1671",
+      "type": "STORE-2c-1 doc fix-up (C-R472-01): doc 306 exact lines + whole-doc accuracy grant",
       "status": "dispatched",
-      "note": "baseline = HEAD 5cd9645 + round-471 tree (3 paths, diff sha 60a7043de64c22c8); A applies b-round-471/sketch-472.patch.txt; claims b-round-471/claims-472.sh"
+      "note": "baseline HEAD 5cd9645 + 3-path tree (diff 7a5ee8da803b7379, app.css d3af7582, test bb46efc7); claims b-round-472/claims-473.sh"
     }
   ],
   "other_keys": [
