@@ -1,112 +1,155 @@
-# Round 478: DPG-P0-3b, the design reference docs in Obsidian & Brass (last DPG P0 stage)
+# Round 479: DPG-FOOTER-LINKS. Store internal links navigate inside the app (DPG P1)
 
-**Planned by:** B, at the round 477 → 478 planning on 2026-11-12 (`b-round-477.md`).
-- **Advisor:** available, consulted after orientation and before hand-off. Its gaps are closed below: lessons read, per-line classes, scan universe, `color-obsidian` location, the full fail list, name→value checks, a mechanical scratch run, docs readers and a C4 probe.
-- **Archive:** the round-477 task is `tasks/round-477.md` (byte-identical, `cmp`).
-- **What this round is:** DPG-DOCS-UPDATE (policy "DPG-FIX block", P0 item 4, and DPG rule 2 "token change = docs change"). A rewrites the stale teal/orange design reference docs so they state the live `app.css` `@theme` values. **Docs only; no `app/**` file changes.** Regression is not due: `date -u` at planning was 2026-11-12, and `regression-last.json` says on or after 2026-11-13.
+**Planned by:** B, at the round 478 → 479 planning on 2026-11-12 (`b-round-478.md`).
+- **Advisor:** available. Consulted twice: after orientation, and before hand-off. The second pass found that the focus helper also fired on Ctrl/middle clicks that do not navigate. Both passes are closed below.
+- **Archive:** the round-478 task is `tasks/round-478.md` (byte-identical, `cmp`).
+- **Regression is not due.** `date -u` was 2026-11-12 20:58, and `regression-last.json` says on or after 2026-11-13.
+
+**What this round is:** DPG-FIX P1 item 3, "Change `<a>` to `<Link>` in Footer.tsx (full page reload kills premium feel)". The scope is widened to the same root cause: a full document reload on an internal Store link. Nothing on screen changes. What changes is that the page no longer reloads, so the entrance cover, fonts and app state are not re-fetched or re-run.
 
 ## Decisions (`backlog.json` `decisions_log_b`)
-- **D-29z1691: round 477 result.** C PASS, `browserVerified`/`realVerified` true, gate 477 published `10791ac`. DPG-P0-3a (DPG-SPOTLIGHT-FIX + the DPG-LOGO header colour) is C-verified and **awaits the DP gate** (DPG rule 4: not მზადაა until both reviewers give 10/10). GATE460-2 (C3: mutant M7 turns P4 red), A-R460-REVIEW-5 (C1: sketch sha256, comment fix) and the portal guard (C3: mutant M8 turns P1 red; C-R190-INFO I1, A-R190-SIGNALS #1) close. SABA-B-16 stays open (asset unnamed). C's notes (product hero white edge-light, brass "Sign In") are DP-gate inputs, not bugs.
-- **D-29z1692: the scope and the four classes of hits (this task).** B ran a hue-range scanner (`b-round-477/tools/hue-scan.py`: hex 3/4/6/8, `rgb[a]`, `hsl[a]` with hue 160–200° = TEAL, hue 25–45° with saturation ≥ 70 % = ORANGE, plus the words teal/cyan/turquoise/orange) over `docs/design` and the Store copy of `docs/technical/store-redesign/direction-decision.md`: **82 hit lines** [K2]. Each line is ruled into one class:
-  1. **Our stale tokens and guidance → rewrite** (55 lines): `DESIGN_SYSTEM.md`, `style-guide.md`, `components/button.md`, `audit-design.md` (the design-auditor checklist), `design-tokens.json`, `box-render-specs.md` l.110 [K19], `awwwards-improvements.md` (proposal snippets an agent would copy).
-  2. **Competitor facts → keep:** `design-systems-reference.md` SOUNDRAW rows.
-  3. **Dated measurements and dated audits → keep the body, add a banner:** `wcag-audit.md` (2025-01-03 ratios; swapping a hex would make a ratio false), `design-audit.md` (2026-01-09), `star-brand-audit.md` (2026-03-07, including its l.168 [K19] description of legacy `--mc-*` CSS), `design-systems-reference.md` (its CZABA row and snippet are the old state it scored). `wcag-audit.md` also gains a new section with ratios B computed for the live palette.
-  4. **Not old identity → keep:** `box-render-specs.md` l.54–55 (the Gold pack box colour, a product packaging palette) and `DESIGN_SYSTEM.md` version-history row 2.1 (l.1536, a history record) [K19].
+- **D-29z1695, round 478 result:**
+  - C PASS. `browserVerified`/`realVerified` are true. Gate 478 published `75a6028`.
+  - DPG-DOCS-UPDATE is C-verified and **awaits the DP gate**. DPG P0 is complete on C evidence, so root re-runs the DP gate.
+  - C-R478-01 → `deferred_low_polish`.
+- **D-29z1696, rulings on A-478's open review items:**
+  - H2 is accepted.
+  - M3, L9 and L11 → Low B-R478-BANNER-DATE (origin: B spec), deferred.
+  - M4 and gate finding 3 → input to DPG-COLOR-CONSOLIDATE (SIG-R478-COOL-NEUTRAL-HUE).
+  - L6 extends SIG-R478-AWWWARDS-GLOW.
+  - The `direction-decision.md:18` misquote → Low B-R478-DD-QUOTE.
+  - The gate's checker-as-CI note → SIG-R478-DOC-TOKEN-CHECKER-CI. It is not tasked.
+- **D-29z1697, scope and P1 order:**
+  - **Order.** DPG-LOGO's serif half is `awaiting_user`. DPG-BUTTON-CLEANUP needs `app/styles/app.css`, which is globally forbidden and needs a narrow grant, plus a Button migration across six files and a product-designer pass, so it is the next P1 round. FOOTER-LINKS depends on neither.
+  - **Inventory.** It covers every `<a` tag in `app/**`, parsed as whole tags.
+  - **In scope:**
+    - Footer: 9 links;
+    - `CookieConsent` → `/privacy`;
+    - `ProductSection` "View all" → `/store` (home);
+    - `privacy.tsx` → `/cookies`;
+    - `terms.tsx` → `/license`;
+    - `faq.tsx` "Contact Us" → `/hire-us`.
+  - **Ruled out:**
 
-  Classes 2–4 are the **27-line residual list** `b-round-477/residual-478.tsv` (file + exact line text, compared by content, so a banner's line shift does not matter). The residual is deliberate, and root should read it as such.
+    | Link | Reason |
+    |---|---|
+    | `ErrorBoundary` "/" | A full reload is the error recovery |
+    | `UserDropdown` | Imported nowhere (SIG-R479-USERDROPDOWN-DEAD) |
+    | `SignUpForm` | Inside the auth modal, which would stay open (SIG-R479-AUTH-MODAL-LINKS) |
+    | `account.orders` `/music` | Dead target (B-R478-DEAD-MUSIC-LINK) |
+    | `account.downloads` | Protected |
+    | Every `mailto:` and `https:` link | Not internal |
+- **D-29z1698, the focus contract (L47).** A client navigation keeps the document, so Chrome keeps the sequential-focus start at the link that unmounted.
+  - **Measured on B's sketch dev server:** after Enter on footer "Support", the first Tab lands on the `/support` "Live Chat" button. At HEAD (full reload) it lands on the header logo.
+  - `blur()` does not fix it. Focusing `document.body` does: a temporary `tabindex=-1`, `focus({ preventScroll: true })`, then the attribute is removed. The first Tab is then the header logo at both viewports, for footer and in-page links.
+  - The helper acts **only on a plain primary activation**. With Ctrl, Meta, Shift or Alt held, a non-zero button, or `defaultPrevented`, it does nothing: the browser opens a new tab and focus stays on the link, as at HEAD (`b-round-478/probe/modifier-sketch.json` vs `modifier-head.json`).
+  - **Implementation:** the shared helper `releaseLinkFocus` in `app/lib/link-focus.ts` (a 3-word name, per `AGENT_DISCOVERABLE_CODE.md` rule 1), used on every route-content Link. It is not a duplicate of `app/lib/focus-source.ts`, which tracks pointer vs keyboard focus for `:focus-visible`.
+  - **Exception:** the persistent CookieConsent banner link stays mounted, so it does **not** use the helper.
+- **D-29z1699, new findings:**
+  - **B-R478-DEAD-LICENSE-LINK (Medium, `awaiting_user`).** Footer "License" and the Terms link go to `/license`, which has no route; the 404 page renders with HTTP 200. Licence copy is legal content, so it goes to Saba (`user-review/questions-round-478.md` Q1). This round keeps the target and only makes the link client-side; C records the 404 and does not FAIL on it.
+  - **B-R478-DEAD-MUSIC-LINK (Medium).** Scheduled later.
+  - **B-R478-SOFT-404 (Low).** Deferred.
 
-  This ruling **narrows D-29z1684's "51 total"**: that count came from an exact-value grep; this is the hue-range scan L2 requires.
+## Reference: how the reference does it
+This is a navigation behaviour on a Store page. The reference is the current Store itself (full reload, measured) and the framework's documented Link behaviour. There is no Ableton reference (Store).
 
-  **Awwwards snippets:** they are recoloured so nothing teal is left to copy. Their glow advice conflicts with the round-453 no-glow rule; doc 310 records this, and it goes to DPG-INTERACTION-FIX (P2) as SIG-R478-AWWWARDS-GLOW. It is not removed here.
-- **D-29z1693: what stays out, by name.** Fonts (Inter / Playfair in these docs [K23]) belong to DPG-FONT-RESOLVE (STORE-2c-2…4). `--color-info` blue and the error reds belong to DPG-COLOR-CONSOLIDATE (P1). `.claude/**` stays root-only (ROOT-REQ-DPG-PRIMITIVES-PATCH, `b-round-475/root-primitives-patch.md`). The 114 hue hit lines in docs outside `docs/design` (legacy Studio component docs describing frozen code, mermaid diagram fills, prompt kits for other industries; `b-round-477/scan/hue-docs-other.txt`) are recorded as signal SIG-R477-DOCS-OUTSIDE-DESIGN for the RETRO 480 primitive and doc staleness check (DPG rule 5). They are not tasked here. History records in `docs/implementation`, `docs/bugs` and `docs/plans` stay.
-- **D-29z1694: deviation from L56/L58, stated.** B ships no byte-equal sketch: the Georgian prose is A's to write. Instead every "after" value is the exit of a checker that reads `app.css` at run time, not a number B typed. Each checker is proven four ways: red on HEAD [K2 `unexpected=55`, K3 `FAILS 156`]; green on a synthetic compliant tree (`b-round-477/scan/syn-doc-token.txt` `FAILS 0`, `syn-residual.txt` `unexpected=0`); red again on a one-value mutant (`syn-doc-token-mutant.txt` `FAILS 2`); and the mechanical parts (four banners, the WCAG append, doc 307–309 l.4) on a scratch clone at `10791ac`, `b-round-477/claims-478-mechanical-scratch.txt` (K6 307–309, K10, K12, K13, K20, K21 and K22 green there). `doc-token-check.py` checks three things: (a) every `--color-*` / `--shadow-*` declaration equals `@theme`; (b) every colour literal in the four normative `.md` files exists in `app.css`; (c) **name→value**: on a line that names a colour token (`` `buy` ``, `buy:`), every hex equals that token's value. That last check is what catches `buy (#006AFF)`, a value `app.css` still holds as `--color-blue-60`. One literal is allowlisted with a reason: `hsl(0, 0%, 0%, 0.95)`, the DESIGN_SYSTEM modal backdrop example (HEAD l.1408 [K19]), which is not old identity. The WCAG ratios are the saved output of `b-round-477/tools/wcag-ratios.py` (`b-round-477/wcag-ratios.txt`).
+| Point | Source | Confirmed behaviour | CZABA after this round | C row |
+|---|---|---|---|---|
+| Internal navigation | Remix 2.13.1 `<Link>` docs, https://remix.run/docs/en/2.13.1/components/link (the version from the dev server log; B did not open the page this round, so the doc is a pointer, not evidence). Measured instead: `b-round-478/probe/modifier-head.json` and `modifier-sketch.json` | **Measured:** a `<Link>` click changes the path with no reload (marker alive). Ctrl+click, Ctrl+Enter and a middle click open one new page and leave the current page, path and focus unchanged, at HEAD and on the sketch | All in-scope links use `<Link to>`. The href is unchanged | C5, C8, C9 |
+| Scroll after navigation | Remix `<ScrollRestoration>` in `root.tsx`; B measured HEAD's existing header `<Link>`s and the sketch (`b-round-478/probe/nav-final-*.json`) | A new location lands at `scrollY 0` (400 ms and 3 s), with Lenis on. One wheel step afterwards moves about 171–200 px, with no jump back | Same as the full reload: `scrollY 0` | C5, C7 |
+| Focus after navigation | HEAD full reload (`nav-final-5173.json`) | After the reload, focus is on `body` and the first Tab is the header logo `a[href="/"]` | Same (D-29z1698) | C6 |
+| Same-route click | Measured: footer "FAQ" on `/faq` from the page bottom (`modifier-*.json`) | HEAD reloads and Chrome restores `scrollY` ≈ 2158 (1440) | The sketch lands at `scrollY 0` (deviation 3) | C5 |
+| Persistent chrome | Measured: CookieConsent is rendered by `root.tsx` and is not unmounted by navigation | The banner stays until a decision is made | Its Privacy link navigates client-side; the banner stays, and so does focus on the link | C10 |
+
+**Deviations from HEAD:**
+1. **No document reload.** This is the item's purpose (DPG-FIX P1 "full page reload kills premium feel").
+2. **The new page title is not announced.** A reload makes screen readers announce the new page title; a client navigation does not. Fixing that needs a root-level route announcer in `root.tsx`, which is root-only. It is recorded as SIG-R479-ROUTE-ANNOUNCE and is not tasked here.
+3. **A same-route click goes to the top.** Clicking the link of the page you are on now scrolls to the top instead of reloading in place. That is the common single-page-app result of clicking the current page's link; the reload's restored position is a side effect, not a design.
 
 ## Rules
-- **Read `lessons.md` first,** in particular L2 (colour migration clause), L26 (doc grants cover accuracy; TEMPLATE headings), L28, L29, L56 and L57.
-- **Claims (L29):** `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-477/claims-478.sh` (`STORE_ROOT=<copy>` runs it on a copy). B's output at HEAD is `b-round-477/claims-478-planning-output.txt`. The required values after A are in the C2 row of §2. The banner text lives in one file, `b-round-477/banner-478.txt` (0 hue hits [K21]).
-- **No code reads `docs/`** [K20 `0`]: no test or script under `app`, `perf` or `scripts` reads a file under `docs/`, so no vitest file covers these edits.
-- **Screen budget (L39):** nothing on screen changes. No `app/**` file is touched [K9].
-- **Tailwind scans `docs/**`** (C-R474-02): no added doc line may contain an arbitrary-value class string such as `bg-[#…]` or `text-[…]` [K8]. Write colours as plain values, `var(--color-…)` or token names (`bg-brand`).
-- **Reference-first:** not applicable (docs-only round; policy "Not in scope"). The source of truth for every value is `app/styles/app.css` `@theme`. The source of the brand reasoning is `docs/technical/store-redesign/direction-decision.md` and `docs/design/brand-vision.md` l.27 [K19]. **Do not invent brand reasoning:** every "why" sentence in the new section cites one of those two files.
+- **Read `lessons.md` first,** in particular L12 (no class selectors in tests), L13 (whole-tag guards), L23, L29, L47, L52, L56 and L58.
+- **Claims (L29):** `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-478/claims-479.sh`. B's output at HEAD is `b-round-478/claims-479-planning-output.txt`, and on the sketch it is `claims-479-sketch-output.txt`.
+- **Sketch (L58):**
+  - The sketch is `b-round-478/sketch-479/`: 11 files, with hashes in `sketch-479.sha256` and the diff against HEAD in `sketch-479.patch.txt`.
+  - It is Biome-formatted, `tsc` rc 0 on a scratch copy, and all 162 tests in the 10 covering files pass (`sketch-vitest-final.log`).
+  - A may apply it as is. Any byte difference from the sketch is listed in `a-round-479.md` with its reason (K10).
+- **Screen budget (L39):** nothing visible changes. There is no new text, class or element. `onClick` handlers and the element type change only.
+- **Primitives:** `AGENT_DISCOVERABLE_CODE.md` (new export `releaseLinkFocus`), `FORWARDREF_COMPONENT.md` (components touched), `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md` (tests), and `GEORGIAN_DOCS.md` (doc 311).
 
 ## Baseline
-- **HEAD `10791ac`** (gate 477 published). The working tree is clean [K17: 0 lines].
+- **HEAD `75a6028`** (gate 478 published). The working tree is clean [K7: 0 lines].
 
-### Grants (exactly these 16 paths)
+### Grants (exactly these 12 paths)
 | Path | What |
 |---|---|
-| `docs/design/DESIGN_SYSTEM.md` | (1) The token section (Borders, Brand, Text, Semantic, Commerce, Shadows; HEAD l.1014–1079 [K19]): every `--color-*` / `--shadow-*` declaration equals `app.css` `@theme`. Declare at least brand, brand-hover, brand-foreground, accent, background, surface, elevated, foreground, muted, dim, outline, outline-hover, positive, destructive, warning, info, buy and buy-hover. Drop `--shadow-glow`, which was removed from `app.css` in round 453 [K11]. (2) Replace the section `## რატომ Teal + Orange?` (HEAD l.720–751 [K19]) with `## რატომ Obsidian & Brass?` (exact heading), citing both source files by path. Keep a 60-30-10 block naming Brand (Brass). (3) The "why not pure black" rationale and its token block (HEAD l.704–716 [K19]): the background is warm obsidian `#0E0D0C`; drop the "blue undertone" sentence. (3b) Every other false colour line the checker lists, including the Semantic table (HEAD l.840 and l.844 [K19]) and the `/* OLD */` example (HEAD l.1489 [K19], which becomes `#A39B8E`). (4) Example literals (HEAD l.436 `color:` example, l.1332 focus `box-shadow` [K19]) use live values or `var(--color-brand)` / `rgba(var(--color-brand-rgb), 0.1)`. (5) Add a version-history row starting exactly `\| 2.2 \| 2026-11-12 \|` describing this update; keep row 2.1 as written |
-| `docs/design/style-guide.md` | The token table (HEAD l.20–32 [K19]), the 60-30-10 block, the `### Teal + Orange` section and the surface examples (HEAD l.57–59 [K19]) state live hex values. The section becomes one warm accent (brass). The `### Blue Undertone (HSL 220°)` section (HEAD l.52–59 [K19]) describes the warm obsidian neutrals with live hex values |
-| `docs/design/components/button.md` | Primary and Accent backgrounds name `#C9A46A`; Hover drops `shadow-glow` [K15] |
-| `docs/design/audit-design.md` | Checklist l.9–10 [K19] and the token block (HEAD l.60–85 [K19]) state live values |
-| `docs/design/design-tokens.json` | `color.*` and `shadow.*` leaves equal `app.css` (a `var()` token may hold its resolved value). Remove leaves whose token no longer exists (`crystal.*`, `premium.*`, `shadow.glow`, `shadow.glow-accent` [K3]). Typography, spacing and radius are unchanged. It must stay valid JSON |
-| `docs/design/box-render-specs.md` | l.110 only [K19]: the obsidian box accent becomes a brass edge glow (`#C9A46A` at 10%). l.54–55 (Gold box) stay [K19] |
-| `docs/design/awwwards-improvements.md` | l.71 [K19] → `#C9A46A`; each `rgba(19, 217, 204, a)` → `rgba(var(--color-brand-rgb), a)` with the same alpha |
-| `docs/design/design-audit.md`, `docs/design/star-brand-audit.md`, `docs/design/design-systems-reference.md` | **Banner only:** insert, after line 2, the banner line (exact text below) and one empty line, so the banner is line 3 [K13]. No other change; 0 deleted lines [K10] |
-| `docs/design/wcag-audit.md` | The same banner, plus `b-round-477/wcag-section-478.md` appended verbatim at the end of the file (after one empty line) [K12]. 0 deleted lines |
-| `docs/technical/store-redesign/direction-decision.md` | l.23 and the `## ტოკენები` section (HEAD l.48–56 [K19]) name only tokens that exist in `app.css` (`--color-brand`, `--color-brand-hover`, `--color-brand-rgb`, `--color-background`, `--color-surface`, …): 0 `--color-obsidian-*` / `--color-brass-*` [K4] |
-| `docs/implementation/2026/quarter-IV/307-…`, `308-…`, `309-…` | l.4 only, each exactly `**სტატუსი:** Completed (C round 478 PASS)` (L28 final stage of the P0 docs series) [K6] |
-| `docs/implementation/2026/quarter-IV/310-dpg-p0-3b-design-docs-brass.md` | New doc, TEMPLATE headings in order [K7]. l.4 exactly `**სტატუსი:** Completed (C round 478 PASS)`. Lists D-29z1692…D-29z1694 and the four classes |
+| `app/components/layout/Footer.tsx` | All 9 `<a href={ROUTES.*}>` become `<Link to={ROUTES.*} … onClick={releaseLinkFocus}>`. Text, classes and order are unchanged. `Link` comes from `@remix-run/react` |
+| `app/components/common/CookieConsent.tsx` | The Privacy Policy `<a href="/privacy">` becomes `<Link to="/privacy">` with the same classes and **no** focus helper |
+| `app/components/home/ProductSection.tsx` | The "View all" `<a href={viewAllLink}>` becomes `<Link to={viewAllLink} onClick={releaseLinkFocus}>` |
+| `app/routes/privacy.tsx`, `app/routes/terms.tsx`, `app/routes/faq.tsx` | The one internal `<a>` in each (`/cookies`, `/license`, `/hire-us`) becomes a `Link` with the helper. `mailto:` and `https:` links stay `<a>` |
+| `app/lib/link-focus.ts` (new) | `releaseLinkFocus(event)`: on a plain primary activation only (no modifier, button 0, not `defaultPrevented`), focus `body` with `preventScroll`, adding a temporary `tabindex=-1` only when the body had none, then removing it |
+| `app/lib/__tests__/link-focus.test.tsx` (new) | LF1, LF2 and LF3 (Ctrl, Meta, Shift, Alt and middle-button clicks keep focus on the link) |
+| `app/lib/__tests__/store-internal-links.test.ts` (new) | IL1 (6 files), IL2 (4 targets carry the helper), IL3 (the scanner mutant), IL4 (the CookieConsent link has no helper) |
+| `app/lib/__tests__/store-header-footer.test.tsx` | F1 renders inside `MemoryRouter`, with **no assertion lost**. Add F2 (9 links: router navigation + focus on `body`, no tabindex left) and F3 (exactly the 9 internal links in order) |
+| `app/components/common/__tests__/CookieConsent.test.tsx` | The `@remix-run/react` mock keeps the real module (`importOriginal`) and overrides only `useLocation`. Renders use `wrapper: MemoryRouter`. CC1–CC5 are unchanged, with no assertion lost. Add CC6 (the Privacy link has href `/privacy` and the Remix Link marker `data-discover="true"`) |
+| `docs/implementation/2026/quarter-IV/311-dpg-footer-links.md` (new) | TEMPLATE headings in order; l.4 exactly `**სტატუსი:** Completed (C round 479 PASS)`. It names D-29z1697…D-29z1699 and the focus measurement, and cites only test ids that exist (L26) |
 
-**Accuracy clause (L26):** inside a granted rewrite file, A may also correct any other line that states a false colour value, without changing headings or adding sections. The banner-only files get the banner and nothing else.
+**Everything else is unchanged:**
+- `app/root.tsx`, `app/styles/**`, the auth components, every protected file, `public/**` and `.claude/**`;
+- every other route and component.
 
-**Banner (exact, one line):**
-
-```
-> **ისტორიული ჩანაწერი (DPG-P0-3b, 2026-11-12):** ეს დოკუმენტი აღწერს მდგომარეობას თავის თარიღზე. 2026-10-25-დან CZABA-ს პალიტრა Obsidian & Brass-ია; მიმდინარე ტოკენები: `docs/design/DESIGN_SYSTEM.md` და `app/styles/app.css` (`@theme`). ქვემოთ მოცემული ძველი ფერები აღარ გამოიყენება.
-```
-
-**Everything else is unchanged:** `app/**`, `.claude/**`, `public/**`, the protected files and every doc not listed.
+`ErrorBoundary`, `SignUpForm`, `UserDropdown` and `account.*` stay `<a>` (D-29z1697).
 
 ## 1. A: steps
-1. **STOP (L11)** if `claims-478.sh` K1–K23 differ from `b-round-477/claims-478-planning-output.txt` before your first edit. Read `GEORGIAN_DOCS.md` and `DESIGN_TOKENS.md` (it is stale; do not copy its values).
-2. **Read the failure lists:**
-   - `b-round-477/scan/doc-token-head.txt` (156 fails at HEAD);
-   - the output of `python3 -I b-round-477/tools/residual-check.py . b-round-477/residual-478.tsv` (55 unexpected at HEAD).
+1. **STOP (L11)** if `claims-479.sh` K1–K9 differ from `b-round-478/claims-479-planning-output.txt` before your first edit.
+2. **Apply the sketch:** copy the 11 files from `b-round-478/sketch-479/`, or write the same change yourself. Then write doc 311.
+3. **Checks:**
+   - `npm run typecheck`;
+   - `npm run lint`;
+   - `npx vitest run $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-478/covering-candidates.txt) app/components/common/__tests__/CookieConsent.test.tsx app/lib/__tests__/store-internal-links.test.ts app/lib/__tests__/link-focus.test.tsx`.
 
-   Edit until both checkers exit 0. Never edit a residual line, the checkers or `residual-478.tsv`.
-3. **Write doc 310** and set doc 307/308/309 l.4.
-4. **Run the claims script** and save its output to `a-round-478/claims.txt`. It must show every "after" value in the C2 row.
-5. **Checks:**
-   - `npm run typecheck` (a sanity check; no TS file changes);
-   - `python3 -I -c 'import json;json.load(open("docs/design/design-tokens.json"))'` rc 0.
-
-   No vitest file covers `docs/**` [K20], so there is none to run. The full suite belongs to the gate.
-6. **Code-reviewer:** run it once on the diff (more than 3 files) and report Medium+ findings. A finding inside a residual line or a banner-only file is outside the grant: report it, do not fix it.
-7. **Report** in `a-round-478.md`. Describe each file's change from its saved diff, `a-round-478/docs.diff.txt` (L56).
+   The expected result is 10 files and 162 tests, all passing. The full suite belongs to the gate.
+4. **Claims:** run the script and save it to `a-round-479/claims.txt`.
+5. **Code-reviewer:** run it once (12 files). Report Medium+ findings; an unruled Medium is a STOP (L10).
+6. **Report** in `a-round-479.md`.
 
 ## 2. C: what to verify
-**Files.** Write `c-round-478.md`, `c-round-478.json` and `c-round-478/progress.json` as you go. The JSON carries all L57 fields. Its `mutantRedOnSketch` is `b-round-477/scan/syn-doc-token-mutant.txt`, noting that this round has a synthetic tree, not a sketch (D-29z1694). Run `python3 -I tools/l57-check.py`.
+Write `c-round-479.md`, `c-round-479.json` (with all L57 fields; `mutantRedOnSketch` = `b-round-478/mutant-*.log`) and `c-round-479/progress.json` as you go.
+
+**Browser setup.** Seed `localStorage.czaba_lead_magnet` as dismissed and submitted, as in `b-round-478/probe/nav-probe-sketch.mjs`, except in C10 and C13. Wait at least 3.5 s after `networkidle` for hydration. Use B's probe script as a starting point, not as evidence.
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| C1 | SOURCE-SCOPE | `git status --short --untracked-files=all` | Exactly the 16 granted paths: 11 under `docs/design`, `direction-decision.md`, docs 307–309 modified and 310 new. K9 = 0 |
-| C2 | CLAIMS | `bash b-round-477/claims-478.sh` | K1 `HEAD 10791ac`. K2 `hits=27 residual=27 unexpected=0 residual_changed=0`. K3 `FAILS 0`. K4 `0`. K5 all `exists`. K6 307/308/309/310 all `**სტატუსი:** Completed (C round 478 PASS)`. K7 `True`. K8 `0`. K9 `0`. K10 `0` four times. K11 `0`. K12 `13 of 13`. K13 `yes` four times. K14 `section 1`, sources ≥ 1 / ≥ 1, `blue-undertone 0`, `old-heading 0`. K15 `0`. K16 `1`. K17 16 lines. K18 `rc 0`. K19 unchanged from the planning output. K20 `0`. K21 `0`. K22 `0`. K23 unchanged |
-| C3 | CHECKERS MEAN SOMETHING | On your own `cp -a` copy of the tree, with `STORE_ROOT=<copy>`: (a) change `--color-brand` in DESIGN_SYSTEM.md to `#13d9cc`; (b) put `rgba(19, 217, 204, 0.3)` back on one awwwards line; (c) delete one residual line in `wcag-audit.md` | (a) K3 `FAILS ≥ 1`; (b) K2 `unexpected=1`; (c) K2 `residual_changed=1`. Then the real tree re-runs green |
-| C4 | VALUES TRUE | Independently of B's checker: for 6 tokens (brand, brand-hover, background, surface, foreground, muted), compare the value in DESIGN_SYSTEM.md, style-guide.md and design-tokens.json with `getComputedStyle(document.documentElement).getPropertyValue('--color-…')` on `/` in Chromium | All three docs equal the computed value (case-insensitive hex). B's baseline probe: `b-round-477/c4-computed-head.json` |
-| C5 | WCAG SECTION | Recompute the 10 ratios with your own formula from the hex pairs in the new section | Each is within ±0.01 of the doc |
-| C6 | REASONING SOURCED | Read `## რატომ Obsidian & Brass?` | Every "why" sentence cites `direction-decision.md` or `brand-vision.md`, and any quote is verbatim (grep it). No teal/orange word, no glow advice |
-| C7 | DOC 310 | Headings, l.4, D-IDs | TEMPLATE headings in order; l.4 exact; it names D-29z1692…D-29z1694; every test or row id it names exists (grep) |
-| C8 | EMISSION (record) | `git diff -U0 -- docs`, added lines | No arbitrary-value class candidate (K8). Record the count of removed `bg-[#13D9CC]`-style candidates (expected 0 in these files) |
-| C9 | AUTH + STUDIO OPENS | `/studio/middle-east` anonymous; `/api/studio-token?product=middle-east&file=x` with no bearer; `/studio-lab` in a fresh context at 1440×900 and 1280×720 | "Sign in required" with 0 audio `src`; 401; `/studio-lab` opens as the demo. The real-owner path is BLOCKED (backend unavailable in cloud) |
-| C10 | HOME UNCHANGED | `/` at 1440×900 and 1280×720 after the entrance | Header logo `rgb(201, 164, 106)`; `body` background `rgb(14, 13, 12)` (no app change in a docs-only round) |
+| C1 | SOURCE-SCOPE | `git status --short --untracked-files=all` | Exactly the 12 granted paths. K8 `0` |
+| C2 | CLAIMS | `bash b-round-478/claims-479.sh` | K1 `HEAD 75a6028`. K2 `footer-anchor-routes 0 footer-to-routes 9`. K3: each of the 5 lines `href… 0 to… 1`. K4 `license:0 collections.music:0`. K5 `exists`, with the 5 files `ProductSection Footer faq privacy terms`. K6 all `exists`. K7 12 lines. K8 `0`. K10 `0` (or each differing file is explained in `a-round-479.md`) |
+| C3 | TESTS | The A step-3 vitest command | 10 files, 162 tests, 0 failed. F1 and CC1–CC5 keep every original `expect` (diff the test files: no removed `expect(` line) |
+| C4 | TESTS MEAN SOMETHING | On your own copy of the whole tree, made the way B's scratch was (store minus `.git`, `docs` and `public`, with `node_modules` and `public` symlinked, so the vitest config is present): (a) restore HEAD's 6 source files; (b) turn the CookieConsent Link back into `<a>`; (c) turn footer Support back into `<a>`; (d) make the helper a no-op; (e) remove `onClick` from `faq.tsx`; (f) delete the helper's modifier guard. Run the 4 test files `store-header-footer`, `CookieConsent`, `store-internal-links` and `link-focus` | Each run is red: (a) 21 failed; (b) 3 (IL1, IL4, CC6); (c) 2 (IL1, F2-Support); (d) 11 (LF1, LF2, 9× F2); (e) 1 (IL2-faq); (f) 5 (LF3). Then the real tree is green again. B's logs: `b-round-478/mutant-*.log` (`baseline-sources`, M1–M5) |
+| C5 | NO RELOAD, SCROLL TOP | At 1440×900 and 1280×720: on `/faq` and on `/`, wheel to the bottom, set `window.__probeMarker`, then mouse-click footer "Support". Also on `/faq`, click footer "FAQ" (same route) | The path is `/support`, the marker survives, and `scrollY` is 0 at 400 ms and at 3 s. Same route: the path stays `/faq`, the marker survives and `scrollY` is 0 (deviation 3). **Control at baseline** (or B's `nav-final-5173.json`): the marker is lost |
+| C6 | FOCUS START (L47) | At both viewports: (a) focus footer "Support" with the keyboard and press Enter; (b) the same with `/faq` "Contact Us"; (c) mouse-click footer "Support" | After each: `document.activeElement` is `BODY`, `body` has no `tabindex`, `body` does not match `:focus-visible` (no visible ring), the first Tab focuses the header logo `a[href="/"]`, and the marker survives |
+| C7 | NO SCROLL JUMP-BACK | After C5, one mouse-wheel step of 200 | `scrollY` ≤ 250 (B measured 171 at 1440 and 200 at 1280) |
+| C8 | EVERY TARGET | At 1440×900, from a page whose layout includes the footer: click each of the 9 footer links, plus privacy → Cookie Policy link, terms → License page, faq → Contact Us, and home "View all" | Each one changes `location.pathname` to its href with the marker alive. `/license` shows the 404 page; record it under B-R478-DEAD-LICENSE-LINK, it is not a FAIL |
+| C9 | MODIFIER CLICK | At both viewports, from `/faq` scrolled to the bottom: (a) Ctrl+click footer "FAQ"; (b) focus it and press Ctrl+Enter; (c) middle-click it | Each opens exactly one new page at `/faq`. The current page keeps its path, `scrollY` and marker, and **focus stays on the link** (`document.activeElement` is that `a`), as at HEAD (`b-round-478/probe/modifier-head.json`) |
+| C10 | COOKIE BANNER | A fresh context with no consent decision and LeadMagnet seeded: wait for the banner, then click "Privacy Policy" | The path is `/privacy`, the marker survives, the banner is still visible with Accept and Decline, and no consent is stored |
+| C11 | AUTH + STUDIO OPENS | `/studio/middle-east` anonymous; `/api/studio-token?product=middle-east&file=x` with no bearer; `/studio-lab` in a fresh context at 1440×900 and 1280×720 | "Sign in required" with 0 audio `src`; 401; `/studio-lab` opens as the demo. The real-owner path is BLOCKED (backend unavailable in cloud) |
+| C12 | DOC 311 | Headings, l.4, D-IDs, test ids | TEMPLATE headings in order; l.4 exact; it names D-29z1697…D-29z1699; every test id it names exists (grep) |
+| C13 | LEADMAGNET AFTER CLIENT NAV (record) | A fresh context, LeadMagnet **not** seeded: on `/`, scroll more than 40 %, client-navigate via footer "FAQ" within 8 s, then wait 10 s | Record whether the popup opens on `/faq`, and compare with HEAD (a reload restarts the 8 s timer). Not a FAIL row. A popup that opens over a page where it is excluded (`/products/*`, `/cart`, `/checkout*`) would be a bug |
 | gate | — | Full verify, code review, publish | Root. Not claimed |
 
 **What could break nearby:**
-- Tailwind candidate extraction from `docs/**` (C8);
-- `design-tokens.json` validity;
-- the residual files' history (C2 K10, C3c).
+- tests that render these components without a router (C3);
+- hydration on content routes (C5, C8);
+- the persistent cookie banner (C10);
+- the LeadMagnet timer across client navigation (C13);
+- browser default behaviour for modifier clicks (C9).
 
 ## 3. After this round
-1. **On C PASS:**
-   - DPG-DOCS-UPDATE is C-verified.
-   - **DPG P0 is complete** (P0-1…P0-3b), so root re-runs the DP gate (design-philosopher + product-designer).
-   - The P0 items stay "awaiting DP gate" until both reviewers give 10/10.
+1. **On C PASS:** DPG-FOOTER-LINKS is C-verified. It awaits the P1 DP gate (DPG rule 4), so it is not მზადაა until then.
 2. **The next planning:**
    1. **REGRESSION-2026-11-13** (due on or after 2026-11-13);
    2. **RETRO 480**;
-   3. DPG P1: the DPG-LOGO serif half (on Saba's answer), DPG-BUTTON-CLEANUP, DPG-FOOTER-LINKS, DPG-CSS-DEDUP, DPG-FONT-RESOLVE (= STORE-2c-2…4) and DPG-COLOR-CONSOLIDATE, plus any DP-gate findings root files.
-3. **Root, non-blocking for the loop:**
-   - ROOT-REQ-DPG-PRIMITIVES-PATCH (the `.claude/**` text). **It should land before the DP-gate re-run.** Otherwise P0 item 4 fails again on `DESIGN_TOKENS.md`;
-   - ROOT-REQ-NAV-LOADING-BAR-RENDER;
-   - ROOT-REQ-DPG-GATE-REPORT.
+   3. DPG-BUTTON-CLEANUP;
+   4. then the rest of P1 and any DP-gate findings root files.
+3. **Saba:** `user-review/questions-round-478.md` (the License page and the `/music` links).
+4. **Root, non-blocking:**
+   - ROOT-REQ-DPG-PRIMITIVES-PATCH (before the DP-gate re-run);
+   - the DP-gate re-run after P0;
+   - ROOT-REQ-NAV-LOADING-BAR-RENDER.

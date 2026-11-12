@@ -1,0 +1,834 @@
+diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+index 157a1fb..b3bb75a 100644
+--- a/docs/design/DESIGN_SYSTEM.md
++++ b/docs/design/DESIGN_SYSTEM.md
+@@ -433,7 +433,7 @@ Ratio: 1.25 (Major Third)
+ 
+ ❌ არასწორი:
+ padding: 23px;
+-color: #13D9CC;
++color: #C9A46A;
+ border-radius: 11px;
+ 
+ ✅ სწორი:
+@@ -703,52 +703,47 @@ CZABA არის **კურატორული გალერეა კი
+ ### ტექნიკური იმპლემენტაცია
+ ```css
+ /* არასოდეს pure black - ძალიან მკვეთრია */
+---color-background: hsl(220, 20%, 4%);   /* #0A0B0F - თითქმის შავი, მაგრამ თბილი */
++--color-background: #0e0d0c;   /* Warm obsidian - თითქმის შავი, მაგრამ თბილი */
+ 
+ /* Elevation = უფრო ნათელი (dark theme-ში!) */
+---color-surface:  hsl(220, 18%, 8%);     /* Cards, modals */
+---color-elevated: hsl(220, 18%, 12%);    /* Hover states */
++--color-surface:  #161412;     /* Cards, modals */
++--color-elevated: #1d1a17;     /* Hover states */
+ ```
+ 
+ **რატომ არა #000000?**
+ - Pure black (#000) ქმნის ძალიან მაღალ კონტრასტს თეთრ ტექსტთან
+ - ეს იწვევს თვალის დაღლილობას
+-- Subtle blue undertone (hsl 220) ქმნის "ცივ", კინემატოგრაფიულ შეგრძნებას
++- Warm obsidian (#0E0D0C) და მისი თბილი ნეიტრალური საფეხურები (#161412, #1D1A17) brass აქცენტთან ერთ ტონალობაში რჩება (`docs/technical/store-redesign/direction-decision.md`: „მუქი, კინემატოგრაფიული გალერეის თემა ოქროსფერი აქცენტით“)
+ 
+ ---
+ 
+-## რატომ Teal + Orange?
++## რატომ Obsidian & Brass?
+ 
+-### Complementary Colors
+-Teal (#13D9CC) და Orange (#F9A80C) არის complementary ფერები ფერთა წრეზე:
++### წყაროები
++პალიტრის არჩევანი აღწერილია `docs/technical/store-redesign/direction-decision.md`-ში (არჩეული ვარიანტი A — Obsidian & Brass gallery), ხოლო ბრენდის ვიზუალური სტანდარტი — `docs/design/brand-vision.md`-ში („ვიზუალური იდენტობა“).
+ 
+-```
+-                    🟡 Orange (38°)
+-                         │
+-                         │
+-        ┌────────────────┼────────────────┐
+-        │                │                │
+-        │           Color Wheel           │
+-        │                │                │
+-        └────────────────┼────────────────┘
+-                         │
+-                         │
+-                    🩵 Teal (175°)
+-```
++### ერთი თბილი აქცენტი
++- `docs/design/brand-vision.md` ფერთა პალიტრას ასე აღწერს: „მონოქრომული (შავი, ნაცრისფერი, თეთრი) + ერთი მკვეთრი აქცენტი (ოქროსფერი/ელექტრული ლურჯი)“. CZABA-მ ამ ორიდან ოქროსფერი აირჩია (`docs/technical/store-redesign/direction-decision.md`).
++- `docs/technical/store-redesign/direction-decision.md`-ის მიხედვით, Studio უკვე Obsidian & Brass თემაზე იყო, ამიტომ ერთი პალიტრა Store-სა და Studio-ს ვიზუალურ ერთიანობას აძლევს.
++- იგივე ფაილი premium audio marketplace-ისთვის „dark theme + gold accent“-ს industry standard-ად ასახელებს.
++
++| ფერი | ტოკენი | მნიშვნელობა | გამოყენება |
++|------|--------|-------------|------------|
++| **Obsidian** | `--color-background` | #0E0D0C | გვერდის ფონი |
++| **Brass (Brand)** | `--color-brand` | #C9A46A | Primary CTA, links, აქტიური მდგომარეობა |
++| **Brass hover** | `--color-brand-hover` | #D9B87F | Brand hover |
++| **Foreground (Text)** | `--color-foreground` | #ECE6DA | ძირითადი ტექსტი |
+ 
+-| ფერი | გამოყენება | რატომ |
+-|------|------------|-------|
+-| **Teal (Brand)** | Primary CTA, links, focus states | სიცოცხლე, ტექნოლოგია, modern feel |
+-| **Orange (Accent)** | Secondary highlights, badges | ენერგია, creativity, warmth |
++`--color-accent` და `--color-buy` ამჟამად `--color-brand`-ის ტოლია (#C9A46A): მეორე აქცენტური ფერი აღარ არსებობს.
+ 
+ ### 60-30-10 წესი CZABA-ში
+ ```
+ 60% - Dark backgrounds (background, surface)
+ 30% - Text colors (foreground, muted, dim)
+-10% - Brand/Accent colors (Teal, Orange)
++10% - Brand (Brass)
+ ```
+ 
+-ეს პროპორცია უზრუნველყოფს რომ brand ფერები **გამოირჩეოდეს** და არ დაიკარგოს.
++ეს პროპორცია უზრუნველყოფს რომ brand ფერი **გამოირჩეოდეს** და არ დაიკარგოს: `docs/design/brand-vision.md` ითხოვს „ერთი მკვეთრი აქცენტი“-ს მონოქრომულ ფონზე.
+ 
+ ---
+ 
+@@ -837,11 +832,11 @@ Page Background (background)
+ 
+ | სცენარი | ფერი | მაგალითი |
+ |---------|------|----------|
+-| **Success** | `--color-positive` (#00D26A) | "Added to cart", "Payment successful" |
++| **Success** | `--color-positive` (#8FA382) | "Added to cart", "Payment successful" |
+ | **Error** | `--color-destructive` | "Invalid email", "Payment failed" |
+ | **Warning** | `--color-warning` | "Limited stock", "Session expiring" |
+ | **Info** | `--color-info` | "New feature", tooltips |
+-| **Buy/Purchase** | `--color-buy` (#006AFF) | "Buy Now", checkout buttons |
++| **Buy/Purchase** | `--color-buy` (#C9A46A) | "Buy Now", checkout buttons |
+ 
+ ---
+ 
+@@ -1015,43 +1010,47 @@ Bold:       700
+ 
+ #### Backgrounds (Dark Theme)
+ ```css
+---color-background:    hsl(220, 20%, 4%);     /* #0A0B0F - Page background */
+---color-surface:       hsl(220, 18%, 8%);     /* #121318 - Cards, modals */
+---color-elevated:      hsl(220, 18%, 12%);    /* #1A1B21 - Hover states, elevated */
++--color-background:    #0e0d0c;    /* Page background (warm obsidian) */
++--color-surface:       #161412;    /* Cards, modals */
++--color-elevated:      #1d1a17;    /* Hover states, elevated */
++--color-muted-bg:      #24201c;    /* Muted backgrounds */
+ ```
+ 
+ #### Borders
+ ```css
+---color-outline:       hsl(220, 15%, 18%);    /* #292B33 - Default borders */
+---color-outline-hover: hsl(220, 15%, 25%);    /* #3B3E47 - Hover borders */
++--color-outline:        #24211e;   /* Default borders */
++--color-outline-hover:  #2e2a26;   /* Hover borders */
++--color-outline-strong: #736b60;   /* Focus states */
+ ```
+ 
+ #### Brand Colors
+ ```css
+---color-brand:         hsl(175, 85%, 46%);    /* #13D9CC - Primary actions */
+---color-brand-hover:   hsl(175, 85%, 52%);    /* #1EEADB - Hover state */
+---color-accent:        hsl(38, 95%, 55%);     /* #F9A80C - Secondary accent */
++--color-brand:            #c9a46a;   /* Brass - Primary actions */
++--color-brand-hover:      #d9b87f;   /* Hover state */
++--color-brand-foreground: #0e0d0c;   /* Text on brand */
++--color-accent:           #c9a46a;   /* Equal to brand */
++--color-brand-rgb:        201, 164, 106;   /* rgba(var(--color-brand-rgb), a) */
+ ```
+ 
+ #### Text Colors
+ ```css
+---color-foreground:    hsl(220, 10%, 94%);    /* #EEEEF0 - Primary text */
+---color-muted:         hsl(220, 10%, 55%);    /* #85858F - Secondary text */
+---color-dim:           hsl(220, 10%, 35%);    /* #54545C - Disabled, hints */
++--color-foreground:    #ece6da;    /* Primary text */
++--color-muted:         #a39b8e;    /* Secondary text */
++--color-dim:           #928a7d;    /* Disabled, hints */
+ ```
+ 
+ #### Semantic Colors
+ ```css
+---color-positive:      #00D26A;               /* Success */
+---color-destructive:   hsl(0, 84%, 60%);      /* Error, destructive */
+---color-warning:       #F59E0B;               /* Warning */
+---color-info:          #3B82F6;               /* Info */
++--color-positive:      #8fa382;    /* Success */
++--color-destructive:   #d2776a;    /* Error, destructive */
++--color-warning:       #d9a35b;    /* Warning */
++--color-info:          #3b82f6;    /* Info */
+ ```
+ 
+ #### Commerce Colors
+ ```css
+---color-buy:           #006AFF;               /* Buy buttons */
+---color-buy-hover:     #0052CC;               /* Buy hover */
++--color-buy:           #c9a46a;    /* Buy buttons (equal to brand) */
++--color-buy-hover:     #d9b87f;    /* Buy hover */
+ ```
+ 
+ ---
+@@ -1072,10 +1071,11 @@ Bold:       700
+ 
+ ```css
+ --shadow-sm:    0 1px 2px hsl(220, 20%, 2%, 0.3);
+---shadow-md:    0 4px 8px hsl(220, 20%, 2%, 0.4);
+---shadow-lg:    0 8px 16px hsl(220, 20%, 2%, 0.5);
+---shadow-xl:    0 16px 32px hsl(220, 20%, 2%, 0.6);
+---shadow-glow:  0 0 20px hsl(175, 85%, 46%, 0.3);
++--shadow-md:    0 2px 8px hsl(220, 20%, 2%, 0.4);
++--shadow-lg:    0 4px 16px hsl(220, 20%, 2%, 0.5);
++--shadow-xl:    0 8px 32px hsl(220, 20%, 2%, 0.6);
++--shadow-card:  0 8px 32px hsl(220, 20%, 2%, 0.4);
++--shadow-elevated: 0 16px 48px hsl(220, 20%, 2%, 0.6);
+ ```
+ 
+ ---
+@@ -1152,7 +1152,6 @@ font-size: var(--text-sm);
+ 
+ /* Hover */
+ background: var(--color-brand-hover);
+-box-shadow: var(--shadow-glow);
+ ```
+ 
+ **Use for:** Add to Cart, Buy Now, Submit, Primary CTA
+@@ -1329,7 +1328,7 @@ color: var(--color-foreground);
+ 
+ /* Focus */
+ border-color: var(--color-brand);
+-box-shadow: 0 0 0 4px hsl(175, 85%, 46%, 0.1);
++box-shadow: 0 0 0 4px rgba(var(--color-brand-rgb), 0.1);
+ 
+ /* Error */
+ border-color: var(--color-destructive);
+@@ -1486,7 +1485,7 @@ font-size: 14px;
+ font-size: var(--text-sm);
+ 
+ /* OLD */
+-color: #85858F;
++color: #A39B8E;
+ /* NEW */
+ color: var(--color-muted);
+ 
+@@ -1533,6 +1532,7 @@ docs/
+ 
+ | Version | Date | Changes |
+ |---------|------|---------|
++| 2.2 | 2026-11-12 | DPG-P0-3b: Color System და Shadows ტოკენები app.css `@theme`-ს გაუთანაბრდა (Obsidian & Brass); "რატომ Obsidian & Brass?" სექცია წყაროების მითითებით; `--shadow-glow` ამოღებულია |
+ | 2.1 | 2026-01-18 | Added Part 1.5: CZABA Design Philosophy - Dark Theme rationale, Color psychology (Teal+Orange), Font pairing logic, Semantic colors usage guide, Component hierarchy |
+ | 2.0 | 2025-01-05 | Added Design Foundations (Part 1): Visual Rhythm, 8pt Grid, Gestalt Principles, Hierarchy, Whitespace, Reading Patterns, Balance, Motion, Accessibility, Color Theory, AI Prompt Checklist |
+ | 1.0 | 2025-01-03 | Initial design system specification |
+diff --git a/docs/design/audit-design.md b/docs/design/audit-design.md
+index ed3c686..9fb8cc8 100644
+--- a/docs/design/audit-design.md
++++ b/docs/design/audit-design.md
+@@ -6,10 +6,10 @@
+ 
+ ### 1. ფერები
+ - [ ] მხოლოდ ტოკენები გამოყენებულია (არა hex/rgb პირდაპირ)
+-- [ ] `--color-brand` (#13D9CC) მხოლოდ primary actions-ზე
+-- [ ] `--color-accent` (#F9A80C) მხოლოდ secondary accent-ზე
+-- [ ] ტექსტი: `foreground` (94%), `muted` (55%), `dim` (35%)
+-- [ ] Background: `background` (4%), `surface` (8%), `elevated` (12%)
++- [ ] `--color-brand` (#C9A46A, Brass) მხოლოდ primary actions-ზე
++- [ ] `--color-accent` (#C9A46A, brand-ის ტოლი) მხოლოდ secondary accent-ზე
++- [ ] ტექსტი: მხოლოდ `foreground`, `muted`, `dim` (მნიშვნელობები — ქვემოთ, სწრაფ რეფერენსში)
++- [ ] Background: მხოლოდ `background`, `surface`, `elevated` (მნიშვნელობები — ქვემოთ, სწრაფ რეფერენსში)
+ - [ ] არ არის pure white (#FFF) ან pure black (#000)
+ 
+ ### 2. Spacing (4px base)
+@@ -59,29 +59,29 @@
+ 
+ ```
+ Backgrounds:
+-  background:    hsl(220, 20%, 4%)    #0A0B0F
+-  surface:       hsl(220, 18%, 8%)    #121318
+-  elevated:      hsl(220, 18%, 12%)   #1A1B21
++  background:    #0E0D0C (warm obsidian)
++  surface:       #161412
++  elevated:      #1D1A17
+ 
+ Borders:
+-  outline:       hsl(220, 15%, 18%)   #292B33
+-  outline-hover: hsl(220, 15%, 25%)   #3B3E47
++  outline:       #24211E
++  outline-hover: #2E2A26
+ 
+ Brand:
+-  brand:         hsl(175, 85%, 46%)   #13D9CC (Teal)
+-  brand-hover:   hsl(175, 85%, 52%)   #1EEADB
+-  accent:        hsl(38, 95%, 55%)    #F9A80C (Orange)
++  brand:         #C9A46A (Brass)
++  brand-hover:   #D9B87F
++  accent:        #C9A46A (brand-ის ტოლი)
+ 
+ Text:
+-  foreground:    hsl(220, 10%, 94%)   #EEEEF0
+-  muted:         hsl(220, 10%, 55%)   #85858F
+-  dim:           hsl(220, 10%, 35%)   #54545C
++  foreground:    #ECE6DA
++  muted:         #A39B8E
++  dim:           #928A7D
+ 
+ Semantic:
+-  positive:      #00D26A
+-  destructive:   hsl(0, 84%, 60%)
+-  warning:       #F59E0B
+-  buy:           #006AFF
++  positive:      #8FA382
++  destructive:   #D2776A
++  warning:       #D9A35B
++  buy:           #C9A46A
+ ```
+ 
+ ---
+diff --git a/docs/design/awwwards-improvements.md b/docs/design/awwwards-improvements.md
+index e1b8032..aa35d62 100644
+--- a/docs/design/awwwards-improvements.md
++++ b/docs/design/awwwards-improvements.md
+@@ -68,7 +68,7 @@
+ **უნდა იყოს:**
+ - ✅ Subtle, smooth transitions
+ - ✅ Film-like ესთეტიკა
+-- ✅ Monochrome + 1 accent (#13D9CC)
++- ✅ Monochrome + 1 accent (#C9A46A)
+ - ✅ "Art gallery" განცდა
+ 
+ ---
+@@ -292,8 +292,8 @@ const itemVariants = {
+   background: linear-gradient(
+     to right,
+     transparent,
+-    rgba(19, 217, 204, 0.1) 20%,
+-    rgba(19, 217, 204, 0.1) 80%,
++    rgba(var(--color-brand-rgb), 0.1) 20%,
++    rgba(var(--color-brand-rgb), 0.1) 80%,
+     transparent
+   );
+ }
+@@ -302,9 +302,9 @@ const itemVariants = {
+   background: linear-gradient(
+     to top,
+     var(--color-accent),
+-    rgba(19, 217, 204, 0.6)
++    rgba(var(--color-brand-rgb), 0.6)
+   );
+-  box-shadow: 0 0 8px rgba(19, 217, 204, 0.4);
++  box-shadow: 0 0 8px rgba(var(--color-brand-rgb), 0.4);
+ }
+ ```
+ 
+@@ -318,7 +318,7 @@ const itemVariants = {
+   border-radius: 50%;
+   background: radial-gradient(
+     circle,
+-    rgba(19, 217, 204, 0.3),
++    rgba(var(--color-brand-rgb), 0.3),
+     transparent 70%
+   );
+   opacity: 0;
+@@ -522,7 +522,7 @@ const handleKeyDown = (e: React.KeyboardEvent) => {
+ 
+ .glass-card:hover {
+   background: rgba(40, 40, 40, 0.7);
+-  border-color: rgba(19, 217, 204, 0.3);
++  border-color: rgba(var(--color-brand-rgb), 0.3);
+ }
+ ```
+ 
+diff --git a/docs/design/box-render-specs.md b/docs/design/box-render-specs.md
+index 2f919ab..ff2d87a 100644
+--- a/docs/design/box-render-specs.md
++++ b/docs/design/box-render-specs.md
+@@ -107,7 +107,7 @@ Shopify Tag: box:crimson
+ ```
+ Primary: #1C1C1C (hsl(0, 0%, 11%))
+ Gradient: #2D2D2D → #0A0A0A
+-Accent: Subtle teal edge glow (#13D9CC at 10%)
++Accent: Subtle brass edge glow (#C9A46A at 10%)
+ Usage: Sound design packs
+ Shopify Tag: box:obsidian
+ ```
+diff --git a/docs/design/components/button.md b/docs/design/components/button.md
+index 77548f7..b089512 100644
+--- a/docs/design/components/button.md
++++ b/docs/design/components/button.md
+@@ -8,9 +8,9 @@
+ 
+ | თვისება | მნიშვნელობა |
+ |---------|------------|
+-| Background | `var(--color-brand)` (#13D9CC) |
++| Background | `var(--color-brand)` (#C9A46A) |
+ | Text | `var(--color-brand-foreground)` (dark) |
+-| Hover | `var(--color-brand-hover)` + `shadow-glow` |
++| Hover | `var(--color-brand-hover)` |
+ | გამოყენება | Add to Cart, Submit, Revenue actions |
+ 
+ ### Secondary
+@@ -36,7 +36,7 @@
+ 
+ | თვისება | მნიშვნელობა |
+ |---------|------------|
+-| Background | `var(--color-accent)` (#F9A80C) |
++| Background | `var(--color-accent)` (#C9A46A) |
+ | Hover | brightness-110 |
+ | გამოყენება | Special attention, highlights |
+ 
+diff --git a/docs/design/design-audit.md b/docs/design/design-audit.md
+index 6948ffb..ec46913 100644
+--- a/docs/design/design-audit.md
++++ b/docs/design/design-audit.md
+@@ -1,5 +1,7 @@
+ # CZABA დიზაინის აუდიტი
+ ## პრემიუმ ხედვა vs მიმდინარე მდგომარეობა
++> **ისტორიული ჩანაწერი (DPG-P0-3b, 2026-11-12):** ეს დოკუმენტი აღწერს მდგომარეობას თავის თარიღზე. 2026-10-25-დან CZABA-ს პალიტრა Obsidian & Brass-ია; მიმდინარე ტოკენები: `docs/design/DESIGN_SYSTEM.md` და `app/styles/app.css` (`@theme`). ქვემოთ მოცემული ძველი ფერები აღარ გამოიყენება.
++
+ 
+ **თარიღი:** 2026-01-09 (განახლებული)
+ **საერთო შეფასება:** 9.2/10
+diff --git a/docs/design/design-systems-reference.md b/docs/design/design-systems-reference.md
+index 39b8bdf..aa556e7 100644
+--- a/docs/design/design-systems-reference.md
++++ b/docs/design/design-systems-reference.md
+@@ -1,5 +1,7 @@
+ # Design Systems Reference
+ 
++> **ისტორიული ჩანაწერი (DPG-P0-3b, 2026-11-12):** ეს დოკუმენტი აღწერს მდგომარეობას თავის თარიღზე. 2026-10-25-დან CZABA-ს პალიტრა Obsidian & Brass-ია; მიმდინარე ტოკენები: `docs/design/DESIGN_SYSTEM.md` და `app/styles/app.css` (`@theme`). ქვემოთ მოცემული ძველი ფერები აღარ გამოიყენება.
++
+ > საუკეთესო მუსიკალური / აუდიო პლატფორმების დიზაინ სისტემების ანალიზი
+ 
+ ---
+diff --git a/docs/design/design-tokens.json b/docs/design/design-tokens.json
+index 9b14bc7..fa1d615 100644
+--- a/docs/design/design-tokens.json
++++ b/docs/design/design-tokens.json
+@@ -4,71 +4,71 @@
+   "color": {
+     "$type": "color",
+     "brand": {
+-      "$value": "hsl(175, 85%, 46%)",
+-      "$description": "Primary actions, links — #13D9CC Teal"
++      "$value": "#C9A46A",
++      "$description": "Primary actions, links — Brass"
+     },
+     "brand-hover": {
+-      "$value": "hsl(175, 85%, 52%)",
++      "$value": "#D9B87F",
+       "$description": "Brand hover state"
+     },
+     "brand-foreground": {
+-      "$value": "hsl(220, 20%, 4%)",
++      "$value": "#0E0D0C",
+       "$description": "ტექსტი brand ფონზე"
+     },
+     "accent": {
+-      "$value": "#F9A80C",
+-      "$description": "Secondary accent — Orange"
++      "$value": "#C9A46A",
++      "$description": "Secondary accent — Brass (brand-ის ტოლი)"
+     },
+     "background": {
+-      "$value": "hsl(220, 20%, 4%)",
+-      "$description": "გვერდის ფონი — #0A0B0F"
++      "$value": "#0E0D0C",
++      "$description": "გვერდის ფონი — warm obsidian"
+     },
+     "surface": {
+-      "$value": "hsl(220, 18%, 8%)",
+-      "$description": "ბარათები, მოდალები — #121318"
++      "$value": "#161412",
++      "$description": "ბარათები, მოდალები"
+     },
+     "elevated": {
+-      "$value": "hsl(220, 18%, 12%)",
+-      "$description": "Hover states — #1A1B21"
++      "$value": "#1D1A17",
++      "$description": "Hover states"
+     },
+     "muted-bg": {
+-      "$value": "hsl(220, 15%, 15%)",
++      "$value": "#24201C",
+       "$description": "Muted backgrounds"
+     },
+     "foreground": {
+-      "$value": "hsl(220, 10%, 94%)",
+-      "$description": "ძირითადი ტექსტი — #EEEEF0"
++      "$value": "#ECE6DA",
++      "$description": "ძირითადი ტექსტი"
+     },
+     "muted": {
+-      "$value": "hsl(220, 10%, 55%)",
+-      "$description": "მეორეული ტექსტი — #85858F"
++      "$value": "#A39B8E",
++      "$description": "მეორეული ტექსტი"
+     },
+     "dim": {
+-      "$value": "hsl(220, 10%, 45%)",
++      "$value": "#928A7D",
+       "$description": "გამორთული, მინიშნებები"
+     },
+     "outline": {
+-      "$value": "hsl(220, 15%, 22%)",
+-      "$description": "ბორდერები — #333640"
++      "$value": "#24211E",
++      "$description": "ბორდერები"
+     },
+     "outline-hover": {
+-      "$value": "hsl(220, 15%, 28%)",
+-      "$description": "Hover ბორდერები — #434750"
++      "$value": "#2E2A26",
++      "$description": "Hover ბორდერები"
+     },
+     "outline-strong": {
+-      "$value": "hsl(220, 15%, 32%)",
++      "$value": "#736B60",
+       "$description": "Focus ბორდერები"
+     },
+     "positive": {
+-      "$value": "#00D26A",
++      "$value": "#8FA382",
+       "$description": "წარმატების ფერი"
+     },
+     "destructive": {
+-      "$value": "hsl(0, 84%, 60%)",
++      "$value": "#D2776A",
+       "$description": "შეცდომის ფერი"
+     },
+     "warning": {
+-      "$value": "#F59E0B",
++      "$value": "#D9A35B",
+       "$description": "გაფრთხილების ფერი"
+     },
+     "info": {
+@@ -76,32 +76,21 @@
+       "$description": "ინფორმაციის ფერი"
+     },
+     "buy": {
+-      "$value": "#006AFF",
+-      "$description": "შეძენის ღილაკი"
++      "$value": "#C9A46A",
++      "$description": "შეძენის ღილაკი (brand-ის ტოლი)"
+     },
+     "buy-hover": {
+-      "$value": "#0052CC",
++      "$value": "#D9B87F",
+       "$description": "შეძენის ღილაკი hover"
+     },
+-    "crystal": {
+-      "cyan": { "$value": "#22D3EE" },
+-      "blue": { "$value": "#3B82F6" },
+-      "purple": { "$value": "#8B5CF6" },
+-      "green": { "$value": "#10B981" }
+-    },
+-    "premium": {
+-      "amber": { "$value": "#F59E0B" },
+-      "gold": { "$value": "#FBBF24" },
+-      "rose": { "$value": "#F43F5E" }
+-    },
+     "glow": {
+       "primary": {
+-        "$value": "hsl(175, 85%, 46%)",
+-        "$description": "Teal glow"
++        "$value": "#C9A46A",
++        "$description": "app.css-ში var(--color-brand)"
+       },
+       "secondary": {
+-        "$value": "hsl(38, 95%, 55%)",
+-        "$description": "Orange glow"
++        "$value": "#D9B87F",
++        "$description": "app.css-ში var(--color-brand-hover)"
+       }
+     }
+   },
+@@ -181,14 +170,6 @@
+       "$value": "0 8px 32px hsl(220, 20%, 2%, 0.6)",
+       "$description": "Elevated elements"
+     },
+-    "glow": {
+-      "$value": "0 0 40px hsl(175, 85%, 46%, 0.15)",
+-      "$description": "Teal glow effect"
+-    },
+-    "glow-accent": {
+-      "$value": "0 0 40px hsl(38, 95%, 55%, 0.15)",
+-      "$description": "Orange glow effect"
+-    },
+     "card": {
+       "$value": "0 8px 32px hsl(220, 20%, 2%, 0.4)",
+       "$description": "Card shadow"
+diff --git a/docs/design/star-brand-audit.md b/docs/design/star-brand-audit.md
+index 7726351..f714c0b 100644
+--- a/docs/design/star-brand-audit.md
++++ b/docs/design/star-brand-audit.md
+@@ -1,5 +1,7 @@
+ # CZABA Store -- Star Brand + Perceived Value აუდიტი
+ 
++> **ისტორიული ჩანაწერი (DPG-P0-3b, 2026-11-12):** ეს დოკუმენტი აღწერს მდგომარეობას თავის თარიღზე. 2026-10-25-დან CZABA-ს პალიტრა Obsidian & Brass-ია; მიმდინარე ტოკენები: `docs/design/DESIGN_SYSTEM.md` და `app/styles/app.css` (`@theme`). ქვემოთ მოცემული ძველი ფერები აღარ გამოიყენება.
++
+ > **აუდიტის თარიღი:** 2026-03-07
+ > **შეფასების ჩარჩო:** `.claude/agents/design-philosopher.md` -- Star Brand 7 ლინზა + Perceived Value Theory
+ > **სტატუსი:** კვლევა (კოდი არ შეცვლილა)
+diff --git a/docs/design/style-guide.md b/docs/design/style-guide.md
+index b9b3653..49eec60 100644
+--- a/docs/design/style-guide.md
++++ b/docs/design/style-guide.md
+@@ -17,18 +17,19 @@ Czaba არის **cinematic audio assets** მაღაზია. დიზ
+ 
+ | კატეგორია | Token | აღწერა |
+ |-----------|-------|--------|
+-| **Surface** | `background` | გვერდის ფონი (`hsl(220, 20%, 4%)`) |
+-| | `surface` | ბარათები, მოდალები (`hsl(220, 18%, 8%)`) |
+-| | `elevated` | Hover, აქტიური ელემენტები (`hsl(220, 18%, 12%)`) |
+-| **Text** | `foreground` | ძირითადი ტექსტი (94% lightness) |
+-| | `muted` | მეორეული ტექსტი (55% lightness) |
+-| | `dim` | გამორთული, მინიშნებები (45% lightness) |
+-| **Interactive** | `brand` | Primary ღილაკები, ლინკები (#13D9CC Teal) |
+-| | `accent` | სპეციალური ყურადღება (#F9A80C Orange) |
+-| | `buy` | შეძენის ღილაკი (#006AFF) |
+-| **Feedback** | `positive` | წარმატება (#00D26A) |
+-| | `destructive` | შეცდომა (`hsl(0, 84%, 60%)`) |
+-| | `warning` | გაფრთხილება (#F59E0B) |
++| **Surface** | `background` | გვერდის ფონი (#0E0D0C, warm obsidian) |
++| | `surface` | ბარათები, მოდალები (#161412) |
++| | `elevated` | Hover, აქტიური ელემენტები (#1D1A17) |
++| **Text** | `foreground` | ძირითადი ტექსტი (#ECE6DA) |
++| | `muted` | მეორეული ტექსტი (#A39B8E) |
++| | `dim` | გამორთული, მინიშნებები (#928A7D) |
++| **Interactive** | `brand` | Primary ღილაკები, ლინკები (#C9A46A Brass) |
++| | `brand-hover` | Brand hover (#D9B87F) |
++| | `accent` | სპეციალური ყურადღება (#C9A46A, brand-ის ტოლი) |
++| | `buy` | შეძენის ღილაკი (#C9A46A, brand-ის ტოლი) |
++| **Feedback** | `positive` | წარმატება (#8FA382) |
++| | `destructive` | შეცდომა (#D2776A) |
++| | `warning` | გაფრთხილება (#D9A35B) |
+ | | `info` | ინფორმაცია (#3B82F6) |
+ 
+ ### ფერთა სქემა: 60-30-10
+@@ -36,27 +37,27 @@ Czaba არის **cinematic audio assets** მაღაზია. დიზ
+ ```
+ 60% — მუქი ფონი (background, surface)
+ 30% — ტექსტი (foreground, muted)
+-10% — brand + accent (teal, orange)
++10% — brand (brass)
+ ```
+ 
+-### Teal + Orange — კომპლემენტარული წყვილი
++### Brass — ერთი თბილი აქცენტი
+ 
+-- **Teal (#13D9CC)** — ძირითადი მოქმედებები, ნავიგაცია
+-- **Orange (#F9A80C)** — აქცენტი, განსაკუთრებული ელემენტები
+-- კონტრასტი იძლევა ვიზუალურ იერარქიას ფერის გარეშეც
++- **Brass (#C9A46A)** — ძირითადი მოქმედებები, ნავიგაცია, აქტიური მდგომარეობა; hover — #D9B87F
++- `accent` და `buy` brand-ის ტოლია: მეორე აქცენტური ფერი აღარ არსებობს
++- იერარქია ტონით და სიკაშკაშით იქმნება, არა მეორე ფერით
+ 
+ ---
+ 
+ ## Dark Mode სტრატეგია
+ 
+-### Blue Undertone (HSL 220°)
++### Warm Obsidian Neutrals
+ 
+-ყველა neutral ფერი იყენებს `hsl(220, ...)` — არა pure black:
++ყველა neutral ფერი თბილი obsidian საფეხურია — არა pure black:
+ 
+ ```
+-background: hsl(220, 20%, 4%)   — არა #000000
+-surface:    hsl(220, 18%, 8%)   — არა #121212
+-elevated:   hsl(220, 18%, 12%)  — არა #1e1e1e
++background: #0E0D0C   — არა #000000
++surface:    #161412   — არა #121212
++elevated:   #1D1A17   — არა #1e1e1e
+ ```
+ 
+ ეს ქმნის "თბილ" მუქ თემას, რომელიც კინემატოგრაფიულია.
+diff --git a/docs/design/wcag-audit.md b/docs/design/wcag-audit.md
+index e51963b..27a35bd 100644
+--- a/docs/design/wcag-audit.md
++++ b/docs/design/wcag-audit.md
+@@ -1,5 +1,7 @@
+ # WCAG AA Contrast Audit
+ 
++> **ისტორიული ჩანაწერი (DPG-P0-3b, 2026-11-12):** ეს დოკუმენტი აღწერს მდგომარეობას თავის თარიღზე. 2026-10-25-დან CZABA-ს პალიტრა Obsidian & Brass-ია; მიმდინარე ტოკენები: `docs/design/DESIGN_SYSTEM.md` და `app/styles/app.css` (`@theme`). ქვემოთ მოცემული ძველი ფერები აღარ გამოიყენება.
++
+ > თარიღი: 2025-01-03
+ > სტანდარტი: WCAG 2.1 AA
+ 
+@@ -134,3 +136,18 @@ Brand buttons-ზე ტექსტი უნდა იყოს მუქი (
+ - [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
+ - [Accessible Colors](https://accessible-colors.com/)
+ - Chrome DevTools → Rendering → Emulate vision deficiencies
++
++## Obsidian & Brass (2026-11-12, DPG-P0-3b)
++
++| Foreground | Background | Ratio | WCAG |
++|-----------|-----------|-------|------|
++| #C9A46A (brand) | #0E0D0C (background) | **8.32:1** | ✅ AAA |
++| #0E0D0C (brand-foreground) | #C9A46A (brand) | **8.32:1** | ✅ AAA |
++| #C9A46A (brand) | #161412 (surface) | **7.88:1** | ✅ AAA |
++| #D9B87F (brand-hover) | #0E0D0C (background) | **10.28:1** | ✅ AAA |
++| #ECE6DA (foreground) | #0E0D0C (background) | **15.62:1** | ✅ AAA |
++| #ECE6DA (foreground) | #161412 (surface) | **14.78:1** | ✅ AAA |
++| #A39B8E (muted) | #0E0D0C (background) | **7.06:1** | ✅ AAA |
++| #A39B8E (muted) | #161412 (surface) | **6.68:1** | ✅ AA |
++| #928A7D (dim) | #0E0D0C (background) | **5.69:1** | ✅ AA |
++| #928A7D (dim) | #161412 (surface) | **5.38:1** | ✅ AA |
+diff --git a/docs/implementation/2026/quarter-IV/307-dpg-p0-1-teal-purge-brass-tokens.md b/docs/implementation/2026/quarter-IV/307-dpg-p0-1-teal-purge-brass-tokens.md
+index 98ac188..a7cc92d 100644
+--- a/docs/implementation/2026/quarter-IV/307-dpg-p0-1-teal-purge-brass-tokens.md
++++ b/docs/implementation/2026/quarter-IV/307-dpg-p0-1-teal-purge-brass-tokens.md
+@@ -1,7 +1,7 @@
+ # DPG-P0-1: Store-ში teal აღარ რჩება, gradient და glow token-ები brass-ზე
+ 
+ **თარიღი:** 2026-11-12
+-**სტატუსი:** In Progress (stage 1 of 3; C round 474 PASS)
++**სტატუსი:** Completed (C round 478 PASS)
+ **შეცვლილი პროექტი:** Store (`app.css`, `utilities.css`, 2 audio კომპონენტი, 3 ტესტ ფაილი, ტესტების helper, ეს დოკუმენტი)
+ 
+ ## კონტექსტი
+diff --git a/docs/implementation/2026/quarter-IV/308-dpg-p0-2-undefined-tokens.md b/docs/implementation/2026/quarter-IV/308-dpg-p0-2-undefined-tokens.md
+index 9cefec5..c327825 100644
+--- a/docs/implementation/2026/quarter-IV/308-dpg-p0-2-undefined-tokens.md
++++ b/docs/implementation/2026/quarter-IV/308-dpg-p0-2-undefined-tokens.md
+@@ -1,7 +1,7 @@
+ # DPG-P0-2: Store-ში ყველა გამოუცხადებელი token იხსნება, ბარათის badge-ს chip ეძლევა
+ 
+ **თარიღი:** 2026-11-12
+-**სტატუსი:** In Progress (stage 2 of 3; C round 475 PASS)
++**სტატუსი:** Completed (C round 478 PASS)
+ **შეცვლილი პროექტი:** Store (`app.css`, `ProductCard.tsx`, 2 stub route, 1 არსებული ტესტი, ახალი ტესტი და helper, ეს დოკუმენტი)
+ 
+ ## კონტექსტი
+diff --git a/docs/implementation/2026/quarter-IV/309-dpg-p0-3a-entrance-logo-brass.md b/docs/implementation/2026/quarter-IV/309-dpg-p0-3a-entrance-logo-brass.md
+index 684acc9..12c55e1 100644
+--- a/docs/implementation/2026/quarter-IV/309-dpg-p0-3a-entrance-logo-brass.md
++++ b/docs/implementation/2026/quarter-IV/309-dpg-p0-3a-entrance-logo-brass.md
+@@ -1,7 +1,7 @@
+ # DPG-P0-3a: შესასვლელი loader და header-ის ლოგო Obsidian & Brass-ში
+ 
+ **თარიღი:** 2026-11-12
+-**სტატუსი:** In Progress (stage 3 of 4; C round 477 PASS)
++**სტატუსი:** Completed (C round 478 PASS)
+ **შეცვლილი პროექტი:** Store (`SpotlightLoader.tsx`, `EntranceCover.tsx`, `Header.tsx`, 2 არსებული ტესტი, ეს დოკუმენტი)
+ 
+ ## კონტექსტი
+diff --git a/docs/technical/store-redesign/direction-decision.md b/docs/technical/store-redesign/direction-decision.md
+index 0084058..6e960f8 100644
+--- a/docs/technical/store-redesign/direction-decision.md
++++ b/docs/technical/store-redesign/direction-decision.md
+@@ -20,7 +20,7 @@ Brand manifest (`docs/design/brand-vision.md`) პირდაპირ აღ
+ 
+ ### 2. Store-Studio ვიზუალური ერთიანობა
+ - Studio უკვე Obsidian & Brass თემაზეა (STORE-2a, რაუნდი 192-195)
+-- ტოკენები შექმნილია: `--color-obsidian-*`, `--color-brass-*`
++- ტოკენები `app.css`-ის `@theme`-შია: `--color-brand`, `--color-brand-hover`, `--color-brand-rgb`, `--color-background`, `--color-surface`
+ - F6 (Store/Studio ვიზუალური mismatch) ავტომატურად იხურება
+ 
+ ### 3. კონკურენტული პოზიციონირება
+@@ -47,12 +47,14 @@ Brand manifest (`docs/design/brand-vision.md`) პირდაპირ აღ
+ 
+ ## ტოკენები (STORE-2a-დან)
+ 
+-უკვე არსებობს `app.css`-ში:
++უკვე არსებობს `app.css`-ის `@theme`-ში (მიმდინარე მნიშვნელობები — `docs/design/DESIGN_SYSTEM.md`):
+ ```
+---color-obsidian-900: ...
+---color-obsidian-800: ...
+---color-brass-500: ...
+---color-brass-400: ...
++--color-background: #0e0d0c;    /* Obsidian */
++--color-surface: #161412;
++--color-elevated: #1d1a17;
++--color-brand: #c9a46a;         /* Brass */
++--color-brand-hover: #d9b87f;
++--color-brand-rgb: 201, 164, 106;
+ ```
+ 
+ ახალი ტოკენები STORE-2b+-ში: hero gradient, card hover, category badge ფერები.
+diff --git a/docs/implementation/2026/quarter-IV/310-dpg-p0-3b-design-docs-brass.md b/docs/implementation/2026/quarter-IV/310-dpg-p0-3b-design-docs-brass.md
+new file mode 100644
+index 0000000..36e3690
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/310-dpg-p0-3b-design-docs-brass.md
+@@ -0,0 +1,86 @@
++# DPG-P0-3b: დიზაინის reference დოკუმენტები Obsidian & Brass-ში
++
++**თარიღი:** 2026-11-12
++**სტატუსი:** Completed (C round 478 PASS)
++**შეცვლილი პროექტი:** Store (მხოლოდ `docs/`: 11 ფაილი `docs/design`-ში, `direction-decision.md`, doc 307–309-ის სტატუსის ხაზი, ეს დოკუმენტი)
++
++## კონტექსტი
++
++DPG-FIX ბლოკის P0-ის მეოთხე პუნქტი (DPG-DOCS-UPDATE) და DPG-ის მეორე წესი: token-ის ცვლილება დოკუმენტაციის ცვლილებასაც ნიშნავს. STORE-2a-მ (doc 158) `app.css`-ის `@theme` Obsidian & Brass-ზე გადაიყვანა, P0-1…P0-3a-მ კი Store-იდან ძველი teal და გამოუცხადებელი token-ები მოაშორა, მაგრამ `docs/design`-ის reference დოკუმენტები ისევ ძველ ცივ-ლურჯ ფონებს, ძველ brand/accent ფერებს და `--shadow-glow`-ს აღწერდნენ. აგენტები ამ ფაილებიდან კოპირებენ მნიშვნელობებს, ამიტომ მოძველებული დოკუმენტი ახალ კოდში ძველ იდენტობას აბრუნებს.
++
++`docs/technical/store-redesign/direction-decision.md` კი ასახელებდა `--color-obsidian-*` და `--color-brass-*` token-ებს, რომლებიც `app.css`-ში არ არსებობს.
++
++## მიდგომა
++
++მხოლოდ დოკუმენტები; `app/**` არ შეცვლილა. ყოველი „შემდეგ" მნიშვნელობა `app/styles/app.css`-ის `@theme`-დან არის აღებული.
++
++B-ის გადაწყვეტილებები:
++
++- **D-29z1692 — ოთხი კლასი.** hue-range სკანერმა `docs/design`-სა და `direction-decision.md`-ში 82 ხაზი იპოვა. თითოეული ერთ კლასს ეკუთვნის:
++  1. ჩვენი მოძველებული token-ები და მითითებები → გადაწერა (55 ხაზი): `DESIGN_SYSTEM.md`, `style-guide.md`, `components/button.md`, `audit-design.md`, `design-tokens.json`, `box-render-specs.md` (l.110), `awwwards-improvements.md`.
++  2. კონკურენტის ფაქტები → რჩება (`design-systems-reference.md`-ის SOUNDRAW-ის ხაზები).
++  3. თარიღიანი გაზომვები და აუდიტები → ტექსტი რჩება, ემატება ბანერი: `wcag-audit.md`, `design-audit.md`, `star-brand-audit.md`, `design-systems-reference.md`. `wcag-audit.md`-ს ბოლოში ემატება ცოცხალი პალიტრის კონტრასტის სექცია (B-ის გამოთვლილი).
++  4. ძველი იდენტობა არ არის → რჩება: `box-render-specs.md`-ის Gold ყუთის ფერები და `DESIGN_SYSTEM.md`-ის ვერსიის 2.1 ჩანაწერი.
++
++  კლასები 2–4 არის 27 ხაზიანი განზრახ დარჩენილი სია.
++- **D-29z1693 — რა რჩება ფარგლებს გარეთ.** ფონტები (DPG-FONT-RESOLVE), `--color-info` და error-ის წითლები (DPG-COLOR-CONSOLIDATE), `.claude/**` (root-ის მოთხოვნა ROOT-REQ-DPG-PRIMITIVES-PATCH) და `docs/design`-ის გარეთ არსებული 114 ხაზი (სიგნალი SIG-R477-DOCS-OUTSIDE-DESIGN, RETRO 480).
++- **D-29z1694 — byte-equal sketch-ის ნაცვლად checker.** ქართული ტექსტი A-მ დაწერა; მნიშვნელობების სისწორეს ამოწმებს checker, რომელიც `app.css`-ს გაშვების დროს კითხულობს: (a) ყოველი `--color-*` / `--shadow-*` დეკლარაცია `@theme`-ის ტოლია; (b) ოთხ ნორმატიულ ფაილში ყოველი ფერის literal `app.css`-შია; (c) token-ის სახელიან ხაზზე ყოველი hex ამ token-ის მნიშვნელობაა.
++
++`awwwards-improvements.md`-ის snippet-ები ფერით გადაკეთდა (`rgba(var(--color-brand-rgb), a)` იმავე alpha-თი), მაგრამ მათი glow-ის რჩევა ეწინააღმდეგება round 453-ის no-glow წესს. ეს გადადის DPG-INTERACTION-FIX-ში (P2) სიგნალად SIG-R478-AWWWARDS-GLOW; აქ არ წაშლილა.
++
++## არქიტექტურა
++
++```mermaid
++flowchart LR
++  T["app.css @theme"] --> DS["DESIGN_SYSTEM.md: Color System, Shadows"]
++  T --> SG["style-guide.md"]
++  T --> AD["audit-design.md"]
++  T --> J["design-tokens.json"]
++  T --> DD["direction-decision.md: ტოკენები"]
++  DS --> W["რატომ Obsidian & Brass?"]
++  BV["brand-vision.md"] --> W
++  DD --> W
++```
++
++`app.css` ერთადერთი წყაროა. „რატომ Obsidian & Brass?" სექციის ყოველი არგუმენტი `direction-decision.md`-ს ან `brand-vision.md`-ს ეყრდნობა.
++
++## შეცვლილი ფაილები
++
++- `docs/design/DESIGN_SYSTEM.md` — Color System და Shadows `@theme`-ის მიხედვით (brand-foreground, muted-bg, outline-strong, brand-rgb დამატებული; `--shadow-glow` ამოღებული; card/elevated ჩრდილები დამატებული); „რატომ Teal + Orange?" → „რატომ Obsidian & Brass?" წყაროებით; warm obsidian-ის ახსნა; Semantic ცხრილი, მაგალითები (Primary Button-ის hover-ზე `--shadow-glow` აღარ არის) და ვერსია 2.2.
++- `docs/design/style-guide.md` — token-ების ცხრილი, 60-30-10, „Brass — ერთი თბილი აქცენტი", „Warm Obsidian Neutrals".
++- `docs/design/components/button.md` — Primary/Accent ფონი `#C9A46A`; hover-ზე `shadow-glow` აღარ არის.
++- `docs/design/audit-design.md` — ჩეკლისტი და სწრაფი რეფერენსი.
++- `docs/design/design-tokens.json` — `color.*` და `shadow.*` `@theme`-ის ტოლია; `crystal.*`, `premium.*`, `shadow.glow`, `shadow.glow-accent` ამოღებულია.
++- `docs/design/box-render-specs.md` — l.110: brass edge glow.
++- `docs/design/awwwards-improvements.md` — l.71 და snippet-ების ფერი.
++- `docs/design/design-audit.md`, `star-brand-audit.md`, `design-systems-reference.md` — მხოლოდ ბანერი (line 3).
++- `docs/design/wcag-audit.md` — ბანერი და ცოცხალი პალიტრის კონტრასტის სექცია ბოლოში.
++- `docs/technical/store-redesign/direction-decision.md` — მხოლოდ `@theme`-ში არსებული token-ების სახელები და მათი მნიშვნელობები.
++- `docs/implementation/2026/quarter-IV/307-…`, `308-…`, `309-…` — სტატუსის ხაზი (l.4).
++- ეს დოკუმენტი.
++
++## პრობლემები და გადაწყვეტები
++
++- **Problem:** `audit-design.md`-ის ჩეკლისტის ერთ ხაზზე სამი token-ის hex-ის ჩაწერა checker-ის name→value შემოწმებას არღვევს (ხაზზე ყოველი hex ყოველ დასახელებულ token-ს ედრება). → **Solution:** ტექსტისა და ფონის ხაზები token-ებს ასახელებს და მნიშვნელობებისთვის იმავე ფაილის სწრაფ რეფერენსს მიუთითებს; ხაზების რაოდენობა უცვლელია.
++- **Problem:** ძველი hex-ის კომენტარში დატოვება (`/* #… */`) checker-ის literal შემოწმებას აწითლებს და მკითხველს ძველ მნიშვნელობას აჩვენებს. → **Solution:** დეკლარაციები პირდაპირ `@theme`-ის hex-ს იყენებს, კომენტარში მხოლოდ როლია.
++- **Problem:** `docs/**` Tailwind-ის candidate-ების წყაროა. → **Solution:** დამატებულ ხაზებში arbitrary-value კლასი (კვადრატული ფრჩხილებით) არ არის; ფერები ჩაწერილია hex-ით, `var(--color-…)`-ით ან token-ის სახელით.
++
++## ტესტირება
++
++`docs/`-ს კოდი არ კითხულობს, ამიტომ vitest ფაილი ამ ცვლილებას არ ფარავს. A-მ გაუშვა:
++
++- B-ის token checker: `FAILS 0` (HEAD-ზე 156).
++- B-ის residual checker: `hits=27 residual=27 unexpected=0 residual_changed=0` (HEAD-ზე `unexpected=55`).
++- round 478-ის claims script-ი (შედეგი `a-round-478/claims.txt`-შია).
++- `design-tokens.json` ვალიდური JSON-ია.
++- `npm run typecheck`.
++
++C ამოწმებს checker-ების mutant-ებს, ექვსი token-ის მნიშვნელობას ბრაუზერის `getComputedStyle`-თან, WCAG-ის ათ თანაფარდობას და მთავარ გვერდს.
++
++## TODO / შემდეგი ნაბიჯები
++
++- **DP-gate re-review:** P0 დასრულდა; root ხელახლა უშვებს design-philosopher-სა და product-designer-ს.
++- **ROOT-REQ-DPG-PRIMITIVES-PATCH:** `.claude/primitives/DESIGN_TOKENS.md` ისევ ძველ ფერებს აღწერს; root-მა DP gate-მდე უნდა შეასწოროს.
++- **SIG-R478-AWWWARDS-GLOW:** glow-ის რჩევა `awwwards-improvements.md`-ში → DPG-INTERACTION-FIX (P2).
++- **SIG-R477-DOCS-OUTSIDE-DESIGN:** `docs/design`-ის გარეთ დარჩენილი ძველი ფერები → RETRO 480.
++- **DPG-FONT-RESOLVE, DPG-COLOR-CONSOLIDATE:** ფონტები, `--color-info` და error-ის ფერები (P1).

@@ -1,0 +1,35 @@
+import { chromium } from '@playwright/test';
+import fs from 'node:fs';
+const OUT = process.argv[2];
+const base = 'http://127.0.0.1:5173';
+const b = await chromium.launch();
+const res = { c4: {}, c9: {}, c10: {} };
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const ctx = await b.newContext({ viewport: { width: w, height: h } });
+  const p = await ctx.newPage();
+  await p.goto(base + '/', { waitUntil: 'load' });
+  await p.waitForLoadState('networkidle').catch(()=>{}); await p.waitForTimeout(6000);
+  const tokens = ['brand', 'brand-hover', 'background', 'surface', 'foreground', 'muted'];
+  const c4 = await p.evaluate((t) => Object.fromEntries(t.map((k) => [k, getComputedStyle(document.querySelector('html')).getPropertyValue('--color-' + k).trim()])), tokens);
+  const logo = await p.evaluate(() => { const a = [...document.querySelectorAll('header a')].find((x) => /CZABA/i.test(x.textContent || '')); return a ? getComputedStyle(a).color : null; });
+  const bodyBg = await p.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  res.c4[w] = c4; res.c10[w] = { logo, bodyBg };
+  await p.screenshot({ path: `${OUT}/home-${w}.png` });
+  await ctx.close();
+  const ctx2 = await b.newContext({ viewport: { width: w, height: h } });
+  const q = await ctx2.newPage();
+  await q.goto(base + '/studio/middle-east', { waitUntil: 'load' });
+  await q.waitForTimeout(3000);
+  const txt = await q.evaluate(() => (document.body&&document.body.innerText||document.documentElement.outerHTML).slice(0, 300));
+  const audioSrc = await q.evaluate(() => [...document.querySelectorAll('audio[src],source[src]')].length);
+  const api = await ctx2.request.get(base + '/api/studio-token?product=middle-east&file=x');
+  res.c9[w] = { txt, audioSrc, apiStatus: api.status() };
+  await q.goto(base + '/studio-lab', { waitUntil: 'load' });
+  await q.waitForTimeout(4000);
+  res.c9[w].lab = { url: q.url(), title: await q.title(), text: (await q.evaluate(() => (document.body?document.body.innerText:'NOBODY'))).slice(0, 200).replace(/\n/g, ' | ') };
+  await q.screenshot({ path: `${OUT}/studio-lab-${w}.png` });
+  await ctx2.close();
+}
+await b.close();
+fs.writeFileSync(`${OUT}/browser.json`, JSON.stringify(res, null, 1));
+console.log(JSON.stringify(res, null, 1));

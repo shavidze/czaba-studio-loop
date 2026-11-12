@@ -1,0 +1,548 @@
+diff -ruN store/app/components/common/CookieConsent.tsx /tmp/scratch479/app/components/common/CookieConsent.tsx
+--- store/app/components/common/CookieConsent.tsx	2026-11-12 20:38:05.439624565 +0000
++++ /tmp/scratch479/app/components/common/CookieConsent.tsx	2026-11-12 21:46:10.961889621 +0000
+@@ -5,7 +5,7 @@
+  * გამოჩნდება ქვემოთ და გაქრება გადაწყვეტილების შემდეგ.
+  */
+ 
+-import { useLocation } from '@remix-run/react';
++import { Link, useLocation } from '@remix-run/react';
+ import { X } from 'lucide-react';
+ import { useEffect, useState } from 'react';
+ import { GA4_MEASUREMENT_ID, hasConsentDecision, setAnalyticsConsent } from '~/lib/analytics';
+@@ -60,12 +60,12 @@
+         {/* Text */}
+         <p className="text-sm text-muted text-center sm:text-left">
+           We use cookies to enhance your experience.{' '}
+-          <a
+-            href="/privacy"
++          <Link
++            to="/privacy"
+             className="text-foreground underline underline-offset-2 hover:text-brand transition-colors"
+           >
+             Privacy Policy
+-          </a>
++          </Link>
+         </p>
+ 
+         {/* Buttons */}
+diff -ruN store/app/components/common/__tests__/CookieConsent.test.tsx /tmp/scratch479/app/components/common/__tests__/CookieConsent.test.tsx
+--- store/app/components/common/__tests__/CookieConsent.test.tsx	2026-11-12 20:38:05.439624565 +0000
++++ /tmp/scratch479/app/components/common/__tests__/CookieConsent.test.tsx	2026-11-12 21:45:33.447589776 +0000
+@@ -1,4 +1,5 @@
+ import { act, fireEvent, render, screen } from '@testing-library/react';
++import { MemoryRouter } from 'react-router-dom';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ 
+ const analyticsMock = vi.hoisted(() => ({
+@@ -14,7 +15,8 @@
+   setAnalyticsConsent: (granted: boolean) => analyticsMock.setConsent(granted),
+ }));
+ 
+-vi.mock('@remix-run/react', () => ({
++vi.mock('@remix-run/react', async (importOriginal) => ({
++  ...(await importOriginal<typeof import('@remix-run/react')>()),
+   useLocation: () => ({
+     pathname: locationMock.pathname,
+     search: '',
+@@ -36,7 +38,7 @@
+ 
+ function renderCookieConsentAt(pathname: string) {
+   locationMock.pathname = pathname;
+-  return render(<CookieConsent />);
++  return render(<CookieConsent />, { wrapper: MemoryRouter });
+ }
+ 
+ describe('CookieConsent (M4)', () => {
+@@ -145,3 +147,22 @@
+     });
+   });
+ });
++
++describe('CookieConsent Privacy link (DPG-FOOTER-LINKS)', () => {
++  beforeEach(() => {
++    vi.useFakeTimers();
++    analyticsMock.hasDecision = false;
++  });
++
++  afterEach(() => {
++    vi.useRealTimers();
++  });
++
++  it('CC6: the Privacy Policy link is a router link to /privacy', () => {
++    renderCookieConsentAt('/');
++    advanceBannerTimer(1500);
++    const link = screen.getByRole('link', { name: 'Privacy Policy' });
++    expect(link.getAttribute('href')).toBe('/privacy');
++    expect(link.getAttribute('data-discover')).toBe('true');
++  });
++});
+diff -ruN store/app/components/home/ProductSection.tsx /tmp/scratch479/app/components/home/ProductSection.tsx
+--- store/app/components/home/ProductSection.tsx	2026-11-12 20:38:05.439908897 +0000
++++ /tmp/scratch479/app/components/home/ProductSection.tsx	2026-11-12 21:46:10.962912859 +0000
+@@ -1,5 +1,7 @@
++import { Link } from '@remix-run/react';
+ import { ArrowRight } from 'lucide-react';
+ import type { ReactNode } from 'react';
++import { releaseLinkFocus } from '~/lib/link-focus';
+ import type { Product } from '~/services/api/client';
+ import type { DisplayProduct } from '~/types';
+ import { Carousel } from '../common/Carousel';
+@@ -60,13 +62,14 @@
+       {/* View All Link */}
+       <PageContainer className="relative mt-10">
+         <div className="flex justify-center">
+-          <a
+-            href={viewAllLink}
++          <Link
++            to={viewAllLink}
++            onClick={releaseLinkFocus}
+             className="group inline-flex cursor-pointer items-center gap-2 text-muted transition-colors hover:text-foreground"
+           >
+             <span className="text-lg">{viewAllText}</span>
+             <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+-          </a>
++          </Link>
+         </div>
+       </PageContainer>
+     </section>
+diff -ruN store/app/components/layout/Footer.tsx /tmp/scratch479/app/components/layout/Footer.tsx
+--- store/app/components/layout/Footer.tsx	2026-11-12 20:38:05.440198746 +0000
++++ /tmp/scratch479/app/components/layout/Footer.tsx	2026-11-12 21:46:10.957617665 +0000
+@@ -1,4 +1,6 @@
++import { Link } from '@remix-run/react';
+ import { CollapsibleSocialLinks } from '~/components/ui';
++import { releaseLinkFocus } from '~/lib/link-focus';
+ import { PageContainer } from './PageContainer';
+ 
+ const APP_NAME = 'CZABA';
+@@ -35,36 +37,36 @@
+           <div className="grid grid-cols-2 gap-8">
+             <div>
+               <h4 className="text-base font-semibold text-foreground mb-6">Navigation</h4>
+-              <a href={ROUTES.store} className={link}>
++              <Link to={ROUTES.store} className={link} onClick={releaseLinkFocus}>
+                 Store
+-              </a>
+-              <a href={ROUTES.giftCards} className={link}>
++              </Link>
++              <Link to={ROUTES.giftCards} className={link} onClick={releaseLinkFocus}>
+                 Gift Cards
+-              </a>
+-              <a href={ROUTES.contact} className={link}>
++              </Link>
++              <Link to={ROUTES.contact} className={link} onClick={releaseLinkFocus}>
+                 Hire Us
+-              </a>
+-              <a href={ROUTES.support} className={link}>
++              </Link>
++              <Link to={ROUTES.support} className={link} onClick={releaseLinkFocus}>
+                 Support
+-              </a>
+-              <a href={ROUTES.faq} className={link}>
++              </Link>
++              <Link to={ROUTES.faq} className={link} onClick={releaseLinkFocus}>
+                 FAQ
+-              </a>
+-              <a href={ROUTES.license} className={link}>
++              </Link>
++              <Link to={ROUTES.license} className={link} onClick={releaseLinkFocus}>
+                 License
+-              </a>
++              </Link>
+             </div>
+             <div>
+               <h4 className="text-base font-semibold text-foreground mb-6">Legal</h4>
+-              <a href={ROUTES.privacy} className={link}>
++              <Link to={ROUTES.privacy} className={link} onClick={releaseLinkFocus}>
+                 Privacy Policy
+-              </a>
+-              <a href={ROUTES.terms} className={link}>
++              </Link>
++              <Link to={ROUTES.terms} className={link} onClick={releaseLinkFocus}>
+                 Terms of Service
+-              </a>
+-              <a href={ROUTES.cookies} className={link}>
++              </Link>
++              <Link to={ROUTES.cookies} className={link} onClick={releaseLinkFocus}>
+                 Cookie Policy
+-              </a>
++              </Link>
+             </div>
+           </div>
+         </div>
+diff -ruN store/app/lib/__tests__/link-focus.test.tsx /tmp/scratch479/app/lib/__tests__/link-focus.test.tsx
+--- store/app/lib/__tests__/link-focus.test.tsx	1970-01-01 00:00:00.000000000 +0000
++++ /tmp/scratch479/app/lib/__tests__/link-focus.test.tsx	2026-11-12 21:45:33.451113554 +0000
+@@ -0,0 +1,80 @@
++import { fireEvent, render, screen } from '@testing-library/react';
++import { afterEach, describe, expect, it } from 'vitest';
++import { releaseLinkFocus } from '~/lib/link-focus';
++
++afterEach(() => {
++  document.body.removeAttribute('tabindex');
++});
++
++describe('releaseLinkFocus (DPG-FOOTER-LINKS)', () => {
++  it('LF1 moves focus from the clicked link to the document body and leaves no tabindex', () => {
++    render(
++      <a
++        href="/support"
++        onClick={(event) => {
++          releaseLinkFocus(event);
++          event.preventDefault();
++        }}
++      >
++        Support
++      </a>,
++    );
++    const link = screen.getByRole('link', { name: 'Support' });
++    link.focus();
++    expect(document.activeElement).toBe(link);
++
++    fireEvent.click(link);
++
++    expect(document.activeElement).toBe(document.body);
++    expect(document.body.hasAttribute('tabindex')).toBe(false);
++  });
++
++  it('LF2 keeps a tabindex the body already had', () => {
++    document.body.setAttribute('tabindex', '0');
++    render(
++      <a
++        href="/faq"
++        onClick={(event) => {
++          releaseLinkFocus(event);
++          event.preventDefault();
++        }}
++      >
++        FAQ
++      </a>,
++    );
++    const link = screen.getByRole('link', { name: 'FAQ' });
++    link.focus();
++
++    fireEvent.click(link);
++
++    expect(document.activeElement).toBe(document.body);
++    expect(document.body.getAttribute('tabindex')).toBe('0');
++  });
++
++  it.each([
++    ['Ctrl', { ctrlKey: true }],
++    ['Meta', { metaKey: true }],
++    ['Shift', { shiftKey: true }],
++    ['Alt', { altKey: true }],
++    ['middle button', { button: 1 }],
++  ])('LF3 a %s click keeps focus on the link (the browser opens a new tab or window)', (_label, init) => {
++    render(
++      <a
++        href="/faq"
++        onClick={(event) => {
++          releaseLinkFocus(event);
++          event.preventDefault();
++        }}
++      >
++        FAQ
++      </a>,
++    );
++    const link = screen.getByRole('link', { name: 'FAQ' });
++    link.focus();
++
++    fireEvent.click(link, init);
++
++    expect(document.activeElement).toBe(link);
++    expect(document.body.hasAttribute('tabindex')).toBe(false);
++  });
++});
+diff -ruN store/app/lib/__tests__/store-header-footer.test.tsx /tmp/scratch479/app/lib/__tests__/store-header-footer.test.tsx
+--- store/app/lib/__tests__/store-header-footer.test.tsx	2026-11-12 20:38:05.447121452 +0000
++++ /tmp/scratch479/app/lib/__tests__/store-header-footer.test.tsx	2026-11-12 21:45:33.452220714 +0000
+@@ -1,6 +1,6 @@
+ import { fireEvent, render, within } from '@testing-library/react';
+ import { renderToString } from 'react-dom/server';
+-import { MemoryRouter } from 'react-router-dom';
++import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
+ import { beforeEach, describe, expect, it, vi } from 'vitest';
+ import { Footer } from '~/components/layout/Footer';
+ import { Header } from '~/components/layout/Header';
+@@ -208,7 +208,11 @@
+ 
+ describe('Store Footer (STORE-1c)', () => {
+   it('F1 copyright uses the CZABA name and keeps Gift Cards and Hire Us links', () => {
+-    const { container } = render(<Footer />);
++    const { container } = render(
++      <MemoryRouter>
++        <Footer />
++      </MemoryRouter>,
++    );
+     const footer = container.querySelector('footer');
+     if (!footer) throw new Error('footer not rendered');
+     const year = new Date().getFullYear();
+@@ -223,3 +227,65 @@
+     );
+   });
+ });
++
++const FOOTER_INTERNAL_LINKS = [
++  ['Store', '/store'],
++  ['Gift Cards', '/gift-cards'],
++  ['Hire Us', '/hire-us'],
++  ['Support', '/support'],
++  ['FAQ', '/faq'],
++  ['License', '/license'],
++  ['Privacy Policy', '/privacy'],
++  ['Terms of Service', '/terms'],
++  ['Cookie Policy', '/cookies'],
++];
++
++function FooterLocationProbe() {
++  const location = useLocation();
++  return <output data-testid="footer-location">{location.pathname}</output>;
++}
++
++function renderFooterInRouter() {
++  return render(
++    <MemoryRouter initialEntries={['/faq-start']}>
++      <Routes>
++        <Route
++          path="*"
++          element={
++            <>
++              <Footer />
++              <FooterLocationProbe />
++            </>
++          }
++        />
++      </Routes>
++    </MemoryRouter>,
++  );
++}
++
++describe('Store Footer links (DPG-FOOTER-LINKS)', () => {
++  it.each(FOOTER_INTERNAL_LINKS)('F2 %s navigates inside the router to %s', (name, path) => {
++    const { container, getByTestId } = renderFooterInRouter();
++    const footer = container.querySelector('footer');
++    if (!footer) throw new Error('footer not rendered');
++    const link = within(footer).getByRole('link', { name });
++
++    expect(link.getAttribute('href')).toBe(path);
++    link.focus();
++    fireEvent.click(link);
++    expect(getByTestId('footer-location').textContent).toBe(path);
++    expect(document.activeElement).toBe(document.body);
++    expect(document.body.hasAttribute('tabindex')).toBe(false);
++  });
++
++  it('F3 the footer has exactly the nine internal links', () => {
++    const { container } = renderFooterInRouter();
++    const footer = container.querySelector('footer');
++    if (!footer) throw new Error('footer not rendered');
++    const internal = Array.from(footer.querySelectorAll('a'))
++      .map((anchor) => [anchor.textContent?.trim() ?? '', anchor.getAttribute('href') ?? ''])
++      .filter(([, href]) => href.startsWith('/'));
++
++    expect(internal).toEqual(FOOTER_INTERNAL_LINKS);
++  });
++});
+diff -ruN store/app/lib/__tests__/store-internal-links.test.ts /tmp/scratch479/app/lib/__tests__/store-internal-links.test.ts
+--- store/app/lib/__tests__/store-internal-links.test.ts	1970-01-01 00:00:00.000000000 +0000
++++ /tmp/scratch479/app/lib/__tests__/store-internal-links.test.ts	2026-11-12 21:45:33.453425071 +0000
+@@ -0,0 +1,85 @@
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++import { describe, expect, it } from 'vitest';
++
++const STORE_LINK_FILES = [
++  'app/components/layout/Footer.tsx',
++  'app/components/common/CookieConsent.tsx',
++  'app/components/home/ProductSection.tsx',
++  'app/routes/privacy.tsx',
++  'app/routes/terms.tsx',
++  'app/routes/faq.tsx',
++];
++
++const EXPECTED_ROUTER_TARGETS: ReadonlyArray<readonly [string, string]> = [
++  ['app/components/home/ProductSection.tsx', 'to={viewAllLink}'],
++  ['app/routes/privacy.tsx', 'to="/cookies"'],
++  ['app/routes/terms.tsx', 'to="/license"'],
++  ['app/routes/faq.tsx', 'to="/hire-us"'],
++];
++
++function readSource(path: string): string {
++  return readFileSync(resolve(process.cwd(), path), 'utf8');
++}
++
++function openingTags(source: string, tagName: string): string[] {
++  const tags: string[] = [];
++  const pattern = new RegExp(`<${tagName}(?=[\\s>])`, 'g');
++  for (let match = pattern.exec(source); match; match = pattern.exec(source)) {
++    let depth = 0;
++    let quote = '';
++    let end = match.index + match[0].length;
++    for (; end < source.length; end++) {
++      const char = source[end];
++      if (quote) {
++        if (char === quote) quote = '';
++      } else if (char === '"' || char === "'" || char === '`') {
++        quote = char;
++      } else if (char === '{') {
++        depth++;
++      } else if (char === '}') {
++        depth--;
++      } else if (char === '>' && depth === 0) {
++        break;
++      }
++    }
++    tags.push(source.slice(match.index, end + 1));
++  }
++  return tags;
++}
++
++function isInternalHref(tag: string): boolean {
++  const literal = tag.match(/\bhref=["'](\/(?!\/)[^"']*)["']/);
++  if (literal) return true;
++  return /\bhref=\{(?:viewAllLink|ROUTES\.\w+)\}/.test(tag);
++}
++
++it('IL4 the persistent CookieConsent banner link keeps focus (no release handler)', () => {
++  const tags = openingTags(readSource('app/components/common/CookieConsent.tsx'), 'Link');
++  const privacy = tags.find((tag) => tag.includes('to="/privacy"'));
++  expect(privacy).toBeDefined();
++  expect(privacy ?? '').not.toContain('releaseLinkFocus');
++});
++
++describe('Store internal links use the router (DPG-FOOTER-LINKS)', () => {
++  it.each(STORE_LINK_FILES)('IL1 %s has no <a> with an internal href', (path) => {
++    const internalAnchors = openingTags(readSource(path), 'a').filter(isInternalHref);
++    expect(internalAnchors).toEqual([]);
++  });
++
++  it.each(EXPECTED_ROUTER_TARGETS)('IL2 %s renders %s through Link', (path, target) => {
++    const linkTags = openingTags(readSource(path), 'Link');
++    const tag = linkTags.find((candidate) => candidate.includes(target));
++    expect(tag).toBeDefined();
++    expect(tag ?? '').toContain('onClick={releaseLinkFocus}');
++  });
++
++  it('IL3 the scanner reads a multi-line anchor with braces in its attributes', () => {
++    const sample = '<a\n  className={cn("a", { b: true })}\n  href="/cookies"\n>x</a>';
++    expect(openingTags(sample, 'a').filter(isInternalHref)).toHaveLength(1);
++    expect(openingTags('<a href="mailto:x@y.z">m</a>', 'a').filter(isInternalHref)).toHaveLength(0);
++    expect(
++      openingTags('<a href="https://stripe.com/privacy">s</a>', 'a').filter(isInternalHref),
++    ).toHaveLength(0);
++  });
++});
+diff -ruN store/app/lib/link-focus.ts /tmp/scratch479/app/lib/link-focus.ts
+--- store/app/lib/link-focus.ts	1970-01-01 00:00:00.000000000 +0000
++++ /tmp/scratch479/app/lib/link-focus.ts	2026-11-12 21:46:10.963931455 +0000
+@@ -0,0 +1,21 @@
++import type { MouseEvent } from 'react';
++
++function isPlainPrimaryActivation(event: MouseEvent<HTMLAnchorElement>): boolean {
++  return (
++    !event.defaultPrevented &&
++    event.button === 0 &&
++    !event.metaKey &&
++    !event.altKey &&
++    !event.ctrlKey &&
++    !event.shiftKey
++  );
++}
++
++export function releaseLinkFocus(event: MouseEvent<HTMLAnchorElement>): void {
++  if (!isPlainPrimaryActivation(event)) return;
++  const { body } = event.currentTarget.ownerDocument;
++  const hadTabIndex = body.hasAttribute('tabindex');
++  if (!hadTabIndex) body.tabIndex = -1;
++  body.focus({ preventScroll: true });
++  if (!hadTabIndex) body.removeAttribute('tabindex');
++}
+diff -ruN store/app/routes/faq.tsx /tmp/scratch479/app/routes/faq.tsx
+--- store/app/routes/faq.tsx	2026-11-12 20:38:05.472121694 +0000
++++ /tmp/scratch479/app/routes/faq.tsx	2026-11-12 21:46:10.960844703 +0000
+@@ -1,8 +1,10 @@
+ import type { MetaFunction } from '@remix-run/node';
++import { Link } from '@remix-run/react';
+ import { ChevronDown } from 'lucide-react';
+ import { useState } from 'react';
+ import { Footer } from '~/components/layout/Footer';
+ import { PageContainer } from '~/components/layout/PageContainer';
++import { releaseLinkFocus } from '~/lib/link-focus';
+ 
+ export const meta: MetaFunction = () => {
+   return [
+@@ -161,12 +163,13 @@
+               <p className="text-muted mb-6">
+                 Our team is here to help with any questions you might have.
+               </p>
+-              <a
+-                href="/hire-us"
++              <Link
++                to="/hire-us"
++                onClick={releaseLinkFocus}
+                 className="inline-block px-8 py-3 bg-brand text-background font-semibold rounded-lg hover:bg-brand-hover transition-colors"
+               >
+                 Contact Us
+-              </a>
++              </Link>
+             </div>
+           </div>
+         </PageContainer>
+diff -ruN store/app/routes/privacy.tsx /tmp/scratch479/app/routes/privacy.tsx
+--- store/app/routes/privacy.tsx	2026-11-12 20:38:05.472121694 +0000
++++ /tmp/scratch479/app/routes/privacy.tsx	2026-11-12 21:46:10.958729177 +0000
+@@ -1,6 +1,8 @@
+ import type { MetaFunction } from '@remix-run/node';
++import { Link } from '@remix-run/react';
+ import { Footer } from '~/components/layout/Footer';
+ import { PageContainer } from '~/components/layout/PageContainer';
++import { releaseLinkFocus } from '~/lib/link-focus';
+ 
+ export const meta: MetaFunction = () => {
+   return [
+@@ -327,9 +329,13 @@
+                   We may use cookies and similar tracking technologies to collect and store your
+                   information. Specific information about how we use such technologies and how you
+                   can refuse certain cookies is set out in our{' '}
+-                  <a href="/cookies" className="text-brand hover:underline">
++                  <Link
++                    to="/cookies"
++                    onClick={releaseLinkFocus}
++                    className="text-brand hover:underline"
++                  >
+                     Cookie Policy
+-                  </a>
++                  </Link>
+                   .
+                 </p>
+               </Section>
+diff -ruN store/app/routes/terms.tsx /tmp/scratch479/app/routes/terms.tsx
+--- store/app/routes/terms.tsx	2026-11-12 20:38:05.473121703 +0000
++++ /tmp/scratch479/app/routes/terms.tsx	2026-11-12 21:46:10.959795729 +0000
+@@ -1,6 +1,8 @@
+ import type { MetaFunction } from '@remix-run/node';
++import { Link } from '@remix-run/react';
+ import { Footer } from '~/components/layout/Footer';
+ import { PageContainer } from '~/components/layout/PageContainer';
++import { releaseLinkFocus } from '~/lib/link-focus';
+ 
+ export const meta: MetaFunction = () => {
+   return [
+@@ -65,9 +67,13 @@
+                 </ul>
+                 <p>
+                   Full license details are available on our{' '}
+-                  <a href="/license" className="text-brand hover:underline">
++                  <Link
++                    to="/license"
++                    onClick={releaseLinkFocus}
++                    className="text-brand hover:underline"
++                  >
+                     License page
+-                  </a>
++                  </Link>
+                   .
+                 </p>
+               </Section>
