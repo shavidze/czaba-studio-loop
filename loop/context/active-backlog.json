@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-12T10:55:33.269Z",
-  "current_task": "Round 466: STORE-2b-3c-2b - the zero-offset glow scanner finds every zero spelling, function and concatenated blurs (test-only; current-task.md, D-29z1643)",
+  "_generatedUtc": "2026-11-12T11:33:36.385Z",
+  "current_task": "Round 467: STORE-2b-3c-2b fix-up - TS8 observes the shadow pre-check (C-R466-01, test-only; current-task.md, D-29z1646)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6649,12 +6649,6 @@
       "title": "style-scan transparent fill misses hsl(... / 0), color-mix(...) and var(); comments mentioning a spe"
     },
     {
-      "id": "INFO-TL-R451-GLOW-CALC",
-      "severity": "info",
-      "status": "dispatched round 466 (D-29z1643): STORE-2b-3c-2b sketch b-ro",
-      "title": "zero-offset glow scan misses 0 0 calc(...) and concatenated values; const backgroundClip = 'text' co"
-    },
-    {
       "id": "INFO-TL-R452-SELECTOR-SHIFT",
       "severity": "info",
       "status": "logged (D-29z1607)",
@@ -6764,18 +6758,20 @@
       "title": "Round 462 deleted app/lib/email.server.ts (dead order-paid email builder that used getDownloadUrl); root to confirm the deletion is acceptable under the no-purchase-code rule",
       "evidence": "gates/round-462/review.md finding 1",
       "added": "2026-11-12 B round 462 -> 463 planning"
+    },
+    {
+      "id": "C-R466-01",
+      "severity": "medium",
+      "origin": "B spec",
+      "to": "B",
+      "added": "2026-11-12 B round 466 -> 467 planning",
+      "status": "dispatched round 467 (D-29z1646): TS8 observes the pattern scan with a String.prototype.matchAll spy; mutant M14-NO-PRECHECK turns TS8 red (b-round-466/mutants/summary.txt); tech-lead APPROVE (b-round-466/sketch-review.md)",
+      "title": "TS8 title claims it pins the /shadow/i pre-check skip, but removing the pre-check leaves TS8 (and all 31 covering tests) green: the pre-check never changes a result. Same finding as A-R466-REVIEW-M1 (code-reviewer) and B's own TL-R465-L1",
+      "evidence": "c-round-466/data/nopcheck-vitest.txt; a-round-466/noprecheck-vitest.log; a-round-466.md section 3",
+      "repro": "copy 6d321c7 + sketch-466 files; delete the 3-line pre-check in countZeroOffsetGlowHits; npx vitest run the 4 covering files -> 31/31 pass"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 457,
-      "task": "current-task.md",
-      "decision": "D-29z1621",
-      "type": "STORE-2b-3c-2a re-dispatch: walker ruling A-R456-REVIEW-M1 (test-only)",
-      "status": "c_fail_stopped_routed_to_b",
-      "note": "baseline db95f40 (gate 455 commit; gate 456 skipped); tree has round-456 sketch + docs; delta b-round-456/sketch-457-delta.patch.txt sha 2b97313c; grants b-round-456/grants-457.txt (6)",
-      "result": "C round 457 FAIL (STOPPED, routed to B; L22 short route): C1 SOURCE-SCOPE, C2 CLAIMS, C3 APPLY, C4 COVERING (4/27), C7 browser (studio + purchase protection at 1440/1280) passed; C5, C6, C8, C9, C10 not run; bug A-R457-REVIEW-M1 Medium (origin B spec) reproduced by C (c-round-457/probe-replay.txt); browserVerified/realVerified true; gate 457 skipped (C taskStatus FAIL); nothing published. Tree keeps round-456 sketch + round-457 delta + doc 299 (6 dirty paths = grants)."
-    },
     {
       "round": 458,
       "task": "current-task.md",
@@ -6848,8 +6844,17 @@
       "task": "current-task.md",
       "decision": "D-29z1643",
       "type": "STORE-2b-3c-2b test-only: helpers/style-scan.ts zero-offset glow forms + store-teal-sweep TS7/TS8",
+      "status": "c_fail",
+      "note": "baseline 6d321c7 (gate 465 skipped, HEAD unchanged since gate 464); manifest b-round-464/r465-tree-sha256.txt (1377) reused; sketch sha 06b2af46191097c06a45e63c2b32171b73dcef17f1bda25e2a9249c0d58244da; grants 4 paths: style-scan.ts, store-teal-sweep.test.ts, new doc 304, doc 299 l.4 (L28 final stage of STORE-2b-3c-2) (D-29z1644)",
+      "result": "C round 466 FAIL (c-round-466.json: short route after A STOP on code-reviewer Medium A-R466-REVIEW-M1; C1, C3, C8 (browser 1440/1280), C11 PASS; C4-C7, C9, C10, C12 not run; bug C-R466-01 Medium origin B spec); gate 466 skipped \"C taskStatus FAIL\" (HEAD stays 6d321c7) (D-29z1645)"
+    },
+    {
+      "round": 467,
+      "task": "current-task.md",
+      "decision": "D-29z1646",
+      "type": "STORE-2b-3c-2b fix-up test-only: store-teal-sweep TS8 spy + docs 299/304 line 4 and doc 304 delta",
       "status": "dispatched",
-      "note": "baseline 6d321c7 (gate 465 skipped, HEAD unchanged since gate 464); manifest b-round-464/r465-tree-sha256.txt (1377) reused; sketch sha 06b2af46191097c06a45e63c2b32171b73dcef17f1bda25e2a9249c0d58244da; grants 4 paths: style-scan.ts, store-teal-sweep.test.ts, new doc 304, doc 299 l.4 (L28 final stage of STORE-2b-3c-2) (D-29z1644)"
+      "note": "baseline 6d321c7 + unpublished round-466 diff (4 paths); delta sketch sha 924c2700ad9126114ab8d1d13590b8bce176e77620347a78cb2b7f8ee6abf6ac; post-image b-round-466/sketch-467-files-sha256.txt"
     }
   ],
   "other_keys": [
