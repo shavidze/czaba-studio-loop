@@ -1,191 +1,193 @@
-# Round 469: SABA-B-15 stage 2. Replace the three home-page blur glows with radial gradients at today's strength
+# Round 470: SABA-B-15 stage 2b. Fix the glow shape (C-R469-01) and close round 469 with a control that works on this runner
 
-**Planned by:** B, at the round 468 → 469 planning on 2026-11-12 (`b-round-468.md`). The advisor was available and was consulted after orientation and before hand-off. `product-designer` was consulted on the look change (`b-round-468/pd-ruling.md`). The round-468 task is archived as `tasks/round-468.md`.
+**Planned by:** B, at the round 469 → 470 planning on 2026-11-12 (`b-round-469.md`).
+- The advisor was available and consulted after orientation.
+- `product-designer` was consulted twice: on s4 (`b-round-469/pd-s4.md`) and on the dispatched s6 (`b-round-469/pd-s6.md`, "none — ship as is").
+- `tech-lead` reviewed the sketch twice (`b-round-469/sketch-review.md`).
+- The round-469 task is archived as `tasks/round-469.md`.
 
 ## Decisions (all in `backlog.json` `decisions_log_b`)
-- **D-29z1650: round 468 accepted.**
-  - C PASS (`c-round-468.json`: C1–C9, 0 bugs, browserVerified/realVerified true).
-  - Gate 468 was skipped, "no real changes" (no store change) [K2].
-  - **Cause confirmed** (in the cloud's software raster): three large `filter: blur()` glows.
-    - `ProductSection.tsx` l.38–39 [K3] causes the band at scrollY ≈ 360–900.
-    - `StudioShowcase.tsx` l.75 [K3] causes the band at ≈ 1850–2020.
-- **D-29z1651: this dispatch.** SABA-B-15 stage 2 = the fix, with exact grants. It keeps the gradient approach (A's proposal), with the opacity lowered to today's glow strength, as product-designer ruled.
-  - **The regression is not due.** `regression-last.json` is dated 2026-11-10 [K7], so it is due 2026-11-13. This planning is dated 2026-11-12.
-- **Not closed by this round.** SABA-B-15 becomes "home cause fixed in cloud" after C PASS.
-  - Saba named `/free-downloads`. It is 0 here at HEAD and is not touched.
-  - Everything was measured in SwiftShader software raster.
-  - TLM-R468-SABA-SCROLL-DEVICE stays open. The question to Saba is in `user-review/questions-round-468.md`.
+- **D-29z1652: round 469 is not accepted.**
+  - C's verdict is BLOCKED: C2–C13 PASS, C1 env-invalid ×3 (`c-round-469.json`). Gate 469 was skipped ("C taskStatus BLOCKED") [K2].
+  - The round-469 diff stays in the tree, uncommitted [K1]. SABA-B-15 does **not** become "home cause fixed in cloud".
+- **D-29z1653: the HEAD control becomes a measured p95 row.**
+  - C1's "> 33.4 ms median ≥ 5" is a cliff. On this runner HEAD drops single frames at exactly 2 vsyncs (33.2–33.3 ms), which that count does not see.
+  - In C's own round-469 data, HEAD `/` p95 ≥ 33.0 in **17/18** frozen passes and TREE p95 ≤ 16.8 in **18/18** [K10]. B's re-run at planning: HEAD 6/6, round-469 TREE 0/6, s6 0/6 [K10].
+  - The same split holds on the earlier runners [K10]. HEAD frozen p95 is 33.3–50 in every pass of B 467, A 468 and C 468. The fixed variants' frozen p95 is ≤ 16.8 in every pass of A 468 (×2), C 468 and B 468 sketch2. Only one **full-page** pass (B 468 sketch2) reached 33.4, so C3 records p95 and does not assert it.
+  - The new C1 asserts that separation. The old ">33.4 median ≥ 5" is kept as a `record` field, never deleted. Analysis: `b-round-469/c469-reanalysis.txt`.
+- **D-29z1654: C-R469-01 is fixed now; it is not deferred.**
+  - C measured it as Low; product-designer's eyeball said Medium. B rules **Low**: the max patch delta is 2.8 of 255, and the section mean was inside the band.
+  - It is fixed in this round under the bug-gate exception "the current round already owns that code and it costs little". The diff is unpublished, the same three lines are in A's grant, and the sketch is measured.
+  - On s6, product-designer rates the remaining difference "none" and would ship it as is (`pd-s6.md`). Its weakest spot is the upper-right accent patch at 0.79×.
+- **D-29z1655: this dispatch.** Scope is sketch s6 (the scale and stop classes on the 3 glow lines) plus doc 305's update. The test file is not touched.
+- **Regression not due.** `regression-last.json` is dated 2026-11-10 [K7]; it is due 2026-11-13. This planning is dated 2026-11-12.
 
 ## Rules
-- **Read `lessons.md` first.** It applies especially:
+- **Read `lessons.md` first.** These apply especially:
   - L18 (scroll frames);
   - L12 (no styling-class selectors in tests);
   - L38 (perf runs alone);
   - L57 (C's harness fields);
-  - L58;
-  - L59/L60 (progress, destructive commands).
-- **L29:** every statement about a file under `store/` carries a `[K#]` tag. The claims script is `b-round-468/claims-469.sh`, and B's run is `b-round-468/claims-469-planning-output.txt`.
-- **Reference-first:** not applicable, because this is a performance fix. **Screen budget:** not applicable, because no persistent element is added. **product-designer:** done at planning; C consults it in review mode (C7).
+  - L58 (asserted numbers come from B's sketch run; mutants named);
+  - L59 and L60 (progress, destructive commands).
+- **L29:** every statement about a file under `store/` carries a `[K#]` tag. The claims script is `b-round-469/claims-470.sh`; B's run is `b-round-469/claims-470-planning-output.txt`.
+- **Not applicable:** reference-first (a performance and look-preserving fix) and the screen budget (nothing persistent is added).
+- **product-designer:** consulted at planning. C consults it in review mode (C7).
 
-## Baseline: HEAD `9ba13ac`, clean [K1]; protected manifest rc 0 [K8]
+## Baseline
+- HEAD `9ba13ac` plus the round-469 diff, uncommitted [K1].
+  - `git status --short --untracked-files=all` shows exactly 4 lines.
+  - `git diff | sha256sum` starts with `9b69dffe162894903a6c` and equals `c-round-469/tree.diff` [K1, K1b].
+- Protected manifest rc 0 [K8].
 
-### Grants (exactly these four paths)
+### Grants (exactly these paths)
 | Path | What |
 |---|---|
-| `app/components/home/ProductSection.tsx` | Only the two glow `<div>` lines (l.38–39 [K3]) |
-| `app/components/home/StudioShowcase.tsx` | Only the glow `<div>` line l.75 [K3]. The reflection line l.118 (`blur-[40px]`) stays |
-| `app/lib/__tests__/store-scroll-paint.test.ts` | New |
-| `docs/implementation/2026/quarter-IV/305-saba-b-15-home-scroll-glows.md` | New. The number 305 is free [K6] |
+| `app/components/home/ProductSection.tsx` | Only the two glow lines l.38–39 [K3] |
+| `app/components/home/StudioShowcase.tsx` | Only the glow line l.75 [K3]. The reflection `blur-[40px]` line stays [K3] |
+| `docs/implementation/2026/quarter-IV/305-saba-b-15-home-scroll-glows.md` | Edit (see A step 3) |
 
-**Everything else stays byte-identical.** That includes:
-- `app/hooks/useSmoothScroll.ts`, so Lenis `duration: 1.2` is kept [K17];
-- `app/root.tsx` and `app/styles/**` (both forbidden [K17]);
-- the keep-list `SpecialOffersSection.tsx`;
-- `NewsletterSection.tsx`;
-- every protected file.
+**Unchanged byte for byte:**
+- `app/lib/__tests__/store-scroll-paint.test.ts`: sha256 `b53b4529fdf9153d53aa3eec9b75f58e2fa51ae5e6d5e55bd44aaedbe68a252b`.
+- Everything else, including:
+  - `useSmoothScroll.ts` (Lenis `duration: 1.2`), `app/root.tsx` and `app/styles/**`;
+  - SpecialOffers (keep-list) and Newsletter;
+  - every protected file.
 
-### Rulings carried from round 468
-- **R-468-1:** Lenis's curve is unchanged.
-- **R-468-2:** keep-list components are not touched.
-- **R-468-3:** no `root.tsx` or `app/styles/**` change.
+### Rulings
+- **Carried over:**
+  - R-468-1: Lenis is unchanged.
+  - R-468-2: the keep-list is untouched.
+  - R-468-3: no `root.tsx` or styles change.
+  - R-469-1: section band 0.8–1.3× HEAD.
+  - R-469-2: no `will-change`, `transform-gpu` or `translate-z` on the glows.
+- **New, R-470-1 (product-designer, `pd-s4.md`): the glow keeps today's shape as well as its mean.**
+  - **Bright patches.** On the 7×7 grid of 40×40 patches, every patch where HEAD's glow is at least 2 levels above the hidden control has a tree glow of 0.7–1.3× HEAD's.
+  - **Patch delta.** No patch differs from HEAD by more than 1.5 levels.
+  - **Lean.** No section has every changed patch (|Δ| ≥ 0.05) moving the same way while its section ratio is outside 0.9–1.1.
+- **New, R-470-2 (tech-lead): no gradient stop goes past 70 %.** On a square box, farthest-corner puts the inscribed circle at about 70.7 %, so a later stop would clip at the `rounded-full` edge. Recorded as SIG-R470-STOP-CEILING.
 
-**New rulings:**
-- **R-469-1 (product-designer, `pd-ruling.md`): the look stays at today's strength.**
-  - Glow contribution = mean section luminance of the build minus the **HEAD build with its glows hidden** (`look-profile.cjs` uses the variant named `hidden` as the control).
-  - Per section and viewport it must be **0.8×–1.3× HEAD's**.
-  - A's round-468 opacities measured 2.4–3.1× and are red.
-- **R-469-2: do not promote the glows.** No `will-change`, `transform-gpu` or `translate-z` on these elements. A's s5 screen made frames 10× worse.
-
-## Why we missed it (SABA-B-15, from round 468)
-- **Phase:** the STORE rounds' C rows measured LCP/CLS at load and contrast. No row measured frames while scrolling, and the PERF harness covers `/studio-lab` only. Smooth scroll was treated as "on" (Lenis is present), not as a measured behaviour.
-- **Rule:** already merged into L18, "Scroll frames (D-29z1648)" [K18]. It is unchanged this round.
-- **Round 468's own near-miss:**
-  - A's and C's whole-section pixel diff called a 2.4–3.1× stronger glow "a touch brighter", because the means were about 1/255.
-  - Only the deleted-glow control and product-designer caught it.
-  - This is recorded for RETRO 480 as RETRO480-LOOK-CONTROL. It is a counter, not yet a lesson (1×).
+## Why we missed it (C-R469-01)
+- **Phase:** B's planning row R-469-1 bounded the section **mean** only.
+  - In round 468 B had demoted product-designer's "peak within ±1 level" row to `record`. B's reason was that content confounded the centre-line peak (the ProductCard `backdrop-blur`).
+  - C's round-469 patch grid, measured against the hidden control, showed that the confound does not stop a patch comparison. A wider, flatter glow keeps its mean and loses its peak.
+- **Rule:** RETRO480-LOOK-CONTROL had 1 occurrence (round 468). It now has 2, so B promotes it into `lessons.md` L58 this planning: "a look-preserving swap is bounded by shape (bright-patch ratio, max patch delta) as well as the section mean; a mean-only band passes a flatter, wider glow." The file stays at 60 lines; the clause is merged into L58.
 
 ## 0. The sketch (B, L58)
-**`b-round-468/sketch-469.diff.txt`** applies to the tree with `git apply --check` rc 0 [K9]. It changes 3 files:
+**`b-round-469/sketch-470.patch.txt`** (sha256 `abff32ff1b9457b9c8a414bd7ade1ea03844f56b5b30d4edfb123e93c0fc3370`, reviewed: `sketch-review.md`) applies to the current tree with `git apply --check` rc 0 [K4, K5]. It changes 2 files:
 
-**1. ProductSection l.38–39.** `bg-<token>/5 blur-[1x0px]` becomes:
-```
-scale-220 rounded-full bg-radial from-brand/2 via-brand/1 via-30% to-transparent to-70%
-scale-225 rounded-full bg-radial from-accent/2 via-accent/1 via-30% to-transparent to-70%
-```
-The position classes and `size-[…]` are unchanged.
-
-**2. StudioShowcase l.75.** `bg-brand/20 blur-[120px]` becomes:
-```
-scale-175 rounded-full bg-radial from-brand/10 via-brand/5 via-40% to-transparent to-70%
-```
-
-**3. `store-scroll-paint.test.ts`.**
-- **SP1:** on files under `components/home/`, the large-blur count (`(?<![\w-])blur-\[(\d+)px\]` with px ≥ 80) must match the allow-list exactly:
-  - `NewsletterSection.tsx` 1;
-  - `SpecialOffersSection.tsx` 2.
-
-  These are the HEAD counts [K4]. The reason for both is SIG-R469-UNMEASURED-BLURS.
-- **SP2:** the 2 measured sections have 0 large blurs.
-- **SP3:** non-vacuous. Each listed file is scanned. The counter's self-tests are:
-  - `blur-[120px]` = 1;
-  - `md:blur-[100px] blur-[80px]` = 2;
-  - `blur-[40px] blur-[79px]` = 0;
-  - `backdrop-blur-[120px] backdrop-blur-lg` = 0.
-- **It does not pin the new gradient classes.** STORE-2d/3 may restyle these sections (L8).
-
-**B's measurements on the applied sketch** (`b-round-468/`, numbers in `claims-469-planning-output.txt`):
-
-| Check | Result | Source |
+| Line | Round 469 (now in tree) | s6 (this sketch) |
 |---|---|---|
-| Frozen probe (`b-round-467/probe/store-scroll-probe.cjs`) | `/` medians **0 / 0**, moving 174–180, finalY 2400. `/free-downloads` 0, finalY 575 / 755 | K11 `scroll-sketch2-frozen.json` |
-| Full-page probe (`b-round-468/store-scroll-probe-full.cjs`, 40 ticks, `PATHS=/,/gift-cards`) | `/` medians **1 / 1**, finalY = maxScroll 4121. HEAD is 8 / 5. `/gift-cards` 0 at HEAD and on the sketch | K11 |
-| Look band (`look-probe2.cjs` + `look-profile.cjs`) | ratioToHead 1.19 / 1.21 (1440) and 1.09 / 1.20 (1280) | K12 |
-| Tailwind emitted every new class | yes | K15 `built-css-classes.txt` |
-| Unit | SP1–SP3: 3 passed | K13 |
-| SP mutant (HEAD's two section files) | SP1 and SP2 red: 2 failed | K13 |
-| Scan suites `store-*` + `studio-naming` with the sketch | 15 files, 212 tests passed | K13 |
-| L23 sweep: old glow tokens in the test roots | 0 files [K16]. The two section importers [K16] pass in the scan run | K16 |
+| PS l.38 | `scale-220 … from-brand/2 via-brand/1 via-30% to-transparent to-70%` | `scale-160 … from-brand/6 via-brand/3 via-30% to-transparent to-60%` |
+| PS l.39 | `scale-225 … from-accent/2 via-accent/1 via-30% … to-70%` | `scale-180 … from-accent/5 via-accent/2 via-25% … to-60%` |
+| SS l.75 | `scale-175 … from-brand/10 via-brand/5 via-40% … to-70%` | `scale-145 … from-brand/20 via-brand/12 via-35% … to-70%` |
 
-- **An observation, not a bound:** one full-page pass at 1440 had 8 frames of 50 ms at scrollY 1796–2032, with no long task (`sketch2-full-slowframes.txt`). The medians stay ≤ 2. HEAD's 3 frames at 3012–3158 are an observation too.
+Position, `size-[…]`, `rounded-full` and `bg-radial` are unchanged. Each new selector is emitted in the tune build [K12].
+
+**B's measurements on s6** (production build of the tree + sketch in `b-round-469/tune`, `tune-run.sh`):
+
+| Check | s6 | Round-469 tree (s0) = mutant | Source |
+|---|---|---|---|
+| Section ratio (R-469-1) | 1.21 / 0.94 (1440), 1.18 / 0.94 (1280) | 1.19 / 1.21, 1.09 / 1.20 | K9 |
+| Bright-patch ratio, all patches with HEAD glow ≥ 2 | 0.78–1.08 | **0.43–0.63 in product** (red) | K9b |
+| Max \|cand − HEAD\| per patch | 0.54–0.78 | **2.64–2.77** (red) | K9b |
+| Lean | mixed (+16/−7, +15/−8, +13/−2, +9/−8) | — | K9b |
+| Edge jump top/bottom | PS 0/1, SS 1.67/0. HEAD is PS 1/0.33 and SS 1/0, so ≤ HEAD + 1 | — | K9, `look-s6-profile-head.txt` |
+| Frozen probe `/` | p95 ≤ 16.8 in 6/6 passes; over33 0/0; 0 in-band slow frames; moving 175–179; finalY 2400. `/free-downloads` 0, finalY 575/755 | — | K10, `s6-frames-summary.txt` |
+| Full-page probe `/` | median 0/0; finalY 4121 = max; one isolated frame at y 3215; `/gift-cards` 0 | — | K10 |
+| HEAD frozen at planning | p95 ≥ 33.0 in 6/6 passes (over33 median 1/1) | — | K10, `b-probe-summary.txt` |
+| Unit SP1–SP3 on s6 | 3 passed | — | K11 |
+
+The deleted glow is also red on the bright-patch row, at 0× by construction.
 
 ## 1. A: steps
-1. **STOP (L11) if the start state is wrong.** HEAD must be `9ba13ac` and the tree clean, with protected rc 0.
-2. **Apply the sketch.** Use `git apply b-round-468/sketch-469.diff.txt` from the store root. That is correct in the store repo; the loop-folder trap does not apply here.
-   - You may change only the opacity stops (`from-*/N`, `via-*/N`), and only to keep R-469-1 inside its band.
-   - Any other class change is a STOP for B.
-3. **Write doc 305** in Georgian, following `docs/implementation/TEMPLATE.md` and L26.
-   - Status l.4 is exactly `Completed (C round 469 PASS)` (L28).
-   - **Context:** Saba's report, the round-468 cause, and the software-raster limit.
-   - **Approach:** gradient vs blur. Why not `will-change`: s5. The rejected options are: delete the glows (look change), A's stronger opacities (product-designer) and a Lenis change (R-468-1).
-   - **Testing:** SP1–SP3 by id, the probe commands, and the band.
-   - **TODO:** TLM-R468-SABA-SCROLL-DEVICE and SIG-R469-UNMEASURED-BLURS.
-4. **Run the checks** (A's speed rules):
+1. **STOP (L11) if the start state is wrong.** Check all of these:
+   - HEAD is `9ba13ac`;
+   - the status shows exactly the 4 round-469 lines;
+   - `git diff | sha256sum` starts with `9b69dffe162894903a6c`;
+   - the protected manifest gives rc 0.
+2. **Apply the sketch from the store root:** `git apply /home/runner/czaba-project/tmp/studio-real-loop/b-round-469/sketch-470.patch.txt` (that is `b-round-469/sketch-470.patch.txt`).
+   - Do not tune. Any other class change is a STOP for B.
+   - Do not edit `store-scroll-paint.test.ts`.
+3. **Update doc 305** in Georgian, following L26.
+   - l.4 becomes exactly `**სტატუსი:** Completed (C round 470 PASS)` (L28).
+   - **მიდგომა:**
+     - give the s6 classes;
+     - add R-470-1 (bright patches, patch delta, lean) next to R-469-1;
+     - add a rejected option: "round 469-ის sketch (s0): საშუალო ზოლში იყო, მაგრამ glow უფრო ბრტყელი და ფართო გამოვიდა (C-R469-01)".
+   - **ტესტირება:**
+     - B's s6 numbers from the table above, attributed to B and not to C;
+     - "round 469" becomes "round 470" where it names C's confirmation;
+     - one line saying round 469's C1 control used a > 33.4 ms count that this runner does not reach, and that the control is now p95.
+   - **TODO:** keep TLM-R468-SABA-SCROLL-DEVICE and SIG-R469-UNMEASURED-BLURS, and add SIG-R470-STOP-CEILING.
+   - Every SP id it cites must exist in the test file.
+4. **Run the checks** (A's speed rules). Save the logs under `a-round-470/`.
    - `npm run typecheck`;
    - `npm run lint`;
-   - `npx vitest run app/lib/__tests__/store-scroll-paint.test.ts app/lib/__tests__/studio-naming.test.tsx app/lib/__tests__/store-hidden-focusables.test.tsx app/lib/__tests__/store-` (the scan suites, L23).
-
-   Save the logs under `a-round-469/`.
-5. **If you changed an opacity stop,** re-run the band yourself:
-   - make a production build of a scratch copy of the tree (`git archive` of HEAD + your diff, applied with `patch -p1` under `a-round-469/`), next to a HEAD build;
-   - run `node b-round-468/look-probe2.cjs <out.json> <shotDir> head=<HEAD url> tree=<tree url> hidden=<HEAD url>,hide`;
-   - then run `node b-round-468/look-profile.cjs <out.json> <out.txt> tree`;
-   - perf runs alone (L38).
-6. **Ask `code-reviewer`** (4 changed files) and include its Architecture note.
-7. **Report** `a-round-469.md`: the diff stat, the logs, the reviewer findings, and whether you changed opacities from the sketch.
+   - `npx vitest run app/lib/__tests__/store-scroll-paint.test.ts app/lib/__tests__/studio-naming.test.tsx app/lib/__tests__/store-hidden-focusables.test.tsx app/lib/__tests__/store-`.
+5. **Ask `code-reviewer`** (3 changed files) and include its Architecture note.
+6. **Report** in `a-round-470.md`: the diff stat (vs HEAD and vs the round-469 tree), the logs and the reviewer's findings.
 
 ## 2. C: what to verify
-- **Files:** write `c-round-469.md`, `c-round-469.json` and `c-round-469/progress.json` as you go.
-- **Builds:** make two scratch production builds under `c-round-469/`: **HEAD** (`git archive 9ba13ac`) on :3471 and **TREE** (HEAD + `git -C store diff` applied with `patch -p1`) on :3472. Start the mock API with `node $(realpath mock-api/server.mjs)` if :5199 does not answer.
-- **Order:** run the probes one at a time (L38), heaviest first.
-- **Budget:** at most 2 extra attempts per row to replace an environment-invalid measurement (agent-workflow).
-  - **Environment-invalid means only:** an L38 overlap (another job ran during the probe), or C1 failing (the environment cannot show the bug). A slow pass is never replaceable.
-  - In C2 and C3, record the slow-frame scrollY values of every pass. A cluster of slow frames inside one of the fix's bands (scrollY ≈ 360–900 or ≈ 1800–2050) in **two or more passes** is a FAIL, even when the median is ≤ 2. B's sketch had one such pass (`sketch2-full-slowframes.txt`).
+**Files.** Write `c-round-470.md`, `c-round-470.json` and `c-round-470/progress.json` as you go.
+
+**Builds.** Make three scratch production builds under `c-round-470/`:
+- **HEAD** (`git archive 9ba13ac`) on :3471;
+- **S0**, the round-469 tree (HEAD + `c-round-469/tree.diff` applied with `patch -p1`, plus `cp` of the untracked test), on :3474;
+- **TREE**, the current store (HEAD + `git -C store diff` applied with `patch -p1`, plus `cp` of the untracked test and doc), on :3472.
+
+Start the mock API with `node $(realpath mock-api/server.mjs)` if :5199 does not answer.
+
+**Order.** Run one probe at a time (L38).
+
+**Budget.** At most 2 extra attempts per row, and only to replace an environment-invalid measurement.
+- Environment-invalid means only an L38 overlap, or a C1 failure.
+- A slow TREE pass is never replaceable.
+- In C2/C3, record the slow-frame scrollY of every pass. A cluster inside a fix band (≈ 360–900 or ≈ 1800–2050) in **two or more passes** is a FAIL.
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| C1 | HEAD-CONTROL (browser) | Frozen probe on HEAD | `/` median ≥ 5 at either viewport. Otherwise the environment is invalid: use a replacement attempt |
-| C2 | FRAMES (browser, both viewports) | `node b-round-467/probe/store-scroll-probe.cjs http://127.0.0.1:3472 <out> 1` | `/` medians **≤ 2**, moving ≥ 100 and finalY 2400 in every pass. `/free-downloads` median 0, finalY 575 / 755 |
-| C3 | FRAMES-FULL (browser, both viewports) | `PATHS=/,/gift-cards node b-round-468/store-scroll-probe-full.cjs http://127.0.0.1:3472 <out> 1` | `/` median **≤ 2**. In every pass finalY === maxScroll and moving ≥ 100. `/gift-cards` median ≤ 2 |
-| C4 | GUARD-MUTANT (browser, 1440) | `b-round-467/probe/lenis-off.diff.txt` applied on top of TREE (third scratch copy, `patch -p1`), then the frozen probe | `/` moving < 100. The eased-scroll guard of C2 can fail |
-| C5 | COMPUTED (browser, both viewports) | `node b-round-468/look-probe2.cjs <out> <shots> head=…3471 tree=…3472 hidden=…3471,hide` | TREE: product-section glowCount 2 and studio-showcase 1. Each has `filter` `none` and a `backgroundImage` containing `radial-gradient`. HEAD shows `blur(120px)` / `blur(100px)` |
-| C6 | LOOK-BAND (browser, both viewports) | `node b-round-468/look-profile.cjs <out> <txt> tree` | ratioToHead **0.8–1.3** for each section × viewport. The band is two-sided: A's round-468 opacities measured 2.4–3.1 (K12), and a deleted glow is 0 by construction |
-| C7 | SHAPE / EDGES (browser) | Same shots, plus your own 200 % zoom crops of each glow; binned profile and edgeJump from `look-profile.cjs`; product-designer in review mode (≤ 7 findings) | Record the rows. edgeJump at the top and bottom ≤ HEAD's + 1 level. No visible ring at the circle edge, no banding steps and no seam at the section edge at 100 %. A visible defect is a finding: **Medium** if it is seen at 100 % at either viewport, else Low |
-| C8 | OVERFLOW (browser) | `/` at 1440, 1280 and 375 on HEAD and TREE | `scrollWidth === clientWidth`, and scrollHeight is equal between HEAD and TREE |
-| C9 | UNIT + MUTANT | In the store: `npx vitest run app/lib/__tests__/store-scroll-paint.test.ts`. In a scratch copy of TREE, put back HEAD's `ProductSection.tsx` only, then HEAD's `StudioShowcase.tsx` only. `git -C store diff` leaves out the untracked test and doc, so copy `store-scroll-paint.test.ts` (and doc 305 for C11) from the store into each scratch copy with `cp`. Never use `git add -N` or `stash` in the store | rc 0 at the tree. Each mutant turns SP1 and SP2 red |
-| C10 | SOURCE-SCOPE | `git status --short --untracked-files=all`; `git diff -U0` of the two components; protected manifest | Exactly the 4 granted paths. The component diff touches only l.38–39 and l.75. `useSmoothScroll.ts`, `root.tsx`, `app/styles/**`, SpecialOffers and Newsletter are unchanged. No `will-change`/`transform-gpu` on the glow lines (R-469-2). Protected rc 0 |
-| C11 | DOC | Doc 305 | Its `## ` headings contain TEMPLATE's seven, in order. l.4 is `Completed (C round 469 PASS)`. Every SP id it cites exists in the test file (L26) |
-| C12 | AUTH + STUDIO SMOKE (browser, 1440 and 1280) | As round 468 C7 | Same PASS meaning. The fake-bearer path is BLOCKED (backend unavailable in cloud) |
-| C13 | CLAIMS | `bash b-round-468/claims-469.sh` | Equal to `claims-469-planning-output.txt` except K1's status count (4) and K9 (the diff is already applied, so `--check` fails). K6 and K16 read `9ba13ac`, so they do not change. No `MISSING` |
+| C1 | HEAD-CONTROL (browser) | `node b-round-467/probe/store-scroll-probe.cjs http://127.0.0.1:3471 <out> 1` | `/` **p95 ≥ 33.0 in ≥ 2 of 3 passes at each viewport**. **Record** the old field too: the movingOver33 median. Otherwise the environment is invalid; use a replacement attempt |
+| C2 | FRAMES (browser, both viewports) | Same probe on :3472, 3 runs | `/` **p95 ≤ 17.0 in ≥ 8 of the 9 passes at each viewport** (every pass recorded; the in-band cluster rule above stays a hard FAIL), movingOver33 median ≤ 2, moving ≥ 100, finalY 2400. `/free-downloads` median 0, finalY 575/755 |
+| C3 | FRAMES-FULL (browser, both viewports) | `PATHS=/,/gift-cards node b-round-468/store-scroll-probe-full.cjs http://127.0.0.1:3472 <out> 1`, 3 runs | `/` median ≤ 2. In every pass finalY === maxScroll and moving ≥ 100. `/gift-cards` median ≤ 2. Record p95 |
+| C4 | GUARD-MUTANT (browser, 1440) | `b-round-467/probe/lenis-off.diff.txt` on top of TREE (a fourth scratch copy, `patch -p1`), then the frozen probe | `/` moving < 100 |
+| C5 | COMPUTED (browser, both viewports) | `node b-round-468/look-probe2.cjs <out.json> <shotDir> head=http://127.0.0.1:3471 tree=http://127.0.0.1:3472 s0=http://127.0.0.1:3474 hidden=http://127.0.0.1:3471,hide` | TREE: product-section glowCount 2 and studio-showcase 1, each with `filter` `none` and a `radial-gradient` backgroundImage, no `will-change`. HEAD shows `blur(120px)` / `blur(100px)` |
+| C6a | LOOK-MEAN | `node b-round-468/look-profile.cjs <out.json> <txt> tree s0` | tree ratioToHead 0.8–1.3 for each section × viewport |
+| C6b | LOOK-BRIGHT-PATCHES (R-470-1) | `node b-round-469/patches2.cjs <shotDir> tree <patches-tree.json>` and the same with `s0`. Per section × viewport, take every patch with HEAD glow (head − hidden) ≥ 2 | Every such patch has a tree glow of 0.7–1.3× HEAD's. **Mutant:** S0 has at least one product patch below 0.7 |
+| C6c | LOOK-PATCH-DELTA (R-470-1) | The same JSON | max \|tree − head\| over all 49 patches ≤ 1.5 per section × viewport. **Mutant:** S0 is above 1.5 |
+| C6d | LOOK-LEAN (R-470-1) | The same JSON | No section where every patch with \|Δ\| ≥ 0.05 has the same sign while its C6a ratio is outside 0.9–1.1 |
+| C7 | SHAPE / EDGES (browser) | Shots plus your own 200 % crops of each glow, including the upper-right accent patch (product 0.8, 0.2), which is `record`; edgeJump from C6a; product-designer in review mode (≤ 7 findings) | edgeJump top and bottom ≤ HEAD's + 1. No visible ring, banding steps or seam at 100 %. A visible defect is **Medium** at 100 % at either viewport, else Low |
+| C8 | OVERFLOW (browser) | `/` at 1440, 1280 and 375 on HEAD and TREE | `scrollWidth === clientWidth`; scrollHeight equal between HEAD and TREE |
+| C9 | UNIT + MUTANT | In the store: `npx vitest run app/lib/__tests__/store-scroll-paint.test.ts`. In a scratch copy of TREE, restore HEAD's `ProductSection.tsx` only, then HEAD's `StudioShowcase.tsx` only. `cp` the untracked test into each copy; never use `git add -N` or `stash` in the store | rc 0 at the tree; each mutant turns SP1 and SP2 red |
+| C10 | SOURCE-SCOPE | `git status --short --untracked-files=all`; `git diff -U0` of the two components; `sha256sum` of the test; protected manifest | 4 paths, the same as round 469. Component hunks only at l.38–39 and l.75, and the `+` lines equal the sketch's `+` lines byte for byte. Test sha `b53b4529…252b`. `useSmoothScroll.ts`, `root.tsx`, `app/styles/**`, SpecialOffers and Newsletter are unchanged. No `will-change`/`transform-gpu`. Protected rc 0 |
+| C11 | DOC | Doc 305 | It contains TEMPLATE's seven `## ` headings in order; l.4 is `**სტატუსი:** Completed (C round 470 PASS)`; every SP id it cites exists; it names C-R469-01 and R-470-1 |
+| C12 | AUTH + STUDIO SMOKE (browser, 1440 and 1280) | As round 469 C12 | `/studio-lab` opens anonymously with the demo; premium `/studio/<handle>` shows "Sign in required" with no audio src; `/api/studio-token` returns 401. The fake-bearer path is BLOCKED (backend unavailable in cloud) |
+| C13 | CLAIMS | `bash b-round-469/claims-470.sh` | Equal to `claims-470-planning-output.txt` except: K1's diff sha (the sketch is applied), K4 (`--check` now fails), and K14's L58 line, which can only change if `current-task.md` changes. No `MISSING` |
 | gate | — | Full verify, code review, publish | Root. Not claimed |
 
-## 3. Claims (`b-round-468/claims-469.sh`)
+## 3. Claims (`b-round-469/claims-470.sh`)
 | Claim | What it checks |
 |---|---|
-| K1 | HEAD and status |
-| K2 | Gate 468 |
-| K3 | HEAD glow line numbers |
-| K4 | Large-blur counts at HEAD per home file |
-| K5 | The home route mounts |
-| K6 | Doc 305 is free |
+| K1 / K1b | HEAD, status, diff sha; C's TREE diff sha |
+| K2 | Gate 469 |
+| K3 | Glow line numbers in the tree; the reflection line |
+| K4 / K5 | The sketch applies; its sha |
+| K6 | The artifacts exist |
 | K7 | `regression-last.json` |
 | K8 | Protected rc |
-| K9 | The sketch applies, and its files |
-| K10 | The artifacts exist |
-| K11 | Frame medians per file |
-| K12 | Look ratios |
-| K13 | Unit and mutant logs |
-| K14 | The probe shas |
-| K15 | The built CSS classes |
-| K16 | The test-root sweep |
-| K17 | Forbidden files and Lenis duration |
-| K18 | lessons.md |
+| K9 / K9b | Look ratios and edges; patch rows for s0, s4 and s6 |
+| K10 | Frame p95 separation (C469 data and B's runs) |
+| K11 | Unit on s6 |
+| K12 | Built CSS selectors |
+| K13 | The probe shas |
+| K14 | The L58 check |
+| K15 | `lessons.md` length |
 
 ## 4. After this round
 1. **On C PASS:**
-   - SABA-B-15 = "home cause fixed in cloud (C round 469)". It closes only after Saba's device answer (TLM-R468-SABA-SCROLL-DEVICE, deadline RETRO 480).
-   - REG-SCROLL-HOME-FRAMES turns its `/` median ≤ 2 into an assert.
+   - SABA-B-15 becomes "home cause fixed in cloud (C round 470)". It closes only after Saba's device answer (TLM-R468-SABA-SCROLL-DEVICE, deadline RETRO 480).
+   - C-R469-01 closes.
+   - REG-SCROLL-HOME-FRAMES uses the p95 control.
 2. **Next planning dated 2026-11-13 or later:** REGRESSION-2026-11-13, with every `scope_additions` entry.
 3. **Then:** STORE-2c, STORE-2d (it owns Lenis reduced-motion), STORE-3, STORE-4, STORE-5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, and phase 2 under the skip rule.
-4. **Root, non-blocking:**
-   - ROOT-REQ-DP-GATE-FIRST, with SABA-B-16 and the critical stance;
-   - the next RETRO is round 480.
+4. **Root, non-blocking:** ROOT-REQ-DP-GATE-FIRST (with SABA-B-16) and RETRO 480.

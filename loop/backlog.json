@@ -3,8 +3,8 @@
   "updated": "2026-11-12",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 469: SABA-B-15 stage 2 - home blur glows -> radial gradients at today's strength (current-task.md, D-29z1651)",
-  "advisor_used_by_B": "2026-11-12 round 467 -> 468: available, consulted after orientation (advice: stub LeadMagnet, prove drops persist, else attach to STORE-2d; record Saba items; DP-GATE request) and before hand-off (advice: Lenis-off control, free-downloads content check, record unrun asserts, Lenis curve ruling, lesson row, scope_additions); the control showed the cost is not in the hook, so round 468 became a diagnosis stage | 2026-11-12 round 461 -> 462: available, consulted after orientation (advice: gate-461 review + Saba answers first, dispatch 2b-3d-1 not 2b-3c-2b, split 2b-3d) and before closing; 2026-11-11 round 452 -> 453: available, consulted after orientation and before writing",
+  "current_task": "Round 470: SABA-B-15 stage 2b - glow shape fix (C-R469-01) + p95 HEAD control; re-verifies the round-469 diff (current-task.md, D-29z1655)",
+  "advisor_used_by_B": "2026-11-12 round 469 -> 470: available, consulted after orientation (advice: re-read C's own data before a harsher probe -> p95 separation found; fold the shape fix into 470 with a measured bound; baseline = HEAD + round-469 diff; do not lower >=5) | 2026-11-12 round 467 -> 468: available, consulted after orientation (advice: stub LeadMagnet, prove drops persist, else attach to STORE-2d; record Saba items; DP-GATE request) and before hand-off (advice: Lenis-off control, free-downloads content check, record unrun asserts, Lenis curve ruling, lesson row, scope_additions); the control showed the cost is not in the hook, so round 468 became a diagnosis stage | 2026-11-12 round 461 -> 462: available, consulted after orientation (advice: gate-461 review + Saba answers first, dispatch 2b-3d-1 not 2b-3c-2b, split 2b-3d) and before closing; 2026-11-11 round 452 -> 453: available, consulted after orientation and before writing",
   "baseline": {
     "tsc_errors": 0,
     "vitest_files": 32,
@@ -12561,8 +12561,16 @@
       "task": "current-task.md",
       "decision": "D-29z1651",
       "type": "SABA-B-15 stage 2: home blur glows -> radial gradients at today's strength (+ guard test + doc 305)",
-      "status": "dispatched",
+      "status": "C BLOCKED (D-29z1652): C2-C13 PASS, C1 control env-invalid x3; gate skipped; diff kept uncommitted for round 470",
       "note": "baseline 9ba13ac clean; grants app/components/home/ProductSection.tsx (l.38-39), app/components/home/StudioShowcase.tsx (l.75), app/lib/__tests__/store-scroll-paint.test.ts (new), docs/implementation/2026/quarter-IV/305-saba-b-15-home-scroll-glows.md (new); sketch b-round-468/sketch-469.diff.txt; claims b-round-468/claims-469.sh"
+    },
+    {
+      "round": 470,
+      "task": "current-task.md",
+      "decision": "D-29z1655",
+      "type": "SABA-B-15 stage 2b: glow shape fix C-R469-01 (sketch s6) + p95 HEAD control; re-verify round-469 rows",
+      "status": "dispatched",
+      "note": "baseline 9ba13ac + round-469 diff (sha 9b69dffe...), uncommitted; grants ProductSection.tsx l.38-39, StudioShowcase.tsx l.75, doc 305 (edit); sketch b-round-469/sketch-470.patch.txt (sha abff32ff...); claims b-round-469/claims-470.sh"
     }
   ],
   "post_current_stage_queue": [
@@ -28833,7 +28841,7 @@
       "id": "SABA-B-15",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "dispatched round 469 (D-29z1651): stage 2 fix = the 3 blur glows (ProductSection l.38-39, StudioShowcase l.75) -> radial gradients at today's strength (product-designer band 0.8-1.3x, b-round-468/pd-ruling.md); stage 1 cause confirmed by C round 468 (D-29z1650); after C PASS: \"home cause fixed in cloud\", closes only with TLM-R468-SABA-SCROLL-DEVICE | dispatched round 468 (D-29z1649): stage 1 diagnosis (A traces + bisects in scratch, proposal diff; no store change); stage 2 fix with exact grants in round 469",
+      "status": "dispatched round 470 (D-29z1655): round 469 C BLOCKED (C1 control env-invalid; C2-C13 PASS) and C-R469-01 shape; stage 2b = sketch s6 + p95 control; after C PASS: \"home cause fixed in cloud\", closes only with TLM-R468-SABA-SCROLL-DEVICE | dispatched round 469 (D-29z1651): stage 2 fix = the 3 blur glows (ProductSection l.38-39, StudioShowcase l.75) -> radial gradients at today's strength (product-designer band 0.8-1.3x, b-round-468/pd-ruling.md); stage 1 cause confirmed by C round 468 (D-29z1650); after C PASS: \"home cause fixed in cloud\", closes only with TLM-R468-SABA-SCROLL-DEVICE | dispatched round 468 (D-29z1649): stage 1 diagnosis (A traces + bisects in scratch, proposal diff; no store change); stage 2 fix with exact grants in round 469",
       "title": "Store scroll is not smooth and soft (Saba 2026-11-12, named /free-downloads on czaba-store-test.vercel.app)",
       "evidence": "b-round-467/probe/bisect-b.md: prod 9ba13ac / median frames >33.4 ms 9 (1440) / 8 (1280), moving 165-175; Lenis off 5/4 with only 20 moving frames (not eased) and script-less long frames -> cost is page rendering, not the Lenis hook; header backdrop-blur, hero backdrop-blurs and hero video autoplay each ruled out (medians 10/8, 10/9, 9/6); /free-downloads renders its 3 items (free-downloads-fullpage.png, 1475 px) and has 0 slow frames in every build (not reproduced in headless Chromium); floor control (all content hidden by injected visibility:hidden, same height): 0/0 slow frames, 140 moving -> bound reachable, cost is painting visible content; slow frames cluster at scrollY ~360-850 and ~1850-2000 (slowFrames in scroll-prod-9ba13ac-cpu1.json)",
       "repro": "node b-round-467/probe/store-scroll-probe.cjs <prod build url> <out.json> 1 (LeadMagnet suppressed)",
@@ -28873,6 +28881,16 @@
       "status": "open (D-29z1648): input to the first DP-GATE review (root, ROOT-REQ-DP-GATE-FIRST); which asset is unconfirmed: header wordmark is text-foreground (R59), so candidates are public/favicon.ico, public/og-image.jpg (public/** global_forbidden -> root) and the SpotlightLoader wordmark; user-review/questions-round-467.md Q3",
       "title": "Logo still uses the old colours, not Obsidian & Brass (Saba 2026-11-12, \"Known issues for the first review\")",
       "added": "2026-11-12 B round 467 -> 468 planning"
+    },
+    {
+      "id": "C-R469-01",
+      "severity": "low",
+      "origin": "C",
+      "status": "dispatched round 470 (D-29z1654): fixed now under the bug-gate exception (round owns the code, cost small); closes on C round 470 PASS of C6b-C6d",
+      "title": "Round-469 glow gradient is flatter and wider than HEAD: peak patch glow 2.1 vs 4.7 (product) and 6.1 vs 8.9 (showcase), flanks +1..+2.9; section mean inside R-469-1",
+      "evidence": "c-round-469/data/patches.txt, patches.json, shots/amp10-*.png; product-designer eyeball Medium, C measured Low; B re-measure b-round-469/patches-s0.txt",
+      "repro": "c-round-469.json bugs[0].steps",
+      "added": "2026-11-12 B round 469 -> 470 planning"
     }
   ],
   "tech_lead_notes": [
@@ -32374,6 +32392,20 @@
       "note": "hero Ken Burns motion.img mutates inline style every frame (260x per wheel sequence); s1 (transform none) 5/4 vs HEAD 6/5, not a cause in cloud",
       "evidence": "a-round-468/invalidations.txt, screens/s1-hero-img-static.json",
       "added": "2026-11-12 B round 468 -> 469 planning"
+    },
+    {
+      "id": "SIG-R470-STOP-CEILING",
+      "status": "signal (D-29z1655)",
+      "note": "tech-lead sketch review: bg-radial is ellipse farthest-corner; on a square rounded-full box the inscribed circle is ~70.7% of the ray, so a stop past 70% clips at the edge (StudioShowcase to-70% is ~4-6 px inside). A later restyle of the home glows keeps every stop <= 70% (R-470-2)",
+      "evidence": "b-round-469/sketch-review.md",
+      "added": "2026-11-12 B round 469 -> 470 planning"
+    },
+    {
+      "id": "SIG-R469-COUNT-LARGE-BLURS-HELPER",
+      "status": "signal (A-R469 code-reviewer Architecture note)",
+      "note": "keep the large-blur guard in store-scroll-paint.test.ts; if more blur scanners appear, move countLargeBlurs into helpers/style-scan.ts next to countZeroOffsetGlowHits",
+      "evidence": "a-round-469.md code-reviewer section",
+      "added": "2026-11-12 B round 469 -> 470 planning"
     }
   ],
   "vitest_floor_round64": 1574,
@@ -43008,6 +43040,26 @@
       "evidence": "a-round-467.md Reviewer findings; c-round-467.md Notes (C: cosmetic)",
       "repro": "docs/implementation/2026/quarter-IV/304-store-2b-3c-2b-glow-scanner-forms.md l.5 vs l.40-43",
       "added": "2026-11-12 B round 467 -> 468 planning"
+    },
+    {
+      "id": "A-R469-REVIEW-L2",
+      "severity": "low",
+      "origin": "A code-reviewer",
+      "status": "deferred_low_polish (D-29z1655)",
+      "title": "store-scroll-paint large-blur counter regex misses decimals, rem, blur-(--x), [filter:blur()], inline style and .css",
+      "evidence": "a-round-469.md A-R469-REVIEW-L2; no such form under components/home/ today",
+      "repro": "app/lib/__tests__/store-scroll-paint.test.ts counter (?<![\\w-])blur-\\[(\\d+)px\\]",
+      "added": "2026-11-12 B round 469 -> 470 planning"
+    },
+    {
+      "id": "INFO-A469-GIFTCARDS-BLUR",
+      "severity": "info",
+      "origin": "A code-reviewer",
+      "status": "recorded (D-29z1655)",
+      "title": "routes/gift-cards.tsx:254 has a 120px blur outside the guard's scope; /gift-cards measured median 0 slow frames (b-round-468 K11, b-round-469 s6-full-1.json)",
+      "evidence": "a-round-469.md Info",
+      "repro": "grep blur-\\[120px\\] app/routes/gift-cards.tsx",
+      "added": "2026-11-12 B round 469 -> 470 planning"
     }
   ],
   "regression_rounds": [
@@ -43374,7 +43426,8 @@
           "added": "2026-11-12 B round 467 -> 468 planning",
           "what": "run b-round-467/probe/store-scroll-probe.cjs on a production build of the regression HEAD: record / and /free-downloads medians (frames >33.4 ms), moving frames and finalY at 1440 and 1280; assert /free-downloads 0 slow frames and finalY 575/755, and on / the eased-scroll guard (moving >= 100, finalY 2400; /free-downloads has only 64-72 moving frames, so the guard is / only); / median <= 2 is an assert only after SABA-B-15 stage 2 passed, else record",
           "source": "SABA-B-15, D-29z1649",
-          "what_update_d29z1651": "after round 469 C PASS: / median <= 2 at both viewports becomes an assert; add the full-page variant b-round-468/store-scroll-probe-full.cjs (PATHS=/,/gift-cards; / median <= 2, finalY === maxScroll, moving >= 100) and the look band (b-round-468/look-probe2.cjs + look-profile.cjs, ratioToHead 0.8-1.3 with head = a 9ba13ac build, the pre-fix look)"
+          "what_update_d29z1651": "after round 469 C PASS: / median <= 2 at both viewports becomes an assert; add the full-page variant b-round-468/store-scroll-probe-full.cjs (PATHS=/,/gift-cards; / median <= 2, finalY === maxScroll, moving >= 100) and the look band (b-round-468/look-probe2.cjs + look-profile.cjs, ratioToHead 0.8-1.3 with head = a 9ba13ac build, the pre-fix look)",
+          "what_update_d29z1653": "control is p95: HEAD / p95 >= 33.0 in >= 2 of 3 passes per viewport; after round 470 C PASS the tree / p95 <= 17.0 every pass and median <= 2 are asserts (round-469 PASS never happened)"
         }
       ]
     }
@@ -45522,18 +45575,6 @@
   },
   "decisions_log_b": [
     {
-      "id": "D-29z1600",
-      "date": "2026-11-11",
-      "by": "2026-11-11 B round 449 -> 450 planning (RETRO 450)",
-      "decision": "RETRO 450 lessons (tech-lead): L4 Port preserves HEAD (4x: C-R438-01, A-R439-REVIEW-M1, A-R441-REVIEW-L1, RETRO450-B-SKETCH-NO-GOLDEN); L22 unruled-Medium STOP = short FAIL (C-R442-M1); L60 store-tree edits (RETRO450-A-SHELL-EDITS-BYPASS-HOOK); L1 evidence id (RETRO450-B-INVENTORY-TOOL-FIRST-PASS); l.3 pointer; 60 lines kept, ids unchanged. RC-R305 -> counter. ROOT-REQ-GATE-L57-UNRULED-MEDIUM filed. Q5 (git apply vs primitives hook) is a proposal for Saba only. Advisor follow-up: L22 evidence is 2x (C-R442-M1 and round 439 A-R439-REVIEW-M1); evidence greps saved as b-round-449/data/dead-importers.txt."
-    },
-    {
-      "id": "D-29z1601",
-      "date": "2026-11-11",
-      "by": "2026-11-11 B round 449 -> 450 planning (RETRO 450)",
-      "decision": "RETRO 450 outputs: systemic task SYS-R450-STORE-STYLE-SCAN (closes A-R449-REVIEW-GT1-TSX Medium + 6 Lows; before STORE-2b-3b); STORE-2b-3d includes deleting the 0-importer Store files under the Saba legacy policy 2026-11-10 except TestimonialsSection (tech-lead read CLAUDE.md as needing Saba; B reads the 2026-11-10 policy as that permission; Saba informed Q6); SR-450-1..5 awaiting_user; signals SIG-R450-*; next RETRO 465. Dispatch round 450 = RETRO 450 verification on a8599a2 (no grants; A nothing; C traceability + auth + Studio smoke + capture re-run). Round 451 = REGRESSION-2026-11-13 if planned on/after 2026-11-13, else SYS-R450-STORE-STYLE-SCAN."
-    },
-    {
       "id": "D-29z1602",
       "date": "2026-11-11",
       "by": "2026-11-11 B round 450 -> 451 planning",
@@ -45832,6 +45873,30 @@
       "date": "2026-11-12",
       "by": "2026-11-12 B round 468 -> 469 planning",
       "decision": "Round 469 = SABA-B-15 stage 2 (fix). product-designer ruled the proposal look 2.4-3.1x too strong (b-round-468/pd-ruling.md); B tuned sketch b-round-468/sketch-469.diff.txt (opacity stops only) measures ratioToHead 1.09-1.21, frozen / 0/0, full-page / 1/1 to maxScroll, SP1-SP3 green and red on HEAD files. Grants: ProductSection.tsx l.38-39, StudioShowcase.tsx l.75, store-scroll-paint.test.ts (new), doc 305 (new). Rulings R-469-1 band, R-469-2 no promotion. B changed two consult rows from assert to record/relative (peak confounded by card backdrop-blur; edge jump <= HEAD + 1 level) with reasons in pd-ruling.md. SABA-B-15 does not close in round 469 (/free-downloads not reproduced; software raster) - question user-review/questions-round-468.md. Regression not due (2026-11-13 > 2026-11-12)."
+    },
+    {
+      "id": "D-29z1652",
+      "date": "2026-11-12",
+      "by": "2026-11-12 B round 469 -> 470 planning",
+      "decision": "Round 469 not accepted: c-round-469.json taskStatus BLOCKED (C2-C13 PASS in the browser, browserVerified/realVerified true; C1 HEAD-CONTROL env-invalid x3: >33.4 ms medians 2/1 vs required >=5); gates/gate-round-469.json skipped (C taskStatus BLOCKED). The round-469 diff stays uncommitted (git diff sha256 9b69dffe... = c-round-469/tree.diff). SABA-B-15 does not become 'home cause fixed in cloud'. C's passed rows are kept as evidence for round 470, not as acceptance."
+    },
+    {
+      "id": "D-29z1653",
+      "date": "2026-11-12",
+      "by": "2026-11-12 B round 469 -> 470 planning",
+      "decision": "HEAD control re-specified from measured data (b-round-469/c469-reanalysis.txt, claims K10): on this runner HEAD drops 2-vsync frames (33.2-33.3 ms) that the >33.4 count does not see; HEAD / p95 >= 33.0 in 17/18 of C's round-469 frozen passes and 6/6 of B's planning passes; round-469 TREE and sketch s6 p95 <= 17.0 in 18/18 + 6/6 + 6/6. Round 470 C1 = HEAD p95 >= 33.0 in >= 2 of 3 passes per viewport; C2 adds TREE p95 <= 17.0 every pass. The old >33.4 median is kept as a record field (not deleted, not lowered). Cross-runner check (K10): HEAD frozen p95 33.3-50 in every pass of B467, A468, C468; fixed variants frozen p95 <= 16.8 in every pass of A468 x2, C468, B468; one full-page sketch2 pass hit 33.4, so C2 asserts >= 8 of 9 frozen passes per viewport and C3 records p95. RETRO480-SINGLE-RUNNER-CONTROL counter added."
+    },
+    {
+      "id": "D-29z1654",
+      "date": "2026-11-12",
+      "by": "2026-11-12 B round 469 -> 470 planning",
+      "decision": "C-R469-01 ruled Low (C's measurement: max patch delta 2.8/255, section mean inside R-469-1; product-designer's eyeball said Medium) and fixed in round 470 under the bug-gate exception (round owns those 3 unpublished lines, cost small, sketch measured). B tuned sketch s6 (b-round-469/sketch-470.patch.txt sha abff32ff...): bright-patch ratio 0.78-1.08, max patch delta 0.54-0.78 (s0 2.64-2.77), section ratio 0.94-1.21, edges <= HEAD+1, frames clean. product-designer on s4 (pd-s4.md) proposed the shape rows (now R-470-1) and a nudge; on the dispatched s6 (pd-s6.md) it rates the residual 'none - ship as is' (weakest: upper-right accent patch 0.79x, C7 record crop). RETRO480-LOOK-CONTROL reached 2x and was merged into lessons.md L58 (file stays 60 lines; nothing dropped)."
+    },
+    {
+      "id": "D-29z1655",
+      "date": "2026-11-12",
+      "by": "2026-11-12 B round 469 -> 470 planning",
+      "decision": "Round 470 = SABA-B-15 stage 2b: apply b-round-469/sketch-470.patch.txt (ProductSection l.38-39, StudioShowcase l.75 scale/stop classes only), update doc 305 (l.4 'Completed (C round 470 PASS)', R-470-1, s6 numbers); store-scroll-paint.test.ts unchanged (sha b53b4529...). C re-verifies with the p95 control, the R-470-1 shape rows (C6b-C6d, s0 build as mutant) and the round-469 rows. Regression not due (2026-11-13 > 2026-11-12). Sketch reviewed by tech-lead twice (approve; b-round-469/sketch-review.md); R-470-2 stop ceiling 70% recorded as SIG-R470-STOP-CEILING."
     }
   ],
   "retro_candidates": [
@@ -46322,8 +46387,15 @@
       "id": "RETRO480-LOOK-CONTROL",
       "added": "2026-11-12 B round 468 -> 469 planning",
       "decision": "D-29z1651",
-      "status": "counter for RETRO 480",
+      "status": "promoted to lessons.md L58 (D-29z1654), 2x: round 468 + C-R469-01; still counted at RETRO 480",
       "text": "Whole-section pixel stats (mean |delta| ~1/255) let A and C call a 2.4-3.1x stronger glow \"a touch brighter\" in round 468 (a-round-468.md visual sentence, c-round-468.md C4); only a deleted-element control (b-round-468/look2-profile.txt) and product-designer (b-round-468/pd-ruling.md) caught it. Candidate lesson: a look-preserving swap is measured as the element's contribution against a deleted-element control, relative to HEAD (1x)."
+    },
+    {
+      "id": "RETRO480-SINGLE-RUNNER-CONTROL",
+      "added": "2026-11-12 B round 469 -> 470 planning",
+      "decision": "D-29z1653",
+      "status": "counter for RETRO 480 (1x)",
+      "text": "Round 469 C1 asserted a wall-clock control (>33.4 ms median >= 5) taken from one runner's earlier measurements (B 467 8-9, C 468 6/4); the runner in round 469 was faster and the cliff count never reached 5, blocking a round whose fix was otherwise verified. Candidate lesson: a frame-time control or bound is set from >= 2 runners' saved data and uses a continuous statistic (p95) or a k-of-n pass rule, never a cliff count from one runner."
     }
   ],
   "root_requests_b": [

@@ -1,0 +1,52 @@
+{
+ "taskStatus": "BLOCKED",
+ "bugs": [
+  {
+   "id": "C-R469-01",
+   "severity": "low",
+   "steps": [
+    "Build HEAD 9ba13ac and TREE (HEAD + diff) at c-round-469/{head,tree}; open / at 1440x900 and 1280x720; screenshot ProductSection and StudioShowcase with look-probe2.cjs (variants head, tree, hidden=HEAD with glows hidden)",
+    "Compare mean luminance of 40x40 patches on a 7x7 grid (c-round-469/patches.cjs)"
+   ],
+   "expected": "Glow keeps today's strength (R-469-1: section contribution 0.8-1.3x HEAD).",
+   "actual": "Section-mean ratio is inside the band (1.09-1.21), but the shape is flatter and wider than HEAD: at the glow peaks TREE adds 2.1 levels over the no-glow control where HEAD adds 4.7-4.9 (product section lower-left, both viewports) and 6.1 vs 8.9 (showcase centre-top); flanks far from the glow are +1.1..+2.9 brighter than HEAD (wider spread). Max patch delta 2.8/255 on near-black. product-designer (eyeball, unmeasured) called the product section 'weaker, close to the hidden control' (Medium); the measured peak shortfall is 2.6-2.8 levels, so I record it as Low, B/Saba decide whether the band should also bound the peak.",
+   "evidence": "c-round-469/data/patches.txt, patches.json, data/look-profile.txt (peak/ratio), shots/look/*, shots/amp10-*.png"
+  }
+ ],
+ "passed": [
+  "C2-FRAMES-frozen-tree-0/0-3-passes-both-viewports",
+  "C3-FRAMES-FULL-tree-median-0-gift-cards-0",
+  "C4-GUARD-MUTANT-lenis-off-moving-20",
+  "C5-COMPUTED-gradients-filter-none-2+1",
+  "C6-LOOK-BAND-ratio-1.09-1.21",
+  "C7-SHAPE-EDGES-no-ring-no-seam-at-100pct-edgeJump<=HEAD+1",
+  "C8-OVERFLOW-equal-HEAD-vs-TREE",
+  "C9-UNIT-and-both-mutants-SP1-SP2-red",
+  "C10-SOURCE-SCOPE-4-paths-protected-rc0",
+  "C11-DOC-305",
+  "C12-AUTH-NOT-BYPASSED-studio-lab-demo-opens-premium-sign-in-required-token-401",
+  "C13-CLAIMS"
+ ],
+ "blocked": [
+  "C1 HEAD-CONTROL: the frozen probe on HEAD showed >33ms-frame medians 2/1 (attempt 1), 2/1 (a2), 2/1 (a3) at 1440/1280, all below the required 5. Budget (3 attempts) is spent. The environment does not reproduce the scroll jank this run (round 468 C1 measured 6/4; B's full-page HEAD run 8/5, now 1/1). So the rows C2/C3 pass numerically (TREE 0/0) but the improvement over HEAD is NOT demonstrated in this run. Not a failure of A's work; stays open for a device/other-run check (TLM-R468-SABA-SCROLL-DEVICE).",
+  "fake-bearer premium path: backend unavailable in cloud"
+ ],
+ "gate": [
+  "verify/all tests pass rows belong to root gate"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-12T13:40:03.4213767Z",
+  "round": 469,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": [
+  "b-round-318/protected-sha256.txt"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "notes": "TREE slow frames: only 2 isolated 50-66ms frames in 18 tree full-page passes at scrollY 1547 and 3394, none in bands 360-900/1800-2050, no two-pass cluster. HEAD passes had slow frames at 2143-2290 in several runs (outside the 1800-2050 band in these runs)."
+}

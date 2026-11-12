@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-12T12:57:54.669Z",
-  "current_task": "Round 468: SABA-B-15 stage 1 - diagnose Store home scroll frame drops (trace + scratch bisect + proposal; no store change) (current-task.md, D-29z1649)",
+  "_generatedUtc": "2026-11-12T14:06:47.864Z",
+  "current_task": "Round 469: SABA-B-15 stage 2 - home blur glows -> radial gradients at today's strength (current-task.md, D-29z1651)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6763,19 +6763,20 @@
       "id": "SABA-B-15",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "dispatched round 468 (D-29z1649): stage 1 diagnosis (A traces + bisects in scratch, proposal diff; no store change); stage 2 fix with exact grants in round 469",
+      "status": "dispatched round 469 (D-29z1651): stage 2 fix = the 3 blur glows (ProductSection l.38-39, StudioShowcase l.75) -> radial gradients at today's strength (product-designer band 0.8-1.3x, b-round-468/pd-ruling.md); stage 1 cause confirmed by C round 468 (D-29z1650); after C PASS: \"home cause fixed in cl …[see backlog.json]",
       "title": "Store scroll is not smooth and soft (Saba 2026-11-12, named /free-downloads on czaba-store-test.vercel.app)",
       "evidence": "b-round-467/probe/bisect-b.md: prod 9ba13ac / median frames >33.4 ms 9 (1440) / 8 (1280), moving 165-175; Lenis off 5/4 with only 20 moving frames (not eased) and script-less long frames -> cost is page rendering, not the Lenis hook; header backdrop-blur, hero backdrop-blurs and hero video autoplay  …[see backlog.json]",
       "repro": "node b-round-467/probe/store-scroll-probe.cjs <prod build url> <out.json> 1 (LeadMagnet suppressed)",
       "why_we_missed": "STORE C rows measured LCP/CLS at load only; no scroll frame-timing row; PERF harness is /studio-lab only; rule merged into lessons L18",
       "requested": "agent-workflow.md \"Saba feedback, 2026-11-12: Scroll is not smooth\"",
-      "added": "2026-11-12 B round 467 -> 468 planning"
+      "added": "2026-11-12 B round 467 -> 468 planning",
+      "cause_d29z1650": "three large filter:blur() glows; raster-bound in SwiftShader software raster (a-round-468/trace-summary.md); hiding or gradient-swapping them removes both bands (a-round-468/bisect.md; C round 468 C2 / medians 0/0); B full-page probe on the tuned sketch: / medians 1/1 to maxScroll 4121 vs HEAD 8/5 ( …[see backlog.json]"
     },
     {
       "id": "TLM-R468-SABA-SCROLL-DEVICE",
       "severity": "medium",
       "origin": "environment",
-      "status": "open_tech_lead_manual (D-29z1649): deadline RETRO 480 (L46); does not block (2026-10-23 root clarification class)",
+      "status": "open_tech_lead_manual (D-29z1649): deadline RETRO 480 (L46); does not block (2026-10-23 root clarification class) | question user-review/questions-round-468.md Q1 (D-29z1651), with the Lenis-feel options (a) keep default, (b) shorter duration, (c) lerp, (d) off (R-468-1, L44)",
       "title": "Saba's own device: /free-downloads and / scroll on the Vercel preview after round 468 lands (mouse wheel and trackpad; Chrome DevTools Performance trace if still not smooth)",
       "added": "2026-11-12 B round 467 -> 468 planning"
     },
@@ -6801,14 +6802,6 @@
     }
   ],
   "recent_rounds": [
-    {
-      "round": 459,
-      "task": "current-task.md",
-      "decision": "D-29z1625",
-      "type": "SABA-B-13 STORE-2b-ENTRANCE: head cover (black first frame) + 1450 ms minimum entrance, CSS failsafe, skip before hydration",
-      "status": "C FAIL (C-R459-01 Medium = A-R459-REVIEW-R1; C-R459-02/03 Low); gate 459 skipped; re-dispatched as round 460 (D-29z1626)",
-      "note": "baseline 891dc0f (gate 458 commit); sketch b-round-458/sketch-459.patch.txt sha f499b724 (tech-lead APPROVE review 2); grants b-round-458/grants-459.txt (5, incl. narrow root.tsx 2 lines)"
-    },
     {
       "round": 460,
       "task": "current-task.md",
@@ -6882,8 +6875,16 @@
       "task": "current-task.md",
       "decision": "D-29z1649",
       "type": "SABA-B-15 stage 1: diagnosis of Store home scroll frame drops (trace + scratch bisect + proposal diff; no store change)",
-      "status": "dispatched",
+      "status": "done (D-29z1650): C PASS (diagnosis, no store change); gate skipped no real changes",
       "note": "baseline 9ba13ac clean; grants none in the store tree; probe b-round-467/probe/store-scroll-probe.cjs; B bisect b-round-467/probe/bisect-b.md; claims b-round-467/claims-468.sh"
+    },
+    {
+      "round": 469,
+      "task": "current-task.md",
+      "decision": "D-29z1651",
+      "type": "SABA-B-15 stage 2: home blur glows -> radial gradients at today's strength (+ guard test + doc 305)",
+      "status": "dispatched",
+      "note": "baseline 9ba13ac clean; grants app/components/home/ProductSection.tsx (l.38-39), app/components/home/StudioShowcase.tsx (l.75), app/lib/__tests__/store-scroll-paint.test.ts (new), docs/implementation/2026/quarter-IV/305-saba-b-15-home-scroll-glows.md (new); sketch b-round-468/sketch-469.diff.txt; claims b-round-468/claims-469.sh"
     }
   ],
   "other_keys": [

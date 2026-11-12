@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-12T12:57:54.669Z)
+# Active loop summary (2026-11-12T14:06:47.864Z)
 
-- backlog.json 3377 KB -> active view 297 KB
-- status: G_ROOT_GATE round 468
-- servers: `{"checkedUtc":"2026-11-12T12:47:54.0055999Z","round":468,"attempt":1,"store":200}`
+- backlog.json 3382 KB -> active view 298 KB
+- status: G_ROOT_GATE round 469
+- servers: `{"checkedUtc":"2026-11-12T13:40:03.4213767Z","round":469,"attempt":1,"store":200}`
 - last publication: 9ba13acda88f88934814972ec23518205245b228 (rounds 465-467)
-- last root gate: round 468 skipped - no real changes
+- last root gate: round 469 skipped - C taskStatus BLOCKED
 
 ## Current items: -
 
@@ -17,7 +17,7 @@
 - **STUDIO-VIS-5** / medium / scheduled (D-29z1512): REVIEW-RECOMMENDATIONS (Saba: defer) / Detail panel spacing (gap-0.5 -> gap-1, px-3 -> px-4)
 - **SABA-B-12** / medium / in_progress (D-29z1515, D-29z1521, D-29z1523, D-29z1527, D-29z1532, D-29z1536, D-29z1538): stages 1, 2a, 2b, 3, 3b passed C and are published (5a30894, 1197dcb, 1a417fb, 0c22ac9, 8233840); stage 4 (selects, STUDIO-VIS-3) in REVIEW-RECOMMENDATIONS / Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cance
 - **GATE462-M1-EMAIL-SERVER-POLICY** / medium / open_root (D-29z1632): question ROOT-REQ-EMAIL-SERVER-DELETION; non-blocking for the loop (2026-10-23 root clarification class: root-only); app/lib/email.server.ts is not in global_forbidden_files (claims-463 K11); 0 importers; r2-tokens.server.ts and every download route unchanged; C round 462 C8 p …[see backlog.json] / Round 462 deleted app/lib/email.server.ts (dead order-paid email builder that used getDownloadUrl); root to confirm the deletion is acceptab
-- **SABA-B-15** / medium / dispatched round 468 (D-29z1649): stage 1 diagnosis (A traces + bisects in scratch, proposal diff; no store change); stage 2 fix with exact grants in round 469 / Store scroll is not smooth and soft (Saba 2026-11-12, named /free-downloads on czaba-store-test.vercel.app)
-- **TLM-R468-SABA-SCROLL-DEVICE** / medium / open_tech_lead_manual (D-29z1649): deadline RETRO 480 (L46); does not block (2026-10-23 root clarification class) / Saba's own device: /free-downloads and / scroll on the Vercel preview after round 468 lands (mouse wheel and trackpad; Chrome DevTools Perfo
+- **SABA-B-15** / medium / dispatched round 469 (D-29z1651): stage 2 fix = the 3 blur glows (ProductSection l.38-39, StudioShowcase l.75) -> radial gradients at today's strength (product-designer band 0.8-1.3x, b-round-468/pd-ruling.md); stage 1 cause confirmed by C round 468 (D-29z1650); after C PASS: "home cause fixed in cl …[see backlog.json] / Store scroll is not smooth and soft (Saba 2026-11-12, named /free-downloads on czaba-store-test.vercel.app)
+- **TLM-R468-SABA-SCROLL-DEVICE** / medium / open_tech_lead_manual (D-29z1649): deadline RETRO 480 (L46); does not block (2026-10-23 root clarification class) | question user-review/questions-round-468.md Q1 (D-29z1651), with the Lenis-feel options (a) keep default, (b) shorter duration, (c) lerp, (d) off (R-468-1, L44) / Saba's own device: /free-downloads and / scroll on the Vercel preview after round 468 lands (mouse wheel and trackpad; Chrome DevTools Perfo
 - **SABA-B-16-LOGO-OLD-COLORS** / medium / open (D-29z1648): input to the first DP-GATE review (root, ROOT-REQ-DP-GATE-FIRST); which asset is unconfirmed: header wordmark is text-foreground (R59), so candidates are public/favicon.ico, public/og-image.jpg (public/** global_forbidden -> root) and the SpotlightLoader wordmark; user-review/quest …[see backlog.json] / Logo still uses the old colours, not Obsidian & Brass (Saba 2026-11-12, "Known issues for the first review")
 - ... and 961 Low/info (see backlog.json)
