@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-13T16:53:27.179Z",
-  "current_task": "Round 492: B-R488-PASSWORD-MODAL-DIALOG (+ B-R492-PASSWORD-FIELDS-UNNAMED, B-R492-PASSWORD-ERROR-NOT-ANNOUNCED) - Account Change Password window gets APG modal dialog semantics, initial focus, Tab trap, Esc, focus return, labelled fields, alert; baseline e4e1d1c (current-task.md, sketch b-round-491/sketch-492.patch.txt f530e0f3)",
+  "_generatedUtc": "2026-11-13T17:24:27.838Z",
+  "current_task": "Round 493: re-dispatch of B-R488-PASSWORD-MODAL-DIALOG (+ B-R492-PASSWORD-FIELDS-UNNAMED, B-R492-PASSWORD-ERROR-NOT-ANNOUNCED) with docs-only v5 fixing C-R492-01 (doc 318 l.22 ring by modality; round 492 -> 493 in docs 315/317/318); baseline e4e1d1c with v3 in the tree (current-task.md, delta b-round-492/sketch-493-delta-v3-to-v4.patch.txt c70366db, full b-round-492/sketch-493.patch.txt ea441270)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6900,17 +6900,6 @@
       "added": "2026-11-12 B round 479 -> 480 planning (RETRO 480)"
     },
     {
-      "id": "B-R488-PASSWORD-MODAL-DIALOG",
-      "severity": "medium",
-      "origin": "pre-existing",
-      "status": "dispatched (D-29z1756): round 492, sketch b-round-491/sketch-492.patch.txt v3 f530e0f3 (role=dialog, aria-modal, labelledby, initial focus, Tab trap, Esc not composing, idempotent focus return, inert while exiting); B browser: HEAD pw-check RED 48, sketch PASS 54 rows (b-round-491/probe/) | schedule …[see backlog.json]",
-      "title": "Account 'Change password' modal has no dialog semantics: no role=dialog/aria-modal, no initial focus, Esc does not close it, no focus return to the trigger",
-      "evidence": "b-round-487/probe/overlays-sketch.json password-modal-keys (1440/1280): dialogs [], afterOpen focus stays on the link, Esc leaves the modal open; tech-lead delta review Low 1 (b-round-487/sketch-review.md)",
-      "repro": "signed-in stub, /account: click 'Click to change password'; inspect the aria tree (no dialog), press Esc (modal stays)",
-      "note": "reference: WAI-ARIA APG Dialog (Modal) pattern; the fix touches function PasswordModal in app/routes/account.tsx only; must keep C-R487-01's passwordModalOpenRef in sync",
-      "added": "2026-11-13 B round 487 -> 488 planning"
-    },
-    {
       "id": "SABA-Q-ENTRANCE-SCROLL-SKIP",
       "status": "awaiting_user (D-29z1743); non-blocking, default applied",
       "title": ""
@@ -6921,28 +6910,6 @@
       "title": ""
     },
     {
-      "id": "B-R492-PASSWORD-FIELDS-UNNAMED",
-      "severity": "medium",
-      "origin": "pre-existing",
-      "status": "dispatched (D-29z1756): round 492 (same owner as B-R488-PASSWORD-MODAL-DIALOG)",
-      "title": "Account 'Change Password' fields have no accessible name (label without htmlFor) and the three eye toggle buttons have an empty name",
-      "evidence": "b-round-491/probe/headprod-pw.json R1_openMouse.fields (inputs [null,null,null], buttons [\"\",\"\",\"\"...]); Biome 3x noLabelWithoutControl at HEAD (b-round-490/sketch-491-biome.log)",
-      "repro": "signed-in stub, /account, open 'Click to change password'; inspect accessible names of the three inputs and eye buttons",
-      "note": "WCAG 1.3.1, 4.1.2; L14 (unique names in a dialog we touch)",
-      "added": "2026-11-13 B round 491 -> 492 planning"
-    },
-    {
-      "id": "B-R492-PASSWORD-ERROR-NOT-ANNOUNCED",
-      "severity": "medium",
-      "origin": "pre-existing",
-      "status": "dispatched (D-29z1756): round 492 (role=alert on the error box)",
-      "title": "Account 'Change Password' error message is not announced (no role=alert / live region); every real attempt ends in this error today",
-      "evidence": "b-round-491/probe/headprod-pw.json R9_errorPath (error text visible, no alert); sketch alertText in sketchprod-pw.json",
-      "repro": "signed-in stub, open the dialog, fill valid values, Update Password; the error appears silently",
-      "note": "WCAG 4.1.3",
-      "added": "2026-11-13 B round 491 -> 492 planning"
-    },
-    {
       "id": "B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED",
       "severity": "high",
       "origin": "pre-existing",
@@ -6951,17 +6918,15 @@
       "evidence": "store app/lib/auth.ts updatePassword (claims-492 K19); b-round-491/probe/headprod-pw.json R9_errorPath",
       "repro": "signed in with email account, /account, Change password with valid values -> error always",
       "added": "2026-11-13 B round 491 -> 492 planning"
+    },
+    {
+      "id": "C-R492-01",
+      "severity": "low",
+      "status": "dispatched (D-29z1758): round 493 docs-only v5 rewrites doc ",
+      "title": "Doc 318 l.22 claimed the Current Password field shows a focus ring on open; false for a mouse open ("
     }
   ],
   "recent_rounds": [
-    {
-      "round": 483,
-      "task": "current-task.md",
-      "decision": "D-29z1717",
-      "type": "REGRESSION-2026-11-13 part 2 (round-423 + round-425 rows + carry_to_next_regression_d29z1490; A no change)",
-      "status": "C PASS, browserVerified false (D-29z1719): 3 record-only browser sub-rows not run; gate 483 skipped",
-      "note": "baseline HEAD 751e30e clean; claims b-round-482/claims-483.sh; frozen manifest b-round-482/r483-tree-sha256.txt (1393); RR-PERF/PERF-LIB/RG-SMOKE carried from C round 482"
-    },
     {
       "round": 484,
       "task": "current-task.md",
@@ -7031,8 +6996,16 @@
       "task": "current-task.md",
       "decision": "D-29z1756",
       "type": "B-R488-PASSWORD-MODAL-DIALOG + B-R492-PASSWORD-FIELDS-UNNAMED + B-R492-PASSWORD-ERROR-NOT-ANNOUNCED (Medium x3)",
-      "status": "dispatched",
+      "status": "c_fail_stopped_routed_to_b (D-29z1758): C round 492 FAIL (browserVerified/realVerified true; C5 PW-CHECK PASS 54 rows on v3; bug C-R492-01 Low origin B spec: doc 318 l.22 ring claim false for a mouse open); A STOP correct; gate 492 skipped (C taskStatus FAIL); nothing published",
       "note": "baseline HEAD e4e1d1c clean; sketch b-round-491/sketch-492.patch.txt (v3 f530e0f3); claims b-round-491/claims-492.sh; probe b-round-491/probe/pw-492.mjs + pw-check.py; mutants b-round-491/mutants/run-mutants.py"
+    },
+    {
+      "round": 493,
+      "task": "current-task.md",
+      "decision": "D-29z1758",
+      "type": "re-dispatch B-R488-PASSWORD-MODAL-DIALOG + B-R492-PASSWORD-FIELDS-UNNAMED + B-R492-PASSWORD-ERROR-NOT-ANNOUNCED (Medium x3) with docs-only v5 (C-R492-01)",
+      "status": "dispatched",
+      "note": "baseline HEAD e4e1d1c with sketch v3 in the tree (6 paths); delta b-round-492/sketch-493-delta-v3-to-v4.patch.txt (c70366db), full b-round-492/sketch-493.patch.txt (ea441270); claims b-round-492/claims-493.sh; v3/v5 production builds byte-identical (b-round-492/css-compare.txt, build-diff.txt)"
     }
   ],
   "other_keys": [

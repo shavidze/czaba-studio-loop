@@ -1,12 +1,13 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 492 FAIL (STOPPED - routed to B): A correctly stopped on doc 318 l.22, whose ring-on-open claim is false for a mouse open (C-R492-01, Low, origin B spec). C5 browser rows passed on v3 (54 rows, browserVerified true), but the verdict is FAIL, so nothing is done; gate 492 skipped. B ruled the STOP as an accepted docs-only delta. tech-lead rejected v4 for three more unverified or false doc sentences, all fixed in v5 (APPROVE). Code and tests are byte-equal to v3, and the v5 production build is byte-identical to v3. Many scoped items remain, so not COMPLETE. Nothing needs external input for the next round, so not BLOCKED.",
- "nextTask": "Round 493: re-dispatch of B-R488-PASSWORD-MODAL-DIALOG (+ B-R492-PASSWORD-FIELDS-UNNAMED, B-R492-PASSWORD-ERROR-NOT-ANNOUNCED) with docs-only v5. A applies b-round-492/sketch-493-delta-v3-to-v4.patch.txt (c70366db) on the v3 tree, or the full b-round-492/sketch-493.patch.txt (ea441270) on a clean e4e1d1c. It changes doc 318 (l.22 ring by modality, l.4 round 493, R7->P11/P12, PD8 wording, TL-R493-D1..D3) and docs 315/317 (round 493). C runs the full C1-C10: claims-493.sh, the pw-492 browser probe on a production build, 20 mutants, the keyboard crop, a full doc truth check, and the auth guard with studio-lab play/stop read from the hidden playback-state span. Then DPG-BUTTON-CLEANUP (RETRO 495; REGRESSION on/after 2026-11-16).",
+ "reason": "C round 493 FAIL (short route, STOPPED - routed to B; browserVerified false): A correctly stopped on doc 318 l.36, which said the backdrop blocks the pointer on the background, but the backdrop ends 40 px above the viewport bottom (C-R493-01, Low, origin B spec; C f1.json, B probe at 3 viewports on dev and production builds). Gate 493 skipped; nothing done. B ruled the STOP as an accepted docs-only v6 with a sentence-to-evidence ledger. Code and tests are byte-equal to v3; v6 CSS equals v5. Many scoped items remain, so not COMPLETE; nothing needs external input for the next round, so not BLOCKED.",
+ "nextTask": "Round 494: re-dispatch of B-R488-PASSWORD-MODAL-DIALOG (+ B-R492-PASSWORD-FIELDS-UNNAMED, B-R492-PASSWORD-ERROR-NOT-ANNOUNCED) with docs-only v6. A applies b-round-493/sketch-494-delta-v5-to-v6.patch.txt on the v5 tree (or the full b-round-493/sketch-494.patch.txt on a clean e4e1d1c): doc 318 l.22 (text caret exception), l.36 (measured 40 px backdrop gap, Ctrl+K exception), l.63, l.85, l.86, l.93 (Ctrl+K palette opens behind the dialog, not over it), three deferred Lows in the TODO, round 494 in docs 315/317/318. C runs C1-C10 plus C5b backdrop probe on a production build, with the clip count read from distinct [data-clip-id]. PASS -> RETRO 495, then DPG-BUTTON-CLEANUP; FAIL -> fix-up 495, RETRO 496; REGRESSION on/after 2026-11-16.",
  "remaining": [
   "B-R488-PASSWORD-MODAL-DIALOG",
   "B-R492-PASSWORD-FIELDS-UNNAMED",
   "B-R492-PASSWORD-ERROR-NOT-ANNOUNCED",
   "C-R492-01",
+  "C-R493-01",
   "ROOT-REQ-DOWNLOADS-MUSIC-LINK",
   "DP-GATE-RERUN-AFTER-P0",
   "DPG-FOOTER-LINKS",
@@ -52,6 +53,8 @@
   "TLM-R491-PHONE-NAME-EDITOR",
   "ARCH-CHECKPOINT-ENTRANCE-LOADING",
   "B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED",
-  "TLM-R492-SR-PASSWORD-DIALOG"
+  "TLM-R492-SR-PASSWORD-DIALOG",
+  "ROOT-REQ-OPTIMIZER-ARCHIVES-OPEN",
+  "LEGACY-DEAD-STORE-COMPONENTS"
  ]
 }

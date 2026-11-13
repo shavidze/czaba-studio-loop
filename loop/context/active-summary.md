@@ -1,14 +1,14 @@
-# Active loop summary (2026-11-13T16:53:27.179Z)
+# Active loop summary (2026-11-13T17:24:27.838Z)
 
-- backlog.json 3506 KB -> active view 305 KB
-- status: G_ROOT_GATE round 492
-- servers: `{"checkedUtc":"2026-11-13T16:48:40.5192853Z","round":492,"attempt":1,"store":200}`
+- backlog.json 3509 KB -> active view 303 KB
+- status: G_ROOT_GATE round 493
+- servers: `{"checkedUtc":"2026-11-13T17:21:53.0510924Z","round":493,"attempt":1,"store":200}`
 - last publication: e4e1d1c961e1390dafa2eda602ee4ba70e7b8460 (rounds 491-491)
-- last root gate: round 492 skipped - C taskStatus FAIL
+- last root gate: round 493 skipped - C taskStatus FAIL
 
 ## Current items: -
 
-## Open findings: 988 (20 Critical/High/Medium)
+## Open findings: 986 (17 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / tracked by task SAFARI-CHECKS (D-29z1705) | listed in the Safari list (user-review/questions-retro-465.md Q2, D-29z1638); does not block | environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the c …[see backlog.json] / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
@@ -25,8 +25,5 @@
 - **FIREFOX-CHECKS** / medium / open_root (D-29z1707; does not block): blocked (D-29z1705): needs ROOT-REQ-PLAYWRIGHT-FIREFOX; C runs all five in one round once Firefox is installed; questions-retro-480.md Q3 / Firefox halves of five manual checks, opened as one task by L46 after two RETROs without an answer
 - **SAFARI-CHECKS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Saba on macOS Safari; questions-retro-480.md Q4 / Safari halves of the manual list, opened as one task by L46
 - **HIREUS-EMAIL-CLIENTS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Brevo and a test send to Gmail/Outlook/Apple Mail (Saba); questions-retro-480.md Q4 / Hire-Us internal e-mail in real clients, opened as a task by L46
-- **B-R488-PASSWORD-MODAL-DIALOG** / medium / dispatched (D-29z1756): round 492, sketch b-round-491/sketch-492.patch.txt v3 f530e0f3 (role=dialog, aria-modal, labelledby, initial focus, Tab trap, Esc not composing, idempotent focus return, inert while exiting); B browser: HEAD pw-check RED 48, sketch PASS 54 rows (b-round-491/probe/) | schedule …[see backlog.json] / Account 'Change password' modal has no dialog semantics: no role=dialog/aria-modal, no initial focus, Esc does not close it, no focus return
-- **B-R492-PASSWORD-FIELDS-UNNAMED** / medium / dispatched (D-29z1756): round 492 (same owner as B-R488-PASSWORD-MODAL-DIALOG) / Account 'Change Password' fields have no accessible name (label without htmlFor) and the three eye toggle buttons have an empty name
-- **B-R492-PASSWORD-ERROR-NOT-ANNOUNCED** / medium / dispatched (D-29z1756): round 492 (role=alert on the error box) / Account 'Change Password' error message is not announced (no role=alert / live region); every real attempt ends in this error today
 - **B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED** / high / open_root (D-29z1757): needs a backend authenticated password-change endpoint and a change in protected app/lib/auth.ts (loop may not edit); question ROOT-REQ-PASSWORD-CHANGE-ENDPOINT; does not block loop rounds, blocks final COMPLETE / Account 'Change password' can never succeed: app/lib/auth.ts updatePassword verifies the current password via login, then always throws 'Pas
-- ... and 968 Low/info (see backlog.json)
+- ... and 969 Low/info (see backlog.json)

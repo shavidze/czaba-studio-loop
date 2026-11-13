@@ -1,0 +1,102 @@
+diff --git a/docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md b/docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md
+index 8c8f297..08536bf 100644
+--- a/docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md
++++ b/docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md
+@@ -36,7 +36,7 @@
+ | ✓-ით (mouse) შენახვა, focus `<body>`-ზეა | წარმატება — სახელის ღილაკი; შეცდომა — First name | PN10c, PN10d, IF-STAY |
+ | შენახვა სრულდება მას შემდეგ, რაც მომხმარებელმა focus სხვაგან გადაიტანა ან password dialog გახსნა | focus არ გადაადგილდება (წარმატებისას რედაქტორი იხურება, შეცდომისას ღია რჩება) | PN10, PN10b, PN10e, PN10f, PN10g, IF-PASSWORD, IF-PASSWORD-NOFOCUS, IF-TABAWAY, IF-REPLAY |
+ 
+-**წესი (round 488):** შენახვის დასრულებისას (წარმატება ან API შეცდომა) focus მხოლოდ მაშინ გადადის, როცა რედაქტორი ჯერ კიდევ "ფლობს" focus-ს: password dialog დახურულია **და** `document.activeElement` არის null, `<body>` ან რედაქტორის row-ის შიგნით (`nameEditorRef`). ვალიდაციის შეცდომა, გახსნა, Esc და Cancel მომხმარებლის მოქმედებაა და ამ წესს არ ექვემდებარება. Dialog-ის მდგომარეობა `passwordModalOpenRef`-ით მოწმდება და არა `activeElement`-ით: Safari-სა და Firefox-mac-ზე mouse click ღილაკს focus-ს არ აძლევს, ამიტომ dialog-ის გახსნის შემდეგ `activeElement` `<body>` რჩებოდა და მხოლოდ body-ზე დაფუძნებული guard focus-ს მაინც მოიპარავდა (round 493-დან dialog გახსნისას focus-ს თვითონ იღებს, მაგრამ dialog-ის არა-focusable ნაწილზე click focus-ს ისევ `<body>`-ზე აგდებს, ამიტომ ref რჩება). Ref (და არა state) იმიტომ, რომ მიმდინარე `handleNameSave` closure-ში `isPasswordModalOpen`-ის ძველ მნიშვნელობას წაიკითხავდა. წყარო: WCAG 2.2 SC 3.2.1 / 3.2.2 — async დასრულება მომხმარებლის მოთხოვნა არ არის (B-ის დასკვნა, არა ციტირებული წესი).
++**წესი (round 488):** შენახვის დასრულებისას (წარმატება ან API შეცდომა) focus მხოლოდ მაშინ გადადის, როცა რედაქტორი ჯერ კიდევ "ფლობს" focus-ს: password dialog დახურულია **და** `document.activeElement` არის null, `<body>` ან რედაქტორის row-ის შიგნით (`nameEditorRef`). ვალიდაციის შეცდომა, გახსნა, Esc და Cancel მომხმარებლის მოქმედებაა და ამ წესს არ ექვემდებარება. Dialog-ის მდგომარეობა `passwordModalOpenRef`-ით მოწმდება და არა `activeElement`-ით: Safari-სა და Firefox-mac-ზე mouse click ღილაკს focus-ს არ აძლევს, ამიტომ dialog-ის გახსნის შემდეგ `activeElement` `<body>` რჩებოდა და მხოლოდ body-ზე დაფუძნებული guard focus-ს მაინც მოიპარავდა (round 494-დან dialog გახსნისას focus-ს თვითონ იღებს, მაგრამ dialog-ის არა-focusable ნაწილზე click focus-ს ისევ `<body>`-ზე აგდებს, ამიტომ ref რჩება). Ref (და არა state) იმიტომ, რომ მიმდინარე `handleNameSave` closure-ში `isPasswordModalOpen`-ის ძველ მნიშვნელობას წაიკითხავდა. წყარო: WCAG 2.2 SC 3.2.1 / 3.2.2 — async დასრულება მომხმარებლის მოთხოვნა არ არის (B-ის დასკვნა, არა ციტირებული წესი).
+ 
+ ### რატომ არის ღილაკი მთელ სიგანეზე
+ 
+@@ -102,7 +102,7 @@ flowchart TD
+   - PN10 / PN10b — შენახვის დროს focus password link-ზე გადავიდა; წარმატება/შეცდომის შემდეგ ის იქვე რჩება (შეცდომისას რედაქტორი ღიაა, ✓ ხელახლა აქტიურია).
+   - PN10c / PN10d — ✓-ით შენახვა, focus `<body>`-ზეა; წარმატება — სახელის ღილაკი, შეცდომა — First name.
+   - PN10e — შენახვის დროს focus Orders tab-ის link-ზეა და იქვე რჩება.
+-  - PN10f / PN10g — focus-ის გარეშე click password dialog-ს ხსნის ✓-ით შენახვის დროს; dialog focus-ს Current Password-ზე გადაიტანს (round 493, doc 318), შემდეგ focus `<body>`-ზე გადადის; დასრულების შემდეგ ის `<body>`-ზე რჩება, არა სახელის ღილაკზე / First name-ზე.
++  - PN10f / PN10g — focus-ის გარეშე click password dialog-ს ხსნის ✓-ით შენახვის დროს; dialog focus-ს Current Password-ზე გადაიტანს (round 494, doc 318), შემდეგ focus `<body>`-ზე გადადის; დასრულების შემდეგ ის `<body>`-ზე რჩება, არა სახელის ღილაკზე / First name-ზე.
+   - PN10h — dialog-ის Cancel-ის შემდეგ ახალი Enter-შენახვა focus-ს ისევ სახელის ღილაკზე აბრუნებს.
+ - A-ს გაშვებები (round 487): `npm run typecheck` rc 0; `npm run lint` rc 0; scoped Biome — 4 წინასწარ არსებული warning (`PasswordModal`/password link); 5 covering ტესტის ფაილი — 74 passed (HS1 scan-ის ჩათვლით).
+ - A-ს გაშვებები (round 488): `npm run typecheck` rc 0; `npm run lint` rc 0; scoped Biome — იგივე 4 წინასწარ არსებული warning; 5 covering ტესტის ფაილი — 82 passed.
+@@ -114,5 +114,5 @@ flowchart TD
+ - TODO: SIG-R487-REPEAT-SAFE-HOME — `preventRepeatedEnterKeyDown` Store-ისა და Studio-ს საერთო helper-ია, მაგრამ `app/components/arrangement/`-შია; მისი `app/lib`-ში გადატანა ცალკე B დავალებაა.
+ - B-R487-PROFILE-EDITOR-NARROW-OVERFLOW (Medium) — 375×812-ზე რედაქტორის row სვეტზე განიერი იყო და ✓/✕ ეკრანს გარეთ; გამოსწორდა round 491-ში (doc 317).
+ - რეალური profile update-ის შემოწმება .NET backend-ით (OWN-BACKEND), როცა backend ხელმისაწვდომი იქნება.
+-- B-R488-PASSWORD-MODAL-DIALOG (Medium) — გამოსწორდა round 493-ში (doc 318): `role="dialog"`/`aria-modal`, საწყისი focus, Tab-ის ჩაკეტვა, Esc-ით დახურვა და focus-ის დაბრუნება.
++- B-R488-PASSWORD-MODAL-DIALOG (Medium) — გამოსწორდა round 494-ში (doc 318): `role="dialog"`/`aria-modal`, საწყისი focus, Tab-ის ჩაკეტვა, Esc-ით დახურვა და focus-ის დაბრუნება.
+ - TODO: B-R488-SAFARI-MENU-SETTLE-FOCUS (Low, `deferred_low_polish`) — Safari model-ში User/Toggle menu-ის focus-ის გარეშე გახსნა შენახვის დროს ჯერ კიდევ იღებს focus-ის დაბრუნებას; რეალური WebKit/Firefox-mac შემოწმება SAFARI-CHECKS/FIREFOX-CHECKS-შია.
+diff --git a/docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md b/docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md
+index 3cd0cc1..224d28f 100644
+--- a/docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md
++++ b/docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md
+@@ -42,6 +42,6 @@
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- B-R488-PASSWORD-MODAL-DIALOG (Medium): "Change password" modal-ს dialog semantics აკლდა; გამოსწორდა round 493-ში (doc 318).
++- B-R488-PASSWORD-MODAL-DIALOG (Medium): "Change password" modal-ს dialog semantics აკლდა; გამოსწორდა round 494-ში (doc 318).
+ - გაზომილია მხოლოდ Chromium-ში. რეალურ ტელეფონზე (iOS Safari, Android Chrome: touch, ვირტუალური კლავიატურა) და WebKit/Firefox-ში შემოწმება Tech Lead-ის ხელით შესამოწმებელ სიაშია (TLM-R491-PHONE-NAME-EDITOR).
+ - მუდმივი ავტომატური guard: role-ით მოძებნილი Save/Cancel-ის viewport-ში ყოფნის Playwright ტესტი 375 px-ზე (signed-in stub-ით) შემდგომი დავალებაა; დღეს smoke config-ს signed-in stub არ აქვს.
+diff --git a/docs/implementation/2026/quarter-IV/318-password-dialog-semantics.md b/docs/implementation/2026/quarter-IV/318-password-dialog-semantics.md
+index 0b3ab0a..2dd49c3 100644
+--- a/docs/implementation/2026/quarter-IV/318-password-dialog-semantics.md
++++ b/docs/implementation/2026/quarter-IV/318-password-dialog-semantics.md
+@@ -1,7 +1,7 @@
+ # B-R488-PASSWORD-MODAL-DIALOG: Account-ის "Change Password" ფანჯარა ნამდვილი modal dialog-ია
+ 
+ **თარიღი:** 2026-11-13
+-**სტატუსი:** Completed (C round 493 PASS)
++**სტატუსი:** Completed (C round 494 PASS)
+ **შეცვლილი პროექტი:** Store (1 route, 1 ახალი და 1 შეცვლილი ტესტის ფაილი, ეს დოკუმენტი, doc 315-ისა და 317-ის ხაზები)
+ 
+ ## კონტექსტი
+@@ -19,7 +19,7 @@
+ 
+ ## მიდგომა
+ 
+-ცვლილება მხოლოდ `app/routes/account.tsx`-შია, `PasswordModal`-სა და `ProfileContent`-ის trigger-ზე. mouse-ით გახსნილი ფანჯარა ვიზუალურად HEAD-ს ემთხვევა (B-ის გაზომვა, ზღვარი 16/255: 0 px სხვაობა 1440×900, 1280×720 და 375×812-ზე; ზღვრის გარეშე 823–1158 px განსხვავდება მაქსიმუმ 8/255-ით). Focus ყოველთვის გადადის (APG: გახსნისას ფანჯრის პირველ ველზე, დახურვისას trigger-ზე), მაგრამ focus ring მხოლოდ keyboard-ით მუშაობისას ჩანს: keyboard-ით გახსნისას Current Password ველზე, Esc-ით დახურვისას trigger-ზე. Mouse-ით გახსნისას და mouse-ით Cancel-ის ან backdrop-ის click-ისას ring არ ჩანს (SABA-B-4: pointer-ის შემდეგ საიტზე ring იმალება).
++ცვლილება მხოლოდ `app/routes/account.tsx`-შია, `PasswordModal`-სა და `ProfileContent`-ის trigger-ზე. mouse-ით გახსნილი ფანჯარა, Current Password-ის text caret-ის გარდა, ვიზუალურად HEAD-ს ემთხვევა (B-ის გაზომვა, screenshot-ები caret-ის გარეშე; ზღვარი 16/255: 0 px სხვაობა 1440×900, 1280×720 და 375×812-ზე; ზღვრის გარეშე 823–1158 px განსხვავდება მაქსიმუმ 8/255-ით). Focus ყოველთვის გადადის (APG: გახსნისას ფანჯრის პირველ ველზე, დახურვისას trigger-ზე), მაგრამ focus ring მხოლოდ keyboard-ით მუშაობისას ჩანს: keyboard-ით გახსნისას Current Password ველზე, Esc-ით დახურვისას trigger-ზე. Mouse-ით გახსნისას და mouse-ით Cancel-ის ან backdrop-ის click-ისას ring არ ჩანს (SABA-B-4: pointer-ის შემდეგ საიტზე ring იმალება).
+ 
+ - **Semantics:** ფანჯრის კონტეინერს აქვს `role="dialog"`, `aria-modal="true"` და `aria-labelledby` სათაურზე "Change Password".
+ - **საწყისი focus:** Current Password ველი. ეფექტი `isPresent`-ზეა მიბმული, ამიტომ თუ ფანჯარა გაქრობის დროს ხელახლა გაიხსნა, `inert` იხსნება და focus ისევ Current Password-ზე გადადის. ასეთ დროს, სავარაუდოდ, იგივე instance ბრუნდება და აკრეფილი მნიშვნელობები, show/hide მდგომარეობა და შეცდომა რჩება (framer-motion-ის ქცევიდან დასკვნა; ტესტით ან browser-ით არ შემოწმებულა).
+@@ -33,7 +33,7 @@
+ 
+ - **საერთო `Modal` (`~/components/ui/Modal.tsx`):** ცვლის backdrop-ს (`bg-black/95`, `z-[1000]`, portal) და მასაც არ აქვს საწყისი focus, Tab-ის ჩაკეტვა და focus-ის დაბრუნება. ის დაცული საერთო ფაილია; ეს ცალკე საკითხია (shared-modal-no-focus-management).
+ - **`useInlineNameEditor` / ProfileNameEditor-ის გამოყოფა:** ARCH-CHECKPOINT-ACCOUNT-PROFILE-ზე root-ის პასუხი ჯერ არ არის, ამიტომ `passwordModalOpenRef` თავის ადგილზე რჩება.
+-- **Scroll lock და `inert` ფონზე ღია ფანჯრის დროს:** APG scroll lock-ს არ მოითხოვს. Pointer-ს ფონზე backdrop ბლოკავს, keyboard-ს Tab-ის ჩაკეტვა.
++- **Scroll lock და `inert` ფონზე ღია ფანჯრის დროს:** არ დაემატა (round 492-ის გადაწყვეტილება). Pointer-ს ფონზე backdrop ბლოკავს, გარდა ეკრანის ქვედა 40 px ზოლისა: backdrop viewport-ზე 40 px-ით მოკლეა (B-ის გაზომვა 1440×900, 1280×720 და 375×812-ზე), ამ ზოლში click გვერდის ფონს ხვდება და ფანჯარას არ ხურავს (B-R492-PASSWORD-BACKDROP-SHORT, deferred Low). Keyboard-ით Tab და Shift+Tab ფანჯარაში რჩება; Ctrl+K-ის გამონაკლისი TODO-შია.
+ 
+ ## არქიტექტურა
+ 
+@@ -60,7 +60,7 @@ stateDiagram-v2
+ ## პრობლემები და გადაწყვეტები
+ 
+ - **პრობლემა:** Esc-ით დახურვის შემდეგ ჯერ კიდევ მიმდინარე update-ის დასრულება `onClose()`-ს მეორედ იძახებდა და focus-ს trigger-ზე დააბრუნებდა, თუნდაც მომხმარებელი უკვე სხვაგან იყოს (C-R487-01-ის კლასი). → **გადაწყვეტა:** `closePasswordModal` `passwordModalOpenRef`-ს ამოწმებს და დახურულ ფანჯარაზე არაფერს აკეთებს (PD7).
+-- **პრობლემა:** B-ის პირველ sketch-ზე browser-მა აჩვენა, რომ გაქრობის ანიმაციის დროს trigger-იდან Tab ქრებად ფანჯარაში შედიოდა, ხოლო ანიმაციის ბოლოს focus `<body>`-ზე ეცემოდა. → **გადაწყვეტა:** `useIsPresent()` false-ზე კონტეინერი `inert` ხდება (PD10, browser P11, P12).
++- **პრობლემა:** `inert`-ის გარეშე (B-ის browser mutant O) გაქრობის ანიმაციის დროს trigger-იდან Tab ქრებად ფანჯრის Current Password-ზე შედიოდა. → **გადაწყვეტა:** `useIsPresent()` false-ზე კონტეინერი `inert` ხდება (PD10, browser P11 და P12: mutant O-ზე წითელი, sketch-ზე მწვანე; P13 მასთან ერთად წითლდება მხოლოდ P12-ის შედეგთან შედარების გამო).
+ - **პრობლემა:** A-R488-REVIEW-L1-EXIT-ANIMATION-WINDOW — დახურვისას ref მაშინვე იწმინდებოდა, focus კი ქრებად Cancel-ზე რჩებოდა. → **გადაწყვეტა:** დახურვა focus-ს მაშინვე trigger-ზე გადაიტანს.
+ 
+ ## ტესტირება
+@@ -82,14 +82,17 @@ stateDiagram-v2
+   - PD14 — გაქრობის დროს ხელახლა გახსნა: ფანჯარა `inert` აღარ არის და focus Current Password-ზეა;
+   - PD15 — focus-ის დროს disabled გამხდარი ღილაკიდან Tab პირველ ველზე გადადის.
+ - `account-profile-name.test.tsx`: PN10f / PN10g განახლდა, დანარჩენი PN უცვლელია.
+-- B-ის მუტანტები (20): თითოეული ცვლილების წაშლა მინიმუმ ერთ PD/PN ტესტს წითლად აქცევს.
+-- Browser (B-ის გაზომვა, Chromium, production build, 1440×900, 1280×720, 375×812, signed-in stub; C ამოწმებს ამ რაუნდში): ერთი dialog სახელით "Change Password", focus Current Password-ზე mouse-ით და keyboard-ით გახსნისას, 8 Tab ფანჯრის შიგნით რჩება, Esc/Cancel/backdrop focus-ს trigger-ზე აბრუნებს, Esc-ის შემდეგ ქრებად ფანჯარაში Tab არ შედის, გაქრობის დროს ხელახლა გახსნილი ფანჯარა `inert` არ არის და focus Current Password-ზეა, შეცდომა `role="alert"`-შია.
++- B-ის jsdom მუტანტები (20): ყველა წითელია, თითოეული მინიმუმ ერთ PD/PN ტესტს წითლად აქცევს. Trigger-ის `type="button"`-ს არც მუტანტი აქვს და არც ტესტი.
++- Browser (Chromium, production build, 1440×900, 1280×720, 375×812, signed-in stub; B-ის გაზომვა და C round 492-ის PW-CHECK PASS იგივე კოდზე, 18 row × 3 viewport): ერთი dialog სახელით "Change Password", focus Current Password-ზე mouse-ით და keyboard-ით გახსნისას, 8 Tab ფანჯრის შიგნით რჩება, Esc/Cancel/backdrop focus-ს trigger-ზე აბრუნებს, Esc-ის შემდეგ ქრებად ფანჯარაში Tab არ შედის, გაქრობის დროს ხელახლა გახსნილი ფანჯარა `inert` არ არის და focus Current Password-ზეა, შეცდომა `role="alert"`-შია.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+ - B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED (High, root) — `app/lib/auth.ts` `updatePassword` მიმდინარე პაროლს ამოწმებს და შემდეგ ყოველთვის აგდებს "Password change is not yet implemented"; საჭიროა backend endpoint და დაცული ფაილის ცვლილება.
+ - shared-modal-no-focus-management — საერთო `Modal`-ს არ აქვს საწყისი focus, Tab-ის ჩაკეტვა და focus-ის დაბრუნება.
+ - რეალური screen reader-ით შემოწმება (dialog-ის სახელი, alert) — Tech Lead-ის ხელით შემოწმება.
+-- Ctrl+K-ით CommandPalette ღია ფანჯრის ზემოთ იხსნება (HEAD-შიც ასეა); ახლა ერთი Esc ორივეს ხურავს — ცალკე Low.
++- Ctrl+K CommandPalette-ს ღია ფანჯრის უკან, დაბნელებული backdrop-ის ქვეშ ხსნის (HEAD-შიც ასეა; B-ის screenshot, 1440×900); ახლა ერთი Esc ორივეს ხურავს — ცალკე Low (TL-R492-L4-CTRLK-OVER-DIALOG).
+ - გაქრობის დროს ხელახლა გახსნისას აკრეფილი პაროლები და show/hide მდგომარეობა, სავარაუდოდ, რჩება (დასკვნა, ტესტით არ შემოწმებულა) — Low.
++- Backdrop viewport-ზე 40 px-ით მოკლეა: ქვედა ზოლი არ ბნელდება და იქ click ფანჯარას არ ხურავს — B-R492-PASSWORD-BACKDROP-SHORT, deferred Low.
++- 375 px-ზე ფანჯარა ეკრანის ორივე კიდეს ეხება (გვერდითი დაშორება არ აქვს) — B-R492-PASSWORD-DIALOG-NO-MARGIN-NARROW, deferred Low.
++- "Update Password"-ზე click ღილაკს disabled ხდის; Chromium-ში focus მოთხოვნის დროს `<body>`-ზე ეცემა და შეცდომის შემდეგ იქ რჩება (შემდეგი Tab ფანჯარაში შედის) — B-R492-PASSWORD-SUBMIT-FOCUS-LOST, deferred Low.
+ - წინა გახსნის დაგვიანებული წარმატება შემდეგ გახსნილ ფანჯარას დახურავს — დღეს მიუღწევადია (`updatePassword` ყოველთვის აგდებს), Low; გამოსწორდეს backend-ის endpoint-თან ერთად.
