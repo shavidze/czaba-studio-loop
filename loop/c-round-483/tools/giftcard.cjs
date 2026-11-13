@@ -1,0 +1,5 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/@playwright/test');
+(async()=>{const b=await chromium.launch();const out={};for(const [w,h] of [[1440,900],[1280,720]]){const p=await b.newPage({viewport:{width:w,height:h}});
+await p.goto('http://127.0.0.1:5173/store',{waitUntil:'load'});await p.waitForTimeout(3000);
+out[w]=await p.evaluate(()=>{const img=[...document.images].find(i=>i.alt==='Gift Card');if(!img)return {noImg:true,alts:[...document.images].map(i=>i.alt).slice(0,8)};const card=img.closest('.group');const f=s=>{const e=card.querySelector(s);if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,y:r.y+scrollY,w:r.width,h:r.height,txt:e.textContent.slice(0,40),vis:getComputedStyle(e).visibility,disp:getComputedStyle(e).display}};return {h3:f('h3'),p:f('p'),doc:[document.documentElement.scrollWidth,document.documentElement.scrollHeight]}});await p.screenshot({path:`out/giftcard-${w}.png`});await p.close();}
+console.log(JSON.stringify(out,null,1));await b.close();})();

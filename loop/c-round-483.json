@@ -1,0 +1,129 @@
+{
+ "taskStatus": "PASS",
+ "summary": "REGRESSION-2026-11-13 part 2 on HEAD 751e30e (A changed nothing, tree clean at start and end). All rows of task sections 3-6 that can run in the cloud ran in real Chromium (Playwright) at 1440x900 and 1280x720 on the dev server :5173 (+ scratch production builds for R-RVM(a), HEAP, export-trunc, fonts-prod, STEM-CACHE) with the standard mock on :5199. No Critical/High/Medium finding and no new bug. Open items are recorded as observations: C-R425-01 (Low, now confirmed by the 5/5 cold-dev reproduction with a re-optimise line), a phase-sensitive harness assert, and a probe-sensitivity row. Several first attempts were environment- or harness-invalid and were replaced (invalidRuns). A few record-only fields were not captured (notRun). Gate rows are not claimed.",
+ "passed": [
+  "G483-SCOPE start/end (K1 751e30e, K2 0, claims output equal; end differs only in K20 ports, allowed)",
+  "G483-AUTH both viewports (anonymous /studio-lab = demo workspace + badge, auth_user null; /studio/middle-east 'Sign in required', 0 audio[src]; token API 401/400, no token in any body; mock answers 403 to the fake Bearer, so it is a real 403, not blocked); repeated at the end of the round",
+  "R-RVM (a) production: 8/8 fresh-context loads at 1440 and 8/8 at 1280 show 'Sign in required', 0 audio[src], 0 errors",
+  "R-EVICT-PIN: EVICT stop() count 0, Add plays live, Undo removes; HEAP-RETAINERS-PROD live counts [2,5,16,16,16,16,16]",
+  "R-CROSS-LANE-FIBERS (behaviour fields equal round 425; dev-fiber rendered counts 12/44/1 equal round 425; mounted-lane count not recorded)",
+  "R-FOLLOW-OFFSET (record): Follow scrollLeft 1180 at 1440 (r425 1180, r389 1178), 1445 at 1280 (r425 1452, r389 1447); attribution fields not captured",
+  "R423-HELD-ENTER (ALL OK, 12 cells)",
+  "R423-MARKER-SEEK (both modes, 0 diffs vs round 423)",
+  "R423-PREVIEW-LIFECYCLE (418 ALL EQUAL, 421 ALL EQUAL)",
+  "R423-STEM-CACHE (production scratch build, 8 cells ALL EQUAL)",
+  "R423-PEAKS (6 files 0 diffs), R423-PEAKS-FALLBACK (normal/none/failing 0 diffs), R423-SCALE (frames, pin-blur-group 0 diffs; minzoom key-timing jitter only)",
+  "R423-STEM-WORKER (proxy throw summary equal; proxy short equal except audioSeek 2 vs 3 range requests, a variance round 414 documented; alt worker not run)",
+  "R423-METER (stop in 5-6 ms, track meters -inf after Stop, equal round 423)",
+  "R423-LANE (lane actions ok true, leaf probe 0 diffs), R423-LEAF-ACTIONS (leaf.cjs: only audio-clock jitter), R423-SCALE-EXPORT (0 diffs)",
+  "R423-VIDEO-DOCK (4 files 0 diffs), R423-SYNTH (copyMs jitter only), R423-PREVIEW-STREAM (r393/r395/r396 0 non-timing diffs), R423-DECODE-STATUS (r392 probe 0 diffs, b7-replay2 0 diffs per D-29z1486)",
+  "R425-WAV-3CLIP-LEN both viewports: sha256 37c56490... equal to round 389/390/425; RIFF PCM 24-bit 48 kHz stereo, 2,304,000 frames = 48.000 s, 99.98 % non-zero, peak 0.2967 (parsed from the exported file)",
+  "R425-VIDEO-SOUND (real tone fixture: onset 0.31 s, after move to 3.0 s onset 3.06-3.14 s, Undo back to 0.31 s; silence before the moved start)",
+  "R425-LANE-REBASE and R389-* rows (t389 batches 1+2, tools b1-b4: only clock/meter jitter, round-436 rename, From/To rename)",
+  "R340-* rows (waveform, shown readers, project end, overview meter, fades, group move, worker R2 after env fix, fonts, hint, journey WAV export, name after selector drift)",
+  "R340-FONTS dev + prod: 0 render-blocking third party, font bytes equal to round 425 for every common file name, 2 preloads",
+  "t258 RG-01..RG-24 and RG-T rows (196 PASS lines, 0 FAIL; RG-20-1440 rerun PASS), RS-4B/rs2a 0 log diffs",
+  "R301 rows (t301 b5-b7, t301x replays, c288 price probe 0 diffs; standard mock restarted, health 200); SABA-B-7 taper export measured -15.003 / -29.999 / -44.999 dB at 25/50/75 % (target -15/-30/-45 +-0.5)",
+  "R389-GROUP-MOVE (Move (2): 2 clips moved 3.000, Undo restores 0.000, both viewports)",
+  "R425-NOSHIFT-BOXES recorded (see lookups)"
+ ],
+ "failed": [],
+ "inconclusive": [
+  "R295-LOAF (c295 loafPass False: 0 LoAF entries at 1280, probe sensitivity)",
+  "c250 splitPlaying single-sample assert (resolved by the continuous probe, see observations)"
+ ],
+ "blocked": [
+  "G483-AUTH fake Bearer: not blocked (mock answers 403)",
+  "backend-only rows: none attempted (backend unavailable in cloud); SRW-21 stays deferred_user"
+ ],
+ "carried": [
+  "RR-PERF (c-round-482, 5 specs / 95 asserts)",
+  "PERF-LIB (c-round-482, 54 tests)",
+  "RG-SMOKE (c-round-482, 2 tests)",
+  "SA-19 awaiting_user (not run)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "RR-OSS"
+ ],
+ "notRun": [
+  "R423-STEM-WORKER alt-worker variants (only the proxy worker, throw+short, ran)",
+  "R-FOLLOW-OFFSET attribution fields (clientWidth, playhead x, lane-header width)",
+  "R-CROSS-LANE-FIBERS mounted-lane count at the record moment",
+  "R425-RP301/RP-BUILT/POSCTL/ESC-DRAG parked rows: run through the chain, record only, not separately analysed",
+  "R389-style per-row sha of the 1440 3-clip WAV vs c-round-389/export-det.json was compared (equal) but R425-RVM-FRESH is replaced by R-RVM as ruled"
+ ],
+ "bugs": [],
+ "observations": [
+  "C-R425-01 stays Low (D-29z1488 confirmed): R-RVM (b), 5 cold dev starts, each on a fresh git archive HEAD scratch copy with its own empty cacheDir and port 5201-5205: /studio/middle-east first load showed an empty body with 'Invalid hook call' in 5/5. Each Vite log has 'new dependencies optimized: pako, @microsoft/signalr, firebase/app, firebase/auth, wavesurfer.js' then 'optimized dependencies changed. reloading' (evidence rvm-cold/vite-deps-*.txt). The production build is clean 16/16 (8 per viewport). No Medium.",
+  "c250 splitPlaying single-sample assert (rms > 0.0005 at one instant) is phase-sensitive: the demo music is a pulse train (peaks 0.15 every 0.5 s, 0.0003 in the gaps). It read False in the first c250 run and in the c250-series run at both viewports, then True in a quiet rerun. A continuous 40 ms sampling probe (c250-split.cjs splitPlayingMax, 115 samples) shows audio continues after Split during playback: pre-split max 0.143, post-split max 0.154, 69 of 75 post-split samples above 0.0005, playhead advances 7.53 -> 10.63; no-split control max 0.151. Not a product bug; the assert design is a harness weakness for B (suggest a max over a window).",
+  "c295 LoAF probe: loafPass False because the 1280 'measured' run saw 0 long-animation-frame entries (probe requires >=1); this is probe sensitivity, not a product failure. Marked inconclusive.",
+  "Order deviation: dev rows ran before production rows (task section 7). The r392 probe once ran while batch423b's scratch production build/probe was starting (CPU overlap); r392 is functional, not timed.",
+  "R-DEV-WARMUP deviation: the warm-up loaded /studio-lab but did NOT do an MP3 export before the timed rows, and the Vite deps directory mtime changed at 01:58:25 mid-chain (during t389 batch 1). Rows in that window (faders, settings) compared with 0 diffs, so they were not rerun; the MP3 export row ran later (mp3ready, 'MP3 created: 01:41.352, 48 kHz stereo')."
+ ],
+ "invalidRuns": [
+  "warmup first attempt crashed (cold compile); second attempt ok",
+  "g483-auth first attempt timed out at 60 s on /studio/middle-east (cold dev compile); replacement PASS",
+  "t389 batch2 cache1440/cache1280 rc=124 (wrong base arg, known); rerun in chain3 with the right base -> cache-*.json equal except etag/mtime/OPFS listing order",
+  "tools batch4 mp3 row (c218-mp3 waits for a ready state that is gone: HARNESS-DRIFT D-29z1485); rerun with c218-mp3-ready.cjs PASS",
+  "R340-NAME first run: main.cjs waited for a .text-glow span in the home 'CZABA Studio' heading; rounds 468-470 removed the span on purpose; selector adapted, rerun PASS (only glow None vs Studio plus checkout button widths 208/217 etc. differ)",
+  "R340-WORKER-R2 first run: environment lacked R2_STRICT=1 and R2_SWAP=1 (the round-425 shell had them), so 50-73 strict/swap diffs; rerun with both set: 3 files 0 diffs",
+  "chain3 RG-20-1440 rerun used rows9.cjs (row not defined there: 'rows[ROW] is not a function', inherited from the round-425 chain); rerun via run.sh rows6.cjs RG-20 1440 PASS (all 5 checks)",
+  "leaf.cjs first run wrote ../out/leaf.json from the wrong cwd (ENOENT); rerun from s423/ ok"
+ ],
+ "lookups": [
+  "Detail label: 'Source offset' -> 'Clip origin' (round 436) in every compare",
+  "Detail label: 'From, s' / 'To, s' -> 'From' / 'To' (rename in rounds 426-481)",
+  "focus tree-1440/1280-rich: exit link border colour rgb(163,155,142) -> rgb(236,230,218), contrast 7.06 -> 15.62 (STUDIO-VIS-10 CZABA link text-muted -> text-foreground); detail-start input ring pixels changed 3041 -> 2201 (spin chrome hidden, STUDIO-VIS-1)",
+  "s186 Store offers box positions, s187 progress bar background (calc() form), checkout button widths 208/259/194 -> 217/277/202, my-orders link width 130 -> 137: Store restyle and My Orders (rounds 446-481, 481); not attributed to a single round per box",
+  "R425-NOSHIFT-BOXES (record only): boxes-1440 21 diff lines, boxes-1280 25 (AuthModal after empty submit, e.g. [1][4] 76 -> 80, [2][2] 156 -> 160): Store restyle (rounds 446-481); not attributed per box",
+  "Fonts: inter-latin.woff2 and playfair-display-latin.woff2 are no longer requested (round 473); common files have equal bytes",
+  "R340-NAME: home heading no longer has .text-glow (rounds 468-470)",
+  "r250 blink samples: animation phase jitter; s188 console: vite/React DevTools lines absent because the server was already warm",
+  "playback timing/meter jitter (clock +-0.1 s, meter +-0.3 dB), Event Timing quantisation (16/24 ms), LoAF counts: record only",
+  "vsound / cont-1 / cont-30: 'contiguous' flags read True where round 425 read False (splice-continuity probe), spliceMaxAtSamples differ; the probe is phase-sensitive, no regression indicated; posctl is a parked row (record only)",
+  "rows-n-1440x900.json now holds BG/EXPORT_norange/EXPORT_project/EXPORT_range/MARQUEE/final keys the oracle did not (extra rows, no diff on shared keys)",
+  "export-trunc / heap: request order and AudioBuffer heap node ids differ (ids only)"
+ ],
+ "browserVerified": false,
+ "realVerified": false,
+ "envStatus": {
+  "checkedUtc": "2026-11-13T01:45:01.5767419Z",
+  "round": 483,
+  "attempt": 1,
+  "store": 200
+ },
+ "stopSignal": null,
+ "progressFile": "c-round-483/progress.json",
+ "regressionPart": "part 2 of REGRESSION-2026-11-13 complete for the rows above; regression-last.json is for B to update at 483 -> 484 planning",
+ "manifestPaths": 1393,
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": "per-row asserts of tasks 423/425: compare scripts ALL OK/ALL EQUAL counts; WAV 24-bit/48k/48.000 s/sha; taper +-0.5 dB; R-RVM 8/8 Sign in required; HEAP [2,5,16x5]; EVICT stop()=0; auth 401/400/403 without token",
+ "mutantsRecorded": "none (regression round)",
+ "mutantRedOnSketch": null,
+ "mutantRedOnSketchReason": "regression round, no sketch",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "RR-OSS"
+ ],
+ "gateChecksRunOnSketch": "not claimed (root gate)",
+ "chainHeadGateRunGreen": "not claimed (root gate)",
+ "affectedChecksNamed": [
+  "round-423 rows",
+  "round-425 rows",
+  "carry_to_next_regression_d29z1490 carries 1-6",
+  "G483-AUTH"
+ ],
+ "affectedChecksRunOnSketch": "all run on HEAD 751e30e dev server :5173 (+ scratch production builds); no sketch in a regression round",
+ "browserVerifiedReason": "false by the strict rule: three browser sub-rows that could run here were not run - R-FOLLOW-OFFSET attribution fields, R-CROSS-LANE-FIBERS mounted-lane count, and the R423-STEM-WORKER alt-worker variants. Every other row ran in the real browser (see passed). B should re-plan only those three record-only pieces; no failure or finding is attached to them."
+}
