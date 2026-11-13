@@ -1,14 +1,14 @@
-# Active loop summary (2026-11-13T13:11:23.775Z)
+# Active loop summary (2026-11-13T14:10:01.407Z)
 
-- backlog.json 3489 KB -> active view 305 KB
-- status: G_ROOT_GATE round 489
-- servers: `{"checkedUtc":"2026-11-13T12:50:54.6604906Z","round":489,"attempt":1,"store":200}`
-- last publication: 73f994dd3e4cd8c311374eabeb6cdfad8df198c5 (rounds 487-488)
-- last root gate: round 489 skipped - C taskStatus FAIL
+- backlog.json 3488 KB -> active view 305 KB
+- status: G_ROOT_GATE round 490
+- servers: `{"checkedUtc":"2026-11-13T13:49:34.4444958Z","round":490,"attempt":1,"store":200}`
+- last publication: 53ff2494ce356a7a92c5e011131bab2c44486fbe (rounds 489-490)
+- last root gate: round 490 published - commit 53ff2494ce356a7a92c5e011131bab2c44486fbe pushed
 
 ## Current items: -
 
-## Open findings: 989 (21 Critical/High/Medium)
+## Open findings: 987 (19 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / tracked by task SAFARI-CHECKS (D-29z1705) | listed in the Safari list (user-review/questions-retro-465.md Q2, D-29z1638); does not block | environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the c …[see backlog.json] / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
@@ -25,9 +25,7 @@
 - **FIREFOX-CHECKS** / medium / open_root (D-29z1707; does not block): blocked (D-29z1705): needs ROOT-REQ-PLAYWRIGHT-FIREFOX; C runs all five in one round once Firefox is installed; questions-retro-480.md Q3 / Firefox halves of five manual checks, opened as one task by L46 after two RETROs without an answer
 - **SAFARI-CHECKS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Saba on macOS Safari; questions-retro-480.md Q4 / Safari halves of the manual list, opened as one task by L46
 - **HIREUS-EMAIL-CLIENTS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Brevo and a test send to Gmail/Outlook/Apple Mail (Saba); questions-retro-480.md Q4 / Hire-Us internal e-mail in real clients, opened as a task by L46
-- **SABA-B-17-ENTRANCE-3-4S** / medium / dispatched (D-29z1743): round 489 (current-task.md; sketch b-round-488/sketch-489.patch.txt) | scheduled (D-29z1740): round 489 (after the 488 fix-up; REGRESSION first if planning is on/after 2026-11-16) | scheduled (D-29z1736): round 488 (after 487; REGRESSION first if planning is on/after 2026-11- …[see backlog.json] / Store entrance animation (SpotlightLoader) disappears too fast; on a first visit it must last at least 3-4 s
-- **B-R487-PROFILE-EDITOR-NARROW-OVERFLOW** / medium / scheduled (D-29z1740): round 490; note the round-488 sketch changes the editor row to '<div ref={nameEditorRef} className="flex items-center gap-3">' (round-487 claims K22 grep no longer matches) | scheduled (D-29z1736): round 489 / Account Profile name editor overflows at 375 px: Save/Cancel icon buttons are off-screen and cannot be clicked or tapped
-- **B-R488-PASSWORD-MODAL-DIALOG** / medium / scheduled (D-29z1739): round 491 (after 489 SABA-B-17 and 490 narrow overflow; REGRESSION first when due) / Account 'Change password' modal has no dialog semantics: no role=dialog/aria-modal, no initial focus, Esc does not close it, no focus return
-- **B-R489-ENTRANCE-SLOW-FIRST-VISIT-EXPIRED** / medium / dispatched (D-29z1743): fixed inside round 489 (SABA-B-17) / On a slow first visit (Fast 3G, or JS later than 1000 ms) the entrance never plays: ~1.3 s plain black, then the page (state expired); at 4G
-- **B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER** / medium / dispatched (D-29z1743): fixed inside round 489 (SABA-B-17) / A wheel gesture while the entrance cover is up scrolls the page underneath unseen (600 px at HEAD); the 3.5 s floor would make it more likel
+- **B-R487-PROFILE-EDITOR-NARROW-OVERFLOW** / medium / scheduled (D-29z1751): round 491 (after the 490 fix-up; REGRESSION first if planning is on/after 2026-11-16) | scheduled (D-29z1740): round 490; note the round-488 sketch changes the editor row to '<div ref={nameEditorRef} className="flex items-center gap-3">' (round-487 claims K22 grep no longer ma …[see backlog.json] / Account Profile name editor overflows at 375 px: Save/Cancel icon buttons are off-screen and cannot be clicked or tapped
+- **B-R488-PASSWORD-MODAL-DIALOG** / medium / scheduled (D-29z1751): round 492 | scheduled (D-29z1739): round 491 (after 489 SABA-B-17 and 490 narrow overflow; REGRESSION first when due) / Account 'Change password' modal has no dialog semantics: no role=dialog/aria-modal, no initial focus, Esc does not close it, no focus return
+- **A-R489-REVIEW-NONZOOM-CLASSIFY** / medium / dispatched (D-29z1747): fixed in round 490 sketch v4 (b-round-489/sketch-490-v3-to-v4.patch.txt): real WheelEvent/one-touch TouchEvent in dispatchScrollGesture; MA-MD (+ ME-MH from tech-lead F1/F1b; S3/E8e over both ctrl+wheel delta signs) red on B's scratch (b-round-489/mutants/mutants-summary.txt) / store-entrance-loader S1/S2/E8c/E8d dispatched a plain Event, so an over-broad zoom classifier (any wheel / one touch = zoom; any real wheel
 - ... and 968 Low/info (see backlog.json)

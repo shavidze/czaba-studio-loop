@@ -1,0 +1,18 @@
+# B round 490->491 checkpoint
+- archive tasks/round-490.md done (cmp)
+- before-copies saved
+- advisor consulted (orientation); baseline 53ff249
+- next: scratch /tmp/b491-scratch, HEAD probe
+- HEAD probe (dev :5173 and prod :5190) + sketch v1 (min-w-0 on both inputs) prod :5192: desktop equal, narrow fixed; DOM mutant MA red
+- v0 (flex-1/sm:/shrink-0) rejected: MB/MC survived (redundant tokens)
+- next: doc 317 in scratch, L23 grep, covering+full suite, tech-lead review, claims
+- tech-lead v1 9fd04bda APPROVE (Lows); v2 a3b6e637 docs-only delta APPROVE
+- full suite on v1 scratch 293/4294 rc0; delivered-tree build probe equal to v1 (probe/desk-eq.txt, mutants-sketch.txt)
+- checkpoint-request-entrance.md written; update-backlog.py written (not yet run)
+- next: sketch-review.md, claims-491.sh + outputs, current-task, feature-status, b-round-490.md, b-next.json, run update-backlog
+- backlog updated (update-backlog.done)
+- current-task.md written
+- feature-status updated
+- b-next.json, b-round-490.md written; server 5192 stopped
+- advisor final: fixes applied (C6 checker, K15, pre-rulings, b-next ids, harness fact, For root); claims rerun both trees; store clean 53ff249; :5173 200
+- PLANNING DONE

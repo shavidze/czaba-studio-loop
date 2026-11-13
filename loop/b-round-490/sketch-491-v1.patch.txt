@@ -1,0 +1,87 @@
+diff --git a/app/routes/account.tsx b/app/routes/account.tsx
+index e774f5e..4f69e0f 100644
+--- a/app/routes/account.tsx
++++ b/app/routes/account.tsx
+@@ -235,7 +235,7 @@ function ProfileContent() {
+               onKeyDown={handleNameKeyDown}
+               placeholder="First name"
+               aria-label="First name"
+-              className="bg-transparent text-foreground text-lg border-b border-brand/50 py-1 w-40"
++              className="min-w-0 bg-transparent text-foreground text-lg border-b border-brand/50 py-1 w-40"
+             />
+             <input
+               type="text"
+@@ -244,7 +244,7 @@ function ProfileContent() {
+               onKeyDown={handleNameKeyDown}
+               placeholder="Last name"
+               aria-label="Last name"
+-              className="bg-transparent text-foreground text-lg border-b border-brand/50 py-1 w-40"
++              className="min-w-0 bg-transparent text-foreground text-lg border-b border-brand/50 py-1 w-40"
+             />
+             <button
+               type="button"
+diff --git a/docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md b/docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md
+index a669843..4d92e09 100644
+--- a/docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md
++++ b/docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md
+@@ -112,7 +112,7 @@ flowchart TD
+ ## TODO / შემდეგი ნაბიჯები
+ 
+ - TODO: SIG-R487-REPEAT-SAFE-HOME — `preventRepeatedEnterKeyDown` Store-ისა და Studio-ს საერთო helper-ია, მაგრამ `app/components/arrangement/`-შია; მისი `app/lib`-ში გადატანა ცალკე B დავალებაა.
+-- TODO: B-R487-PROFILE-EDITOR-NARROW-OVERFLOW (Medium) — 375×812-ზე რედაქტორის row სვეტზე განიერია და ✓/✕ ეკრანს გარეთაა; დაგეგმილია round 489-ში.
++- B-R487-PROFILE-EDITOR-NARROW-OVERFLOW (Medium) — 375×812-ზე რედაქტორის row სვეტზე განიერი იყო და ✓/✕ ეკრანს გარეთ; გამოსწორდა round 491-ში (doc 317).
+ - რეალური profile update-ის შემოწმება .NET backend-ით (OWN-BACKEND), როცა backend ხელმისაწვდომი იქნება.
+ - TODO: B-R488-PASSWORD-MODAL-DIALOG (Medium) — `PasswordModal`-ს არ აქვს `role="dialog"`/`aria-modal`, საწყისი focus, Esc-ით დახურვა და focus-ის დაბრუნება; დაგეგმილია round 490-ის შემდეგ.
+ - TODO: B-R488-SAFARI-MENU-SETTLE-FOCUS (Low, `deferred_low_polish`) — Safari model-ში User/Toggle menu-ის focus-ის გარეშე გახსნა შენახვის დროს ჯერ კიდევ იღებს focus-ის დაბრუნებას; რეალური WebKit/Firefox-mac შემოწმება SAFARI-CHECKS/FIREFOX-CHECKS-შია.
+diff --git a/docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md b/docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md
+new file mode 100644
+index 0000000..0b1f5bc
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md
+@@ -0,0 +1,46 @@
++# B-R487-PROFILE-EDITOR-NARROW-OVERFLOW: Account Profile-ის სახელის რედაქტორი ვიწრო ეკრანზე ეტევა
++
++**თარიღი:** 2026-11-13
++**სტატუსი:** Completed (C round 491 PASS)
++**შეცვლილი პროექტი:** Store (1 route, ეს დოკუმენტი, doc 315-ის ერთი TODO ხაზი)
++
++## კონტექსტი
++
++`/account`-ზე "Full Name"-ის რედაქტორის row არის `flex` ორი `w-40` input-ით და ორი 32 px icon ღილაკით (Save name ✓, Cancel name edit ✕), `gap-3`-ით. მისი შიგთავსი 420 px-ია. 375×812-ზე სვეტი 343 px-ია, ამიტომ ✓ და ✕ ეკრანის მარჯვენა კიდის მიღმა იყო: mouse click და touch tap ვერ აღწევდა მათ, შენახვა მხოლოდ Enter-ით და გაუქმება მხოლოდ Esc-ით შეიძლებოდა. B-მ HEAD `53ff249`-ის production build-ზე 375, 360 და 320 px-ზე დაადასტურა: ✓-ზე click და tap 0 `PUT /api/auth/profile`-ს აგზავნიდა და რედაქტორი ღია რჩებოდა. 1440 და 1280 px-ზე პრობლემა არ იყო.
++
++მიზეზი: flex item-ის ნაგულისხმევი `min-width: auto`. Input-ისთვის ეს ავტომატური მინიმუმი `w-40`-ის 160 px-ია, ამიტომ `flex-shrink: 1`-ის მიუხედავად input-ები არ ვიწროვდებოდა და row სვეტიდან გადადიოდა.
++
++## მიდგომა
++
++ორივე input-ს ემატება `min-w-0`. `w-40` რჩება flex-basis-ად: სადაც ადგილი საკმარისია (≥ 420 px შიგთავსისთვის), ზომები უცვლელია. ვიწრო სვეტში ორივე input თანაბრად ვიწროვდება, ღილაკები კი 32×32-ად რჩება და row-ში ეტევა.
++
++განხილული და უარყოფილი ვარიანტები:
++- `flex-wrap`: ღილაკები ცალკე ხაზზე, input-ებისგან მოშორებით გადადიოდა და row-ის სიმაღლე იცვლებოდა.
++- სვეტად დაწყობა (`flex-col` ვიწრო ეკრანზე): მეტი layout ცვლილება ერთი მიზეზისთვის.
++- `min-w-0 flex-1 sm:w-40 sm:flex-none` input-ებზე და `shrink-0` ღილაკებზე: იგივე შედეგი, მაგრამ `flex-1`, `sm:*` და `shrink-0`-ის მოხსნა browser mutant-ში არაფერს ცვლიდა. ზედმეტი token-ები არ დავტოვეთ.
++
++## არქიტექტურა
++
++კომპონენტის სტრუქტურა, state, focus-ის წესები (round 487/488) და ტესტები უცვლელია. იცვლება მხოლოდ ორი `className`.
++
++## შეცვლილი ფაილები
++
++- `app/routes/account.tsx` — ორივე სახელის input-ს დაემატა `min-w-0`.
++- `docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md` — TODO ხაზი B-R487-PROFILE-EDITOR-NARROW-OVERFLOW-ზე ახლა ამ დოკუმენტზე მიუთითებს.
++- `docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md` — ეს დოკუმენტი.
++
++## პრობლემები და გადაწყვეტები
++
++- **Problem:** 375 px-ზე ✓/✕ ეკრანს გარეთ იყო და click/tap ვერ აღწევდა. **Solution:** `min-w-0` input-ებზე; input-ები 121.5 px-მდე ვიწროვდება (320 px-ზე 94 px-მდე), ღილაკები სვეტის მარჯვენა კიდემდე რჩება.
++- **Problem:** layout-ის ცვლილება jsdom-ში ვერ მოწმდება, ხოლო class-ის assert ტესტში აკრძალულია (styling-class selector). **Solution:** ეს გეომეტრიის ცვლილებაა და მისი მტკიცებულება browser row-ია: HEAD-ის build წითელია, sketch მწვანე, ხოლო DOM mutant `min-w-0`-ის მოხსნით ისევ წითლდება.
++
++## ტესტირება
++
++- Browser (production build, Chromium, signed-in stub): 1440×900 და 1280×720-ზე რედაქტორის ყველა box HEAD-ის ტოლია. 375×812, 360×780 და 320×640-ზე ✓ და ✕ viewport-შია, `elementFromPoint` თავად ღილაკს აბრუნებს, mouse click და touch tap ✓-ზე 1 PUT-ს აგზავნის და რედაქტორს ხურავს, ✕ რედაქტორს ხურავს, გვერდს ჰორიზონტალური scroll არ აქვს.
++- Mutant: `min-w-0`-ის მოხსნა browser-ში ✓/✕-ს ისევ ეკრანს გარეთ გადააქვს (375 და 320 px).
++- Unit: `account-profile-name.test.tsx` (PN1–PN10h) უცვლელად მწვანეა; ახალი unit row არ ემატება, რადგან ცვლილება მხოლოდ layout-ია.
++
++## TODO / შემდეგი ნაბიჯები
++
++- B-R488-PASSWORD-MODAL-DIALOG (Medium): "Change password" modal-ს dialog semantics აკლია; დაგეგმილია შემდეგ რაუნდში.
++- რეალურ ტელეფონზე შემოწმება (touch, ვირტუალური კლავიატურა) Tech Lead-ის ხელით შესამოწმებელ სიაშია.

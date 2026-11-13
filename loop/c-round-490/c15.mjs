@@ -1,0 +1,35 @@
+import { createRequire } from 'node:module';
+import { writeFileSync, mkdirSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const out = process.argv[2]; mkdirSync(out, { recursive: true });
+const dev = 'http://127.0.0.1:5173', prod = 'http://127.0.0.1:5191'; const res = {};
+const b = await chromium.launch();
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const ctx = await b.newContext({ viewport: { width: w, height: h } }); const p = await ctx.newPage(); const r = {};
+  await p.goto(prod + '/account', { waitUntil: 'load' }).catch(() => {}); await p.waitForTimeout(3500);
+  const at = await p.locator('body').innerText();
+  r.account = { signInRequired: /Sign in required/i.test(at), fullName: /Full Name/i.test(at) };
+  await p.screenshot({ path: `${out}/account-${w}.png` });
+  await p.goto(prod + '/studio/middle-east', { waitUntil: 'load' }).catch(() => {}); await p.waitForTimeout(3500);
+  r.purchased = { signInRequired: /Sign in required/i.test(await p.locator('body').innerText()), audioSrc: await p.locator('audio[src]').count() };
+  await p.screenshot({ path: `${out}/purchased-${w}.png` });
+  await p.goto(dev + '/studio-lab', { waitUntil: 'networkidle' }).catch(() => {});
+  r.authUser = await p.evaluate(() => localStorage.getItem('auth_user'));
+  r.ready = await p.getByText('Demo collection ready').first().waitFor({ timeout: 30000 }).then(() => true).catch(() => false);
+  await p.screenshot({ path: `${out}/lab-ready-${w}.png` });
+  const pos = () => p.locator('[data-testid="arrangement-position"]').first().innerText().catch(() => 'n/a');
+  const item = p.locator('[role="option"],[role="treeitem"],li[tabindex]').first();
+  await item.focus().catch(() => {}); await p.keyboard.press('Enter'); await p.waitForTimeout(1000);
+  r.clips = await p.locator('[data-testid="arrangement-clip-waveform"]').count();
+  r.pos0 = await pos(); await p.screenshot({ path: `${out}/lab-clip-${w}.png` });
+  r.transportText0 = await p.locator('[data-testid="arrangement-playback-state"]').first().innerText().catch(() => 'n/a');
+  await p.keyboard.press('Space'); await p.waitForTimeout(1500);
+  r.posPlaying = await pos(); r.transportPlaying = await p.locator('[data-testid="arrangement-playback-state"]').first().innerText().catch(() => 'n/a');
+  await p.screenshot({ path: `${out}/lab-playing-${w}.png` });
+  await p.keyboard.press('Space'); await p.waitForTimeout(600);
+  r.posStopped = await pos(); r.transportStopped = await p.locator('[data-testid="arrangement-playback-state"]').first().innerText().catch(() => 'n/a');
+  await p.screenshot({ path: `${out}/lab-stopped-${w}.png` });
+  res[`${w}x${h}`] = r; await ctx.close();
+}
+await b.close(); writeFileSync(out + '/c15.json', JSON.stringify(res, null, 1)); console.log(JSON.stringify(res, null, 1));

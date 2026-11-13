@@ -1,0 +1,10 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); const p = await ctx.newPage();
+await p.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'networkidle' }); await p.getByText('Demo collection ready').first().waitFor({timeout:30000});
+const item = p.locator('[role="option"],[role="treeitem"],li[tabindex]').first(); await item.focus(); await p.keyboard.press('Enter'); await p.waitForTimeout(800);
+console.log(await p.evaluate(() => ({ clips: [...document.querySelectorAll('[data-testid]')].map(e=>e.dataset.testid).filter(t=>/clip|play|transport|position/i.test(t)).slice(0,40), playBtn: [...document.querySelectorAll('button')].map(b=>b.getAttribute('aria-label')||b.innerText).filter(t=>/play|stop|pause/i.test(t)) })));
+await p.keyboard.press('Space'); await p.waitForTimeout(1200);
+console.log(await p.evaluate(() => ({ playBtn: [...document.querySelectorAll('button')].map(b=>[b.getAttribute('aria-label')||b.innerText,b.getAttribute('aria-pressed')]).filter(t=>/play|stop|pause/i.test(t[0])), status: [...document.querySelectorAll('[role=status],[aria-live]')].map(e=>e.innerText.slice(0,100)) })));
+await b.close();

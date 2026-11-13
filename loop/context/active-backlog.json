@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-13T13:11:23.775Z",
-  "current_task": "Round 489: SABA-B-17-ENTRANCE-3-4S - first-visit entrance lasts >= 3.5 s from its first painted frame (cap 5 s), slower pacing, 500 ms overlay exit, takeover window 2 s for slow first visits, wheel/touchmove skip without scrolling under the cover; baseline 73f994d (current-task.md, sketch b-round-488/sketch-489.patch.txt)",
+  "_generatedUtc": "2026-11-13T14:10:01.407Z",
+  "current_task": "Round 490: SABA-B-17 fix-up - entrance tests dispatch real WheelEvent/one-touch TouchEvent (A-R489-REVIEW-NONZOOM-CLASSIFY) and a positive-delta ctrl+wheel zoom fixture; 28 mutants red; components byte-equal to v3; C re-verifies the entrance in the browser + studio-lab playback; baseline 73f994d + v3 (current-task.md, delta b-round-489/sketch-490-v3-to-v4.patch.txt)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6900,20 +6900,10 @@
       "added": "2026-11-12 B round 479 -> 480 planning (RETRO 480)"
     },
     {
-      "id": "SABA-B-17-ENTRANCE-3-4S",
-      "severity": "medium",
-      "origin": "Saba 2026-11-13 (policy section 'SpotlightLoader too fast')",
-      "status": "dispatched (D-29z1743): round 489 (current-task.md; sketch b-round-488/sketch-489.patch.txt) | scheduled (D-29z1740): round 489 (after the 488 fix-up; REGRESSION first if planning is on/after 2026-11-16) | scheduled (D-29z1736): round 488 (after 487; REGRESSION first if planning is on/after 2026-11- …[see backlog.json]",
-      "title": "Store entrance animation (SpotlightLoader) disappears too fast; on a first visit it must last at least 3-4 s",
-      "evidence": "agent-workflow.md 'Saba feedback, 2026-11-13'; EntranceCover.tsx ENTRANCE_MIN_TOTAL_MS 1450, ENTRANCE_MAX_TOTAL_MS 1900 (claims-487 K23); SABA-B-13 (archived) delivered 1450-1900 ms",
-      "added": "2026-11-13 B round 486 -> 487 planning",
-      "note": "supersedes SABA-B-13's 1.2-1.5 s example; needs production-build first-frame probe (L18), Why-we-missed-it section and a lesson at its planning"
-    },
-    {
       "id": "B-R487-PROFILE-EDITOR-NARROW-OVERFLOW",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "scheduled (D-29z1740): round 490; note the round-488 sketch changes the editor row to '<div ref={nameEditorRef} className=\"flex items-center gap-3\">' (round-487 claims K22 grep no longer matches) | scheduled (D-29z1736): round 489",
+      "status": "scheduled (D-29z1751): round 491 (after the 490 fix-up; REGRESSION first if planning is on/after 2026-11-16) | scheduled (D-29z1740): round 490; note the round-488 sketch changes the editor row to '<div ref={nameEditorRef} className=\"flex items-center gap-3\">' (round-487 claims K22 grep no longer ma …[see backlog.json]",
       "title": "Account Profile name editor overflows at 375 px: Save/Cancel icon buttons are off-screen and cannot be clicked or tapped",
       "evidence": "b-round-486/probe/head-named.json 375x812: afterClick.name.textBox width 420 in a 343 px column; afterMouseSave puts 0 / editing true; afterMouseCancel editing true (sketch v3 equal: probe/v3/sketch-named.json)",
       "repro": "375x812, signed-in stub: open the name editor; the check and X buttons sit beyond the right edge",
@@ -6923,30 +6913,12 @@
       "id": "B-R488-PASSWORD-MODAL-DIALOG",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "scheduled (D-29z1739): round 491 (after 489 SABA-B-17 and 490 narrow overflow; REGRESSION first when due)",
+      "status": "scheduled (D-29z1751): round 492 | scheduled (D-29z1739): round 491 (after 489 SABA-B-17 and 490 narrow overflow; REGRESSION first when due)",
       "title": "Account 'Change password' modal has no dialog semantics: no role=dialog/aria-modal, no initial focus, Esc does not close it, no focus return to the trigger",
       "evidence": "b-round-487/probe/overlays-sketch.json password-modal-keys (1440/1280): dialogs [], afterOpen focus stays on the link, Esc leaves the modal open; tech-lead delta review Low 1 (b-round-487/sketch-review.md)",
       "repro": "signed-in stub, /account: click 'Click to change password'; inspect the aria tree (no dialog), press Esc (modal stays)",
       "note": "reference: WAI-ARIA APG Dialog (Modal) pattern; the fix touches function PasswordModal in app/routes/account.tsx only; must keep C-R487-01's passwordModalOpenRef in sync",
       "added": "2026-11-13 B round 487 -> 488 planning"
-    },
-    {
-      "id": "B-R489-ENTRANCE-SLOW-FIRST-VISIT-EXPIRED",
-      "severity": "medium",
-      "origin": "pre-existing",
-      "status": "dispatched (D-29z1743): fixed inside round 489 (SABA-B-17)",
-      "title": "On a slow first visit (Fast 3G, or JS later than 1000 ms) the entrance never plays: ~1.3 s plain black, then the page (state expired); at 4G + 4x CPU the tagline is never fully shown",
-      "evidence": "b-round-488/probe/head/f-1440-cpu1-net3g.json, f-1440-cpu1-delayjs.json, f-1440-cpu4-net4g.json",
-      "added": "2026-11-13 B round 488 -> 489 planning"
-    },
-    {
-      "id": "B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER",
-      "severity": "medium",
-      "origin": "pre-existing",
-      "status": "dispatched (D-29z1743): fixed inside round 489 (SABA-B-17)",
-      "title": "A wheel gesture while the entrance cover is up scrolls the page underneath unseen (600 px at HEAD); the 3.5 s floor would make it more likely",
-      "evidence": "b-round-488/probe/head/f-1440-cpu1-wheel.json scrollY 600",
-      "added": "2026-11-13 B round 488 -> 489 planning"
     },
     {
       "id": "SABA-Q-ENTRANCE-SCROLL-SKIP",
@@ -6957,17 +6929,21 @@
       "id": "SABA-Q-ENTRANCE-SLOW-WAIT",
       "status": "awaiting_user (D-29z1743); non-blocking, default applied",
       "title": ""
+    },
+    {
+      "id": "A-R489-REVIEW-NONZOOM-CLASSIFY",
+      "severity": "medium",
+      "origin": "A (code-reviewer)",
+      "status": "dispatched (D-29z1747): fixed in round 490 sketch v4 (b-round-489/sketch-490-v3-to-v4.patch.txt): real WheelEvent/one-touch TouchEvent in dispatchScrollGesture; MA-MD (+ ME-MH from tech-lead F1/F1b; S3/E8e over both ctrl+wheel delta signs) red on B's scratch (b-round-489/mutants/mutants-summary.txt)",
+      "title": "store-entrance-loader S1/S2/E8c/E8d dispatched a plain Event, so an over-broad zoom classifier (any wheel / one touch = zoom; any real wheel unblocked) stayed green",
+      "evidence": "a-round-489/review-mutants.log (MA-MD 61/61 green); c-round-489.json bug C-R489-A-STOP-NONZOOM-TEST-GAP",
+      "confirmedBy": [
+        "C-R489-A-STOP-NONZOOM-TEST-GAP (C round 489 reproduced MA, MB)"
+      ],
+      "added": "2026-11-13 B round 489 -> 490 planning"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 480,
-      "task": "current-task.md",
-      "decision": "D-29z1706",
-      "type": "RETRO 480 (window 465-479)",
-      "status": "c_pass (D-29z1708): C PASS 13 rows, browserVerified true; gate 480 skipped (no real changes); HEAD bbb3193",
-      "note": "baseline HEAD bbb3193 clean; claims b-round-479/claims-480.sh; manifest b-round-479/r480-tree-sha256.txt (1391)"
-    },
     {
       "round": 481,
       "task": "current-task.md",
@@ -7037,8 +7013,16 @@
       "task": "current-task.md",
       "decision": "D-29z1743",
       "type": "SABA-B-17-ENTRANCE-3-4S (Medium, Saba) + B-R489-ENTRANCE-SLOW-FIRST-VISIT-EXPIRED + B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER",
+      "status": "C FAIL (gate 489 skipped)",
+      "note": "baseline HEAD 73f994d clean; sketch b-round-488/sketch-489.patch.txt; claims b-round-488/claims-489.sh | C FAIL: unruled Medium A-R489-REVIEW-NONZOOM-CLASSIFY; product rows green (c-round-489.json); ruled and fixed in round 490 (D-29z1747)"
+    },
+    {
+      "round": 490,
+      "task": "current-task.md",
+      "decision": "D-29z1747",
+      "type": "fix-up of 489: A-R489-REVIEW-NONZOOM-CLASSIFY (Medium) + C re-verification of SABA-B-17-ENTRANCE-3-4S, B-R489-ENTRANCE-SLOW-FIRST-VISIT-EXPIRED, B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER",
       "status": "dispatched",
-      "note": "baseline HEAD 73f994d clean; sketch b-round-488/sketch-489.patch.txt; claims b-round-488/claims-489.sh"
+      "note": "baseline HEAD 73f994d + round-489 v3 uncommitted (4 paths); delta b-round-489/sketch-490-v3-to-v4.patch.txt; claims b-round-489/claims-490.sh"
     }
   ],
   "other_keys": [

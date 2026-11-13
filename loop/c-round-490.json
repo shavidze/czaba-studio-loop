@@ -1,0 +1,111 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [
+  {
+   "id": "C-R490-INFO-CLICK50-HANDOFF-GAP",
+   "severity": "info",
+   "origin": "pre-existing",
+   "steps": [
+    "serve prod build of the tree on :5191",
+    "node frames489.mjs http://127.0.0.1:5191 1440 900 1 click50 (click 50 ms after data-start)",
+    "read gapsWhileCovered"
+   ],
+   "expected": "not a gated row in round 490 (C11 pins logoFullMs 0, skipped, remFc<=400, scrollY 0, url /)",
+   "actual": "gapsWhileCovered 1, then 0 and 2 on two re-runs (round 489: 0). One or two 16-30 ms samples at the cover-to-overlay hand-off on a skip click before hydration; blackFrames 0. Components are byte-equal to round 489",
+   "evidence": "c-round-490/tree-table.txt click50 row; c-round-490/click50-reruns.jsonl; not a finding against A (no component change)"
+  },
+  {
+   "id": "C-R490-INFO-EXIT-FADE-DOUBLE-WORDMARK",
+   "severity": "info",
+   "origin": "pre-existing",
+   "steps": [
+    "node record.mjs http://127.0.0.1:5191 rec saba-b-17-entrance-after-1440",
+    "open rec/...-3200.png"
+   ],
+   "expected": "manual feel check TLM-R489-SABA-ENTRANCE-FEEL",
+   "actual": "at 3.2 s the entrance wordmark and the hero's own CZABA headline are both visible mid-crossfade (two overlapping CZABA words). Design record only; the exit fade is round 489's accepted ruling",
+   "evidence": "c-round-490/rec/saba-b-17-entrance-after-1440-3200.png"
+  }
+ ],
+ "passed": [
+  "C1-SOURCE-SCOPE",
+  "C2-CLAIMS",
+  "C3-APPLY",
+  "C4-COVERING-94",
+  "C4-MUTANTS-30",
+  "C4b-REAL-EVENT-ROWS",
+  "C5-DURATION-1x",
+  "C5b-CLIENT-NAV-BACK",
+  "C6-DURATION-4x",
+  "C7-SLOW-FIRST-VISIT",
+  "C7b-LATE-JS-GIVES-UP",
+  "C8-SCROLL-UNDER-COVER",
+  "C8t-REAL-TOUCH-SWIPE",
+  "C9-NO-COVER",
+  "C10-NO-JS-FAILSAFE",
+  "C11-SKIP-BEFORE-HYDRATION",
+  "C11b-SKIP-DURING-LOGO",
+  "C12-ARRIVE",
+  "C13-RECORDING",
+  "C14-HYDRATION",
+  "C15-STUDIO-PURCHASE-PROTECTION",
+  "C16-DOC",
+  "C17-LESSON",
+  "C18-L57"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "biome",
+  "npm run verify"
+ ],
+ "manual": [
+  "TLM-R489-SABA-ENTRANCE-FEEL",
+  "TLM-R489-TOUCH-SWIPE (real phone)"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-13T13:49:34.4444958Z",
+  "round": 490,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": [
+  "c-round-490.md",
+  "c-round-490/tree-table.txt",
+  "c-round-490/tree-m/summary.jsonl",
+  "c-round-490/touch.txt",
+  "c-round-490/c15/c15.json",
+  "c-round-490/mutants/mutants-summary.txt",
+  "c-round-490/covering.log",
+  "c-round-490/rec/",
+  "c-round-490/click50-reruns.jsonl",
+  "c-round-490/claims-start.txt",
+  "c-round-490/webm.sha"
+ ],
+ "missingPaths": [],
+ "countMismatches": 0,
+ "claimCheckMinutes": 2,
+ "assertsSpecified": "94 covering tests; 30 mutants",
+ "mutantsRecorded": 30,
+ "mutantRedOnSketch": "b-round-489/mutants/mutants-summary.txt (30 lines, equal to C's run, 0 NONE)",
+ "gateChecksNamed": [
+  "npm run test:run",
+  "typecheck",
+  "build",
+  "biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": "B: precheck-full-490.log; A: typecheck, lint, biome, covering",
+ "chainHeadGateRunGreen": "gate 488 published 73f994d",
+ "affectedChecksNamed": [
+  "store-entrance-loader",
+  "store-live-teal",
+  "store-gradient-text",
+  "store-teal-sweep"
+ ],
+ "affectedChecksRunOnSketch": "4 files / 94 tests green (C, c-round-490/covering.log)"
+}

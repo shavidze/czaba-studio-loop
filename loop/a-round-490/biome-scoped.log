@@ -1,0 +1,55 @@
+app/components/loading/EntranceCover.tsx:59:9 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    57 │         media={isEntrancePending() ? 'all' : 'not all'}
+    58 │         suppressHydrationWarning
+  > 59 │         dangerouslySetInnerHTML={{ __html: ENTRANCE_COVER_CSS }}
+       │         ^^^^^^^^^^^^^^^^^^^^^^^
+    60 │       />
+    61 │       <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: ENTRANCE_BOOT_SCRIPT }} />
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+app/components/loading/EntranceCover.tsx:61:40 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    59 │         dangerouslySetInnerHTML={{ __html: ENTRANCE_COVER_CSS }}
+    60 │       />
+  > 61 │       <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: ENTRANCE_BOOT_SCRIPT }} />
+       │                                        ^^^^^^^^^^^^^^^^^^^^^^^
+    62 │     </>
+    63 │   );
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+app/components/loading/TrackListSkeleton.tsx:11:50 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+     9 │     <div className="space-y-2">
+    10 │       {Array.from({ length: count }).map((_, index) => (
+  > 11 │         <TrackRowSkeleton key={`track-skeleton-${index}`} />
+       │                                                  ^^^^^
+    12 │       ))}
+    13 │     </div>
+  
+  i This is the source of the key value.
+  
+     8 │   return (
+     9 │     <div className="space-y-2">
+  > 10 │       {Array.from({ length: count }).map((_, index) => (
+       │                                              ^^^^^
+    11 │         <TrackRowSkeleton key={`track-skeleton-${index}`} />
+    12 │       ))}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+Checked 9 files in 33ms. No fixes applied.
+Found 3 warnings.

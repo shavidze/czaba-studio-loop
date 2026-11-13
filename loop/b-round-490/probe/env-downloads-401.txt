@@ -1,0 +1,14 @@
+# B round 490 -> 491 planning, 2026-11-13. dbg.mjs (this folder) on dev :5173 with the loop mock API up on :5199,
+# auth_user stub with accessToken, only /api/auth/profile stubbed. Console output of the run (response log + Full Name probe):
+RESP 200 GET http://127.0.0.1:5173/app/services/api/client.ts
+RESP 200 GET http://localhost:5199/api/auth/profile
+RESP 200 GET http://localhost:5199/api/cart
+RESP 401 GET http://localhost:5199/api/downloads
+0 [ '"Full Name" BUTTON' ]
+RESP 401 POST http://localhost:5199/api/auth/refresh
+RESP 200 GET http://localhost:5199/api/cart
+500 []
+1500 []
+3000 []
+# Result: the 401 on /api/downloads triggers refresh -> 401 -> sign-out (screenshot shots/dbg.png shows the Sign in modal).
+# Fix in probes: route **/api/downloads** -> 200 {"success":true,"data":[]} (narrow-491.mjs, mut-491.mjs).
