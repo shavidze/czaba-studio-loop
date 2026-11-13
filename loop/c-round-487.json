@@ -1,0 +1,34 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {"checkedUtc": "2026-11-13T09:59:39.8903899Z", "round": 487, "attempt": 1, "store": 200},
+ "bugs": [
+  {
+   "id": "C-R487-01 (= A-R487-REVIEW-FOCUS-STEAL, confirmed)",
+   "severity": "medium",
+   "origin": "A code-reviewer, reproduced by C; introduced by this round's sketch",
+   "steps": [
+    "Signed-in stub, /account, PUT /api/auth/profile delayed 1500 ms (c-round-487/focus-steal-replay.mjs)",
+    "Click the name button, click Save name",
+    "During the delay click 'Click to change password' (modal opens)",
+    "Wait for the PUT to settle (status 200 or 500)"
+   ],
+   "expected": "Focus stays where the user moved it (modal or password link). It is not pulled to the name editor or button behind the open modal.",
+   "actual": "At 1440x900 and 1280x720 the modal stays open. After PUT 200 the active element is the name button 'Probe User'. After PUT 500 it is the First name input. 1 PUT each. HEAD had no focus call on save settle, so this is new in this round.",
+   "evidence": "c-round-487/focus-steal-replay.json; a-round-487/repro/focus-steal.json (same results). Fix proposal in a-round-487.md: move focus only if activeElement is null, body, or inside the editor row."
+  }
+ ],
+ "passed": [
+  "C-APPLY (K15 2 of 2, both files equal b-round-486/sketch-487)",
+  "C-SCOPE (claims at start and end identical; only the expected sketch deltas vs the planning output; K17 L58 OK)",
+  "PN-TAB-STUBBED", "PN-KEYS-STUBBED", "PN-FOCUS-STUBBED (1440/1280)", "PN-ESC-INFLIGHT-STUBBED",
+  "PN-HELD-STUBBED", "PN-HELD-FAST-STUBBED", "PN-KBSAVE-500-STUBBED", "PN-AX-STUBBED", "PN-RING",
+  "PN-PIXEL (18 pairs, 0 differing px below y=80)", "PN-BOX", "PN-PRESS-SELECT",
+  "HS1-SCAN", "G487-AUTH (account and /studio/middle-east show Sign in required, 0 audio[src]; /studio-lab demo, auth_user null)",
+  "PN-UNIT (partial: covering vitest only, 5 files / 74 tests pass)"
+ ],
+ "gate": ["full vitest, typecheck, build, Biome, npm run verify"],
+ "blocked": ["OWN-BACKEND: backend unavailable in cloud"],
+ "notRun": ["PN-UNIT mutants.py (14 mutants) not run by C; DOC: only l.4 and the 7 TEMPLATE headings checked, the doc has no '## Prompt' section (TEMPLATE has one; the task wording is ambiguous), other content not audited"]
+}

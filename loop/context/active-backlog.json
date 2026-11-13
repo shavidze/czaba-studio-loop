@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-13T08:28:45.738Z",
-  "current_task": "Round 486: B-R480-ORDER-CARD-KEYBOARD - My Orders card header becomes h3 > button (aria-expanded, aria-controls, hidden panel; APG Accordion), inset shared focus ring, 0 px visual change; tests OC1-OC4; doc 314; baseline 0341229 (current-task.md)",
+  "_generatedUtc": "2026-11-13T10:06:50.821Z",
+  "current_task": "Round 487: B-R486-PROFILE-NAME-KEYBOARD - Account Profile name <p onClick> becomes a native button (aria-labelledby 'Full Name <value>'), focus returns to it after Esc/Cancel/save, First name after failures, held Enter guarded by the shared helper (1 PUT, HEAD 6), labelled inputs and icon buttons; tests PN1-PN9; doc 315; baseline bb82154 (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6897,37 +6897,38 @@
       "added": "2026-11-12 B round 479 -> 480 planning (RETRO 480)"
     },
     {
-      "id": "B-R480-ORDER-CARD-KEYBOARD",
-      "severity": "medium",
-      "origin": "B pre-check",
-      "status": "dispatched (D-29z1729): round 486 on baseline 0341229 | scheduled (D-29z1726): round 486 (after CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1720): round 486 (after REGRESSION remainder 484 and CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1715): round 485 (after REGRESSION 482-483 and CLIENT-NAV-CONTRAC …[see backlog.json]",
-      "title": "My Orders: an order card opens only on a mouse click on a <div>; keyboard and screen-reader users cannot reach the order items, licence type and prices",
-      "evidence": "app/routes/account.orders.tsx l.59-62 (<div onClick> with cursor-pointer, no role/tabIndex/key handler); npx biome check app/routes/account.orders.tsx -> lint/a11y/useKeyWithClickEvents (b-round-480/sketch-biome.log); claims-481 K11",
-      "repro": "signed in with at least one order (stub /api/orders/my in Playwright): Tab through /account/orders; no stop on any order card; Enter/Space cannot expand it",
-      "added": "2026-11-12 B round 480 -> 481 planning",
-      "evidence_kind": "reproduced in Chromium at HEAD 0341229 by B (b-round-485/probe/head.json, 0 card Tab stops at 1440x900 and 1280x720, signed-in stub); source + Biome as before"
-    },
-    {
       "id": "B-R486-PROFILE-NAME-KEYBOARD",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "scheduled (D-29z1733): round 487 (after round 486; REGRESSION first if planning is on/after 2026-11-16)",
+      "status": "dispatched (D-29z1735): round 487 on baseline bb82154 | scheduled (D-29z1733): round 487 (after round 486; REGRESSION first if planning is on/after 2026-11-16)",
       "title": "Account Profile: the name is edited by clicking a <p onClick> ('Click to add name'); keyboard and screen-reader users cannot start editing their name",
       "evidence": "app/routes/account.tsx onClick={handleNameClick} on a <p> (b-round-485/mouse-only-sweep.txt: lint/a11y/useKeyWithClickEvents account.tsx:214); claims-486 K22",
       "repro": "signed in (localStorage.auth_user stub): Tab through /account; no stop on the name; Enter cannot open the editor",
       "added": "2026-11-13 B round 485 -> 486 planning",
-      "evidence_kind": "source + full-app Biome sweep; not yet reproduced in a browser (round-487 planning runs the Tab probe first)"
+      "evidence_kind": "reproduced in Chromium at HEAD bb82154 by B (b-round-486/probe/head-named.json: nameStop 0; Esc/X/save focus BODY; held Enter 6 PUTs; noname-head.json paragraph); source + Biome as before"
+    },
+    {
+      "id": "SABA-B-17-ENTRANCE-3-4S",
+      "severity": "medium",
+      "origin": "Saba 2026-11-13 (policy section 'SpotlightLoader too fast')",
+      "status": "scheduled (D-29z1736): round 488 (after 487; REGRESSION first if planning is on/after 2026-11-16)",
+      "title": "Store entrance animation (SpotlightLoader) disappears too fast; on a first visit it must last at least 3-4 s",
+      "evidence": "agent-workflow.md 'Saba feedback, 2026-11-13'; EntranceCover.tsx ENTRANCE_MIN_TOTAL_MS 1450, ENTRANCE_MAX_TOTAL_MS 1900 (claims-487 K23); SABA-B-13 (archived) delivered 1450-1900 ms",
+      "added": "2026-11-13 B round 486 -> 487 planning",
+      "note": "supersedes SABA-B-13's 1.2-1.5 s example; needs production-build first-frame probe (L18), Why-we-missed-it section and a lesson at its planning"
+    },
+    {
+      "id": "B-R487-PROFILE-EDITOR-NARROW-OVERFLOW",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "status": "scheduled (D-29z1736): round 489",
+      "title": "Account Profile name editor overflows at 375 px: Save/Cancel icon buttons are off-screen and cannot be clicked or tapped",
+      "evidence": "b-round-486/probe/head-named.json 375x812: afterClick.name.textBox width 420 in a 343 px column; afterMouseSave puts 0 / editing true; afterMouseCancel editing true (sketch v3 equal: probe/v3/sketch-named.json)",
+      "repro": "375x812, signed-in stub: open the name editor; the check and X buttons sit beyond the right edge",
+      "added": "2026-11-13 B round 486 -> 487 planning"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 477,
-      "task": "current-task.md",
-      "decision": "D-29z1690",
-      "type": "DPG-P0-3a re-dispatch (R1 ruled), full C1-C12 on preserved tree",
-      "status": "C PASS (c-round-477.json, browserVerified true); gate published 10791ac (D-29z1691)",
-      "note": "baseline HEAD edeba5a + preserved round-476 tree; claims b-round-476/claims-477.sh; allowed deltas b-round-476/claims-477-allowed-deltas.txt"
-    },
     {
       "round": 478,
       "task": "current-task.md",
@@ -6997,8 +6998,16 @@
       "task": "current-task.md",
       "decision": "D-29z1729",
       "type": "B-R480-ORDER-CARD-KEYBOARD (Medium fix)",
+      "status": "passed",
+      "note": "baseline HEAD 0341229 clean; claims b-round-485/claims-486.sh; frozen manifest b-round-485/r486-tree-sha256.txt (1397); sketch b-round-485/sketch-486.patch.txt; probes b-round-485/probe; sketch v2 sha 794821b0d13b4059 (D-29z1732); C round 486 PASS browserVerified true; gate published bb82154 (D-29z1734)"
+    },
+    {
+      "round": 487,
+      "task": "current-task.md",
+      "decision": "D-29z1735",
+      "type": "B-R486-PROFILE-NAME-KEYBOARD (Medium fix)",
       "status": "dispatched",
-      "note": "baseline HEAD 0341229 clean; claims b-round-485/claims-486.sh; frozen manifest b-round-485/r486-tree-sha256.txt (1397); sketch b-round-485/sketch-486.patch.txt; probes b-round-485/probe; sketch v2 sha 794821b0d13b4059 (D-29z1732)"
+      "note": "baseline HEAD bb82154 clean; claims b-round-486/claims-487.sh; frozen manifest b-round-486/r487-tree-sha256.txt (1399); sketch b-round-486/sketch-487.patch.txt v4 sha d8f8c4ffc0c0295c (D-29z1737); probes b-round-486/probe"
     }
   ],
   "other_keys": [

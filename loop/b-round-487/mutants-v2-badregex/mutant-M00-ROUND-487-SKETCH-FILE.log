@@ -1,0 +1,155 @@
+
+ RUN  v4.0.16 /tmp/b488-mut
+
+ ✓ app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN1 the name is a native button named by the Full Name label and its value 137ms
+ ✓ app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN1b with no name the button keeps the visible copy in its name 25ms
+ ✓ app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN2 opening the editor focuses a labelled First name field; controls have unique names 55ms
+ ✓ app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN3 Escape and Cancel close the editor and return focus to the name button 58ms
+ ✓ app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN4 Enter saves once and returns focus to the name button 33ms
+ ✓ app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN5 a repeated Enter and a second Enter during the save do not send another save 33ms
+ ✓ app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN6 an empty first name keeps the editor open and focuses First name 22ms
+ ✓ app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN7 a failed save keeps the editor open, re-enables it and focuses First name 34ms
+ ✓ app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN9 Escape during a pending save keeps the editor open; the save then returns focus to the name button 36ms
+ × app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10 focus moved off the editor during a save stays there when the save succeeds 33ms
+   → expected <button id=":r16:" …(3)></button> to be <button …(1)></button> // Object.is equality
+ × app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10b focus moved off the editor during a save stays there when the save fails 38ms
+   → expected <input type="text" …(4)></input> to be <button …(1)></button> // Object.is equality
+ ✓ app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10c a Save name click with focus on the body returns focus to the name button 32ms
+ ✓ app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10d a Save name click with focus on the body focuses First name when the save fails 30ms
+ × app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10e focus on a clicked account tab during a save stays on that tab after the save settles 36ms
+   → expected <button id=":r1m:" …(3)></button> to be <a data-discover="true" …(3)>…(1)</a> // Object.is equality
+ × app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10f an unfocused click that opens the password dialog during a save keeps focus off the editor when the save succeeds 64ms
+   → expected <button id=":r1q:" …(3)></button> not to be <button id=":r1q:" …(3)></button> // Object.is equality
+ × app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10g an unfocused click that opens the password dialog during a save keeps focus off First name when the save fails 41ms
+   → expected <input type="text" …(4)></input> not to be <input type="text" …(4)></input> // Object.is equality
+ ✓ app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10h after the password dialog is cancelled, a later save returns focus to the name button 57ms
+ ✓ app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN8 a repeated Enter on the name button is suppressed; a first Enter is not 9ms
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 13 passed (18)
+   Start at  10:28:45
+   Duration  1.80s (transform 223ms, setup 0ms, import 521ms, tests 773ms, environment 378ms)
+
+stderr | app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN1 the name is a native button named by the Full Name label and its value
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10 focus moved off the editor during a save stays there when the save succeeds
+AssertionError: expected <button id=":r16:" …(3)></button> to be <button …(1)></button> // Object.is equality
+
+- Expected
++ Received
+
+  <button
+-   class="text-brand/80 hover:text-brand underline underline-offset-4 text-sm transition-colors"
++   aria-labelledby=":r15: :r16:"
++   class="block w-full text-left text-foreground text-lg hover:text-brand active:transform-none! transition-colors"
++   id=":r16:"
++   type="button"
+  >
+-   Click to change password
++   Probe User
+  </button>
+
+ ❯ app/lib/__tests__/account-profile-name.test.tsx:215:36
+    213|     expect(spies.showToast).toHaveBeenCalledWith('Name updated', 'succ…
+    214|     expect(screen.queryByRole('textbox', { name: 'First name' })).toBe…
+    215|     expect(document.activeElement).toBe(passwordLink);
+       |                                    ^
+    216|   });
+    217| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10b focus moved off the editor during a save stays there when the save fails
+AssertionError: expected <input type="text" …(4)></input> to be <button …(1)></button> // Object.is equality
+
+- Expected
++ Received
+
+- <button
+-   class="text-brand/80 hover:text-brand underline underline-offset-4 text-sm transition-colors"
+- >
+-   Click to change password
+- </button>
++ <input
++   aria-label="First name"
++   class="bg-transparent text-foreground text-lg border-b border-brand/50 py-1 w-40"
++   placeholder="First name"
++   type="text"
++   value="Probe"
++ />
+
+ ❯ app/lib/__tests__/account-profile-name.test.tsx:235:36
+    233|     expect(screen.getByRole('textbox', { name: 'First name' })).toBeTr…
+    234|     expect(screen.getByRole('button', { name: 'Save name' }).hasAttrib…
+    235|     expect(document.activeElement).toBe(passwordLink);
+       |                                    ^
+    236|   });
+    237| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10e focus on a clicked account tab during a save stays on that tab after the save settles
+AssertionError: expected <button id=":r1m:" …(3)></button> to be <a data-discover="true" …(3)>…(1)</a> // Object.is equality
+
+- Expected
++ Received
+
+- <a
+-   aria-current="page"
+-   class="pb-3 text-sm font-medium transition-colors relative text-foreground"
+-   data-discover="true"
+-   href="/account/orders"
++ <button
++   aria-labelledby=":r1l: :r1m:"
++   class="block w-full text-left text-foreground text-lg hover:text-brand active:transform-none! transition-colors"
++   id=":r1m:"
++   type="button"
+  >
+-   Orders
+-   <div
+-     class="absolute bottom-0 left-0 right-0 h-0.5 bg-brand"
+-     style="opacity: 1;"
+-   />
+- </a>
++   Probe User
++ </button>
+
+ ❯ app/lib/__tests__/account-profile-name.test.tsx:292:36
+    290|     });
+    291|     expect(spies.updateProfile).toHaveBeenCalledTimes(1);
+    292|     expect(document.activeElement).toBe(ordersTab);
+       |                                    ^
+    293|   });
+    294| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10f an unfocused click that opens the password dialog during a save keeps focus off the editor when the save succeeds
+AssertionError: expected <button id=":r1q:" …(3)></button> not to be <button id=":r1q:" …(3)></button> // Object.is equality
+ ❯ app/lib/__tests__/account-profile-name.test.tsx:314:40
+    312|     expect(spies.updateProfile).toHaveBeenCalledTimes(1);
+    313|     expect(screen.queryByRole('textbox', { name: 'First name' })).toBe…
+    314|     expect(document.activeElement).not.toBe(nameButton());
+       |                                        ^
+    315|   });
+    316| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10g an unfocused click that opens the password dialog during a save keeps focus off First name when the save fails
+AssertionError: expected <input type="text" …(4)></input> not to be <input type="text" …(4)></input> // Object.is equality
+ ❯ app/lib/__tests__/account-profile-name.test.tsx:335:40
+    333|     });
+    334|     expect(spies.showToast).toHaveBeenCalledWith('Stub failure', 'erro…
+    335|     expect(document.activeElement).not.toBe(screen.getByRole('textbox'…
+       |                                        ^
+    336|   });
+    337| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
