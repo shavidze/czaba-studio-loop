@@ -1,0 +1,122 @@
+app/routes/account.orders.tsx:196:25 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    194 │           <div className="space-y-4">
+    195 │             {Array.from({ length: 3 }).map((_, i) => (
+  > 196 │               <div key={i} className="skeleton-shimmer h-32 rounded-lg" />
+        │                         ^
+    197 │             ))}
+    198 │           </div>
+  
+  i This is the source of the key value.
+  
+    193 │           </div>
+    194 │           <div className="space-y-4">
+  > 195 │             {Array.from({ length: 3 }).map((_, i) => (
+        │                                                ^
+    196 │               <div key={i} className="skeleton-shimmer h-32 rounded-lg" />
+    197 │             ))}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/routes/checkout.success.tsx:117:40 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    115 │               <SuccessRing />
+    116 │               {PARTICLES.map((p, i) => (
+  > 117 │                 <FloatingParticle key={i} {...p} />
+        │                                        ^
+    118 │               ))}
+    119 │             </div>
+  
+  i This is the source of the key value.
+  
+    114 │             <div className="relative mb-10 flex justify-center">
+    115 │               <SuccessRing />
+  > 116 │               {PARTICLES.map((p, i) => (
+        │                                  ^
+    117 │                 <FloatingParticle key={i} {...p} />
+    118 │               ))}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/routes/checkout.success.tsx:152:32 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    150 │                       {STEPS.map((step, index) => (
+    151 │                         <motion.li
+  > 152 │                           key={index}
+        │                                ^^^^^
+    153 │                           className="flex items-start gap-3"
+    154 │                           initial={{ opacity: 0, x: -10 }}
+  
+  i This is the source of the key value.
+  
+    148 │                     <h2 className="font-medium text-foreground mb-4">What happens next</h2>
+    149 │                     <ul className="text-muted space-y-3 text-sm">
+  > 150 │                       {STEPS.map((step, index) => (
+        │                                         ^^^^^
+    151 │                         <motion.li
+    152 │                           key={index}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/routes/faq.tsx:191:30 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    189 │       <div className="space-y-3">
+    190 │         {category.items.map((item, index) => (
+  > 191 │           <FAQAccordion key={index} item={item} />
+        │                              ^^^^^
+    192 │         ))}
+    193 │       </div>
+  
+  i This is the source of the key value.
+  
+    188 │       </h2>
+    189 │       <div className="space-y-3">
+  > 190 │         {category.items.map((item, index) => (
+        │                                    ^^^^^
+    191 │           <FAQAccordion key={index} item={item} />
+    192 │         ))}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/routes/faq.tsx:203:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    201 │   return (
+    202 │     <div className="border border-outline rounded-lg overflow-hidden">
+  > 203 │       <button
+        │       ^^^^^^^
+  > 204 │         onClick={() => setIsOpen(!isOpen)}
+  > 205 │         className="w-full flex items-center justify-between p-5 text-left bg-surface hover:bg-elevated transition-colors cursor-pointer"
+  > 206 │       >
+        │       ^
+    207 │         <span className="font-medium text-foreground pr-4">{item.question}</span>
+    208 │         <ChevronDown
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+Checked 6 files in 18ms. No fixes applied.
+Found 5 warnings.

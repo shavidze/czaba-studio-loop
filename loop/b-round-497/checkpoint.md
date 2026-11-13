@@ -1,0 +1,13 @@
+# B round 497 -> 498 planning checkpoint
+- [x] tasks/round-497.md archived (cp -n of round-497 current-task.md, 15,187 B)
+- [x] advisor consulted after orientation
+- [x] gate 497 review read (5 Lows, signal ButtonLink); user-review: no new answers
+- [x] inventory at 5d12c75 (scan-brand.py, scan-head.json 121/52, scan-mutant.txt, stage2-inventory.md, other-handrolled-count.txt)
+- [x] product-designer consult (consult-product-designer.md)
+- [x] scratch sketch v1 -> tech-lead APPROVE-WITH-CHANGES -> v3 -> delta APPROVE (sketch-review.md)
+- [x] biome/tsc rc 0, covering 9/120, full 296/4322 rc 0, build rc 0 (same CSS hash), mutants N1-N10 RED
+- [x] browser HEAD + sketch (measure/head.json, sketch.json)
+- [x] frozen manifests (r498-tree-sha256.txt 1402, pre/post sha)
+- [x] current-task.md written; claims planning + sketch outputs; L58 OK
+- [x] backlog v491, feature-status, b-round-497.md, b-next.json (questions file dropped: GATE497-L2 not reproduced)
+- [x] advisor closing check (D-29z1786 fixes applied; claims + L58 re-run OK)

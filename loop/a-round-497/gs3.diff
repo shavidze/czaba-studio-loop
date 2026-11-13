@@ -1,0 +1,100 @@
+diff --git a/app/lib/__tests__/store-glow-shadow.test.ts b/app/lib/__tests__/store-glow-shadow.test.ts
+index 0448d44..ef025e3 100644
+--- a/app/lib/__tests__/store-glow-shadow.test.ts
++++ b/app/lib/__tests__/store-glow-shadow.test.ts
+@@ -1,5 +1,6 @@
+ // @vitest-environment node
+ import { describe, expect, it } from 'vitest';
++import { type ButtonShape, buildButtonClassName } from '~/components/ui';
+ import {
+   ANY_STYLED_SOURCE_EXTENSIONS,
+   APP_ROOT,
+@@ -47,14 +48,20 @@ const RETIRED_UTILITY_ALLOW_LIST: StyleScanAllowList = {
+   },
+ };
+ 
+-const PRIMARY_BUTTON_SELECTORS: ReadonlyArray<string> = [
++const BUTTON_SHAPES: ReadonlyArray<ButtonShape> = ['default', 'pill'];
++
++const RETIRED_BUTTON_SELECTORS: ReadonlyArray<string> = [
+   '.btn-primary',
+   '.btn-primary:hover',
+   '.btn-primary:active',
++  '.button',
+   '.button-primary',
+   '.button-primary:hover',
+ ];
+ 
++const RETIRED_BUTTON_CLASS_IN_CSS = /\.(btn-primary|btn-secondary|button|button-primary)(?![\w-])/;
++const MIN_SCANNED_CSS = 3;
++
+ function countMatches(pattern: RegExp): (source: string) => number {
+   return (source) => (source.match(pattern) ?? []).length;
+ }
+@@ -81,31 +88,44 @@ describe('store glow shadows (STORE-2b-3b)', () => {
+     });
+   });
+ 
+-  it('GS3: the primary button rules carry no glow, no teal and no teal gradient', () => {
++  it('GS3: the retired CSS button rules are gone and the primary Button classes carry no glow, no teal and no gradient', () => {
+     const css = readApp(STORE_CSS_PATH);
+-    for (const selector of PRIMARY_BUTTON_SELECTORS) {
+-      const bodies = cssRuleBodies(css, selector);
+-      expect(bodies.length, selector).toBeGreaterThanOrEqual(1);
+-      for (const body of bodies) {
+-        expect(countZeroOffsetGlowHits(body), selector).toBe(0);
+-        expect(countTealHits(body), selector).toBe(0);
+-        expect(body, selector).not.toContain('--gradient-primary');
+-      }
++    for (const selector of RETIRED_BUTTON_SELECTORS) {
++      expect(cssRuleBodies(css, selector), selector).toEqual([]);
+     }
+-    expect(cssRuleBodies(css, '.button-primary').join('')).toContain(
+-      'color: var(--color-brand-foreground);',
+-    );
+-    expect(cssRuleBodies(css, '.button-primary').join('')).toContain(
+-      'background: var(--color-brand);',
+-    );
+-    for (const selector of PRIMARY_BUTTON_SELECTORS) {
+-      for (const body of cssRuleBodies(css, selector)) {
+-        expect(body, selector).not.toMatch(/gradient\(/);
+-      }
++    const cssFiles = listFiles(APP_ROOT, /\.css$/);
++    expect(cssFiles.length).toBeGreaterThanOrEqual(MIN_SCANNED_CSS);
++    expect(cssFiles).toContain(STORE_CSS_PATH);
++    expect(cssFiles).toContain('styles/base/utilities.css');
++    expect(cssFiles.filter((path) => RETIRED_BUTTON_CLASS_IN_CSS.test(readApp(path)))).toEqual([]);
++    for (const sample of [
++      '.btn-primary:focus-visible {}',
++      'a.button {}',
++      '.btn-primary::after {}',
++      '.btn-secondary{',
++      '.card .button-primary, x {}',
++    ]) {
++      expect(RETIRED_BUTTON_CLASS_IN_CSS.test(sample), sample).toBe(true);
++    }
++    for (const sample of [
++      '.btn-icon {}',
++      '.buttons {}',
++      'button:focus-visible {}',
++      '.my-button {}',
++    ]) {
++      expect(RETIRED_BUTTON_CLASS_IN_CSS.test(sample), sample).toBe(false);
++    }
++    for (const shape of BUTTON_SHAPES) {
++      const classes = buildButtonClassName({ variant: 'primary', shape });
++      expect(countZeroOffsetGlowHits(classes), shape).toBe(0);
++      expect(countTealHits(classes), shape).toBe(0);
++      expect(classes, shape).not.toMatch(/gradient|bg-linear|shadow-glow|teal|cyan/);
++      const tokens = classes.split(' ');
++      expect(tokens, shape).toContain('bg-brand');
++      expect(tokens, shape).toContain('text-background');
++      expect(tokens, shape).toContain('hover:bg-brand-hover');
++      expect(classes, shape).not.toMatch(/hover:opacity/);
+     }
+-    const hoverBodies = cssRuleBodies(css, '.btn-primary:hover');
+-    expect(hoverBodies.join('')).toContain('background: var(--color-brand-hover);');
+-    expect(hoverBodies.join('')).not.toContain('opacity');
+   });
+ 
+   it('GS4: the scan is non-vacuous and reads every granted file', () => {

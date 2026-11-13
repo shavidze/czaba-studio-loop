@@ -1,0 +1,63 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [
+  {
+   "id": "C497-HDR-HEIGHT-SIGNED-IN",
+   "severity": "low",
+   "origin": "pre-existing (B spec: C15's 'equals \u00b11px' criterion was written against a header that has always differed)",
+   "steps": [
+    "Playwright 1440x900 and 1280x720, lead-magnet dismissed",
+    "Load / signed out: header height 81 (Sign In 48 tall)",
+    "New context with localStorage.auth_user (no accessToken), load /: header height 75, user button 36 tall, no Sign In"
+   ],
+   "expected": "C15: signed-in header height equals signed-out \u00b11 px",
+   "actual": "81 vs 75 (\u03946 px) at both viewports; nav height 42 in both, no wrap. The 48px Sign In button was already 48 tall at HEAD (head.json), so the \u0394 is not caused by A's round; it is the same 6px shift as the deferred Low A-R496-CR-SIGNED-IN-SKELETON-SHIFT (skeleton h-12 \u2192 user button 36)",
+   "evidence": "c-round-497/extra.json signedIn/hdrOut, c-round-497/signedin-1440.png, signedin-1280.png"
+  }
+ ],
+ "passed": [
+  "C0-source-scope-start (13 paths, 4 frozen checks rc 0)",
+  "C1-rest (1440+1280, also 1023/1024/375: bg rgb(201,164,106), text rgb(14,13,12), r 9999px, 16/600, pad 12/24, boxes equal sketch.json \u00b11)",
+  "C2-hover (rgb(217,184,127), opacity 1; #2 text brass, no bg)",
+  "C3-focus (keyboard ring solid 1px brass/0.8 offset 2px equal HEAD; mouse press fv=false outline none)",
+  "C4-breakpoint (display none 1023/375, flex 1024; mobile menu Sign In 343x48 pill; desktop modal heading visible, Esc hides)",
+  "C5-nav (/, /store, /store, /; each a single <a> with 0 inner buttons; home nested a>button=14, pre-existing)",
+  "C6-404-pair (aligned, no wrap, nf-1440.png)",
+  "C7-journey (screenshots j1-j3; 0 console errors)",
+  "C8-skeleton-grep (2)",
+  "C9-grep (TOTAL 2, 0, 3)",
+  "C10-tests (4 files, 42/42; BC1b, CSS-wide GS3, BC3 closest, BC4 present)",
+  "C11-mutants (N1-N8 RED; M1-M8 RED)",
+  "C12-docs (DESIGN_SYSTEM Buttons section matches Button.tsx and barrel; hunks only at l.1062 and 1110-1193; doc 319 has 7 headings)",
+  "C13-claims (rc 0, stderr empty, no MISSING, diff vs B output only K23)",
+  "C14-source-scope-end (identical to start)"
+ ],
+ "blocked": [],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-13T20:36:51.6189196Z",
+  "round": 497,
+  "attempt": 1,
+  "store": 200
+ },
+ "gate": [
+  "full vitest, build, biome, npm run verify (not run by C)"
+ ],
+ "rowsNotPassed": [
+  "C15 signed-in header: criterion 'height equals signed-out \u00b11 px' NOT met (75 vs 81); recorded, user button box 36x36 at x=1292 (1440) / 1212 (1280); skeleton capture not attempted"
+ ],
+ "manifestPaths": 4,
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": 2,
+ "assertsSpecified": null,
+ "mutantsRecorded": 16,
+ "mutantRedOnSketch": 16,
+ "gateChecksNamed": null,
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null,
+ "evidence": "c-round-497.md, c-round-497/*.json|png|log"
+}

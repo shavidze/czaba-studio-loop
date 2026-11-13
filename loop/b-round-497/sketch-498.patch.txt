@@ -1,0 +1,270 @@
+diff --git a/app/lib/__tests__/store-button-cleanup-2.test.tsx b/app/lib/__tests__/store-button-cleanup-2.test.tsx
+new file mode 100644
+index 0000000..e82adb4
+--- /dev/null
++++ b/app/lib/__tests__/store-button-cleanup-2.test.tsx
+@@ -0,0 +1,129 @@
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { cleanup, render, screen } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { MemoryRouter } from 'react-router-dom';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { buildButtonClassName } from '~/components/ui';
++import OrdersPage from '~/routes/account.orders';
++import CheckoutCancel from '~/routes/checkout.cancel';
++import CheckoutSuccess from '~/routes/checkout.success';
++import FAQ from '~/routes/faq';
++import { apiClient } from '~/services/api/client';
++import { APP_ROOT } from './helpers/style-scan';
++
++vi.mock('~/hooks', () => ({
++  useAuth: () => ({ user: { id: 7, email: 'buyer@example.invalid', accessToken: 'token' } }),
++}));
++vi.mock('~/components/auth', () => ({
++  RequireAuth: ({ children }: { children: ReactNode }) => <>{children}</>,
++}));
++vi.mock('~/components/layout/Footer', () => ({
++  Footer: () => null,
++}));
++vi.mock('~/services/api/client', async (importOriginal) => {
++  const actual = await importOriginal<typeof import('~/services/api/client')>();
++  return {
++    ...actual,
++    apiClient: {
++      getMyOrders: vi.fn(),
++      setAccessToken: vi.fn(),
++    },
++  };
++});
++
++const PRIMARY_LG_PILL =
++  'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-6 py-3 text-base gap-2';
++const GHOST_LG_PILL =
++  'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-150 cursor-pointer bg-transparent text-muted hover:bg-elevated hover:text-foreground active:opacity-90 px-6 py-3 text-base gap-2';
++
++const STAGE_2A_FILES = [
++  'routes/checkout.cancel.tsx',
++  'routes/checkout.success.tsx',
++  'routes/faq.tsx',
++  'routes/account.orders.tsx',
++];
++
++function expectOneAnchor(name: string, href: string, expectedClassName: string): void {
++  const link = screen.getByRole('link', { name });
++  expect(link.tagName).toBe('A');
++  expect(link.getAttribute('href')).toBe(href);
++  expect(link.className).toBe(expectedClassName);
++  expect(link.querySelector('button')).toBeNull();
++  expect(link.closest('button')).toBeNull();
++}
++
++beforeEach(() => {
++  vi.clearAllMocks();
++  vi.mocked(apiClient.getMyOrders).mockResolvedValue({
++    items: [],
++    totalCount: 0,
++    pageNumber: 1,
++    pageSize: 50,
++  });
++});
++afterEach(() => cleanup());
++
++describe('DPG-BUTTON-CLEANUP-2 stage 2a', () => {
++  it('B2-0: the literal oracles equal the builder output for primary and ghost lg pill', () => {
++    expect(buildButtonClassName({ size: 'lg', shape: 'pill' })).toBe(PRIMARY_LG_PILL);
++    expect(buildButtonClassName({ variant: 'ghost', size: 'lg', shape: 'pill' })).toBe(
++      GHOST_LG_PILL,
++    );
++  });
++
++  it('B2-1: checkout cancel pair is primary + ghost lg pill, one anchor each', () => {
++    render(
++      <MemoryRouter>
++        <CheckoutCancel />
++      </MemoryRouter>,
++    );
++    expectOneAnchor('Return to Cart', '/cart', PRIMARY_LG_PILL);
++    expectOneAnchor('Continue Shopping', '/store', GHOST_LG_PILL);
++  });
++
++  it('B2-2: checkout success pair is primary + ghost lg pill, one anchor each', async () => {
++    render(
++      <MemoryRouter>
++        <CheckoutSuccess />
++      </MemoryRouter>,
++    );
++    await screen.findByRole('link', { name: 'Access Your Downloads' }, { timeout: 3000 });
++    expectOneAnchor('Access Your Downloads', '/account/downloads', PRIMARY_LG_PILL);
++    expectOneAnchor('Discover More', '/store', GHOST_LG_PILL);
++  });
++
++  it('B2-3: FAQ Contact Us is primary lg pill and keeps its href', () => {
++    render(
++      <MemoryRouter>
++        <FAQ />
++      </MemoryRouter>,
++    );
++    expectOneAnchor('Contact Us', '/hire-us', PRIMARY_LG_PILL);
++  });
++
++  it('B2-4: orders empty state Browse Music is primary lg pill and stays a plain anchor', async () => {
++    render(<OrdersPage />);
++    await screen.findByText('No orders yet');
++    expectOneAnchor('Browse Music', '/store', PRIMARY_LG_PILL);
++    expect(screen.getByRole('link', { name: 'Browse Music' }).hasAttribute('data-discover')).toBe(
++      false,
++    );
++  });
++
++  it('B2-5: no stage-2a file keeps a hand-rolled brand or ghost class string', () => {
++    for (const file of STAGE_2A_FILES) {
++      const source = readFileSync(join(APP_ROOT, file), 'utf8');
++      const literals = [...source.matchAll(/className="([^"]*)"/g)].map((match) => match[1] ?? '');
++      for (const literal of literals) {
++        const tokens = literal.split(/\s+/);
++        expect(tokens, `${file}: ${literal}`).not.toContain('bg-brand');
++        expect(tokens, `${file}: ${literal}`).not.toContain('hover:bg-brand-hover');
++        expect(
++          tokens.includes('bg-transparent') && tokens.includes('text-muted'),
++          `${file}: ${literal}`,
++        ).toBe(false);
++      }
++    }
++  });
++});
+diff --git a/app/lib/__tests__/store-theme-tokens.test.ts b/app/lib/__tests__/store-theme-tokens.test.ts
+index b90a3de..5ec844d 100644
+--- a/app/lib/__tests__/store-theme-tokens.test.ts
++++ b/app/lib/__tests__/store-theme-tokens.test.ts
+@@ -681,12 +681,15 @@ describe('Store @theme colour tokens: Obsidian & Brass (STORE-2a)', () => {
+     expect(hireUsSubmit).toHaveLength(1);
+     expectDarkTextOnFill(hireUsSubmit[0] ?? '', 'bg-brand');
+ 
+-    const ordersCta = classAttributesWithTokens(readStoreFile('app/routes/account.orders.tsx'), [
+-      'bg-brand',
+-      'inline-block',
+-    ]);
+-    expect(ordersCta).toHaveLength(1);
+-    expectDarkTextOnFill(ordersCta[0] ?? '', 'bg-brand');
++    const ordersSource = readStoreFile('app/routes/account.orders.tsx');
++    expect(classAttributesWithTokens(ordersSource, ['bg-brand'])).toHaveLength(0);
++    expect(ordersSource).toContain(
++      "className={buildButtonClassName({ size: 'lg', shape: 'pill' })}",
++    );
++    const primaryTokens = classTokens(buttonVariantClasses(buttonSource, 'primary'));
++    expect(primaryTokens).toContain('bg-brand');
++    expect(primaryTokens).toContain('text-background');
++    expect(primaryTokens).not.toContain('text-foreground');
+ 
+     const buyNow = classAttributesWithTokens(
+       readStoreFile('app/components/product/PurchaseHeader.tsx'),
+diff --git a/app/routes/account.orders.tsx b/app/routes/account.orders.tsx
+index 48732a6..b73f85b 100644
+--- a/app/routes/account.orders.tsx
++++ b/app/routes/account.orders.tsx
+@@ -2,6 +2,7 @@ import type { MetaFunction } from '@remix-run/node';
+ import { Calendar, ChevronDown, ChevronUp, CreditCard, Package } from 'lucide-react';
+ import { useEffect, useId, useState } from 'react';
+ import { RequireAuth } from '~/components/auth';
++import { buildButtonClassName } from '~/components/ui';
+ import { useAuth } from '~/hooks';
+ import { apiClient, type Order } from '~/services/api/client';
+ 
+@@ -233,10 +234,7 @@ function OrdersContent() {
+             <p className="text-muted mb-6">
+               When you make a purchase, your orders will appear here.
+             </p>
+-            <a
+-              href="/store"
+-              className="inline-block px-6 py-3 bg-brand text-brand-foreground font-medium rounded-lg hover:bg-brand/90 transition-colors"
+-            >
++            <a href="/store" className={buildButtonClassName({ size: 'lg', shape: 'pill' })}>
+               Browse Music
+             </a>
+           </div>
+diff --git a/app/routes/checkout.cancel.tsx b/app/routes/checkout.cancel.tsx
+index 77902f0..530f8c1 100644
+--- a/app/routes/checkout.cancel.tsx
++++ b/app/routes/checkout.cancel.tsx
+@@ -3,6 +3,7 @@ import { Link } from '@remix-run/react';
+ import { ArrowLeft, ShoppingCart, XCircle } from 'lucide-react';
+ import { Footer } from '~/components/layout/Footer';
+ import { PageContainer } from '~/components/layout/PageContainer';
++import { buildButtonClassName } from '~/components/ui';
+ 
+ export const meta: MetaFunction = () => {
+   return [
+@@ -38,16 +39,13 @@ export default function CheckoutCancel() {
+             </div>
+ 
+             <div className="flex flex-col sm:flex-row gap-4 justify-center">
+-              <Link
+-                to="/cart"
+-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand text-background font-semibold rounded-md hover:bg-brand-hover transition-all"
+-              >
++              <Link to="/cart" className={buildButtonClassName({ size: 'lg', shape: 'pill' })}>
+                 <ShoppingCart className="w-5 h-5" />
+                 Return to Cart
+               </Link>
+               <Link
+                 to="/store"
+-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-transparent text-muted font-semibold rounded-md hover:bg-elevated hover:text-foreground transition-all"
++                className={buildButtonClassName({ variant: 'ghost', size: 'lg', shape: 'pill' })}
+               >
+                 <ArrowLeft className="w-5 h-5" />
+                 Continue Shopping
+diff --git a/app/routes/checkout.success.tsx b/app/routes/checkout.success.tsx
+index 005acc4..e503b4b 100644
+--- a/app/routes/checkout.success.tsx
++++ b/app/routes/checkout.success.tsx
+@@ -5,6 +5,7 @@ import { CheckCircle, Download, Home, Sparkles } from 'lucide-react';
+ import { useEffect, useState } from 'react';
+ import { Footer } from '~/components/layout/Footer';
+ import { PageContainer } from '~/components/layout/PageContainer';
++import { buildButtonClassName } from '~/components/ui';
+ 
+ export const meta: MetaFunction = () => {
+   return [
+@@ -184,14 +185,18 @@ export default function CheckoutSuccess() {
+                   >
+                     <Link
+                       to="/account/downloads"
+-                      className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand text-background font-semibold rounded-lg hover:bg-brand-hover transition-all"
++                      className={buildButtonClassName({ size: 'lg', shape: 'pill' })}
+                     >
+                       <Download className="w-5 h-5" />
+                       Access Your Downloads
+                     </Link>
+                     <Link
+                       to="/store"
+-                      className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-transparent text-muted font-semibold rounded-lg hover:bg-elevated hover:text-foreground transition-all"
++                      className={buildButtonClassName({
++                        variant: 'ghost',
++                        size: 'lg',
++                        shape: 'pill',
++                      })}
+                     >
+                       <Home className="w-5 h-5" />
+                       Discover More
+diff --git a/app/routes/faq.tsx b/app/routes/faq.tsx
+index 3c2a48c..88cd3ba 100644
+--- a/app/routes/faq.tsx
++++ b/app/routes/faq.tsx
+@@ -4,6 +4,7 @@ import { ChevronDown } from 'lucide-react';
+ import { useState } from 'react';
+ import { Footer } from '~/components/layout/Footer';
+ import { PageContainer } from '~/components/layout/PageContainer';
++import { buildButtonClassName } from '~/components/ui';
+ import { releaseLinkFocus } from '~/lib/link-focus';
+ 
+ export const meta: MetaFunction = () => {
+@@ -166,7 +167,7 @@ export default function FAQ() {
+               <Link
+                 to="/hire-us"
+                 onClick={releaseLinkFocus}
+-                className="inline-block px-8 py-3 bg-brand text-background font-semibold rounded-lg hover:bg-brand-hover transition-colors"
++                className={buildButtonClassName({ size: 'lg', shape: 'pill' })}
+               >
+                 Contact Us
+               </Link>
