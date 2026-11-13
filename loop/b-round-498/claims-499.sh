@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# usage: bash claims-499.sh [store-tree]   (default /home/runner/czaba-project/store). Run from anywhere.
+S="${1:-/home/runner/czaba-project/store}"; L=/home/runner/czaba-project/tmp/studio-real-loop; B=$L/b-round-498
+cd "$S" || exit 2
+echo "K1 store HEAD $(git -C /home/runner/czaba-project/store rev-parse --short HEAD 2>/dev/null)"
+echo "K2 EmptyState primary literal (Link + button): $(grep -c 'px-6 py-3 bg-brand text-background rounded-lg font-medium hover:bg-brand/90 transition-colors' app/components/ui/EmptyState.tsx)"
+echo "K3 EmptyState secondary literal (Link + button): $(grep -c 'px-6 py-3 bg-elevated text-foreground rounded-lg font-medium hover:bg-outline transition-colors border border-outline' app/components/ui/EmptyState.tsx)"
+echo "K4 ErrorDisplay Try Again secondary Button / Go Home literal: $(grep -c '<Button variant="secondary" size="lg" onClick={() => window.location.reload()}>' app/components/errors/ErrorBoundary.tsx) $(grep -c 'bg-brand hover:bg-brand/90 text-black font-medium rounded-lg' app/components/errors/ErrorBoundary.tsx)"
+echo "K5 store Try again literal: $(grep -c 'className="inline-block rounded-lg bg-brand px-5 py-3 text-background"' app/routes/store.tsx)"
+echo "K6 builder calls (EmptyState, ErrorBoundary, store): $(grep -c 'buildButtonClassName(' app/components/ui/EmptyState.tsx) $(grep -c 'buildButtonClassName(' app/components/errors/ErrorBoundary.tsx) $(grep -c 'buildButtonClassName(' app/routes/store.tsx)"
+echo "K7 EmptyState callers (non-test):"; grep -rn "<EmptyState" app --include=*.tsx | grep -v __tests__ | cut -d: -f1,2 | sed 's/^/  /'
+echo "K8 RouteErrorBoundary showHome={false} count / root.tsx Layout export: $(grep -c 'showHome={false}' app/components/errors/ErrorBoundary.tsx) $(grep -c '^export function Layout' app/root.tsx)"
+echo "K9 recordings licenseType.toLowerCase uses (malformed-stub crash path): $(grep -c 'catalog.licenseType.toLowerCase()' 'app/routes/recordings.$productId.tsx')"
+echo "K10 SWEEP accessible names and module paths (app/**/__tests__, perf/**, e2e/**):"
+grep -rlE "Discover the Collection|Go to Downloads|Browse the store|Go Home|Try Again|Try again|could not be loaded|EmptyState|components/errors|RootErrorBoundary|RouteErrorBoundary" app perf e2e --include=*.ts --include=*.tsx 2>/dev/null | grep -E '__tests__|^perf/|^e2e/|\.spec\.' | sort | sed 's/^/  /'
+echo "K11 scanner (any/solid): $(python3 -I $L/b-round-497/scan-brand.py . /tmp/claims-499-scan.json)"
+echo "K12 doc 320 status line / doc 321 present: $(sed -n 4p docs/implementation/2026/quarter-IV/320-dpg-button-cleanup-stage-2a.md) | $(ls docs/implementation/2026/quarter-IV/321-* 2>/dev/null | wc -l)"
+echo "K13 DESIGN_SYSTEM pill row ends with orders / EmptyState rule present: $(grep -c 'orders "Browse Music") |' docs/design/DESIGN_SYSTEM.md) $(grep -c 'EmptyState`-ის მეორე მოქმედებას' docs/design/DESIGN_SYSTEM.md)"
+echo "K14 artifacts:"; for f in sketch-499.patch.txt sketch-sha.txt sketch-review.md consult-product-designer.md r499-tree-sha256.txt r499-pre-sha.txt r499-post-sketch-sha.txt mutants-499.sh mutants-499.txt mutants-499-failing-rows.txt precheck-full.log precheck-covering.log precheck-tsc.log precheck-biome.log precheck-build-sketch.log covering-files.txt scan-head.txt scan-sketch.txt builder-calls-sketch.txt measure/measure-499.mjs measure/nav-499.mjs measure/summary.txt measure/head/head-on.json measure/head/head-off.json measure/sketch/sketch-on.json measure/sketch/sketch-off.json measure/head/head-nav-on.json measure/head/head-nav-off.json measure/sketch/sketch-nav-on.json measure/sketch/sketch-nav-off.json probe/reach.mjs probe/mock-on/reach.json probe/mock-off/reach.json precheck-full-v2-mutcopy-env-invalid.log head-biome.log mutant-logs/m499-N1.log mutant-logs/m499-N9.log measure/sketch/sketch-ROOT-ERR-pair-375.png measure/sketch/sketch-REC-DENIED-pair-375.png ../user-review/questions-round-499.md; do test -f $B/$f && echo "  ok $f" || echo "  MISSING $f"; done
+echo "K15 gate 498 CSS bundle: $(grep -oE 'app-[A-Za-z0-9_-]+\.css' $L/gates/round-498/verify.log | sort -u | tr '\n' ' ')"
+echo "K16 ids: "; (cd $L && python3 -I tools/find-ids.py . DPG-BUTTON-CLEANUP-2 SIG-R498-BUTTONLINK-WRAPPER PD-R498-404-SECONDARY-ALIGN B-R499-ROOT-ERRORBOUNDARY-NESTED-HTML GATE498-L1-BUILDER-NO-FOCUS GATE498-L2-BARREL-IMPORT | cut -d' ' -f1-2 | sed 's/^/  /')
+echo "K17 l58: $(cd $L && python3 -I tools/l58-check.py current-task.md | tail -1)"

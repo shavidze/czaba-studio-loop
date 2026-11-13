@@ -1,0 +1,333 @@
+diff --git a/app/components/errors/ErrorBoundary.tsx b/app/components/errors/ErrorBoundary.tsx
+index ded4de7..4bc3ec6 100644
+--- a/app/components/errors/ErrorBoundary.tsx
++++ b/app/components/errors/ErrorBoundary.tsx
+@@ -7,7 +7,7 @@
+ 
+ import { isRouteErrorResponse, useRouteError } from '@remix-run/react';
+ import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
+-import { Button } from '~/components/ui';
++import { Button, buildButtonClassName } from '~/components/ui';
+ 
+ interface ErrorDisplayProps {
+   title: string;
+@@ -34,7 +34,7 @@ function ErrorDisplay({ title, message, showRefresh = true, showHome = true }: E
+         {/* Actions */}
+         <div className="flex flex-col sm:flex-row gap-3 justify-center">
+           {showRefresh && (
+-            <Button variant="secondary" size="lg" onClick={() => window.location.reload()}>
++            <Button size="lg" shape="pill" onClick={() => window.location.reload()}>
+               <RefreshCw className="w-4 h-4" />
+               <span>Try Again</span>
+             </Button>
+@@ -43,7 +43,7 @@ function ErrorDisplay({ title, message, showRefresh = true, showHome = true }: E
+           {showHome && (
+             <a
+               href="/"
+-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand hover:bg-brand/90 text-black font-medium rounded-lg transition-colors"
++              className={buildButtonClassName({ variant: 'ghost', size: 'lg', shape: 'pill' })}
+             >
+               <Home className="w-4 h-4" />
+               <span>Go Home</span>
+diff --git a/app/components/ui/EmptyState.tsx b/app/components/ui/EmptyState.tsx
+index f6e5737..fcb8f66 100644
+--- a/app/components/ui/EmptyState.tsx
++++ b/app/components/ui/EmptyState.tsx
+@@ -1,6 +1,7 @@
+ import { Link } from '@remix-run/react';
+ import type { LucideIcon } from 'lucide-react';
+ import { Bell, Download, FileMusic, Heart, Package, Search, ShoppingBag } from 'lucide-react';
++import { Button, buildButtonClassName } from './Button';
+ 
+ // Preset icons for common empty states
+ const presetIcons: Record<string, LucideIcon> = {
+@@ -58,19 +59,13 @@ export function EmptyState({
+         {actionLabel &&
+           (actionHref || onAction) &&
+           (actionHref ? (
+-            <Link
+-              to={actionHref}
+-              className="inline-flex items-center justify-center px-6 py-3 bg-brand text-background rounded-lg font-medium hover:bg-brand/90 transition-colors"
+-            >
++            <Link to={actionHref} className={buildButtonClassName({ size: 'lg', shape: 'pill' })}>
+               {actionLabel}
+             </Link>
+           ) : (
+-            <button
+-              onClick={onAction}
+-              className="inline-flex items-center justify-center px-6 py-3 bg-brand text-background rounded-lg font-medium hover:bg-brand/90 transition-colors cursor-pointer"
+-            >
++            <Button type="button" size="lg" shape="pill" onClick={onAction}>
+               {actionLabel}
+-            </button>
++            </Button>
+           ))}
+ 
+         {secondaryActionLabel &&
+@@ -78,17 +73,20 @@ export function EmptyState({
+           (secondaryActionHref ? (
+             <Link
+               to={secondaryActionHref}
+-              className="inline-flex items-center justify-center px-6 py-3 bg-elevated text-foreground rounded-lg font-medium hover:bg-outline transition-colors border border-outline"
++              className={buildButtonClassName({ variant: 'ghost', size: 'lg', shape: 'pill' })}
+             >
+               {secondaryActionLabel}
+             </Link>
+           ) : (
+-            <button
++            <Button
++              type="button"
++              variant="ghost"
++              size="lg"
++              shape="pill"
+               onClick={onSecondaryAction}
+-              className="inline-flex items-center justify-center px-6 py-3 bg-elevated text-foreground rounded-lg font-medium hover:bg-outline transition-colors border border-outline cursor-pointer"
+             >
+               {secondaryActionLabel}
+-            </button>
++            </Button>
+           ))}
+       </div>
+     </div>
+diff --git a/app/lib/__tests__/store-button-cleanup-2b.test.tsx b/app/lib/__tests__/store-button-cleanup-2b.test.tsx
+new file mode 100644
+index 0000000..116617c
+--- /dev/null
++++ b/app/lib/__tests__/store-button-cleanup-2b.test.tsx
+@@ -0,0 +1,151 @@
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { cleanup, fireEvent, render, screen } from '@testing-library/react';
++import type { ReactElement } from 'react';
++import { renderToString } from 'react-dom/server';
++import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router-dom';
++import { afterEach, describe, expect, it, vi } from 'vitest';
++import { RootErrorBoundary, RouteErrorBoundary } from '~/components/errors';
++import { buildButtonClassName, EmptyState } from '~/components/ui';
++import { APP_ROOT } from './helpers/style-scan';
++
++const PRIMARY_LG_PILL =
++  'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-6 py-3 text-base gap-2';
++const GHOST_LG_PILL =
++  'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-150 cursor-pointer bg-transparent text-muted hover:bg-elevated hover:text-foreground active:opacity-90 px-6 py-3 text-base gap-2';
++
++const STAGE_2B1_SITES: ReadonlyArray<{ file: string; anchor: string; end: string }> = [
++  { file: 'components/ui/EmptyState.tsx', anchor: '{/* Actions */}', end: '</div>\n    </div>' },
++  {
++    file: 'components/errors/ErrorBoundary.tsx',
++    anchor: '{/* Actions */}',
++    end: '</div>\n      </div>',
++  },
++  {
++    file: 'routes/store.tsx',
++    anchor: '{error ? (',
++    end: '</div>',
++  },
++];
++
++function renderErrorPage(element: ReactElement, error: unknown): Document {
++  const router = createMemoryRouter(
++    [{ id: 'root', path: '/', element: null, errorElement: element }],
++    { initialEntries: ['/'], hydrationData: { errors: { root: error } } },
++  );
++  const html = renderToString(<RouterProvider router={router} />);
++  return new DOMParser().parseFromString(html, 'text/html');
++}
++
++afterEach(() => {
++  cleanup();
++  vi.restoreAllMocks();
++});
++
++describe('DPG-BUTTON-CLEANUP-2 stage 2b-1', () => {
++  it('B2B-0: the literal oracles equal the builder output for primary and ghost lg pill', () => {
++    expect(buildButtonClassName({ size: 'lg', shape: 'pill' })).toBe(PRIMARY_LG_PILL);
++    expect(buildButtonClassName({ variant: 'ghost', size: 'lg', shape: 'pill' })).toBe(
++      GHOST_LG_PILL,
++    );
++  });
++
++  it('B2B-1: EmptyState link pair is primary + ghost lg pill, one anchor each', () => {
++    render(
++      <MemoryRouter>
++        <EmptyState
++          title="Collection ownership required"
++          description="d"
++          actionLabel="Go to Downloads"
++          actionHref="/account/downloads"
++          secondaryActionLabel="Browse the store"
++          secondaryActionHref="/store"
++        />
++      </MemoryRouter>,
++    );
++    const primary = screen.getByRole('link', { name: 'Go to Downloads' });
++    const secondary = screen.getByRole('link', { name: 'Browse the store' });
++    expect(primary.getAttribute('href')).toBe('/account/downloads');
++    expect(primary.className).toBe(PRIMARY_LG_PILL);
++    expect(secondary.getAttribute('href')).toBe('/store');
++    expect(secondary.className).toBe(GHOST_LG_PILL);
++    expect(screen.queryAllByRole('button')).toHaveLength(0);
++  });
++
++  it('B2B-2: EmptyState action buttons are Button primary + ghost lg pill, type button, one call per click', () => {
++    const onAction = vi.fn();
++    const onSecondaryAction = vi.fn();
++    render(
++      <EmptyState
++        title="t"
++        description="d"
++        actionLabel="Retry"
++        onAction={onAction}
++        secondaryActionLabel="Dismiss"
++        onSecondaryAction={onSecondaryAction}
++      />,
++    );
++    const primary = screen.getByRole('button', { name: 'Retry' });
++    const secondary = screen.getByRole('button', { name: 'Dismiss' });
++    expect(primary.className).toBe(PRIMARY_LG_PILL);
++    expect(secondary.className).toBe(GHOST_LG_PILL);
++    expect(primary.getAttribute('type')).toBe('button');
++    expect(secondary.getAttribute('type')).toBe('button');
++    fireEvent.click(primary);
++    fireEvent.click(secondary);
++    expect(onAction).toHaveBeenCalledTimes(1);
++    expect(onSecondaryAction).toHaveBeenCalledTimes(1);
++    expect(screen.queryAllByRole('link')).toHaveLength(0);
++  });
++
++  it('B2B-3: root error page has Try Again primary lg pill and Go Home ghost lg pill plain anchor', () => {
++    vi.spyOn(console, 'error').mockImplementation(() => undefined);
++    const doc = renderErrorPage(<RootErrorBoundary />, new Error('boom'));
++    const tryAgain = [...doc.querySelectorAll('button')].filter((button) =>
++      button.textContent?.includes('Try Again'),
++    );
++    const home = [...doc.querySelectorAll('a')].filter((link) =>
++      link.textContent?.includes('Go Home'),
++    );
++    expect(tryAgain).toHaveLength(1);
++    expect(home).toHaveLength(1);
++    expect(tryAgain[0]?.className).toBe(PRIMARY_LG_PILL);
++    expect(home[0]?.className).toBe(GHOST_LG_PILL);
++    expect(home[0]?.getAttribute('href')).toBe('/');
++    expect(home[0]?.hasAttribute('data-discover')).toBe(false);
++    expect(home[0]?.querySelectorAll('svg')).toHaveLength(1);
++    expect(tryAgain[0]?.querySelectorAll('svg')).toHaveLength(1);
++  });
++
++  it('B2B-4: route error page keeps one Try Again primary lg pill and no Go Home', () => {
++    vi.spyOn(console, 'error').mockImplementation(() => undefined);
++    const doc = renderErrorPage(<RouteErrorBoundary />, new Error('boom'));
++    const buttons = [...doc.querySelectorAll('button')];
++    expect(buttons).toHaveLength(1);
++    expect(buttons[0]?.textContent).toContain('Try Again');
++    expect(buttons[0]?.className).toBe(PRIMARY_LG_PILL);
++    expect(doc.querySelectorAll('a')).toHaveLength(0);
++  });
++
++  it('B2B-5: the stage-2b-1 action blocks keep no hand-rolled brand, elevated or ghost class string', () => {
++    for (const site of STAGE_2B1_SITES) {
++      const source = readFileSync(join(APP_ROOT, site.file), 'utf8');
++      const start = source.indexOf(site.anchor);
++      expect(start, `${site.file}: anchor`).toBeGreaterThan(-1);
++      const end = source.indexOf(site.end, start);
++      expect(end, `${site.file}: end`).toBeGreaterThan(start);
++      const block = source.slice(start, end);
++      expect(block, site.file).toContain('buildButtonClassName(');
++      const literals = [
++        ...block.matchAll(/className=(?:"([^"]*)"|\{'([^']*)'\}|\{`([^`]*)`\})/g),
++      ].map((match) => match[1] ?? match[2] ?? match[3] ?? '');
++      for (const literal of literals) {
++        const tokens = literal.split(/\s+/);
++        expect(tokens, `${site.file}: ${literal}`).not.toContain('bg-brand');
++        expect(tokens, `${site.file}: ${literal}`).not.toContain('bg-elevated');
++        expect(tokens, `${site.file}: ${literal}`).not.toContain('text-black');
++        expect(tokens, `${site.file}: ${literal}`).not.toContain('rounded-lg');
++      }
++    }
++  });
++});
+diff --git a/app/routes/store.tsx b/app/routes/store.tsx
+index eb7ea7b..a87c638 100644
+--- a/app/routes/store.tsx
++++ b/app/routes/store.tsx
+@@ -30,7 +30,7 @@ export const meta: MetaFunction = () => {
+ 
+ import { Form, Link, useLoaderData, useNavigation, useSearchParams } from '@remix-run/react';
+ import { ArrowRight, Check, ChevronDown, Loader2, Search, X } from 'lucide-react';
+-import { Button } from '~/components/ui';
++import { Button, buildButtonClassName } from '~/components/ui';
+ 
+ type PackCategory = 'sfx' | 'loops' | 'sounds' | 'music';
+ 
+@@ -350,10 +350,7 @@ export default function StorePage() {
+         {error ? (
+           <div role="alert" className="text-center py-16 space-y-4">
+             <p className="text-foreground">The collection could not be loaded. Please try again.</p>
+-            <Link
+-              to="/store"
+-              className="inline-block rounded-lg bg-brand px-5 py-3 text-background"
+-            >
++            <Link to="/store" className={buildButtonClassName({ size: 'lg', shape: 'pill' })}>
+               Try again
+             </Link>
+           </div>
+diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+index 6ab18bb..8e912fd 100644
+--- a/docs/design/DESIGN_SYSTEM.md
++++ b/docs/design/DESIGN_SYSTEM.md
+@@ -1154,7 +1154,7 @@ Store-ში ღილაკის სამიზნე წყაროა `But
+ | Shape | Class | გამოყენება |
+ |-------|-------|------------|
+ | `default` | `rounded-md` (8px) | dialog-ები, ფორმები, Studio |
+-| `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music") |
++| `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“) |
+ 
+ `shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდებზე brand-ის pill (direction A, „a brass pill“), dialog-ებში 8px.
+ 
+@@ -1190,7 +1190,7 @@ hover:bg-elevated hover:text-foreground
+ active:opacity-90
+ ```
+ 
+-**Use for:** Less important actions. Store-ის გვერდზე primary CTA-ის წყვილი (მაგ. checkout-ის „Continue Shopping“ და „Discover More“) არის `ghost` `lg` `pill`, primary-ის ტოლი სიმაღლით (48px). 404-ის „Browse Store“ დროებით მშვიდი text link-ია (`text-foreground hover:text-brand`); მისი `ghost` pill-ზე გადაყვანა შემდეგ ეტაპზეა (PD-R498-404-SECONDARY-ALIGN).
++**Use for:** Less important actions. Store-ის გვერდზე primary CTA-ის წყვილი (მაგ. checkout-ის „Continue Shopping“ და „Discover More“) არის `ghost` `lg` `pill`, primary-ის ტოლი სიმაღლით (48px). 404-ის „Browse Store“ დროებით მშვიდი text link-ია (`text-foreground hover:text-brand`); მისი `ghost` pill-ზე გადაყვანა შემდეგ ეტაპზეა (PD-R498-404-SECONDARY-ALIGN). იგივე წესი ეხება `EmptyState`-ის მეორე მოქმედებას („Browse the store“) და შეცდომის გვერდის „Go Home“-ს: აღდგენის მოქმედება („Try Again“) primary-ია, გასვლა `ghost`.
+ 
+ ### IconButton
+ 
+diff --git a/docs/implementation/2026/quarter-IV/320-dpg-button-cleanup-stage-2a.md b/docs/implementation/2026/quarter-IV/320-dpg-button-cleanup-stage-2a.md
+index 67147db..7f7e662 100644
+--- a/docs/implementation/2026/quarter-IV/320-dpg-button-cleanup-stage-2a.md
++++ b/docs/implementation/2026/quarter-IV/320-dpg-button-cleanup-stage-2a.md
+@@ -1,7 +1,7 @@
+ # DPG-BUTTON-CLEANUP, ეტაპი 2a: სტატუსის გვერდების CTA ღილაკები
+ 
+ **თარიღი:** 2026-11-13
+-**სტატუსი:** In Progress (stage 2a of DPG-BUTTON-CLEANUP-2)
++**სტატუსი:** In Progress (stage 2a of DPG-BUTTON-CLEANUP-2; C round 498 PASS)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+diff --git a/docs/implementation/2026/quarter-IV/321-dpg-button-cleanup-stage-2b-1.md b/docs/implementation/2026/quarter-IV/321-dpg-button-cleanup-stage-2b-1.md
+new file mode 100644
+index 0000000..004e228
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/321-dpg-button-cleanup-stage-2b-1.md
+@@ -0,0 +1,19 @@
++# DPG-BUTTON-CLEANUP, ეტაპი 2b-1: ცარიელი და შეცდომის მდგომარეობების CTA ღილაკები
++
++**თარიღი:** 2026-11-13
++**სტატუსი:** In Progress (stage 2b-1 of DPG-BUTTON-CLEANUP-2; C round 499 PASS)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++## მიდგომა
++
++## არქიტექტურა
++
++## შეცვლილი ფაილები
++
++## პრობლემები და გადაწყვეტები
++
++## ტესტირება
++
++## TODO / შემდეგი ნაბიჯები
