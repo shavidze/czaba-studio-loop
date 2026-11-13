@@ -1,0 +1,151 @@
+diff --git a/app/components/errors/ErrorBoundary.tsx b/app/components/errors/ErrorBoundary.tsx
+index ded4de7..4bc3ec6 100644
+--- a/app/components/errors/ErrorBoundary.tsx
++++ b/app/components/errors/ErrorBoundary.tsx
+@@ -7,7 +7,7 @@
+ 
+ import { isRouteErrorResponse, useRouteError } from '@remix-run/react';
+ import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
+-import { Button } from '~/components/ui';
++import { Button, buildButtonClassName } from '~/components/ui';
+ 
+ interface ErrorDisplayProps {
+   title: string;
+@@ -34,7 +34,7 @@ function ErrorDisplay({ title, message, showRefresh = true, showHome = true }: E
+         {/* Actions */}
+         <div className="flex flex-col sm:flex-row gap-3 justify-center">
+           {showRefresh && (
+-            <Button variant="secondary" size="lg" onClick={() => window.location.reload()}>
++            <Button size="lg" shape="pill" onClick={() => window.location.reload()}>
+               <RefreshCw className="w-4 h-4" />
+               <span>Try Again</span>
+             </Button>
+@@ -43,7 +43,7 @@ function ErrorDisplay({ title, message, showRefresh = true, showHome = true }: E
+           {showHome && (
+             <a
+               href="/"
+-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand hover:bg-brand/90 text-black font-medium rounded-lg transition-colors"
++              className={buildButtonClassName({ variant: 'ghost', size: 'lg', shape: 'pill' })}
+             >
+               <Home className="w-4 h-4" />
+               <span>Go Home</span>
+diff --git a/app/components/ui/EmptyState.tsx b/app/components/ui/EmptyState.tsx
+index f6e5737..fcb8f66 100644
+--- a/app/components/ui/EmptyState.tsx
++++ b/app/components/ui/EmptyState.tsx
+@@ -1,6 +1,7 @@
+ import { Link } from '@remix-run/react';
+ import type { LucideIcon } from 'lucide-react';
+ import { Bell, Download, FileMusic, Heart, Package, Search, ShoppingBag } from 'lucide-react';
++import { Button, buildButtonClassName } from './Button';
+ 
+ // Preset icons for common empty states
+ const presetIcons: Record<string, LucideIcon> = {
+@@ -58,19 +59,13 @@ export function EmptyState({
+         {actionLabel &&
+           (actionHref || onAction) &&
+           (actionHref ? (
+-            <Link
+-              to={actionHref}
+-              className="inline-flex items-center justify-center px-6 py-3 bg-brand text-background rounded-lg font-medium hover:bg-brand/90 transition-colors"
+-            >
++            <Link to={actionHref} className={buildButtonClassName({ size: 'lg', shape: 'pill' })}>
+               {actionLabel}
+             </Link>
+           ) : (
+-            <button
+-              onClick={onAction}
+-              className="inline-flex items-center justify-center px-6 py-3 bg-brand text-background rounded-lg font-medium hover:bg-brand/90 transition-colors cursor-pointer"
+-            >
++            <Button type="button" size="lg" shape="pill" onClick={onAction}>
+               {actionLabel}
+-            </button>
++            </Button>
+           ))}
+ 
+         {secondaryActionLabel &&
+@@ -78,17 +73,20 @@ export function EmptyState({
+           (secondaryActionHref ? (
+             <Link
+               to={secondaryActionHref}
+-              className="inline-flex items-center justify-center px-6 py-3 bg-elevated text-foreground rounded-lg font-medium hover:bg-outline transition-colors border border-outline"
++              className={buildButtonClassName({ variant: 'ghost', size: 'lg', shape: 'pill' })}
+             >
+               {secondaryActionLabel}
+             </Link>
+           ) : (
+-            <button
++            <Button
++              type="button"
++              variant="ghost"
++              size="lg"
++              shape="pill"
+               onClick={onSecondaryAction}
+-              className="inline-flex items-center justify-center px-6 py-3 bg-elevated text-foreground rounded-lg font-medium hover:bg-outline transition-colors border border-outline cursor-pointer"
+             >
+               {secondaryActionLabel}
+-            </button>
++            </Button>
+           ))}
+       </div>
+     </div>
+diff --git a/app/routes/store.tsx b/app/routes/store.tsx
+index eb7ea7b..a87c638 100644
+--- a/app/routes/store.tsx
++++ b/app/routes/store.tsx
+@@ -30,7 +30,7 @@ export const meta: MetaFunction = () => {
+ 
+ import { Form, Link, useLoaderData, useNavigation, useSearchParams } from '@remix-run/react';
+ import { ArrowRight, Check, ChevronDown, Loader2, Search, X } from 'lucide-react';
+-import { Button } from '~/components/ui';
++import { Button, buildButtonClassName } from '~/components/ui';
+ 
+ type PackCategory = 'sfx' | 'loops' | 'sounds' | 'music';
+ 
+@@ -350,10 +350,7 @@ export default function StorePage() {
+         {error ? (
+           <div role="alert" className="text-center py-16 space-y-4">
+             <p className="text-foreground">The collection could not be loaded. Please try again.</p>
+-            <Link
+-              to="/store"
+-              className="inline-block rounded-lg bg-brand px-5 py-3 text-background"
+-            >
++            <Link to="/store" className={buildButtonClassName({ size: 'lg', shape: 'pill' })}>
+               Try again
+             </Link>
+           </div>
+diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+index 6ab18bb..8e912fd 100644
+--- a/docs/design/DESIGN_SYSTEM.md
++++ b/docs/design/DESIGN_SYSTEM.md
+@@ -1154,7 +1154,7 @@ Store-ში ღილაკის სამიზნე წყაროა `But
+ | Shape | Class | გამოყენება |
+ |-------|-------|------------|
+ | `default` | `rounded-md` (8px) | dialog-ები, ფორმები, Studio |
+-| `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music") |
++| `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“) |
+ 
+ `shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდებზე brand-ის pill (direction A, „a brass pill“), dialog-ებში 8px.
+ 
+@@ -1190,7 +1190,7 @@ hover:bg-elevated hover:text-foreground
+ active:opacity-90
+ ```
+ 
+-**Use for:** Less important actions. Store-ის გვერდზე primary CTA-ის წყვილი (მაგ. checkout-ის „Continue Shopping“ და „Discover More“) არის `ghost` `lg` `pill`, primary-ის ტოლი სიმაღლით (48px). 404-ის „Browse Store“ დროებით მშვიდი text link-ია (`text-foreground hover:text-brand`); მისი `ghost` pill-ზე გადაყვანა შემდეგ ეტაპზეა (PD-R498-404-SECONDARY-ALIGN).
++**Use for:** Less important actions. Store-ის გვერდზე primary CTA-ის წყვილი (მაგ. checkout-ის „Continue Shopping“ და „Discover More“) არის `ghost` `lg` `pill`, primary-ის ტოლი სიმაღლით (48px). 404-ის „Browse Store“ დროებით მშვიდი text link-ია (`text-foreground hover:text-brand`); მისი `ghost` pill-ზე გადაყვანა შემდეგ ეტაპზეა (PD-R498-404-SECONDARY-ALIGN). იგივე წესი ეხება `EmptyState`-ის მეორე მოქმედებას („Browse the store“) და შეცდომის გვერდის „Go Home“-ს: აღდგენის მოქმედება („Try Again“) primary-ია, გასვლა `ghost`.
+ 
+ ### IconButton
+ 
+diff --git a/docs/implementation/2026/quarter-IV/320-dpg-button-cleanup-stage-2a.md b/docs/implementation/2026/quarter-IV/320-dpg-button-cleanup-stage-2a.md
+index 67147db..7f7e662 100644
+--- a/docs/implementation/2026/quarter-IV/320-dpg-button-cleanup-stage-2a.md
++++ b/docs/implementation/2026/quarter-IV/320-dpg-button-cleanup-stage-2a.md
+@@ -1,7 +1,7 @@
+ # DPG-BUTTON-CLEANUP, ეტაპი 2a: სტატუსის გვერდების CTA ღილაკები
+ 
+ **თარიღი:** 2026-11-13
+-**სტატუსი:** In Progress (stage 2a of DPG-BUTTON-CLEANUP-2)
++**სტატუსი:** In Progress (stage 2a of DPG-BUTTON-CLEANUP-2; C round 498 PASS)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი

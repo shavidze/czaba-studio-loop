@@ -1,0 +1,69 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": false,
+ "realVerified": false,
+ "envStatus": {
+  "checkedUtc": "2026-11-13T22:49:30.3324183Z",
+  "round": 499,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "A-R499-CR-STORE-TRY-UNPINNED",
+   "severity": "medium",
+   "origin": "B spec",
+   "steps": [
+    "Read app/lib/__tests__/store-button-cleanup-2b.test.tsx B2B-5 (l.130-150) for the routes/store.tsx block",
+    "Compare with b-round-498/mutants-499.sh N7/N8"
+   ],
+   "expected": "The /store error 'Try again' link's builder arguments and `to` are pinned by a row.",
+   "actual": "Confirmed by C: the store.tsx block is asserted only to contain `buildButtonClassName(` and no hand-rolled literal tokens; no DOM row renders the branch. A ghost/md variant or a changed `to` would pass. A STOP is routed to B (L22/RETRO 450: unruled Medium = FAIL).",
+   "evidence": "c-round-499.md section 2; test file l.24-27,130-150; app/routes/store.tsx:353"
+  }
+ ],
+ "passed": [
+  "C0",
+  "C12",
+  "C13-auth-guard"
+ ],
+ "gate": [
+  "full vitest run",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "blocked": [
+  "C1-C11 not run: A STOPPED (L22) - unruled Medium routed to B; C1-C8, C10 not run in the browser",
+  "C9/C10/C11 (covering tests, mutants, docs) not run under L22 short route"
+ ],
+ "notes": "C14 source-scope end: same 5 modified + 2 new paths, frozen checks 1,2,4 rc 0 (c-round-499/frozen*.log). C12: no MISSING; diff only location moves (account.downloads.tsx:281 order, GATE498-L1 backlog->archive). C13 browser: fresh contexts 1440x900 and 1280x720: /studio/1 and /account/downloads show 'Sign in required' with no product download link (only nav 'Free Samples' link to /free-downloads); /studio-lab opens demo 'no sign-in required'. Premium not bypassed.",
+ "forB": [
+  "Rule A-R499-CR-STORE-TRY-UNPINNED: option (a) add a /store DOM row + mutant and re-pin check 4, or rule it Low with reasoning",
+  "A's Lows A-R499-CR-PAIR-ORDER, CR-TRYAGAIN-TYPE, CR-DS-SAME-RULE, doc 321 l.30/build-line/l.83 wording remain open"
+ ],
+ "manifestPaths": 7,
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": 1,
+ "assertsSpecified": true,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": null,
+ "gateChecksNamed": [
+  "full vitest",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": [
+  "B precheck-full.log",
+  "B precheck-build-sketch.log (not re-run by C)"
+ ],
+ "chainHeadGateRunGreen": true,
+ "affectedChecksNamed": [
+  "covering 14 files/137 tests"
+ ],
+ "affectedChecksRunOnSketch": [
+  "B precheck-covering.log; C did not re-run (L22 short route)"
+ ]
+}

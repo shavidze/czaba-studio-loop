@@ -1,0 +1,229 @@
+diff --git a/app/components/errors/ErrorBoundary.tsx b/app/components/errors/ErrorBoundary.tsx
+index 4bc3ec6..94cc480 100644
+--- a/app/components/errors/ErrorBoundary.tsx
++++ b/app/components/errors/ErrorBoundary.tsx
+@@ -34,7 +34,7 @@ function ErrorDisplay({ title, message, showRefresh = true, showHome = true }: E
+         {/* Actions */}
+         <div className="flex flex-col sm:flex-row gap-3 justify-center">
+           {showRefresh && (
+-            <Button size="lg" shape="pill" onClick={() => window.location.reload()}>
++            <Button type="button" size="lg" shape="pill" onClick={() => window.location.reload()}>
+               <RefreshCw className="w-4 h-4" />
+               <span>Try Again</span>
+             </Button>
+diff --git a/app/lib/__tests__/product-price-cards.test.tsx b/app/lib/__tests__/product-price-cards.test.tsx
+index 5bd38ce..5dc010b 100644
+--- a/app/lib/__tests__/product-price-cards.test.tsx
++++ b/app/lib/__tests__/product-price-cards.test.tsx
+@@ -61,6 +61,9 @@ function renderVersions(
+   );
+ }
+ 
++const STORE_ERROR_TRY_AGAIN_CLASS =
++  'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-6 py-3 text-base gap-2';
++
+ function renderStoreCards(): string {
+   return renderToStaticMarkup(<StorePage />);
+ }
+@@ -225,6 +228,28 @@ describe('/store card price', () => {
+     loaderState.data = undefined;
+   });
+ 
++  it('SE1: a failed catalogue load renders one Try again link to /store with the primary lg pill classes', async () => {
++    apiSpies.getProducts.mockRejectedValue(new Error('backend down'));
++    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
++    const response = await loader({
++      request: new Request('http://localhost/store'),
++      params: {},
++      context: {},
++    });
++    loaderState.data = await response.json();
++    expect(consoleError).toHaveBeenCalledTimes(1);
++    consoleError.mockRestore();
++    const doc = new DOMParser().parseFromString(renderStoreCards(), 'text/html');
++    const alerts = doc.querySelectorAll('[role="alert"]');
++    expect(alerts).toHaveLength(1);
++    const links = [...(alerts[0]?.querySelectorAll('a') ?? [])];
++    expect(links).toHaveLength(1);
++    expect(links[0]?.textContent?.trim()).toBe('Try again');
++    expect(links[0]?.getAttribute('href')).toBe('/store');
++    expect(links[0]?.className).toBe(STORE_ERROR_TRY_AGAIN_CLASS);
++    expect(doc.querySelectorAll('a[href^="/products/"]')).toHaveLength(0);
++  });
++
+   it('SC1: the route loader maps a priceless pack to Price unavailable and a known one to its price', async () => {
+     apiSpies.getProducts.mockResolvedValue({
+       items: [
+diff --git a/app/lib/__tests__/store-button-cleanup-2b.test.tsx b/app/lib/__tests__/store-button-cleanup-2b.test.tsx
+index 116617c..bdadacd 100644
+--- a/app/lib/__tests__/store-button-cleanup-2b.test.tsx
++++ b/app/lib/__tests__/store-button-cleanup-2b.test.tsx
+@@ -14,20 +14,36 @@ const PRIMARY_LG_PILL =
+ const GHOST_LG_PILL =
+   'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-150 cursor-pointer bg-transparent text-muted hover:bg-elevated hover:text-foreground active:opacity-90 px-6 py-3 text-base gap-2';
+ 
+-const STAGE_2B1_SITES: ReadonlyArray<{ file: string; anchor: string; end: string }> = [
+-  { file: 'components/ui/EmptyState.tsx', anchor: '{/* Actions */}', end: '</div>\n    </div>' },
++const STAGE_2B1_SITES: ReadonlyArray<{
++  file: string;
++  anchor: string;
++  end: string;
++  pins: ReadonlyArray<string>;
++}> = [
++  {
++    file: 'components/ui/EmptyState.tsx',
++    anchor: '{/* Actions */}',
++    end: '</div>\n    </div>',
++    pins: [],
++  },
+   {
+     file: 'components/errors/ErrorBoundary.tsx',
+     anchor: '{/* Actions */}',
+     end: '</div>\n      </div>',
++    pins: ['onClick={() => window.location.reload()}'],
+   },
+   {
+     file: 'routes/store.tsx',
+     anchor: '{error ? (',
+     end: '</div>',
++    pins: [],
+   },
+ ];
+ 
++function isBefore(first: Element, second: Element): boolean {
++  return (first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
++}
++
+ function renderErrorPage(element: ReactElement, error: unknown): Document {
+   const router = createMemoryRouter(
+     [{ id: 'root', path: '/', element: null, errorElement: element }],
+@@ -69,6 +85,7 @@ describe('DPG-BUTTON-CLEANUP-2 stage 2b-1', () => {
+     expect(primary.className).toBe(PRIMARY_LG_PILL);
+     expect(secondary.getAttribute('href')).toBe('/store');
+     expect(secondary.className).toBe(GHOST_LG_PILL);
++    expect(isBefore(primary, secondary)).toBe(true);
+     expect(screen.queryAllByRole('button')).toHaveLength(0);
+   });
+ 
+@@ -91,6 +108,7 @@ describe('DPG-BUTTON-CLEANUP-2 stage 2b-1', () => {
+     expect(secondary.className).toBe(GHOST_LG_PILL);
+     expect(primary.getAttribute('type')).toBe('button');
+     expect(secondary.getAttribute('type')).toBe('button');
++    expect(isBefore(primary, secondary)).toBe(true);
+     fireEvent.click(primary);
+     fireEvent.click(secondary);
+     expect(onAction).toHaveBeenCalledTimes(1);
+@@ -112,6 +130,8 @@ describe('DPG-BUTTON-CLEANUP-2 stage 2b-1', () => {
+     expect(tryAgain[0]?.className).toBe(PRIMARY_LG_PILL);
+     expect(home[0]?.className).toBe(GHOST_LG_PILL);
+     expect(home[0]?.getAttribute('href')).toBe('/');
++    expect(tryAgain[0]?.getAttribute('type')).toBe('button');
++    expect(tryAgain[0] && home[0] ? isBefore(tryAgain[0], home[0]) : false).toBe(true);
+     expect(home[0]?.hasAttribute('data-discover')).toBe(false);
+     expect(home[0]?.querySelectorAll('svg')).toHaveLength(1);
+     expect(tryAgain[0]?.querySelectorAll('svg')).toHaveLength(1);
+@@ -124,6 +144,7 @@ describe('DPG-BUTTON-CLEANUP-2 stage 2b-1', () => {
+     expect(buttons).toHaveLength(1);
+     expect(buttons[0]?.textContent).toContain('Try Again');
+     expect(buttons[0]?.className).toBe(PRIMARY_LG_PILL);
++    expect(buttons[0]?.getAttribute('type')).toBe('button');
+     expect(doc.querySelectorAll('a')).toHaveLength(0);
+   });
+ 
+@@ -136,6 +157,9 @@ describe('DPG-BUTTON-CLEANUP-2 stage 2b-1', () => {
+       expect(end, `${site.file}: end`).toBeGreaterThan(start);
+       const block = source.slice(start, end);
+       expect(block, site.file).toContain('buildButtonClassName(');
++      for (const pin of site.pins) {
++        expect(block, `${site.file}: ${pin}`).toContain(pin);
++      }
+       const literals = [
+         ...block.matchAll(/className=(?:"([^"]*)"|\{'([^']*)'\}|\{`([^`]*)`\})/g),
+       ].map((match) => match[1] ?? match[2] ?? match[3] ?? '');
+diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+index 8e912fd..18f2018 100644
+--- a/docs/design/DESIGN_SYSTEM.md
++++ b/docs/design/DESIGN_SYSTEM.md
+@@ -1190,7 +1190,7 @@ hover:bg-elevated hover:text-foreground
+ active:opacity-90
+ ```
+ 
+-**Use for:** Less important actions. Store-ის გვერდზე primary CTA-ის წყვილი (მაგ. checkout-ის „Continue Shopping“ და „Discover More“) არის `ghost` `lg` `pill`, primary-ის ტოლი სიმაღლით (48px). 404-ის „Browse Store“ დროებით მშვიდი text link-ია (`text-foreground hover:text-brand`); მისი `ghost` pill-ზე გადაყვანა შემდეგ ეტაპზეა (PD-R498-404-SECONDARY-ALIGN). იგივე წესი ეხება `EmptyState`-ის მეორე მოქმედებას („Browse the store“) და შეცდომის გვერდის „Go Home“-ს: აღდგენის მოქმედება („Try Again“) primary-ია, გასვლა `ghost`.
++**Use for:** Less important actions. Store-ის გვერდზე primary CTA-ის წყვილი (მაგ. checkout-ის „Continue Shopping“ და „Discover More“) არის `ghost` `lg` `pill`, primary-ის ტოლი სიმაღლით (48px). 404-ის „Browse Store“ დროებით მშვიდი text link-ია (`text-foreground hover:text-brand`); მისი `ghost` pill-ზე გადაყვანა შემდეგ ეტაპზეა (PD-R498-404-SECONDARY-ALIGN). Store-ის CTA წყვილის წესი (`ghost` `lg` `pill`) ეხება `EmptyState`-ის მეორე მოქმედებას („Browse the store“) და შეცდომის გვერდის „Go Home“-ს: აღდგენის მოქმედება („Try Again“) primary-ია, გასვლა `ghost`.
+ 
+ ### IconButton
+ 
+diff --git a/docs/implementation/2026/quarter-IV/321-dpg-button-cleanup-stage-2b-1.md b/docs/implementation/2026/quarter-IV/321-dpg-button-cleanup-stage-2b-1.md
+index ff8a5ab..a4e1824 100644
+--- a/docs/implementation/2026/quarter-IV/321-dpg-button-cleanup-stage-2b-1.md
++++ b/docs/implementation/2026/quarter-IV/321-dpg-button-cleanup-stage-2b-1.md
+@@ -1,7 +1,7 @@
+ # DPG-BUTTON-CLEANUP, ეტაპი 2b-1: ცარიელი და შეცდომის მდგომარეობების CTA ღილაკები
+ 
+ **თარიღი:** 2026-11-13
+-**სტატუსი:** In Progress (stage 2b-1 of DPG-BUTTON-CLEANUP-2; C round 499 PASS)
++**სტატუსი:** In Progress (stage 2b-1 of DPG-BUTTON-CLEANUP-2; C round 500 PASS)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -27,7 +27,7 @@ B-ის scanner-ით HEAD-ზე 116 hit იყო, მათგან 48 sol
+ - **ლინკები ლინკებად რჩება.** Remix `Link` და ჩვეულებრივი `<a>` (href `/`) class string-ს builder-იდან იღებს. `EmptyState`-ის ორი `<button>` branch გახდა `Button` (`type="button"`). ამ branch-ებს დღეს caller არ ჰყავს, მაგრამ ისინი component API-ის ნაწილია და რჩება (product-designer Q3; B-R499-EMPTYSTATE-ONACTION-UNUSED).
+ - **Import:** `EmptyState` იმპორტს აკეთებს `./Button`-იდან და არა `~/components/ui` barrel-იდან. მიზეზი: `ui/`-ს შიგნით barrel import ციკლს შექმნიდა (tech-lead, `b-round-498/sketch-review.md`).
+ - **Deviation-ები (თითოეული მიზეზით; ზომები: `b-round-498/measure/summary.txt`):**
+-  - D1: ათივე target-ის სიმაღლე 50-დან (border-ით 52-დან) ხდება 48. radius 8/12 px-დან ხდება 9999 px, weight კი 600. მიზეზი: ეტაპი 1-ის `lg` pill.
++  - D1: ათივე target-ის სიმაღლე 50-დან (denied წყვილში 52-დან: border ან flex row-ის stretch) ხდება 48. radius 8/12 px-დან ხდება 9999 px, weight კი 600. მიზეზი: ეტაპი 1-ის `lg` pill.
+   - D2: `EmptyState`-ის მეორე მოქმედებას ჰქონდა `bg-elevated`, `border-outline` და `text-foreground`. ახლა ის `ghost`-ია: გამჭვირვალე, `text-muted`, contrast 7.06. მიზეზი: მეორეხარისხოვანი მოქმედების ერთი კონცეფცია.
+   - D3: შეცდომის გვერდზე „Try Again“ secondary-დან ხდება primary, ხოლო „Go Home“ (ადრე `bg-brand` და `text-black`) ხდება `ghost`. მიზეზი: მთავარი მოქმედება აღდგენაა. route error გვერდზე `showHome` false-ია, ამიტომ იქ „Try Again“ ხშირად ერთადერთი ღილაკია (product-designer Q4).
+   - D4: `/store`-ის „Try again“ `inline-block` და `px-5`-დან ხდება `inline-flex` და `px-6` და იღებს hover-ს. სიგანე 107-დან ხდება 117. მიზეზი: drift-ის მოხსნა.
+@@ -61,9 +61,10 @@ flowchart LR
+ ## შეცვლილი ფაილები
+ 
+ - `app/components/ui/EmptyState.tsx` — ორი `Link` builder-ზე (primary და `ghost`, ორივე `lg` `pill`). ორი `<button>` branch გახდა `Button`. იმპორტი `./Button`-იდან. builder-ის 2 გამოძახება (`b-round-498/builder-calls-sketch.txt`).
+-- `app/components/errors/ErrorBoundary.tsx` — `ErrorDisplay`-ის „Try Again“ ხდება primary `lg` `pill`. „Go Home“ ჩვეულებრივ `<a>`-დ რჩება `ghost` `lg` `pill` class-ით. builder-ის 1 გამოძახება.
++- `app/components/errors/ErrorBoundary.tsx` — `ErrorDisplay`-ის „Try Again“ ხდება primary `lg` `pill` და იღებს `type="button"`-ს (რაუნდი 500, A-R499-CR-TRYAGAIN-TYPE). „Go Home“ ჩვეულებრივ `<a>`-დ რჩება `ghost` `lg` `pill` class-ით. builder-ის 1 გამოძახება.
+ - `app/routes/store.tsx` — შეცდომის „Try again“ `Link` primary `lg` `pill`-ზე. builder-ის 1 გამოძახება.
+-- `app/lib/__tests__/store-button-cleanup-2b.test.tsx` — ახალი ტესტები B2B-0…B2B-5.
++- `app/lib/__tests__/store-button-cleanup-2b.test.tsx` — ახალი ტესტები B2B-0…B2B-5. რაუნდში 500 დაემატა წყვილის რიგი (B2B-1…B2B-3), „Try Again“-ის `type="button"` (B2B-3, B2B-4) და reload handler-ის pin (B2B-5).
++- `app/lib/__tests__/product-price-cards.test.tsx` — ახალი row SE1: `/store`-ის შეცდომის „Try again“ (რაუნდი 500, A-R499-CR-STORE-TRY-UNPINNED).
+ - `docs/design/DESIGN_SYSTEM.md` — `### Buttons`: pill-ის გამოყენების სტრიქონი და Ghost-ის „Use for“ სტრიქონი.
+ - `docs/implementation/2026/quarter-IV/320-dpg-button-cleanup-stage-2a.md` — მხოლოდ სტატუსის სტრიქონი (L28 ფორმა, B-R498-DOC320-L28).
+ 
+@@ -80,24 +81,26 @@ flowchart LR
+ 
+   ეს მხოლოდ client path-ს ამოწმებს. ანონიმური `/studio/1` და `/account/downloads` კვლავ „Sign in required“-ს აჩვენებს (C-ის row C13).
+ - **Problem:** root error გვერდი `Layout`-ის body-ში საკუთარ `<html>`-ს რენდერავს. browser აფიქსირებს `validateDOMNesting` გაფრთხილებას. → **Solution:** ეს ბაგი ამ რაუნდამდეც არსებობდა და ამ რაუნდში არ სწორდება. ჩაიწერა როგორც B-R499-ROOT-ERRORBOUNDARY-NESTED-HTML (Low) და იხილეთ TODO.
+-- **Problem:** class string-ის ტესტები შეიძლება builder-ს დაეყრდნოს და ვერაფერი დაიჭიროს. → **Solution:** B2B-0 ამოწმებს, რომ ორი literal oracle (`PRIMARY_LG_PILL`, `GHOST_LG_PILL`) builder-ის output-ს უდრის. B2B-1…B2B-4 target-ებს ამ oracle-ებს ადარებს. B2B-5 სამ action block-ში ამოწმებს, რომ `bg-brand`, `bg-elevated`, `text-black` და `rounded-lg` literal აღარ არის. B-ის mutant-ებიდან N1–N9 ყველა წითელია (`b-round-498/mutants-499.txt`, `mutants-499-failing-rows.txt`). A-ს mutant-ები არ გაუშვია.
++- **Problem:** რაუნდში 499 A-ს code-reviewer-მა აჩვენა, რომ `/store`-ის „Try again“-ს არცერთი DOM row არ ამოწმებდა: `ghost` variant-ი ან `to="/"` ყველა row-ს გაივლიდა (A-R499-CR-STORE-TRY-UNPINNED, Medium). A-მ რაუნდი STOP-ით დაასრულა (`a-round-499.md`). → **Solution:** B-მ რაუნდში 500 დაამატა SE1 და mutant-ები N10–N13, N17 (`b-round-499/mutants-500.txt`).
++- **Problem:** class string-ის ტესტები შეიძლება builder-ს დაეყრდნოს და ვერაფერი დაიჭიროს. → **Solution:** B2B-0 ამოწმებს, რომ ორი literal oracle (`PRIMARY_LG_PILL`, `GHOST_LG_PILL`) builder-ის output-ს უდრის. B2B-1…B2B-4 EmptyState-ისა და შეცდომის გვერდების target-ებს ამ oracle-ებს ადარებს და წყვილის რიგს ამოწმებს. `/store`-ის „Try again“-ს SE1 (`product-price-cards.test.tsx`) loader-ის შეცდომიდან რენდერავს და მის class-ს, ტექსტსა და href-ს (`/store`) ამოწმებს. B2B-5 სამ action block-ში ამოწმებს, რომ `bg-brand`, `bg-elevated`, `text-black` და `rounded-lg` literal აღარ არის. B-ის mutant-ებიდან N1–N9 (`b-round-498/mutants-499.txt`) და N5b, N10–N18 (`b-round-499/mutants-500.txt`) ყველა წითელია; წითელი row-ები: `b-round-499/mutants-500-failing-rows.txt`. A-ს mutant-ები არ გაუშვია.
+ 
+ ## ტესტირება
+ 
+-- **A, რაუნდი 499** (logs `a-round-499/`-ში):
+-  - frozen check-ები 1–3 (HEAD `82e118a`) rc 0. sketch-ის `git apply --check` და `git apply` rc 0, check 4 rc 0 (`a-round-499.md`). prose-ის შემდეგ check-ები 1, 2 და 4 ხელახლა rc 0 (`frozen-after-doc.log`);
++- **A, რაუნდი 500** (logs `a-round-500/`-ში):
++  - frozen check-ები 1–3 rc 0. delta sketch-ის (`b-round-499/sketch-500.patch.txt`) `git apply --check` და `git apply` rc 0, check 4 rc 0 (`a-round-500.md`);
+   - `npm run typecheck` rc 0 (`typecheck.log`);
+-  - `npm run lint` rc 0, 180 warning (`lint.log`);
+-  - Biome შეცვლილ 4 code/test ფაილზე: rc 0, 6 warning (`biome-scoped.log`; B: `b-round-498/precheck-biome.log`);
+-  - covering set (`b-round-498/covering-files.txt`): 14 ფაილი, 137 ტესტი, ყველა PASS (`covering.log`).
+-- **B, sketch-ის pre-check** (scratch ასლზე, `b-round-498/`):
+-  - სრული suite: 297 ფაილი / 4,328 ტესტი, rc 0 (`precheck-full.log`);
+-  - build rc 0 (`precheck-build-sketch.log`);
+-  - browser-ში HEAD და sketch შედარდა 1440/1280/375 viewport-ებზე (`measure/head/`, `measure/sketch/`, `measure/summary.txt`);
+-  - contrast: primary 8.32, ghost 7.06, hover ≥ 10.28 (`measure/summary.txt`). ghost-ის hover fill გვერდის ფონზე სუსტია, 1.12 (`measure/summary.txt`); მას DPG-COLOR-CONSOLIDATE ფლობს (PD-R499-GHOST-HOVER-FAINT).
++  - `npm run lint` rc 0, 180 warning (`lint.log`; B: `b-round-499/precheck-lint.log`);
++  - Biome შეცვლილ 5 code/test ფაილზე: rc 0, 6 warning (`biome-scoped.log`; B: `b-round-499/precheck-biome.log`);
++  - covering set (`b-round-499/covering-files.txt`): 14 ფაილი, 138 ტესტი, ყველა PASS (`covering.log`; B: `b-round-499/precheck-covering.log`).
++- **B, sketch-ის pre-check** (scratch ასლზე, `b-round-499/`):
++  - სრული suite: 297 ფაილი / 4,329 ტესტი, rc 0 (`precheck-full.log`);
++  - build rc 0, `✓ built`; CSS bundle იგივეა, რაც gate 498-ზე (`precheck-build-sketch.log`);
++  - mutant-ები N5b, N10–N18 ყველა წითელია (`mutants-500.txt`); ძველი N1–N4 და N6–N9 ამ tree-ზეც წითელია (`mutants-499-on-500-tree.txt`);
++  - browser-ში HEAD და sketch შედარდა 1440/1280/375 viewport-ებზე (`b-round-498/measure/head/`, `b-round-498/measure/sketch/`, `b-round-498/measure/summary.txt`). რაუნდი 500-ის delta class-ს არ ცვლის: ის ამატებს მხოლოდ `type="button"`-ს და ტესტებს;
++  - contrast: primary 8.32, ghost 7.06, hover ≥ 10.28 (`b-round-498/measure/summary.txt`). ghost-ის hover fill გვერდის ფონზე სუსტია, 1.12 (`b-round-498/measure/summary.txt`); მას DPG-COLOR-CONSOLIDATE ფლობს (PD-R499-GHOST-HOVER-FAINT).
+ 
+   A-ს browser row-ები არ გაუშვია.
+-- **Browser-ის მიღება** (rest, hover, focus, stack, contrast, nav, journey, protection): C round 499, შედეგი `c-round-499.json`-შია.
++- **Browser-ის მიღება** (rest, hover, focus, stack, contrast, nav, journey, protection): C round 500, შედეგი `c-round-500.json`-შია.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
