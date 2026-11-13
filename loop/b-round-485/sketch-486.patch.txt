@@ -1,0 +1,350 @@
+diff --git a/app/lib/__tests__/account-orders-card.test.tsx b/app/lib/__tests__/account-orders-card.test.tsx
+new file mode 100644
+index 0000000..b11c01d
+--- /dev/null
++++ b/app/lib/__tests__/account-orders-card.test.tsx
+@@ -0,0 +1,172 @@
++import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import OrdersPage from '~/routes/account.orders';
++import { apiClient, type Order } from '~/services/api/client';
++
++vi.mock('~/hooks', () => ({
++  useAuth: () => ({ user: { id: 7, email: 'buyer@example.invalid', accessToken: 'token' } }),
++}));
++vi.mock('~/components/auth', () => ({
++  RequireAuth: ({ children }: { children: ReactNode }) => <>{children}</>,
++}));
++vi.mock('~/services/api/client', async (importOriginal) => {
++  const actual = await importOriginal<typeof import('~/services/api/client')>();
++  return {
++    ...actual,
++    apiClient: {
++      getMyOrders: vi.fn(),
++      setAccessToken: vi.fn(),
++    },
++  };
++});
++
++const ORDERS: Order[] = [
++  {
++    id: 101,
++    orderNumber: '1001',
++    userId: 7,
++    status: 'Completed',
++    paymentStatus: 'Paid',
++    subtotal: 49,
++    tax: 0,
++    total: 49,
++    currency: 'USD',
++    createdAt: '2026-11-01T10:00:00Z',
++    items: [
++      {
++        id: 501,
++        productId: 11,
++        productTitle: 'Middle East',
++        variantName: 'Full mix + 4 stems',
++        licenseType: 'Standard',
++        unitPrice: 49,
++        quantity: 1,
++        total: 49,
++      },
++    ],
++  },
++  {
++    id: 102,
++    orderNumber: '1002',
++    userId: 7,
++    status: 'Completed',
++    paymentStatus: 'Pending',
++    subtotal: 98,
++    tax: 0,
++    total: 98,
++    currency: 'USD',
++    createdAt: '2026-11-05T10:00:00Z',
++    items: [
++      {
++        id: 502,
++        productId: 12,
++        productTitle: 'Night Drive',
++        licenseType: 'Extended',
++        unitPrice: 59,
++        quantity: 1,
++        total: 59,
++      },
++      {
++        id: 503,
++        productId: 13,
++        productTitle: 'Dust Storm',
++        licenseType: 'Standard',
++        unitPrice: 39,
++        quantity: 1,
++        total: 39,
++      },
++    ],
++  },
++];
++
++beforeEach(() => {
++  vi.clearAllMocks();
++  vi.mocked(apiClient.getMyOrders).mockResolvedValue({
++    items: ORDERS,
++    totalCount: ORDERS.length,
++    pageNumber: 1,
++    pageSize: 50,
++  });
++});
++afterEach(() => cleanup());
++
++function renderOrders(): void {
++  render(<OrdersPage />);
++}
++
++async function findToggle(orderNumber: string): Promise<HTMLElement> {
++  return screen.findByRole('button', { name: new RegExp(`^Order #${orderNumber}(?!\\d)`) });
++}
++
++function controlledPanel(toggle: HTMLElement): HTMLElement {
++  const panelId = toggle.getAttribute('aria-controls');
++  expect(panelId).toBeTruthy();
++  const panel = panelId ? document.getElementById(panelId) : null;
++  expect(panel).not.toBeNull();
++  if (!panel) throw new Error('controlled panel missing');
++  return panel;
++}
++
++describe('Account order card disclosure (B-R480-ORDER-CARD-KEYBOARD)', () => {
++  it('OC1 each order header is a native button inside its h3, collapsed, controlling a hidden panel', async () => {
++    renderOrders();
++    const toggle = await findToggle('1001');
++    expect(toggle.tagName).toBe('BUTTON');
++    expect(toggle.getAttribute('type')).toBe('button');
++    expect(toggle.getAttribute('aria-expanded')).toBe('false');
++    expect(toggle.closest('h3')).not.toBeNull();
++    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(2);
++    const panel = controlledPanel(toggle);
++    expect(panel.hidden).toBe(true);
++    expect(toggle.contains(panel)).toBe(false);
++    expect(screen.queryByRole('heading', { level: 4, name: 'Middle East' })).toBeNull();
++    expect(document.querySelectorAll('[role="button"]')).toHaveLength(0);
++  });
++
++  it('OC2 activating the toggle shows items, licence and prices, and activating again hides them', async () => {
++    renderOrders();
++    const toggle = await findToggle('1001');
++    fireEvent.click(toggle);
++    expect(toggle.getAttribute('aria-expanded')).toBe('true');
++    const panel = controlledPanel(toggle);
++    expect(panel.hidden).toBe(false);
++    const inPanel = within(panel);
++    expect(inPanel.getByRole('heading', { level: 4, name: 'Middle East' })).toBeTruthy();
++    expect(inPanel.getByText('Full mix + 4 stems')).toBeTruthy();
++    expect(inPanel.getByText(/Standard License/)).toBeTruthy();
++    expect(inPanel.getByText('Total')).toBeTruthy();
++    expect(inPanel.getAllByText('$49.00')).toHaveLength(2);
++    fireEvent.click(toggle);
++    expect(toggle.getAttribute('aria-expanded')).toBe('false');
++    expect(panel.hidden).toBe(true);
++    expect(screen.queryByRole('heading', { level: 4, name: 'Middle East' })).toBeNull();
++  });
++
++  it('OC3 cards toggle independently and control distinct panels', async () => {
++    renderOrders();
++    const first = await findToggle('1001');
++    const second = await findToggle('1002');
++    expect(first.getAttribute('aria-controls')).not.toBe(second.getAttribute('aria-controls'));
++    fireEvent.click(second);
++    expect(second.getAttribute('aria-expanded')).toBe('true');
++    expect(first.getAttribute('aria-expanded')).toBe('false');
++    expect(controlledPanel(first).hidden).toBe(true);
++    const secondPanel = within(controlledPanel(second));
++    expect(secondPanel.getByRole('heading', { level: 4, name: 'Night Drive' })).toBeTruthy();
++    expect(secondPanel.getByRole('heading', { level: 4, name: 'Dust Storm' })).toBeTruthy();
++  });
++
++  it('OC4 the toggle keeps focus and its node across expand and collapse', async () => {
++    renderOrders();
++    const toggle = await findToggle('1002');
++    toggle.focus();
++    fireEvent.click(toggle);
++    const expanded = await findToggle('1002');
++    expect(expanded).toBe(toggle);
++    expect(document.activeElement).toBe(toggle);
++    fireEvent.click(toggle);
++    expect(await findToggle('1002')).toBe(toggle);
++    expect(document.activeElement).toBe(toggle);
++  });
++});
+diff --git a/app/routes/account.orders.tsx b/app/routes/account.orders.tsx
+index 22982a1..48732a6 100644
+--- a/app/routes/account.orders.tsx
++++ b/app/routes/account.orders.tsx
+@@ -1,6 +1,6 @@
+ import type { MetaFunction } from '@remix-run/node';
+ import { Calendar, ChevronDown, ChevronUp, CreditCard, Package } from 'lucide-react';
+-import { useEffect, useState } from 'react';
++import { useEffect, useId, useState } from 'react';
+ import { RequireAuth } from '~/components/auth';
+ import { useAuth } from '~/hooks';
+ import { apiClient, type Order } from '~/services/api/client';
+@@ -56,87 +56,91 @@ interface OrderCardProps {
+ 
+ function OrderCard({ order }: OrderCardProps) {
+   const [isExpanded, setIsExpanded] = useState(false);
++  const panelId = useId();
+ 
+   return (
+     <div className="bg-elevated border border-outline rounded-lg overflow-hidden">
+-      <div
+-        onClick={() => setIsExpanded(!isExpanded)}
+-        className="p-4 md:p-6 cursor-pointer hover:bg-surface/50 transition-colors"
+-      >
+-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+-          <div className="flex items-start gap-4">
+-            <div className="w-12 h-12 bg-surface rounded-lg flex items-center justify-center flex-shrink-0">
+-              <Package className="w-6 h-6 text-brand" />
+-            </div>
+-            <div>
+-              <div className="flex items-center gap-3 mb-1">
+-                <h3 className="text-lg font-semibold text-foreground">
+-                  Order #{order.orderNumber}
+-                </h3>
+-                {getStatusBadge(order.paymentStatus)}
+-              </div>
+-              <div className="flex items-center gap-4 text-sm text-muted">
+-                <span className="flex items-center gap-1">
+-                  <Calendar className="w-4 h-4" />
+-                  {formatDate(order.createdAt)}
++      <h3>
++        <button
++          type="button"
++          aria-expanded={isExpanded}
++          aria-controls={panelId}
++          onClick={() => setIsExpanded((expanded) => !expanded)}
++          className="block w-full select-text text-left p-4 md:p-6 hover:bg-surface/50 active:transform-none! transition-colors [--focus-offset:-2px]"
++        >
++          <span className="flex flex-col md:flex-row md:items-center justify-between gap-4">
++            <span className="flex items-start gap-4">
++              <span className="w-12 h-12 bg-surface rounded-lg flex items-center justify-center flex-shrink-0">
++                <Package className="w-6 h-6 text-brand" />
++              </span>
++              <span className="block">
++                <span className="flex items-center gap-3 mb-1">
++                  <span className="text-lg font-semibold text-foreground">
++                    Order #{order.orderNumber}
++                  </span>
++                  {getStatusBadge(order.paymentStatus)}
+                 </span>
+-                <span className="flex items-center gap-1">
+-                  <CreditCard className="w-4 h-4" />
+-                  {formatPrice(order.total, order.currency)}
++                <span className="flex items-center gap-4 text-sm text-muted">
++                  <span className="flex items-center gap-1">
++                    <Calendar className="w-4 h-4" />
++                    {formatDate(order.createdAt)}
++                  </span>
++                  <span className="flex items-center gap-1">
++                    <CreditCard className="w-4 h-4" />
++                    {formatPrice(order.total, order.currency)}
++                  </span>
+                 </span>
+-              </div>
+-            </div>
+-          </div>
++              </span>
++            </span>
+ 
+-          <div className="flex items-center gap-2">
+-            <span className="text-sm text-muted">
+-              {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
++            <span className="flex items-center gap-2">
++              <span className="text-sm text-muted">
++                {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
++              </span>
++              {isExpanded ? (
++                <ChevronUp className="w-5 h-5 text-muted" />
++              ) : (
++                <ChevronDown className="w-5 h-5 text-muted" />
++              )}
+             </span>
+-            {isExpanded ? (
+-              <ChevronUp className="w-5 h-5 text-muted" />
+-            ) : (
+-              <ChevronDown className="w-5 h-5 text-muted" />
+-            )}
+-          </div>
+-        </div>
+-      </div>
++          </span>
++        </button>
++      </h3>
++
++      <div id={panelId} hidden={!isExpanded} className="border-t border-outline">
++        <div className="p-4 md:p-6 space-y-4">
++          {order.items.map((item) => (
++            <div key={item.id} className="flex items-center gap-4 p-3 bg-surface rounded-lg">
++              <div className="w-16 h-16 bg-background rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
++                <Package className="w-6 h-6 text-muted" />
++              </div>
+ 
+-      {isExpanded && (
+-        <div className="border-t border-outline">
+-          <div className="p-4 md:p-6 space-y-4">
+-            {order.items.map((item) => (
+-              <div key={item.id} className="flex items-center gap-4 p-3 bg-surface rounded-lg">
+-                <div className="w-16 h-16 bg-background rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+-                  <Package className="w-6 h-6 text-muted" />
+-                </div>
+-
+-                <div className="flex-1 min-w-0">
+-                  <h4 className="text-foreground font-medium truncate">{item.productTitle}</h4>
+-                  {item.variantName && <p className="text-sm text-muted">{item.variantName}</p>}
+-                  <p className="text-xs text-muted">
+-                    {item.licenseType} License &middot; Qty: {item.quantity}
+-                  </p>
+-                </div>
+-
+-                <div className="text-right">
+-                  <span className="text-foreground font-medium">
+-                    {formatPrice(item.unitPrice, order.currency)}
+-                  </span>
+-                </div>
++              <div className="flex-1 min-w-0">
++                <h4 className="text-foreground font-medium truncate">{item.productTitle}</h4>
++                {item.variantName && <p className="text-sm text-muted">{item.variantName}</p>}
++                <p className="text-xs text-muted">
++                  {item.licenseType} License &middot; Qty: {item.quantity}
++                </p>
+               </div>
+-            ))}
+-          </div>
+ 
+-          <div className="px-4 md:px-6 pb-4 md:pb-6">
+-            <div className="flex justify-between items-center pt-4 border-t border-outline">
+-              <span className="text-muted font-medium">Total</span>
+-              <span className="text-xl font-bold text-foreground">
+-                {formatPrice(order.total, order.currency)}
+-              </span>
++              <div className="text-right">
++                <span className="text-foreground font-medium">
++                  {formatPrice(item.unitPrice, order.currency)}
++                </span>
++              </div>
+             </div>
++          ))}
++        </div>
++
++        <div className="px-4 md:px-6 pb-4 md:pb-6">
++          <div className="flex justify-between items-center pt-4 border-t border-outline">
++            <span className="text-muted font-medium">Total</span>
++            <span className="text-xl font-bold text-foreground">
++              {formatPrice(order.total, order.currency)}
++            </span>
+           </div>
+         </div>
+-      )}
++      </div>
+     </div>
+   );
+ }

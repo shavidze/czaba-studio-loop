@@ -1,0 +1,8 @@
+# B round 485 -> 486 planning checkpoint
+- step1: archived tasks/round-485.md (cmp equal). Baseline store HEAD 0341229 (gate 485 published; context/head-sha.txt still 751e30e, stale). Backups *-before-486 saved.
+- step2: inputs read: c-round-485 PASS bV true (1 Low B-R485-STUDIO-PRODUCT-TITLE), a-round-485 (reviewer Low target case, arch note), gate 485 review COMMIT OK (Medium-low h1 exit-wrapper -> Low; cosmetic import order). L57 on c-round-485: 12 fields absent + 1 bug without origin (INFO). No new user-review answers.
+- step3 (next): backlog bookkeeping script update-backlog-1.py; then order-card HEAD probe, sketch on /tmp/b486-scratch (:5186, cacheDir /tmp/b486-vite-cache).
+- step4: backlog v476 (D-29z1727, D-29z1728). HEAD probe reproduced B-R480 (0 card Tab stops, probe/head.json). Sketch on /tmp/b486-scratch (:5186): h3>button disclosure, hidden panel, [--focus-offset:-2px], no radius -> 0 px diff HEAD (probe/pxdiff.txt). sketch-486.patch.txt sha ebcfe669...; tests OC1-OC4; 9 mutants red; full suite 292/4263 rc0; tsc rc0. tech-lead review launched (background). Next: claims script, task, feature-status, b-round-485.md, b-next.json, backlog-2.
+- step5: task written; backlog v477 (D-29z1729-1731); feature-status updated. Next: claims planning/sketch outputs, b-round-485.md, b-next.json, cleanup scratch.
+- step6: claims outputs (planning/sketch/delta) saved; b-round-485.md + b-next.json written. Next: final advisor, scratch cleanup.
+- step7: advisor closing items applied (375 probe, selection/press -> sketch v2 794821b0, tech-lead delta APPROVE, mouse-only sweep -> B-R486-PROFILE-NAME-KEYBOARD Medium for 487, TLM on board, K16 wording); backlog v478; claims regenerated (no MISSING); scratch removed; store clean. DONE.

@@ -1,0 +1,17 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const ORD={ id: 101, orderNumber: '1001', userId: 7, status: 'C', paymentStatus: 'Paid', subtotal: 49, tax: 0, total: 49, currency: 'USD', createdAt: '2026-11-01T10:00:00Z', items: [{ id: 501, productId: 11, productTitle: 'Middle East', licenseType: 'Standard', unitPrice: 49, quantity: 1, total: 49 }] };
+const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+await ctx.addInitScript(() => { localStorage.setItem('czaba_lead_magnet', JSON.stringify({ viewCount: 0, lastResetDate: new Date().toISOString().slice(0, 10), dismissed: true, submitted: false })); localStorage.setItem('auth_user', JSON.stringify({ id: 7, email: 'p@example.invalid', accessToken: 'stub-token', refreshToken: 'r' })); });
+await ctx.route('**/api/auth/profile', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, data: { id: 7, email: 'p@example.invalid' } }) }));
+await ctx.route('**/api/orders/my**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, data: { items: [ORD], totalCount: 1, pageNumber: 1, pageSize: 50 } }) }));
+const p = await ctx.newPage(); p.on('framenavigated', (f) => { if (f === p.mainFrame()) console.log('NAV', f.url()); });
+await p.goto(process.argv[2] + '/account/orders'); await p.getByText('Order #1001').waitFor(); await p.waitForTimeout(1500);
+const a = () => p.evaluate(() => `${document.activeElement.tagName} ${document.activeElement.getAttribute('aria-expanded')} ${document.activeElement.textContent.trim().slice(0,20)}`);
+await p.getByRole('button', { name: /Order #1001/ }).focus(); console.log('focus', await a());
+await p.keyboard.press('Enter'); await p.waitForTimeout(300); console.log('enter', await a());
+await p.keyboard.press('Space'); await p.waitForTimeout(300); console.log('space', await a());
+await p.keyboard.down('Enter'); for (let i = 0; i < 5; i++) { await p.keyboard.down('Enter'); await p.waitForTimeout(40); } await p.keyboard.up('Enter'); await p.waitForTimeout(300); console.log('heldEnter', await a());
+await p.keyboard.down(' '); for (let i = 0; i < 5; i++) { await p.keyboard.down(' '); await p.waitForTimeout(40); } await p.keyboard.up(' '); await p.waitForTimeout(300); console.log('heldSpace', await a(), p.url());
+await b.close();

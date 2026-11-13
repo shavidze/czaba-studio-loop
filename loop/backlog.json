@@ -1,9 +1,9 @@
 {
-  "version": 475,
+  "version": 478,
   "updated": "2026-11-13",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 485: CLIENT-NAV-CONTRACT - route announcer in RouteTransition (title, else page h1; silent first render; Studio<->Store), releaseLinkFocus try/finally + target/download skip, doc 313 slow-loader note; closes GATE479-M1 (live-region contract) + 4 Lows; baseline 751e30e (current-task.md)",
+  "current_task": "Round 486: B-R480-ORDER-CARD-KEYBOARD - My Orders card header becomes h3 > button (aria-expanded, aria-controls, hidden panel; APG Accordion), inset shared focus ring, 0 px visual change; tests OC1-OC4; doc 314; baseline 0341229 (current-task.md)",
   "advisor_used_by_B": "2026-11-12 B round 475 -> 476 planning: advisor available and consulted after orientation (advice applied: read gate-475 review + all of a-round-475; snapshot before edits; L10 STOP ruling; R1 as confirmedBy (L7); split P0-3 into 3a loader/logo and 3b docs after a docs hue scan; primitives text to root now; product-designer before the sketch; one background value for cover+loader+page; DPG-LOGO header pulled in to avoid three logo treatments; parked SpotlightLoader items ruled (L6); L23 pre-run of pinning tests; computed-style rows, pixel rows not run by B ship as record; SABA-B-16 stays open). product-designer b-round-475/pd-p0-3a.md; tech-lead APPROVE WITH CHANGES, all adopted in v2 (b-round-475/sketch-review.md)",
   "baseline": {
     "tsc_errors": 0,
@@ -12726,8 +12726,16 @@
       "task": "current-task.md",
       "decision": "D-29z1724",
       "type": "CLIENT-NAV-CONTRACT (GATE479-M1 + 4 Lows)",
-      "status": "dispatched",
+      "status": "C PASS (browserVerified true, 15 rows, 1 Low pre-existing); gate 485 published 0341229 (D-29z1727)",
       "note": "baseline HEAD 751e30e clean; claims b-round-484/claims-485.sh; frozen manifest b-round-484/r485-tree-sha256.txt (1393); sketch b-round-484/sketch-485.patch.txt; probes b-round-484/probe"
+    },
+    {
+      "round": 486,
+      "task": "current-task.md",
+      "decision": "D-29z1729",
+      "type": "B-R480-ORDER-CARD-KEYBOARD (Medium fix)",
+      "status": "dispatched",
+      "note": "baseline HEAD 0341229 clean; claims b-round-485/claims-486.sh; frozen manifest b-round-485/r486-tree-sha256.txt (1397); sketch b-round-485/sketch-486.patch.txt; probes b-round-485/probe; sketch v2 sha 794821b0d13b4059 (D-29z1732)"
     }
   ],
   "post_current_stage_queue": [
@@ -29223,7 +29231,7 @@
       "id": "GATE479-M1-ROUTE-ANNOUNCE",
       "severity": "medium",
       "origin": "gate reviewer",
-      "status": "dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485, announcer in RouteTransition (sketch pre-run in browser); screen-reader half -> TLM-R485-SR-ROUTE-ANNOUNCE after C PASS | scheduled (D-29z1720): CLIENT-NAV-CONTRACT round 485 (after the REGRESSION part-2 remainder 484) | scheduled (D-29z1715): CLIENT-NAV-CONTRACT round 484 (after REGRESSION parts 482-483) | scheduled (D-29z1704): CLIENT-NAV-CONTRACT round 482 (B pre-runs title timing, meta fallback, remount on a sketch); else ROOT-REQ-ROUTE-ANNOUNCER | open (D-29z1700): ruling D-29z1704",
+      "status": "done (D-29z1727): live-region contract C round 485 PASS (browserVerified true), published 0341229; screen-reader half -> TLM-R485-SR-ROUTE-ANNOUNCE (deadline RETRO 495, does not block) | dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485, announcer in RouteTransition (sketch pre-run in browser); screen-reader half -> TLM-R485-SR-ROUTE-ANNOUNCE after C PASS | scheduled (D-29z1720): CLIENT-NAV-CONTRACT round 485 (after the REGRESSION part-2 remainder 484) | scheduled (D-29z1715): CLIENT-NAV-CONTRACT round 484 (after REGRESSION parts 482-483) | scheduled (D-29z1704): CLIENT-NAV-CONTRACT round 482 (B pre-runs title timing, meta fallback, remount on a sketch); else ROOT-REQ-ROUTE-ANNOUNCER | open (D-29z1700): ruling D-29z1704",
       "title": "Client navigation does not announce the new page title to screen readers (a full reload did); 13 footer/content links since round 479, 15 header links before it",
       "evidence": "gates/round-479/review.md finding 1; git show 75a6028:app/components/layout/Header.tsx (15 <Link>); app/root.tsx has no announcer",
       "repro": "screen reader on: Tab to footer Support, Enter; the new page title is not spoken",
@@ -29277,12 +29285,12 @@
       "id": "B-R480-ORDER-CARD-KEYBOARD",
       "severity": "medium",
       "origin": "B pre-check",
-      "status": "scheduled (D-29z1726): round 486 (after CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1720): round 486 (after REGRESSION remainder 484 and CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1715): round 485 (after REGRESSION 482-483 and CLIENT-NAV-CONTRACT 484) | scheduled (D-29z1711): round 484 (after REGRESSION 482 and CLIENT-NAV-CONTRACT 483)",
+      "status": "dispatched (D-29z1729): round 486 on baseline 0341229 | scheduled (D-29z1726): round 486 (after CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1720): round 486 (after REGRESSION remainder 484 and CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1715): round 485 (after REGRESSION 482-483 and CLIENT-NAV-CONTRACT 484) | scheduled (D-29z1711): round 484 (after REGRESSION 482 and CLIENT-NAV-CONTRACT 483)",
       "title": "My Orders: an order card opens only on a mouse click on a <div>; keyboard and screen-reader users cannot reach the order items, licence type and prices",
       "evidence": "app/routes/account.orders.tsx l.59-62 (<div onClick> with cursor-pointer, no role/tabIndex/key handler); npx biome check app/routes/account.orders.tsx -> lint/a11y/useKeyWithClickEvents (b-round-480/sketch-biome.log); claims-481 K11",
       "repro": "signed in with at least one order (stub /api/orders/my in Playwright): Tab through /account/orders; no stop on any order card; Enter/Space cannot expand it",
       "added": "2026-11-12 B round 480 -> 481 planning",
-      "evidence_kind": "source reading + Biome lint only; not yet reproduced in a browser (round-484 planning runs the Tab probe with a one-order stub first)"
+      "evidence_kind": "reproduced in Chromium at HEAD 0341229 by B (b-round-485/probe/head.json, 0 card Tab stops at 1440x900 and 1280x720, signed-in stub); source + Biome as before"
     },
     {
       "id": "INFO-C482-PLAYWAV-IDENTICAL",
@@ -29291,6 +29299,17 @@
       "status": "recorded (D-29z1716): no task; R482-JOURNEY covers real playback",
       "title": "R482-EXPORT-VIS play-wav.mjs output byte-identical to round 437 including its clock samples; cause not established",
       "evidence": "c-round-482.json notes (R482-EXPORT-VIS); c-round-482/wav/wav.json cmp-equal to c-round-437/play-wav.json (claim K25)"
+    },
+    {
+      "id": "B-R486-PROFILE-NAME-KEYBOARD",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "status": "scheduled (D-29z1733): round 487 (after round 486; REGRESSION first if planning is on/after 2026-11-16)",
+      "title": "Account Profile: the name is edited by clicking a <p onClick> ('Click to add name'); keyboard and screen-reader users cannot start editing their name",
+      "evidence": "app/routes/account.tsx onClick={handleNameClick} on a <p> (b-round-485/mouse-only-sweep.txt: lint/a11y/useKeyWithClickEvents account.tsx:214); claims-486 K22",
+      "repro": "signed in (localStorage.auth_user stub): Tab through /account; no stop on the name; Enter cannot open the editor",
+      "added": "2026-11-13 B round 485 -> 486 planning",
+      "evidence_kind": "source + full-app Biome sweep; not yet reproduced in a browser (round-487 planning runs the Tab probe first)"
     }
   ],
   "tech_lead_notes": [
@@ -29778,6 +29797,13 @@
       "added": "2026-11-12 B round 467 -> 468 planning",
       "status": "RETRO 495 (D-29z1705) | open (D-29z1649): deadline RETRO 480 (L46); does not block",
       "what": "Saba's own device after SABA-B-15 stage 2 lands on the Vercel preview: / and /free-downloads with a mouse wheel and a trackpad in his browser; if still not smooth, a Chrome DevTools Performance trace (user-review/questions-round-467.md Q4)"
+    },
+    {
+      "id": "TLM-R485-SR-ROUTE-ANNOUNCE",
+      "added": "2026-11-13 B round 485 -> 486 planning",
+      "status": "open (D-29z1727): deadline RETRO 495 (L46); does not block (2026-10-23 root clarification class)",
+      "what": "NVDA (Windows Chrome) and VoiceOver (macOS Safari): after a footer link click (e.g. FAQ) the screen reader speaks the new page title ('FAQ | CZABA'); a repeated same-name navigation (/account -> /account/downloads) is spoken again; /studio-lab entry speaks 'CZABA Studio — Demo collection'",
+      "evidence": "c-round-485.md RA-* rows (live-region contract verified in Chromium, speech not)"
     }
   ],
   "workflow_policy": {
@@ -32969,6 +32995,21 @@
       "id": "SIG-R480-E2E-STALE-MUSIC-NAV",
       "added": "2026-11-12 B round 480 -> 481 planning",
       "note": "e2e/main-flow.spec.ts l.59 expects a nav link 'Music' -> /music; the header has none, and isVisible() makes the step skip silently. Clean up with the next e2e owner; not tasked."
+    },
+    {
+      "id": "SIG-R485-ROUTE-ANNOUNCEMENT-HOOK",
+      "added": "2026-11-13 B round 485 -> 486 planning",
+      "note": "A code-reviewer and gate-485 reviewer: app/components/animations/RouteTransition.tsx now owns announcement state + effect + rAF beside the transition. Keep. Extract useRouteAnnouncement(pathname) as one bounded task only if a second focus/announcement lifecycle lands here; acceptance = RA1-RA9 unchanged. Not scheduled."
+    },
+    {
+      "id": "SIG-R486-DISCLOSURE-PRIMITIVE",
+      "added": "2026-11-13 B round 485 -> 486 planning",
+      "note": "tech-lead (round-486 sketch review): ProductAccordion and the account OrderCard now both implement the APG accordion (heading > button, aria-expanded/controls). Extract a shared Disclosure/AccordionItem primitive only if a third copy appears. Not scheduled."
+    },
+    {
+      "id": "SIG-R486-MOUSE-ONLY-SWEEP",
+      "added": "2026-11-13 B round 485 -> 486 planning",
+      "note": "Full Biome a11y sweep 2026-11-13 (b-round-485/mouse-only-sweep.txt): besides account.orders (round 486) and account.tsx (B-R486-PROFILE-NAME-KEYBOARD), mouse-only click handlers remain on modal backdrops (ui/Modal.tsx x2, auth/AuthModal.tsx, audio/StemsPlayerModal.tsx x2; usually paired with Escape/close buttons - verify per modal before filing), legacy components/studio/* (StudioTrack, TransportBar, VideoPlayer, VideoUploadZone; frozen legacy per the removal policy) and the protected studio.$productId.tsx (x2). Triage, not scheduled."
     }
   ],
   "vitest_floor_round64": 1574,
@@ -43819,7 +43860,7 @@
       "id": "A-R479-L1-TARGET-BLANK",
       "severity": "low",
       "origin": "A",
-      "status": "dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485; closes on C PASS | deferred_low_polish (D-29z1701)",
+      "status": "closed (D-29z1727): CLIENT-NAV-CONTRACT C round 485 PASS, published 0341229 | dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485; closes on C PASS | deferred_low_polish (D-29z1701)",
       "title": "releaseLinkFocus does not skip target=\"_blank\" or reloadDocument links (React Router shouldProcessLinkClick does); no current call site has either",
       "evidence": "a-round-479.md code-reviewer Low 1",
       "repro": "see evidence",
@@ -43830,7 +43871,7 @@
       "id": "A-R479-L2-SLOW-LOADER-FOCUS",
       "severity": "low",
       "origin": "A",
-      "status": "dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485; closes on C PASS | deferred_low_polish (D-29z1701)",
+      "status": "closed (D-29z1727): CLIENT-NAV-CONTRACT C round 485 PASS, published 0341229 | dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485; closes on C PASS | deferred_low_polish (D-29z1701)",
       "title": "focus moves to body at click time; if a loader is slow or fails the user stays on the old page with focus on body; not written in doc 311",
       "evidence": "a-round-479.md code-reviewer Low 2",
       "repro": "see evidence",
@@ -43841,7 +43882,7 @@
       "id": "A-R479-L3-DEFAULTPREVENTED-UNTESTED",
       "severity": "low",
       "origin": "A",
-      "status": "dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485; closes on C PASS | deferred_low_polish (D-29z1701)",
+      "status": "closed (D-29z1727): CLIENT-NAV-CONTRACT C round 485 PASS, published 0341229 | dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485; closes on C PASS | deferred_low_polish (D-29z1701)",
       "title": "the defaultPrevented branch of releaseLinkFocus has no runtime test; IL4 is source text and sits outside its describe",
       "evidence": "a-round-479.md code-reviewer Low 3",
       "repro": "see evidence",
@@ -43852,7 +43893,7 @@
       "id": "GATE479-L2-TABINDEX-FINALLY",
       "severity": "low",
       "origin": "gate reviewer",
-      "status": "dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485; closes on C PASS | deferred_low_polish (D-29z1701)",
+      "status": "closed (D-29z1727): CLIENT-NAV-CONTRACT C round 485 PASS, published 0341229 | dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485; closes on C PASS | deferred_low_polish (D-29z1701)",
       "title": "link-focus.ts l.18-20: if the handler throws between setting and removing tabindex, body keeps tabindex=-1; try/finally would remove the risk",
       "evidence": "gates/round-479/review.md finding 2",
       "repro": "see evidence",
@@ -43908,6 +43949,47 @@
       "evidence": "b-round-484/sketch-review.md v2 N1/N2 (tech-lead delta re-review)",
       "repro": "signed-in client nav /account -> /account/downloads; read [data-route-announcer]",
       "added": "2026-11-13 B round 484 -> 485 planning"
+    },
+    {
+      "id": "B-R485-STUDIO-PRODUCT-TITLE",
+      "severity": "low",
+      "origin": "pre-existing",
+      "status": "deferred_low_polish (D-29z1728): needs ROOT-REQ-STUDIO-PRODUCT-TITLE (protected app/routes/studio.$productId.tsx)",
+      "title": "Client navigation into the purchased Studio /studio/:productId announces nothing (route has no meta; title '' and the h1 fallback is not rendered at the rAF read)",
+      "evidence": "a-round-485/studio-product-probe.json; c-round-485/auth.json",
+      "repro": "/faq -> client nav /studio/middle-east; read [data-route-announcer] and document.title",
+      "added": "2026-11-13 B round 485 -> 486 planning"
+    },
+    {
+      "id": "A-R485-REVIEW-L1-TARGET-CASE",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1728)",
+      "title": "releaseLinkFocus compares target case-sensitively (link-focus.ts), so target=\"_Self\" keeps focus; consistent with React Router's same-document check",
+      "evidence": "a-round-485.md code-reviewer Low",
+      "repro": "jsdom: anchor target=\"_Self\" plain click -> focus not released",
+      "added": "2026-11-13 B round 485 -> 486 planning"
+    },
+    {
+      "id": "GATE485-L1-H1-EXIT-WRAPPER",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1728): reviewer 'Medium-low' ruled Low; only reachable on a title-less route, and every loop-editable Store route has a title since round 485",
+      "title": "route-name.ts h1 fallback uses querySelector on .page-transition-wrapper h1; during AnimatePresence mode=wait exit the old wrapper is first, so a title-less route can be announced with the previous page's h1",
+      "evidence": "gates/round-485/review.md finding 1",
+      "repro": "a Store route without meta, client nav from a page with an h1; read the region one frame after navigation",
+      "fix": "read the last .page-transition-wrapper (querySelectorAll, last) plus a test that holds the exit open",
+      "added": "2026-11-13 B round 485 -> 486 planning"
+    },
+    {
+      "id": "B-R486-FOCUS-OFFSET-GUARD",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1730)",
+      "title": "The --focus-offset hook of the shared :focus-visible rule (app.css) is used by a Store component for the first time ([--focus-offset:-2px] on the order card toggle); store-focus-ring has no allow-list for it, so any offset value could be copied",
+      "evidence": "b-round-485/sketch-review.md L1 (tech-lead)",
+      "fix": "document --focus-offset as the approved offset hook (DESIGN_TOKENS/FORWARDREF via root) and add an allow-list row to store-focus-ring.test.ts",
+      "added": "2026-11-13 B round 485 -> 486 planning"
     }
   ],
   "regression_rounds": [
@@ -45723,7 +45805,7 @@
       "id": "CLIENT-NAV-CONTRACT",
       "added": "2026-11-12 B round 479 -> 480 planning (RETRO 480)",
       "decision": "D-29z1704",
-      "status": "dispatched round 485 (D-29z1724): RouteTransition placement (not Header) + meta titles on 6 routes, sketch-485 sha 3f06149c6bdd650a | planned for round 482 (after REGRESSION-2026-11-13); B pre-runs title timing, meta fallback and Studio->Store remount on a sketch (L58)",
+      "status": "done (D-29z1727): C round 485 PASS browserVerified true, published 0341229 | dispatched round 485 (D-29z1724): RouteTransition placement (not Header) + meta titles on 6 routes, sketch-485 sha 3f06149c6bdd650a | planned for round 482 (after REGRESSION-2026-11-13); B pre-runs title timing, meta fallback and Studio->Store remount on a sketch (L58)",
       "what": "RouteAnnouncer in app/components/layout (title, fallback main h1; not on /studio*), releaseLinkFocus try/finally, skip target=_blank/reloadDocument, runtime defaultPrevented test, slow-loader note in doc 311 successor",
       "closes": [
         "GATE479-M1-ROUTE-ANNOUNCE",
@@ -46494,30 +46576,6 @@
   },
   "decisions_log_b": [
     {
-      "id": "D-29z1673",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 473 -> 474 planning",
-      "decision": "Round 473 result: C PASS (c-round-473.json, browserVerified/realVerified true, C1-C7 PASS); gate 473 published 58fc56e. STORE-2c-1 done (browser evidence C round 472 C1-C10 at app.css d3af7582 = 58fc56e; doc C round 473). C-R471-01, C-R472-01 closed. DPG-FONT-RESOLVE stays open (2c-1 is its token half). C-R473-01 and A-R473-REVIEW-FN4-SOURCE-NOTES to deferred_low_polish, owner 2c-4."
-    },
-    {
-      "id": "D-29z1674",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 473 -> 474 planning",
-      "decision": "DPG P0 inventory (b-round-473/dpg-inventory.md): hue scan 160-200 deg over app/ = 41 hits at 58fc56e; the policy's 61 equals the hue-scan total of app.css at a8599a2 (2026-11-11, pre-STORE-2b-3; claim K15), so the review likely read that tree; P0 split P0-1 (teal, gradient/glow tokens, dead decorative tokens), P0-2 (undefined tokens, live), P0-3 (SpotlightLoader + docs, product-designer + root report). Date 2026-11-12: regression not due (regression-last 2026-11-10)."
-    },
-    {
-      "id": "D-29z1675",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 473 -> 474 planning",
-      "decision": "P0-1 rulings: replace teal in place with brass token refs (dead rules stay, LEGACY-DEAD list); redefine 5 gradient + 2 glow + video-sync tokens via var(--color-*) (deliberate collapse: gradient-accent = gradient-primary, glow-secondary orange -> brand-hover); delete 7 dead --color-crystal-*/--color-premium-* tokens (0 readers); frozen legacy Studio teal listed, not edited -> SABA-Q-DPG-LEGACY-STUDIO-TEAL. tech-lead APPROVE (b-round-473/sketch-review.md); its 3 test changes adopted (build check, scanner oklch/hwb/named/arbitrary, GR1 gradient pin)."
-    },
-    {
-      "id": "D-29z1676",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 473 -> 474 planning",
-      "decision": "StemsPlayerModal is unreachable (createDisplayVersions never sets stems; PlayStemsButton never renders, K5): teal swapped anyway (StemControl Solo bg-brand text-background, contrast 8.32:1; spinner text-brand); C7 contrast is arithmetic only; SIG-R473-STEMS-PLAYER-DEAD."
-    },
-    {
       "id": "D-29z1677",
       "date": "2026-11-12",
       "by": "2026-11-12 B round 473 -> 474 planning",
@@ -46816,6 +46874,48 @@
       "date": "2026-11-13",
       "by": "2026-11-13 B round 484 -> 485 planning",
       "decision": "Outcome after round 485 fixed in advance (current-task.md section 6): C PASS with browserVerified true -> GATE479-M1 done for the live-region contract, the 4 Lows close, CLIENT-NAV-CONTRACT done, TLM-R485-SR-ROUTE-ANNOUNCE opens; round 486 = B-R480-ORDER-CARD-KEYBOARD; then DPG-BUTTON-CLEANUP and the rest of DPG P1. FAIL -> fix-up first. PARTIAL -> same round resumes. Next REGRESSION due on or after 2026-11-16. No architecture checkpoint requested: the change is small (2 component files + 1 lib), no accumulated owner risk on animations/ or link-focus."
+    },
+    {
+      "id": "D-29z1727",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 485 -> 486 planning",
+      "decision": "Round 485 result (C evidence only): c-round-485.json taskStatus PASS, browserVerified true, realVerified true, 15 rows passed (RA-ATTRS, RA-INITIAL, RA-BROWSER, RA-TITLES, RA-STUDIO, RA-TAB, RA-REPEAT, RA-SPEAKERS, RA-VISUAL, STUDIO-485, LF-RUNTIME, LF-FOOTER, G485-AUTH, C-SCOPE, C-APPLY); gate 485 published 034122994313113c9c74888b4fef2f8ee1a6144a on both remotes (review COMMIT OK). Per the outcome fixed in advance (D-29z1726): CLIENT-NAV-CONTRACT done; GATE479-M1-ROUTE-ANNOUNCE done for the live-region contract (screen-reader half -> TLM-R485-SR-ROUTE-ANNOUNCE, deadline RETRO 495, does not block); Lows GATE479-L2-TABINDEX-FINALLY, A-R479-L1-TARGET-BLANK, A-R479-L3-DEFAULTPREVENTED-UNTESTED, A-R479-L2-SLOW-LOADER-FOCUS closed. Caveat recorded, not rounded up: C's LF-RUNTIME checked each mutant's expected red row only, not the full red-row sets. Baseline for round 486 = 0341229 (gate 485 commit; context/head-sha.txt still showed 751e30e)."
+    },
+    {
+      "id": "D-29z1728",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 485 -> 486 planning",
+      "decision": "New findings from round 485, all Low under the 2026-10-23 bug gate -> deferred_low_polish: B-R485-STUDIO-PRODUCT-TITLE (C; client nav into protected /studio/:productId is silent, needs root edit -> ROOT-REQ-STUDIO-PRODUCT-TITLE); A-R485-REVIEW-L1-TARGET-CASE (A reviewer; target compared case-sensitively, same as React Router); GATE485-L1-H1-EXIT-WRAPPER (gate reviewer 'Medium-low', ruled Low: the h1 fallback can read the exiting wrapper's h1 during AnimatePresence exit, only on a title-less route; every loop-editable Store route now has a title and the remaining title-less routes are protected; fix = read the last .page-transition-wrapper); GATE485-L2-ACCOUNT-IMPORT-ORDER (cosmetic, already noted in B-R485-DOWNLOADS-TITLE text). A-R485 RA9 jsdom-limit note is covered by C's RA-BROWSER/RA-TITLES (no id). Architecture note (A reviewer + gate reviewer): RouteTransition owns announcement state + rAF; keep; extract useRouteAnnouncement(pathname) only if a second lifecycle lands -> architecture_signals SIG-R485-ROUTE-ANNOUNCEMENT-HOOK (signal, not scheduled). B-spec INFOs: task said Biome 14->14 warnings, real 16->16 (B's biome command expanded the unquoted $id.$token path); task 4 'Store -> Studio announced' was over-broad (true for /studio-lab only); c-round-485.json lacks 12 L57 fields and the bug origin (INFO, C bookkeeping)."
+    },
+    {
+      "id": "D-29z1729",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 485 -> 486 planning",
+      "decision": "Round 486 = B-R480-ORDER-CARD-KEYBOARD (oldest open loop-fixable Medium; 2026-10-23 bug gate) on baseline 0341229. Reproduced in Chromium at HEAD by B (b-round-485/probe/head.json: signed-in stub, 2 orders, both viewports, 0 card Tab stops). Sketch b-round-485/sketch-486.patch.txt sha256 ebcfe669df8dbcf2bec5ba9dbc15ec250a0b1c4102d11d09d55a47bd66a9b8f3: WAI-ARIA APG Accordion (h3 > button type=button, aria-expanded, aria-controls=useId, panel always rendered with hidden, no role=region for up to 50 orders), inner elements -> spans with the same classes, [--focus-offset:-2px] (shared :focus-visible ring moved inside the overflow-hidden card), no radius -> 0 px diff vs HEAD collapsed and mouse-expanded at both viewports (probe/pxdiff.txt); Tab stops 12/13, Enter expands, Space collapses, focus kept (probe/sketch.json); AX name 'Order #1001 Paid Nov 1, 2026 $49.00 1 item' (probe/ax-sketch.json). Tests OC1-OC4 (new app/lib/__tests__/account-orders-card.test.tsx); 9 mutants red incl. the HEAD file (mutants/mutants-summary.txt); covering 5 files/68 tests; full suite on sketch 292 files/4263 tests rc 0; tsc rc 0; Biome on the route 2 -> 1 warning. tech-lead review APPROVE (sketch-review.md). Grants: the 2 sketch files + doc 314."
+    },
+    {
+      "id": "D-29z1730",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 485 -> 486 planning",
+      "decision": "Rulings for round 486: pressed header now gets the global unlayered button:active scale(0.98) (accepted, as ProductAccordion; app/styles forbidden); h3 accessible name includes status/date/price/count (APG, accepted); held Enter toggles per repeat, held Space once (native, record); hidden panel content stays in DOM (no focusables); OC-PIXEL 0 px wins over class-level readings. New Low B-R486-FOCUS-OFFSET-GUARD (tech-lead L1: the --focus-offset hook has no guard in store-focus-ring) -> deferred_low_polish. Architecture signal SIG-R486-DISCLOSURE-PRIMITIVE (extract a shared Disclosure/AccordionItem if a third copy appears; not scheduled). OWN-BACKEND row BLOCKED (backend unavailable in cloud); stubbed rows prove the client path only (L36)."
+    },
+    {
+      "id": "D-29z1731",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 485 -> 486 planning",
+      "decision": "Outcome after round 486 fixed in advance (current-task.md section 6): C PASS with browserVerified true -> B-R480-ORDER-CARD-KEYBOARD done for the client path (OWN-BACKEND stays open evidence, does not block); round 487 = DPG-BUTTON-CLEANUP unless planning is on or after 2026-11-16 (then REGRESSION). FAIL -> fix-up first. PARTIAL -> same round resumes. No architecture checkpoint requested: one route component, no accumulated owner risk. | amended by D-29z1733: round 487 = B-R486-PROFILE-NAME-KEYBOARD before DPG-BUTTON-CLEANUP."
+    },
+    {
+      "id": "D-29z1732",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 485 -> 486 planning",
+      "decision": "Round 486 sketch v2 (sha 794821b0d13b4059015722410340247ebcd8c8b21fea51b3e960a991146df1c2, supersedes v1 ebcfe669...): the toggle className gains select-text and active:transform-none! so mouse behaviour equals HEAD. B's browser probe (b-round-485/probe/x-head.json, x-mutant-v1.json, x-mutant-select-only.json, x-sketch.json; 375x812, 1440x900, 1280x720): HEAD drag selects 'Order #1001' and press transform none; v1 selected '' and pressed to matrix(0.98) via the unlayered global button:active rule; select-text alone gave 'Order #100'; v2 equals HEAD. 0 px in 12 screenshot pairs incl. the stacked 375 layout (probe/pxdiff.txt). Re-checked on v2: 9 mutants red, full suite 292/4263 rc 0, covering 5/68, tsc rc 0. tech-lead delta re-review APPROVE (2 Lows ruled, sketch-review.md). Deviation listed: ProductAccordion keeps the press scale. The v1 ruling D-29z1730 (accept the scale) is superseded."
+    },
+    {
+      "id": "D-29z1733",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 485 -> 486 planning",
+      "decision": "Full mouse-only sweep (npx biome lint app --max-diagnostics=1000; b-round-485/mouse-only-sweep.txt, 13 hits; a-round-485/lint.log was truncated by the diagnostics cap). New Medium B-R486-PROFILE-NAME-KEYBOARD (account.tsx: the Profile name <p onClick> 'Click to add name' has no keyboard path; source + Biome, browser repro at its planning). Others recorded as one signal SIG-R486-MOUSE-ONLY-SWEEP: Modal/AuthModal/StemsPlayerModal backdrop clicks (close also by Escape/close button; to verify per modal), legacy components/studio/* (frozen legacy, removal policy), protected studio.$productId.tsx (2). Order change: round 487 = B-R486-PROFILE-NAME-KEYBOARD (Medium first, 2026-10-23 bug gate) unless planning is on/after 2026-11-16 (REGRESSION first); then DPG-BUTTON-CLEANUP. Not added to round 486 (no widening)."
     }
   ],
   "retro_candidates": [
@@ -47587,6 +47687,16 @@
       "request": "In the protected app/routes/account.downloads.tsx add `export const meta: MetaFunction = () => [{ title: 'My Downloads | CZABA' }];` (pattern of the 6 routes titled in round 485); can be combined with ROOT-REQ-DOWNLOADS-MUSIC-LINK",
       "closes": [
         "B-R485-DOWNLOADS-TITLE"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "ROOT-REQ-STUDIO-PRODUCT-TITLE",
+      "added": "2026-11-13 B round 485 -> 486 planning",
+      "decision": "D-29z1728",
+      "request": "In the protected app/routes/studio.$productId.tsx add a meta export with a title from the product (e.g. '<product title> — CZABA Studio'), so that client navigation into the purchased Studio is announced and the tab is titled (WCAG 2.4.2). Can be combined with ROOT-REQ-DOWNLOADS-TITLE and the SRW-21 mount work.",
+      "closes": [
+        "B-R485-STUDIO-PRODUCT-TITLE"
       ],
       "status": "open"
     }

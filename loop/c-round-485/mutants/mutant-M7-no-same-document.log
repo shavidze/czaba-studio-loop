@@ -1,0 +1,60 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c485-scratch[39m
+
+ [31m❯[39m app/lib/__tests__/link-focus.test.tsx [2m([22m[2m13 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 205[2mms[22m[39m
+     [32m✓[39m LF1 moves focus from the clicked link to the document body and leaves no tabindex[32m 113[2mms[22m[39m
+     [32m✓[39m LF2 keeps a tabindex the body already had[32m 10[2mms[22m[39m
+     [32m✓[39m LF3 a Ctrl click keeps focus on the link (the browser opens a new tab or window)[32m 12[2mms[22m[39m
+     [32m✓[39m LF3 a Meta click keeps focus on the link (the browser opens a new tab or window)[32m 7[2mms[22m[39m
+     [32m✓[39m LF3 a Shift click keeps focus on the link (the browser opens a new tab or window)[32m 9[2mms[22m[39m
+     [32m✓[39m LF3 a Alt click keeps focus on the link (the browser opens a new tab or window)[32m 9[2mms[22m[39m
+     [32m✓[39m LF3 a middle button click keeps focus on the link (the browser opens a new tab or window)[32m 7[2mms[22m[39m
+     [32m✓[39m LF4 a click whose default an earlier handler prevented keeps focus on the link[32m 5[2mms[22m[39m
+[31m     [31m×[31m LF5 a target="_blank" link keeps focus (it does not replace this document)[39m[32m 12[2mms[22m[39m
+[31m     [31m×[31m LF5 a target="_top" link keeps focus (it does not replace this document)[39m[32m 5[2mms[22m[39m
+[31m     [31m×[31m LF5 a download link keeps focus (it does not replace this document)[39m[32m 5[2mms[22m[39m
+     [32m✓[39m LF6 target="_self" still releases focus[32m 6[2mms[22m[39m
+     [32m✓[39m LF7 removes the temporary body tabindex even when focusing the body throws[32m 4[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m10 passed[39m[22m[90m (13)[39m
+[2m   Start at [22m 07:26:48
+[2m   Duration [22m 859ms[2m (transform 47ms, setup 0ms, import 142ms, tests 205ms, environment 379ms)[22m
+
+
+::error file=/tmp/c485-scratch/app/lib/__tests__/link-focus.test.tsx,title=app/lib/__tests__/link-focus.test.tsx > releaseLinkFocus (DPG-FOOTER-LINKS) > LF5 a target="_blank" link keeps focus (it does not replace this document),line=131,column=27::AssertionError: expected "focus" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st focus call:%0A%0A    Array [%0A      Object {%0A        "preventScroll": true,%0A      },%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ app/lib/__tests__/link-focus.test.tsx:131:27%0A%0A
+
+::error file=/tmp/c485-scratch/app/lib/__tests__/link-focus.test.tsx,title=app/lib/__tests__/link-focus.test.tsx > releaseLinkFocus (DPG-FOOTER-LINKS) > LF5 a target="_top" link keeps focus (it does not replace this document),line=131,column=27::AssertionError: expected "focus" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st focus call:%0A%0A    Array [%0A      Object {%0A        "preventScroll": true,%0A      },%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ app/lib/__tests__/link-focus.test.tsx:131:27%0A%0A
+
+::error file=/tmp/c485-scratch/app/lib/__tests__/link-focus.test.tsx,title=app/lib/__tests__/link-focus.test.tsx > releaseLinkFocus (DPG-FOOTER-LINKS) > LF5 a download link keeps focus (it does not replace this document),line=131,column=27::AssertionError: expected "focus" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st focus call:%0A%0A    Array [%0A      Object {%0A        "preventScroll": true,%0A      },%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ app/lib/__tests__/link-focus.test.tsx:131:27%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/link-focus.test.tsx[2m > [22mreleaseLinkFocus (DPG-FOOTER-LINKS)[2m > [22mLF5 a target="_blank" link keeps focus (it does not replace this document)
+[41m[1m FAIL [22m[49m app/lib/__tests__/link-focus.test.tsx[2m > [22mreleaseLinkFocus (DPG-FOOTER-LINKS)[2m > [22mLF5 a target="_top" link keeps focus (it does not replace this document)
+[41m[1m FAIL [22m[49m app/lib/__tests__/link-focus.test.tsx[2m > [22mreleaseLinkFocus (DPG-FOOTER-LINKS)[2m > [22mLF5 a download link keeps focus (it does not replace this document)
+[31m[1mAssertionError[22m: expected "focus" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st focus call:
+
+[22m    Array [
+      Object {
+        "preventScroll": true,
+      },
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m app/lib/__tests__/link-focus.test.tsx:[2m131:27[22m[39m
+    [90m129| [39m    fireEvent[33m.[39m[34mclick[39m(link)[33m;[39m
+    [90m130| [39m
+    [90m131| [39m    [34mexpect[39m(bodyFocus)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m132| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m(link)[33m;[39m
+    [90m133| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+

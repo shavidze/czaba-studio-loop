@@ -1,0 +1,20 @@
+import json, os, sys
+L='/home/runner/czaba-project/tmp/studio-real-loop'
+mark=os.path.join(L,'b-round-485/update-backlog-3.done')
+if os.path.exists(mark): sys.exit('already applied')
+p=os.path.join(L,'backlog.json'); b=json.load(open(p,encoding='utf-8'))
+by='2026-11-13 B round 485 -> 486 planning'
+sha=open(os.path.join(L,'b-round-485/sketch-486.sha256')).read().split()[0]
+D=b['decisions_log_b']
+D.append({"id":"D-29z1732","date":"2026-11-13","by":by,"decision":"Round 486 sketch v2 (sha "+sha+", supersedes v1 ebcfe669...): the toggle className gains select-text and active:transform-none! so mouse behaviour equals HEAD. B's browser probe (b-round-485/probe/x-head.json, x-mutant-v1.json, x-mutant-select-only.json, x-sketch.json; 375x812, 1440x900, 1280x720): HEAD drag selects 'Order #1001' and press transform none; v1 selected '' and pressed to matrix(0.98) via the unlayered global button:active rule; select-text alone gave 'Order #100'; v2 equals HEAD. 0 px in 12 screenshot pairs incl. the stacked 375 layout (probe/pxdiff.txt). Re-checked on v2: 9 mutants red, full suite 292/4263 rc 0, covering 5/68, tsc rc 0. tech-lead delta re-review APPROVE (2 Lows ruled, sketch-review.md). Deviation listed: ProductAccordion keeps the press scale. The v1 ruling D-29z1730 (accept the scale) is superseded."})
+D.append({"id":"D-29z1733","date":"2026-11-13","by":by,"decision":"Full mouse-only sweep (npx biome lint app --max-diagnostics=1000; b-round-485/mouse-only-sweep.txt, 13 hits; a-round-485/lint.log was truncated by the diagnostics cap). New Medium B-R486-PROFILE-NAME-KEYBOARD (account.tsx: the Profile name <p onClick> 'Click to add name' has no keyboard path; source + Biome, browser repro at its planning). Others recorded as one signal SIG-R486-MOUSE-ONLY-SWEEP: Modal/AuthModal/StemsPlayerModal backdrop clicks (close also by Escape/close button; to verify per modal), legacy components/studio/* (frozen legacy, removal policy), protected studio.$productId.tsx (2). Order change: round 487 = B-R486-PROFILE-NAME-KEYBOARD (Medium first, 2026-10-23 bug gate) unless planning is on/after 2026-11-16 (REGRESSION first); then DPG-BUTTON-CLEANUP. Not added to round 486 (no widening)."})
+for d in D:
+    if d['id']=='D-29z1731':
+        d['decision']+=' | amended by D-29z1733: round 487 = B-R486-PROFILE-NAME-KEYBOARD before DPG-BUTTON-CLEANUP.'
+b['open_findings'].append({"id":"B-R486-PROFILE-NAME-KEYBOARD","severity":"medium","origin":"pre-existing","status":"scheduled (D-29z1733): round 487 (after round 486; REGRESSION first if planning is on/after 2026-11-16)","title":"Account Profile: the name is edited by clicking a <p onClick> ('Click to add name'); keyboard and screen-reader users cannot start editing their name","evidence":"app/routes/account.tsx onClick={handleNameClick} on a <p> (b-round-485/mouse-only-sweep.txt: lint/a11y/useKeyWithClickEvents account.tsx:214); claims-486 K22","repro":"signed in (localStorage.auth_user stub): Tab through /account; no stop on the name; Enter cannot open the editor","added":by,"evidence_kind":"source + full-app Biome sweep; not yet reproduced in a browser (round-487 planning runs the Tab probe first)"})
+b['architecture_signals'].append({"id":"SIG-R486-MOUSE-ONLY-SWEEP","added":by,"note":"Full Biome a11y sweep 2026-11-13 (b-round-485/mouse-only-sweep.txt): besides account.orders (round 486) and account.tsx (B-R486-PROFILE-NAME-KEYBOARD), mouse-only click handlers remain on modal backdrops (ui/Modal.tsx x2, auth/AuthModal.tsx, audio/StemsPlayerModal.tsx x2; usually paired with Escape/close buttons - verify per modal before filing), legacy components/studio/* (StudioTrack, TransportBar, VideoPlayer, VideoUploadZone; frozen legacy per the removal policy) and the protected studio.$productId.tsx (x2). Triage, not scheduled."})
+for r in b['rounds']:
+    if r.get('round')==486: r['note']+='; sketch v2 sha '+sha[:16]+' (D-29z1732)'
+b['version']=b['version']+1; b['updated']='2026-11-13'
+json.dump(b,open(p,'w',encoding='utf-8'),ensure_ascii=False,indent=2)
+open(mark,'w').write('ok\n'); print('v',b['version'])

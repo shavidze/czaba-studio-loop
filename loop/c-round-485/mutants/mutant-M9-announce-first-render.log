@@ -1,0 +1,127 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c485-scratch[39m
+
+ [31m❯[39m app/components/animations/__tests__/route-transition.test.tsx [2m([22m[2m13 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 363[2mms[22m[39m
+     [32m✓[39m RT1: a studio path renders the wrapper with no inline opacity on the server[32m 4[2mms[22m[39m
+     [32m✓[39m RT2: a store path keeps the motion fade (inline opacity 0 on the server)[32m 7[2mms[22m[39m
+     [32m✓[39m RT3: a studio path change remounts the page[32m 18[2mms[22m[39m
+     [32m✓[39m RT4: the same studio path keeps the page mounted[32m 3[2mms[22m[39m
+[31m     [31m×[31m RA1 renders one polite, atomic, visually hidden region that stays silent on the first render[39m[32m 14[2mms[22m[39m
+[31m     [31m×[31m RA2 a path change announces the new document title after the next frame[39m[32m 20[2mms[22m[39m
+     [32m✓[39m RA3 an empty title falls back to the new page heading[32m 38[2mms[22m[39m
+     [32m✓[39m RA4 two paths with the same name still change the region text[32m 72[2mms[22m[39m
+[31m     [31m×[31m RA5 a re-render on the same path announces nothing[39m[32m 35[2mms[22m[39m
+     [32m✓[39m RA6 Studio to Store and back keeps one region and announces both arrivals[32m 57[2mms[22m[39m
+     [32m✓[39m RA7 two path changes inside one frame announce only the last page[32m 52[2mms[22m[39m
+     [32m✓[39m RA8 the first render stays silent under StrictMode (effects run twice)[32m 18[2mms[22m[39m
+[31m     [31m×[31m RA9 a Store navigation through the router with an empty title announces the new page heading[39m[32m 23[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (13)[39m
+[2m   Start at [22m 07:26:51
+[2m   Duration [22m 1.17s[2m (transform 105ms, setup 0ms, import 302ms, tests 363ms, environment 381ms)[22m
+
+
+::error file=/tmp/c485-scratch/app/components/animations/__tests__/route-transition.test.tsx,title=app/components/animations/__tests__/route-transition.test.tsx > RouteTransition route announcement (CLIENT-NAV-CONTRACT) > RA1 renders one polite%2C atomic%2C visually hidden region that stays silent on the first render,line=106,column=38::AssertionError: expected 'CZABA Studio — Demo collection' to be '' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A+ CZABA Studio — Demo collection%0A%0A ❯ app/components/animations/__tests__/route-transition.test.tsx:106:38%0A%0A
+
+::error file=/tmp/c485-scratch/app/components/animations/__tests__/route-transition.test.tsx,title=app/components/animations/__tests__/route-transition.test.tsx > RouteTransition route announcement (CLIENT-NAV-CONTRACT) > RA2 a path change announces the new document title after the next frame,line=123,column=38::AssertionError: expected 'CZABA Studio — Demo collection' to be '' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A+ CZABA Studio — Demo collection%0A%0A ❯ app/components/animations/__tests__/route-transition.test.tsx:123:38%0A%0A
+
+::error file=/tmp/c485-scratch/app/components/animations/__tests__/route-transition.test.tsx,title=app/components/animations/__tests__/route-transition.test.tsx > RouteTransition route announcement (CLIENT-NAV-CONTRACT) > RA5 a re-render on the same path announces nothing,line=194,column=38::AssertionError: expected 'Support | CZABA' to be '' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A+ Support | CZABA%0A%0A ❯ app/components/animations/__tests__/route-transition.test.tsx:194:38%0A%0A
+
+::error file=/tmp/c485-scratch/app/components/animations/__tests__/route-transition.test.tsx,title=app/components/animations/__tests__/route-transition.test.tsx > RouteTransition route announcement (CLIENT-NAV-CONTRACT) > RA9 a Store navigation through the router with an empty title announces the new page heading,line=303,column=38::AssertionError: expected 'Frequently Asked Questions' to be '' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A+ Frequently Asked Questions%0A%0A ❯ app/components/animations/__tests__/route-transition.test.tsx:303:38%0A%0A
+[90mstderr[2m | app/components/animations/__tests__/route-transition.test.tsx[2m > [22m[2mRouteTransition[2m > [22m[2mRT2: a store path keeps the motion fade (inline opacity 0 on the server)
+[22m[39mWarning: useLayoutEffect does nothing on the server, because its effect cannot be encoded into the server renderer's output format. This will lead to a mismatch between the initial, non-hydrated UI and the intended UI. To avoid this, useLayoutEffect should only be used in components that render exclusively on the client. See https://reactjs.org/link/uselayouteffect-ssr for common fixes.
+    at MemoryRouter (/home/runner/czaba-project/store/node_modules/react-router/dist/umd/react-router.development.js:1102:7)
+Warning: useLayoutEffect does nothing on the server, because its effect cannot be encoded into the server renderer's output format. This will lead to a mismatch between the initial, non-hydrated UI and the intended UI. To avoid this, useLayoutEffect should only be used in components that render exclusively on the client. See https://reactjs.org/link/uselayouteffect-ssr for common fixes.
+    at AnimatePresence (file:///home/runner/czaba-project/store/node_modules/framer-motion/dist/es/components/AnimatePresence/index.mjs:44:28)
+    at RouteTransition (/tmp/c485-scratch/app/components/animations/RouteTransition.tsx:15:28)
+    at Router (/home/runner/czaba-project/store/node_modules/react-router/dist/umd/react-router.development.js:1208:17)
+    at MemoryRouter (/home/runner/czaba-project/store/node_modules/react-router/dist/umd/react-router.development.js:1102:7)
+Warning: useLayoutEffect does nothing on the server, because its effect cannot be encoded into the server renderer's output format. This will lead to a mismatch between the initial, non-hydrated UI and the intended UI. To avoid this, useLayoutEffect should only be used in components that render exclusively on the client. See https://reactjs.org/link/uselayouteffect-ssr for common fixes.
+    at MotionDOMComponent (file:///home/runner/czaba-project/store/node_modules/framer-motion/dist/es/motion/index.mjs:42:16)
+    at PageTransition (/tmp/c485-scratch/app/components/animations/PageTransition.tsx:30:27)
+    at PresenceChild (file:///home/runner/czaba-project/store/node_modules/framer-motion/dist/es/components/AnimatePresence/PresenceChild.mjs:9:26)
+    at AnimatePresence (file:///home/runner/czaba-project/store/node_modules/framer-motion/dist/es/components/AnimatePresence/index.mjs:44:28)
+    at RouteTransition (/tmp/c485-scratch/app/components/animations/RouteTransition.tsx:15:28)
+    at Router (/home/runner/czaba-project/store/node_modules/react-router/dist/umd/react-router.development.js:1208:17)
+    at MemoryRouter (/home/runner/czaba-project/store/node_modules/react-router/dist/umd/react-router.development.js:1102:7)
+
+[90mstderr[2m | app/components/animations/__tests__/route-transition.test.tsx[2m > [22m[2mRouteTransition route announcement (CLIENT-NAV-CONTRACT)[2m > [22m[2mRA6 Studio to Store and back keeps one region and announces both arrivals
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/components/animations/__tests__/route-transition.test.tsx[2m > [22mRouteTransition route announcement (CLIENT-NAV-CONTRACT)[2m > [22mRA1 renders one polite, atomic, visually hidden region that stays silent on the first render
+[31m[1mAssertionError[22m: expected 'CZABA Studio — Demo collection' to be '' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[31m+ CZABA Studio — Demo collection[39m
+
+[36m [2m❯[22m app/components/animations/__tests__/route-transition.test.tsx:[2m106:38[22m[39m
+    [90m104| [39m    [34mexpect[39m(region[33m.[39m[34mhasAttribute[39m([32m'role'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m105| [39m    [34mexpect[39m(region[33m.[39mclassName)[33m.[39m[34mtoBe[39m([32m'sr-only'[39m)[33m;[39m
+    [90m106| [39m    [34mexpect[39m([34mannouncerText[39m(container))[33m.[39m[34mtoBe[39m([32m''[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m107| [39m  })[33m;[39m
+    [90m108| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/components/animations/__tests__/route-transition.test.tsx[2m > [22mRouteTransition route announcement (CLIENT-NAV-CONTRACT)[2m > [22mRA2 a path change announces the new document title after the next frame
+[31m[1mAssertionError[22m: expected 'CZABA Studio — Demo collection' to be '' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[31m+ CZABA Studio — Demo collection[39m
+
+[36m [2m❯[22m app/components/animations/__tests__/route-transition.test.tsx:[2m123:38[22m[39m
+    [90m121| [39m      [33m<[39m[33m/[39m[33mRouteTransition[39m[33m>[39m[33m,[39m
+    [90m122| [39m    )[33m;[39m
+    [90m123| [39m    [34mexpect[39m([34mannouncerText[39m(container))[33m.[39m[34mtoBe[39m([32m''[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m124| [39m    [35mawait[39m [34mact[39m(nextFrame)[33m;[39m
+    [90m125| [39m    [34mexpect[39m([34mannouncerText[39m(container))[33m.[39m[34mtoBe[39m([32m'Middle East | CZABA'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/components/animations/__tests__/route-transition.test.tsx[2m > [22mRouteTransition route announcement (CLIENT-NAV-CONTRACT)[2m > [22mRA5 a re-render on the same path announces nothing
+[31m[1mAssertionError[22m: expected 'Support | CZABA' to be '' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[31m+ Support | CZABA[39m
+
+[36m [2m❯[22m app/components/animations/__tests__/route-transition.test.tsx:[2m194:38[22m[39m
+    [90m192| [39m    )[33m;[39m
+    [90m193| [39m    [35mawait[39m [34mact[39m(nextFrame)[33m;[39m
+    [90m194| [39m    [34mexpect[39m([34mannouncerText[39m(container))[33m.[39m[34mtoBe[39m([32m''[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m195| [39m  })[33m;[39m
+    [90m196| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/components/animations/__tests__/route-transition.test.tsx[2m > [22mRouteTransition route announcement (CLIENT-NAV-CONTRACT)[2m > [22mRA9 a Store navigation through the router with an empty title announces the new page heading
+[31m[1mAssertionError[22m: expected 'Frequently Asked Questions' to be '' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[31m+ Frequently Asked Questions[39m
+
+[36m [2m❯[22m app/components/animations/__tests__/route-transition.test.tsx:[2m303:38[22m[39m
+    [90m301| [39m    [35mconst[39m { container } [33m=[39m [34mrender[39m([33m<[39m[33mRouterProvider[39m [33mrouter[39m[33m=[39m[33m{[39mrouter[33m}[39m [33m/[39m[33m>[39m)[33m;[39m
+    [90m302| [39m    [35mawait[39m [34mact[39m(nextFrame)[33m;[39m
+    [90m303| [39m    [34mexpect[39m([34mannouncerText[39m(container))[33m.[39m[34mtoBe[39m([32m''[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m304| [39m    [35mawait[39m [34mact[39m([35masync[39m () [33m=>[39m {
+    [90m305| [39m      [35mawait[39m router[33m.[39m[34mnavigate[39m([32m'/cart'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
