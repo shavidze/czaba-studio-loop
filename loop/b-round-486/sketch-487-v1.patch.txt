@@ -1,0 +1,344 @@
+diff --git a/app/lib/__tests__/account-profile-name.test.tsx b/app/lib/__tests__/account-profile-name.test.tsx
+new file mode 100644
+index 0000000..a5f1585
+--- /dev/null
++++ b/app/lib/__tests__/account-profile-name.test.tsx
+@@ -0,0 +1,185 @@
++import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { MemoryRouter } from 'react-router-dom';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import AccountPage from '~/routes/account';
++
++const spies = vi.hoisted(() => ({
++  updateProfile: vi.fn<(firstName: string, lastName: string) => Promise<void>>(),
++  showToast: vi.fn(),
++  user: {
++    id: 7,
++    email: 'buyer@example.invalid',
++    firstName: 'Probe',
++    lastName: 'User',
++    name: 'Probe User',
++    registrationSource: 'email',
++  },
++}));
++
++vi.mock('~/hooks', () => ({
++  useAuth: () => ({
++    user: spies.user,
++    updateProfile: spies.updateProfile,
++    updatePassword: vi.fn(),
++    isLoading: false,
++  }),
++  useToast: () => ({ showToast: spies.showToast }),
++}));
++vi.mock('~/components/auth', () => ({
++  RequireAuth: ({ children }: { children: ReactNode }) => <>{children}</>,
++}));
++
++function renderProfile() {
++  return render(
++    <MemoryRouter initialEntries={['/account']}>
++      <AccountPage />
++    </MemoryRouter>,
++  );
++}
++
++function nameButton() {
++  return screen.getByRole('button', { name: 'Full Name Probe User' });
++}
++
++function deferred() {
++  let resolve: () => void = () => {};
++  let reject: (error: Error) => void = () => {};
++  const promise = new Promise<void>((res, rej) => {
++    resolve = res;
++    reject = rej;
++  });
++  return { promise, resolve, reject };
++}
++
++beforeEach(() => {
++  vi.clearAllMocks();
++  spies.user.name = 'Probe User';
++  spies.updateProfile.mockResolvedValue(undefined);
++});
++afterEach(() => cleanup());
++
++describe('Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD)', () => {
++  it('PN1 the name is a native button named by the Full Name label and its value', () => {
++    renderProfile();
++    const button = nameButton();
++    expect(button.tagName).toBe('BUTTON');
++    expect(button.getAttribute('type')).toBe('button');
++    expect(button.tabIndex).toBe(0);
++    expect(button.textContent).toBe('Probe User');
++  });
++
++  it('PN1b with no name the button keeps the visible copy in its name', () => {
++    spies.user.name = '';
++    renderProfile();
++    expect(screen.getByRole('button', { name: 'Full Name Click to add name' })).toBeTruthy();
++  });
++
++  it('PN2 opening the editor focuses a labelled First name field; controls have unique names', () => {
++    renderProfile();
++    fireEvent.click(nameButton());
++    const first = screen.getByRole('textbox', { name: 'First name' });
++    expect(document.activeElement).toBe(first);
++    expect(screen.getByRole('textbox', { name: 'Last name' })).toBeTruthy();
++    for (const name of ['Save name', 'Cancel name edit']) {
++      const matches = screen.getAllByRole('button', { name });
++      expect(matches).toHaveLength(1);
++      expect(matches[0].getAttribute('type')).toBe('button');
++    }
++  });
++
++  it('PN3 Escape and Cancel close the editor and return focus to the name button', () => {
++    renderProfile();
++    fireEvent.click(nameButton());
++    fireEvent.keyDown(screen.getByRole('textbox', { name: 'First name' }), { key: 'Escape' });
++    expect(screen.queryByRole('textbox', { name: 'First name' })).toBeNull();
++    expect(document.activeElement).toBe(nameButton());
++
++    fireEvent.click(nameButton());
++    fireEvent.click(screen.getByRole('button', { name: 'Cancel name edit' }));
++    expect(screen.queryByRole('textbox', { name: 'First name' })).toBeNull();
++    expect(document.activeElement).toBe(nameButton());
++    expect(spies.updateProfile).not.toHaveBeenCalled();
++  });
++
++  it('PN4 Enter saves once and returns focus to the name button', async () => {
++    renderProfile();
++    fireEvent.click(nameButton());
++    const first = screen.getByRole('textbox', { name: 'First name' });
++    fireEvent.change(first, { target: { value: '  Ada ' } });
++    await act(async () => {
++      fireEvent.keyDown(first, { key: 'Enter' });
++    });
++    expect(spies.updateProfile).toHaveBeenCalledTimes(1);
++    expect(spies.updateProfile).toHaveBeenCalledWith('Ada', 'User');
++    expect(spies.showToast).toHaveBeenCalledWith('Name updated', 'success');
++    expect(screen.queryByRole('textbox', { name: 'First name' })).toBeNull();
++    expect(document.activeElement).toBe(nameButton());
++  });
++
++  it('PN5 a repeated Enter and a second Enter during the save do not send another save', async () => {
++    const pending = deferred();
++    spies.updateProfile.mockReturnValue(pending.promise);
++    renderProfile();
++    fireEvent.click(nameButton());
++    const first = screen.getByRole('textbox', { name: 'First name' });
++    fireEvent.keyDown(first, { key: 'Enter', repeat: true });
++    expect(spies.updateProfile).not.toHaveBeenCalled();
++    act(() => {
++      fireEvent.keyDown(first, { key: 'Enter' });
++      fireEvent.keyDown(first, { key: 'Enter' });
++    });
++    expect(spies.updateProfile).toHaveBeenCalledTimes(1);
++    await act(async () => {
++      pending.resolve();
++      await pending.promise;
++    });
++    expect(spies.updateProfile).toHaveBeenCalledTimes(1);
++    expect(document.activeElement).toBe(nameButton());
++  });
++
++  it('PN6 an empty first name keeps the editor open and focuses First name', () => {
++    renderProfile();
++    fireEvent.click(nameButton());
++    const first = screen.getByRole('textbox', { name: 'First name' });
++    const last = screen.getByRole('textbox', { name: 'Last name' });
++    fireEvent.change(first, { target: { value: '   ' } });
++    last.focus();
++    fireEvent.keyDown(last, { key: 'Enter' });
++    expect(spies.showToast).toHaveBeenCalledWith('First name is required', 'error');
++    expect(spies.updateProfile).not.toHaveBeenCalled();
++    expect(document.activeElement).toBe(first);
++  });
++
++  it('PN7 a failed save keeps the editor open, re-enables it and focuses First name', async () => {
++    const pending = deferred();
++    spies.updateProfile.mockReturnValue(pending.promise);
++    renderProfile();
++    fireEvent.click(nameButton());
++    const last = screen.getByRole('textbox', { name: 'Last name' });
++    last.focus();
++    act(() => {
++      fireEvent.keyDown(last, { key: 'Enter' });
++    });
++    await act(async () => {
++      pending.reject(new Error('Stub failure'));
++      await pending.promise.catch(() => undefined);
++    });
++    expect(spies.showToast).toHaveBeenCalledWith('Stub failure', 'error');
++    const first = screen.getByRole('textbox', { name: 'First name' });
++    expect(document.activeElement).toBe(first);
++    expect(screen.getByRole('button', { name: 'Save name' }).hasAttribute('disabled')).toBe(false);
++    await act(async () => {
++      fireEvent.keyDown(first, { key: 'Enter' });
++    });
++    expect(spies.updateProfile).toHaveBeenCalledTimes(2);
++  });
++
++  it('PN8 a repeated Enter on the name button is suppressed; a first Enter is not', () => {
++    renderProfile();
++    const button = nameButton();
++    expect(fireEvent.keyDown(button, { key: 'Enter', repeat: true })).toBe(false);
++    expect(fireEvent.keyDown(button, { key: 'Enter' })).toBe(true);
++    expect(fireEvent.keyDown(button, { key: ' ', repeat: true })).toBe(true);
++  });
++});
+diff --git a/app/routes/account.tsx b/app/routes/account.tsx
+index ee5a16f..739bf28 100644
+--- a/app/routes/account.tsx
++++ b/app/routes/account.tsx
+@@ -6,7 +6,7 @@ import type { MetaFunction } from '@remix-run/node';
+ import { NavLink, Outlet, useLocation } from '@remix-run/react';
+ import { AnimatePresence, motion } from 'framer-motion';
+ import { AlertCircle, Check, Eye, EyeOff, X } from 'lucide-react';
+-import { useEffect, useRef, useState } from 'react';
++import { useEffect, useId, useRef, useState } from 'react';
+ import { RequireAuth } from '~/components/auth';
+ import { Button } from '~/components/ui';
+ import { useAuth, useToast } from '~/hooks';
+@@ -114,6 +114,11 @@ function ProfileContent() {
+   const [editLastName, setEditLastName] = useState(user?.lastName || '');
+   const [nameSaving, setNameSaving] = useState(false);
+   const nameInputRef = useRef<HTMLInputElement>(null);
++  const nameButtonRef = useRef<HTMLButtonElement>(null);
++  const restoreNameFocusRef = useRef(false);
++  const nameSaveInFlightRef = useRef(false);
++  const nameLabelId = useId();
++  const nameValueId = useId();
+ 
+   // Password modal state
+   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+@@ -121,10 +126,14 @@ function ProfileContent() {
+   // Check if user registered with email (can change password)
+   const canChangePassword = user?.registrationSource === 'email';
+ 
+-  // Focus name input when editing starts
+   useEffect(() => {
+-    if (isEditingName && nameInputRef.current) {
+-      nameInputRef.current.focus();
++    if (isEditingName) {
++      nameInputRef.current?.focus();
++      return;
++    }
++    if (restoreNameFocusRef.current) {
++      restoreNameFocusRef.current = false;
++      nameButtonRef.current?.focus();
+     }
+   }, [isEditingName]);
+ 
+@@ -135,31 +144,43 @@ function ProfileContent() {
+   };
+ 
+   const handleNameCancel = () => {
++    restoreNameFocusRef.current = true;
+     setIsEditingName(false);
+     setEditFirstName(user?.firstName || '');
+     setEditLastName(user?.lastName || '');
+   };
+ 
+   const handleNameSave = async () => {
++    if (nameSaveInFlightRef.current) {
++      return;
++    }
+     if (!editFirstName.trim()) {
+       showToast('First name is required', 'error');
++      nameInputRef.current?.focus();
+       return;
+     }
+ 
++    nameSaveInFlightRef.current = true;
+     setNameSaving(true);
+     try {
+       await updateProfile(editFirstName.trim(), editLastName.trim());
+       showToast('Name updated', 'success');
++      restoreNameFocusRef.current = true;
+       setIsEditingName(false);
+     } catch (error) {
+       showToast(error instanceof Error ? error.message : 'Failed to update name', 'error');
++      nameInputRef.current?.focus();
+     } finally {
++      nameSaveInFlightRef.current = false;
+       setNameSaving(false);
+     }
+   };
+ 
+   const handleNameKeyDown = (e: React.KeyboardEvent) => {
+     if (e.key === 'Enter') {
++      if (e.repeat) {
++        return;
++      }
+       handleNameSave();
+     } else if (e.key === 'Escape') {
+       handleNameCancel();
+@@ -175,7 +196,9 @@ function ProfileContent() {
+     >
+       {/* Full Name */}
+       <div>
+-        <p className="text-sm text-muted mb-2">Full Name</p>
++        <p id={nameLabelId} className="text-sm text-muted mb-2">
++          Full Name
++        </p>
+         {isEditingName ? (
+           <div className="flex items-center gap-3">
+             <input
+@@ -185,6 +208,7 @@ function ProfileContent() {
+               onChange={(e) => setEditFirstName(e.target.value)}
+               onKeyDown={handleNameKeyDown}
+               placeholder="First name"
++              aria-label="First name"
+               className="bg-transparent text-foreground text-lg border-b border-brand/50 py-1 w-40"
+             />
+             <input
+@@ -193,9 +217,12 @@ function ProfileContent() {
+               onChange={(e) => setEditLastName(e.target.value)}
+               onKeyDown={handleNameKeyDown}
+               placeholder="Last name"
++              aria-label="Last name"
+               className="bg-transparent text-foreground text-lg border-b border-brand/50 py-1 w-40"
+             />
+             <button
++              type="button"
++              aria-label="Save name"
+               onClick={handleNameSave}
+               disabled={nameSaving}
+               className="p-1.5 text-brand hover:bg-brand/10 rounded transition-colors"
+@@ -203,6 +230,8 @@ function ProfileContent() {
+               <Check className="w-5 h-5" />
+             </button>
+             <button
++              type="button"
++              aria-label="Cancel name edit"
+               onClick={handleNameCancel}
+               disabled={nameSaving}
+               className="p-1.5 text-muted hover:bg-elevated rounded transition-colors"
+@@ -211,12 +240,21 @@ function ProfileContent() {
+             </button>
+           </div>
+         ) : (
+-          <p
++          <button
++            ref={nameButtonRef}
++            id={nameValueId}
++            type="button"
++            aria-labelledby={`${nameLabelId} ${nameValueId}`}
+             onClick={handleNameClick}
+-            className="text-foreground text-lg cursor-pointer hover:text-brand transition-colors"
++            onKeyDown={(e) => {
++              if (e.key === 'Enter' && e.repeat) {
++                e.preventDefault();
++              }
++            }}
++            className="block w-full select-text text-left text-foreground text-lg hover:text-brand active:transform-none! transition-colors"
+           >
+             {user?.name || 'Click to add name'}
+-          </p>
++          </button>
+         )}
+       </div>
+ 

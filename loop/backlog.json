@@ -1,9 +1,9 @@
 {
-  "version": 478,
+  "version": 481,
   "updated": "2026-11-13",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 486: B-R480-ORDER-CARD-KEYBOARD - My Orders card header becomes h3 > button (aria-expanded, aria-controls, hidden panel; APG Accordion), inset shared focus ring, 0 px visual change; tests OC1-OC4; doc 314; baseline 0341229 (current-task.md)",
+  "current_task": "Round 487: B-R486-PROFILE-NAME-KEYBOARD - Account Profile name <p onClick> becomes a native button (aria-labelledby 'Full Name <value>'), focus returns to it after Esc/Cancel/save, First name after failures, held Enter guarded by the shared helper (1 PUT, HEAD 6), labelled inputs and icon buttons; tests PN1-PN9; doc 315; baseline bb82154 (current-task.md)",
   "advisor_used_by_B": "2026-11-12 B round 475 -> 476 planning: advisor available and consulted after orientation (advice applied: read gate-475 review + all of a-round-475; snapshot before edits; L10 STOP ruling; R1 as confirmedBy (L7); split P0-3 into 3a loader/logo and 3b docs after a docs hue scan; primitives text to root now; product-designer before the sketch; one background value for cover+loader+page; DPG-LOGO header pulled in to avoid three logo treatments; parked SpotlightLoader items ruled (L6); L23 pre-run of pinning tests; computed-style rows, pixel rows not run by B ship as record; SABA-B-16 stays open). product-designer b-round-475/pd-p0-3a.md; tech-lead APPROVE WITH CHANGES, all adopted in v2 (b-round-475/sketch-review.md)",
   "baseline": {
     "tsc_errors": 0,
@@ -12734,8 +12734,16 @@
       "task": "current-task.md",
       "decision": "D-29z1729",
       "type": "B-R480-ORDER-CARD-KEYBOARD (Medium fix)",
+      "status": "passed",
+      "note": "baseline HEAD 0341229 clean; claims b-round-485/claims-486.sh; frozen manifest b-round-485/r486-tree-sha256.txt (1397); sketch b-round-485/sketch-486.patch.txt; probes b-round-485/probe; sketch v2 sha 794821b0d13b4059 (D-29z1732); C round 486 PASS browserVerified true; gate published bb82154 (D-29z1734)"
+    },
+    {
+      "round": 487,
+      "task": "current-task.md",
+      "decision": "D-29z1735",
+      "type": "B-R486-PROFILE-NAME-KEYBOARD (Medium fix)",
       "status": "dispatched",
-      "note": "baseline HEAD 0341229 clean; claims b-round-485/claims-486.sh; frozen manifest b-round-485/r486-tree-sha256.txt (1397); sketch b-round-485/sketch-486.patch.txt; probes b-round-485/probe; sketch v2 sha 794821b0d13b4059 (D-29z1732)"
+      "note": "baseline HEAD bb82154 clean; claims b-round-486/claims-487.sh; frozen manifest b-round-486/r487-tree-sha256.txt (1399); sketch b-round-486/sketch-487.patch.txt v4 sha d8f8c4ffc0c0295c (D-29z1737); probes b-round-486/probe"
     }
   ],
   "post_current_stage_queue": [
@@ -29228,16 +29236,6 @@
       "added": "2026-11-12 B round 478 -> 479 planning"
     },
     {
-      "id": "GATE479-M1-ROUTE-ANNOUNCE",
-      "severity": "medium",
-      "origin": "gate reviewer",
-      "status": "done (D-29z1727): live-region contract C round 485 PASS (browserVerified true), published 0341229; screen-reader half -> TLM-R485-SR-ROUTE-ANNOUNCE (deadline RETRO 495, does not block) | dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485, announcer in RouteTransition (sketch pre-run in browser); screen-reader half -> TLM-R485-SR-ROUTE-ANNOUNCE after C PASS | scheduled (D-29z1720): CLIENT-NAV-CONTRACT round 485 (after the REGRESSION part-2 remainder 484) | scheduled (D-29z1715): CLIENT-NAV-CONTRACT round 484 (after REGRESSION parts 482-483) | scheduled (D-29z1704): CLIENT-NAV-CONTRACT round 482 (B pre-runs title timing, meta fallback, remount on a sketch); else ROOT-REQ-ROUTE-ANNOUNCER | open (D-29z1700): ruling D-29z1704",
-      "title": "Client navigation does not announce the new page title to screen readers (a full reload did); 13 footer/content links since round 479, 15 header links before it",
-      "evidence": "gates/round-479/review.md finding 1; git show 75a6028:app/components/layout/Header.tsx (15 <Link>); app/root.tsx has no announcer",
-      "repro": "screen reader on: Tab to footer Support, Enter; the new page title is not spoken",
-      "added": "2026-11-12 B round 479 -> 480 planning"
-    },
-    {
       "id": "FIREFOX-CHECKS",
       "severity": "medium",
       "origin": "environment",
@@ -29285,7 +29283,7 @@
       "id": "B-R480-ORDER-CARD-KEYBOARD",
       "severity": "medium",
       "origin": "B pre-check",
-      "status": "dispatched (D-29z1729): round 486 on baseline 0341229 | scheduled (D-29z1726): round 486 (after CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1720): round 486 (after REGRESSION remainder 484 and CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1715): round 485 (after REGRESSION 482-483 and CLIENT-NAV-CONTRACT 484) | scheduled (D-29z1711): round 484 (after REGRESSION 482 and CLIENT-NAV-CONTRACT 483)",
+      "status": "done (D-29z1734): C round 486 PASS (client path, stubbed auth/orders; OWN-BACKEND BLOCKED backend unavailable in cloud, open evidence), published bb82154 | dispatched (D-29z1729): round 486 on baseline 0341229 | scheduled (D-29z1726): round 486 (after CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1720): round 486 (after REGRESSION remainder 484 and CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1715): round 485 (after REGRESSION 482-483 and CLIENT-NAV-CONTRACT 484) | scheduled (D-29z1711): round 484 (after REGRESSION 482 and CLIENT-NAV-CONTRACT 483)",
       "title": "My Orders: an order card opens only on a mouse click on a <div>; keyboard and screen-reader users cannot reach the order items, licence type and prices",
       "evidence": "app/routes/account.orders.tsx l.59-62 (<div onClick> with cursor-pointer, no role/tabIndex/key handler); npx biome check app/routes/account.orders.tsx -> lint/a11y/useKeyWithClickEvents (b-round-480/sketch-biome.log); claims-481 K11",
       "repro": "signed in with at least one order (stub /api/orders/my in Playwright): Tab through /account/orders; no stop on any order card; Enter/Space cannot expand it",
@@ -29304,12 +29302,32 @@
       "id": "B-R486-PROFILE-NAME-KEYBOARD",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "scheduled (D-29z1733): round 487 (after round 486; REGRESSION first if planning is on/after 2026-11-16)",
+      "status": "dispatched (D-29z1735): round 487 on baseline bb82154 | scheduled (D-29z1733): round 487 (after round 486; REGRESSION first if planning is on/after 2026-11-16)",
       "title": "Account Profile: the name is edited by clicking a <p onClick> ('Click to add name'); keyboard and screen-reader users cannot start editing their name",
       "evidence": "app/routes/account.tsx onClick={handleNameClick} on a <p> (b-round-485/mouse-only-sweep.txt: lint/a11y/useKeyWithClickEvents account.tsx:214); claims-486 K22",
       "repro": "signed in (localStorage.auth_user stub): Tab through /account; no stop on the name; Enter cannot open the editor",
       "added": "2026-11-13 B round 485 -> 486 planning",
-      "evidence_kind": "source + full-app Biome sweep; not yet reproduced in a browser (round-487 planning runs the Tab probe first)"
+      "evidence_kind": "reproduced in Chromium at HEAD bb82154 by B (b-round-486/probe/head-named.json: nameStop 0; Esc/X/save focus BODY; held Enter 6 PUTs; noname-head.json paragraph); source + Biome as before"
+    },
+    {
+      "id": "SABA-B-17-ENTRANCE-3-4S",
+      "severity": "medium",
+      "origin": "Saba 2026-11-13 (policy section 'SpotlightLoader too fast')",
+      "status": "scheduled (D-29z1736): round 488 (after 487; REGRESSION first if planning is on/after 2026-11-16)",
+      "title": "Store entrance animation (SpotlightLoader) disappears too fast; on a first visit it must last at least 3-4 s",
+      "evidence": "agent-workflow.md 'Saba feedback, 2026-11-13'; EntranceCover.tsx ENTRANCE_MIN_TOTAL_MS 1450, ENTRANCE_MAX_TOTAL_MS 1900 (claims-487 K23); SABA-B-13 (archived) delivered 1450-1900 ms",
+      "added": "2026-11-13 B round 486 -> 487 planning",
+      "note": "supersedes SABA-B-13's 1.2-1.5 s example; needs production-build first-frame probe (L18), Why-we-missed-it section and a lesson at its planning"
+    },
+    {
+      "id": "B-R487-PROFILE-EDITOR-NARROW-OVERFLOW",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "status": "scheduled (D-29z1736): round 489",
+      "title": "Account Profile name editor overflows at 375 px: Save/Cancel icon buttons are off-screen and cannot be clicked or tapped",
+      "evidence": "b-round-486/probe/head-named.json 375x812: afterClick.name.textBox width 420 in a 343 px column; afterMouseSave puts 0 / editing true; afterMouseCancel editing true (sketch v3 equal: probe/v3/sketch-named.json)",
+      "repro": "375x812, signed-in stub: open the name editor; the check and X buttons sit beyond the right edge",
+      "added": "2026-11-13 B round 486 -> 487 planning"
     }
   ],
   "tech_lead_notes": [
@@ -33004,12 +33022,17 @@
     {
       "id": "SIG-R486-DISCLOSURE-PRIMITIVE",
       "added": "2026-11-13 B round 485 -> 486 planning",
-      "note": "tech-lead (round-486 sketch review): ProductAccordion and the account OrderCard now both implement the APG accordion (heading > button, aria-expanded/controls). Extract a shared Disclosure/AccordionItem primitive only if a third copy appears. Not scheduled."
+      "note": "tech-lead (round-486 sketch review): ProductAccordion and the account OrderCard now both implement the APG accordion (heading > button, aria-expanded/controls). Extract a shared Disclosure/AccordionItem primitive only if a third copy appears. Not scheduled. | gate 486 L3: panels are always rendered (hidden), so up to 50 orders render their items up front; revisit if the page size grows (D-29z1734)."
     },
     {
       "id": "SIG-R486-MOUSE-ONLY-SWEEP",
       "added": "2026-11-13 B round 485 -> 486 planning",
       "note": "Full Biome a11y sweep 2026-11-13 (b-round-485/mouse-only-sweep.txt): besides account.orders (round 486) and account.tsx (B-R486-PROFILE-NAME-KEYBOARD), mouse-only click handlers remain on modal backdrops (ui/Modal.tsx x2, auth/AuthModal.tsx, audio/StemsPlayerModal.tsx x2; usually paired with Escape/close buttons - verify per modal before filing), legacy components/studio/* (StudioTrack, TransportBar, VideoPlayer, VideoUploadZone; frozen legacy per the removal policy) and the protected studio.$productId.tsx (x2). Triage, not scheduled."
+    },
+    {
+      "id": "SIG-R487-REPEAT-SAFE-HOME",
+      "added": "2026-11-13 B round 486 -> 487 planning",
+      "note": "tech-lead L3 (b-round-486/sketch-review.md): app/components/arrangement/studio-repeat-safe.ts (preventRepeatedEnterKeyDown) is now imported by the Store route account.tsx; move to app/lib/keyboard (or similar) and update HELPER_PATH in held-enter-source-scan.test.ts in one bounded task. Not scheduled."
     }
   ],
   "vitest_floor_round64": 1574,
@@ -43988,8 +44011,22 @@
       "status": "deferred_low_polish (D-29z1730)",
       "title": "The --focus-offset hook of the shared :focus-visible rule (app.css) is used by a Store component for the first time ([--focus-offset:-2px] on the order card toggle); store-focus-ring has no allow-list for it, so any offset value could be copied",
       "evidence": "b-round-485/sketch-review.md L1 (tech-lead)",
-      "fix": "document --focus-offset as the approved offset hook (DESIGN_TOKENS/FORWARDREF via root) and add an allow-list row to store-focus-ring.test.ts",
-      "added": "2026-11-13 B round 485 -> 486 planning"
+      "fix": "document --focus-offset as the approved offset hook (DESIGN_TOKENS/FORWARDREF via root) and add an allow-list row to store-focus-ring.test.ts ; also pin select-text and active:transform-none! on the order-card toggle (source guard in store-focus-ring.test.ts; not a jsdom cascade assert, L12) ; and the same active:transform-none! on the Profile name button (account.tsx, round 487)",
+      "added": "2026-11-13 B round 485 -> 486 planning",
+      "confirmedBy": [
+        "A-R486 code-reviewer Medium (ruled by task 486 s4; a-round-486.md)",
+        "gates/round-486/review.md L1, L2"
+      ]
+    },
+    {
+      "id": "A-R486-REVIEW-L1-OC-TEST-GAPS",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1734)",
+      "title": "account-orders-card OC tests: no assert that the hidden panel holds no focusables; OC1 does not assert the h3 holds only the button",
+      "evidence": "a-round-486.md code-reviewer Lows 2 and 3",
+      "fix": "add both asserts to app/lib/__tests__/account-orders-card.test.tsx",
+      "added": "2026-11-13 B round 486 -> 487 planning"
     }
   ],
   "regression_rounds": [
@@ -44981,6 +45018,11 @@
       "id": "B-R344-PROD-NAMES",
       "fact": "Render probes that count components by name (ArrangementProvider, StudioWorkspace, ArrangementVideoDock; b-round-343/video-probe.mjs) read 0 on production builds because component names are minified; only totals (perMove, max, commits) are valid there. Run name-based render rows on the dev server (:5173). Evidence: b-round-344/probe/video-sketch-summary.txt (prod: provider/workspace/dock 0 while perMove 28.4).",
       "added": "2026-11-05 B round 344 -> 345 planning (part 3)"
+    },
+    {
+      "id": "INFO-B487-HEADER-BAND-1280",
+      "added": "2026-11-13 B round 486 -> 487 planning",
+      "note": "At 1280x720 the Store header's top edge (bbox [1047,16,1122,17], 11 px) differs between captures of the same tree (HEAD vs HEAD: b-round-486/probe/headctl/pxdiff-control.txt 11 then 0; v4 full-frame 0). Environment drift outside page content; pixel rows on Store pages below the header use pxdiff-region.mjs YMIN=80 or a same-run HEAD pair."
     }
   ],
   "retro_policy": {
@@ -46576,48 +46618,6 @@
   },
   "decisions_log_b": [
     {
-      "id": "D-29z1677",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 473 -> 474 planning",
-      "decision": "Dispatch round 474 = DPG-P0-1 (current-task.md): sketch b-round-473/sketch-474.patch.txt byte-exact on 4 source files; 3 test files edited (shrink-only allow-lists, LT7 replaced, ST3 26->29, decorative-absent row, GR1, HUE1-3); doc 307; A runs typecheck, lint, 14 covering files, npm run build, 4 mutants; C: scope, hue scan, mutants, unit, browser no-change vs HEAD at both viewports, injected-rule probe, contrast, doc, auth, claims. Lessons: DPG process rules merged into L2 (60 lines kept). After C PASS the DPG ids are awaiting DP-gate re-review, not done."
-    },
-    {
-      "id": "D-29z1678",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 474 -> 475 planning",
-      "decision": "Round 474 result: C PASS (c-round-474.json, browserVerified/realVerified true, C1-C10); gate 474 published 297f5ae. DPG-P0-1 C-verified, awaiting DP-gate re-review (not done). C-R474-01 ruled: K16/K17/K18 accepted deltas, closed, L56 evidence. C-R474-02 -> deferred_low_polish (root primitives patch / P0-3). A signals: SIG-R474-DOCS-TAILWIND-TEAL = confirmedBy on C-R474-02; SIG-R474-LEGACY-LOADER-SCROLLBAR noted on SABA-Q-DPG-LEGACY-STUDIO-TEAL; architecture note -> SIG-R474-STYLE-SCAN-COLOUR-EXTRACT (keep). Date 2026-11-12: regression not due (regression-last 2026-11-10, due 2026-11-13)."
-    },
-    {
-      "id": "D-29z1679",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 474 -> 475 planning",
-      "decision": "P0-2 inventory with Tailwind's compiler as resolver (b-round-474/scan/var-undefined.mjs, tw-undefined-ast.mjs): undefined var() reads 14 at HEAD (text-primary 5, primary-hue/sat/light 6, accent-hover 1, text-muted 2) -> 0 on sketch; non-emitting colour utilities 28 -> 24 (ProductCard 4 fixed; rest dead UserDropdown 18, glow remnants kept by rounds 449/453, frozen GlobalPlayhead, store.tsx transition string). --radius-xs and --color-black resolve via Tailwind's default theme (browser probe-head.json) - Saba's --radius-xs item is not broken; --radius_full 0 hits."
-    },
-    {
-      "id": "D-29z1680",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 474 -> 475 planning",
-      "decision": "P0-2 rulings (product-designer b-round-474/pd-p0-2.md): badge bg-background/70 text-foreground (brass only on New); wrapper bg-surface; title no-op hover removed; nav-loading-bar not switched on - display: none interim because root.tsx is protected (ROOT-REQ-NAV-LOADING-BAR-RENDER; SABA-Q-PENDING-NAV-FEEDBACK to Saba, L44); stub routes var(--color-muted); --color-text-primary -> --color-foreground (0 px, every consumer inherited #ece6da at both viewports); dead artist-photo -> brand-rgb (pink stays for P2). No @theme token changes, so DPG rule 2 needs no design-doc edit (K16 = 0)."
-    },
-    {
-      "id": "D-29z1681",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 474 -> 475 planning",
-      "decision": "Dispatch round 475 = DPG-P0-2 (current-task.md): sketch v2 b-round-474/sketch-475.patch.txt sha d2385ffc (7 files) byte-exact + doc 308; narrow grant app.css; tests store-undefined-tokens UT1-UT5 (helper token-resolve.ts, real Tailwind compile, pinned token lists) + store-live-teal .code-4 pin; 11 mutants red; sketch pre-check: typecheck/lint rc 0, full suite K12, browser probes at both viewports on a sketch-applied clone (own Vite cache, :5181) vs HEAD. C: scope, resolver scans, mutants, 16 covering files, no-change consumers, badge/wrapper/hover/nav/stub/dead-rule browser rows, journey, doc, auth, claims."
-    },
-    {
-      "id": "D-29z1682",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 475 -> 476 planning",
-      "decision": "Round 475 result: C PASS (c-round-475.json, browserVerified/realVerified true, C1-C15); gate 475 published edeba5a. DPG-P0-2 C-verified, awaiting DP-gate re-review (not done). A-R187-PRODUCTCARD-PRIMARY-TOKEN closed (C6). C-R475-02 environment transient closed; L38 amended. Date 2026-11-12: regression not due (regression-last 2026-11-10, due 2026-11-13)."
-    },
-    {
-      "id": "D-29z1683",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 475 -> 476 planning",
-      "decision": "Ruling on A's round-475 STOP (L10): tree accepted, C-R475-01 closed. From round 476: for byte-equal-granted files a reviewer Low is reported, never edited, not a STOP; STOP only for Medium+ or out-of-grant. R1 -> confirmedBy SIG-R475-TOKEN-GUARD-LIMITS (L7); R2/R3/R4/UT3 title -> C-R475-REVIEW-LOWS deferred; A Architecture note -> confirmedBy SIG-R475-LEGACY-DEAD-MORE; gate 475 suggestions -> SIG-R476-CARD-TITLE-HOVER-CUE, SIG-R475-STUB-ROUTES confirmedBy; nav-bar suggestion = ROOT-REQ-NAV-LOADING-BAR-RENDER (existing)."
-    },
-    {
       "id": "D-29z1684",
       "date": "2026-11-12",
       "by": "2026-11-12 B round 475 -> 476 planning",
@@ -46916,6 +46916,30 @@
       "date": "2026-11-13",
       "by": "2026-11-13 B round 485 -> 486 planning",
       "decision": "Full mouse-only sweep (npx biome lint app --max-diagnostics=1000; b-round-485/mouse-only-sweep.txt, 13 hits; a-round-485/lint.log was truncated by the diagnostics cap). New Medium B-R486-PROFILE-NAME-KEYBOARD (account.tsx: the Profile name <p onClick> 'Click to add name' has no keyboard path; source + Biome, browser repro at its planning). Others recorded as one signal SIG-R486-MOUSE-ONLY-SWEEP: Modal/AuthModal/StemsPlayerModal backdrop clicks (close also by Escape/close button; to verify per modal), legacy components/studio/* (frozen legacy, removal policy), protected studio.$productId.tsx (2). Order change: round 487 = B-R486-PROFILE-NAME-KEYBOARD (Medium first, 2026-10-23 bug gate) unless planning is on/after 2026-11-16 (REGRESSION first); then DPG-BUTTON-CLEANUP. Not added to round 486 (no widening)."
+    },
+    {
+      "id": "D-29z1734",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 486 -> 487 planning",
+      "decision": "C round 486 PASS (c-round-486.json: 16 rows passed incl. OC-TAB/KEYS/MOUSE/AX-STUBBED, OC-PIXEL 12/12 0 px, OC-PRESS, OC-SELECT, OC-UNIT 68/68 + 9 mutants identical to B; browserVerified/realVerified true; 0 bugs; l57-check OK) and gates/gate-round-486.json published bb82154 on both remotes (its head field says 0341229; commit field and git rev-parse are the truth). B-R480-ORDER-CARD-KEYBOARD -> done for the client path; OWN-BACKEND (real .NET orders) stays open evidence for a backend-enabled check, does not block. Reviewer and gate notes (L7, no new ids where an id exists): code-reviewer Medium 'no unit guard for select-text / active:transform-none! / [--focus-offset:-2px]' (ruled by task 486 s4) and gate review L1/L2 -> confirmedBy on B-R486-FOCUS-OFFSET-GUARD, whose fix now also names the two classes; A-reviewer Lows 'no unit assert that the hidden panel holds no focusables' and 'OC1 does not assert the h3 holds only the button' -> new Low A-R486-REVIEW-L1-OC-TEST-GAPS (deferred_low_polish). Gate L3 (collapsed panels render up to 50 orders' items) -> note on SIG-R486-DISCLOSURE-PRIMITIVE. A-reviewer side note (FORWARDREF_COMPONENT / DESIGN_TOKENS focus examples contradict store-focus-ring STF2) -> retro_candidates for the RETRO 495 primitive-staleness check (primitives are root/Saba files). Architecture note (keep; no shared Disclosure yet) recorded as signal only."
+    },
+    {
+      "id": "D-29z1735",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 486 -> 487 planning",
+      "decision": "Dispatch round 487 = B-R486-PROFILE-NAME-KEYBOARD (current-task.md) on baseline bb82154 (gate 486 published; regression not due until 2026-11-16). Browser repro at HEAD (b-round-486/probe/head-named.json, 1440/1280/375, signed-in stub): name not a Tab stop; Esc / X / save leave focus on BODY; held Enter in the input sends 6 PUTs; inputs and icon buttons unnamed. Sketch v3 sha b2eee700a70196adaa046cb56c6a9e34cb2a91b7f9e70d1c22e20b81a8cbd8bb (v1 failed HS1 held-enter-source-scan in the full suite -> v2 uses the shared preventRepeatedEnterKeyDown; v3 adds tech-lead L1 Escape-during-save guard + PN9 and L4 non-vacuous tabindex assert): native button named via aria-labelledby 'Full Name <value>', focus return to it after Esc/Cancel/save, First name after validation/API failure, in-flight ref, held-Enter guard on input and trigger, input/icon labels. Evidence: 18 screenshot pairs 0 px below the header (probe/v3/pxdiff-region.txt; header band 11 px drifts HEAD-vs-HEAD, probe/headctl/pxdiff-control.txt); 14 mutants red; covering 5/74; full suite 293/4273 rc 0; tsc rc 0; tech-lead APPROVE-WITH-CHANGES (v2) then APPROVE (v3 delta), b-round-486/sketch-review.md. Doc 315. STOP threshold and rulings in task s2/s4. | amended by D-29z1737: dispatched sketch is v4 sha d8f8c4ffc0c0295c (select-text dropped)."
+    },
+    {
+      "id": "D-29z1736",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 486 -> 487 planning",
+      "decision": "New ids and order. (1) L42: Saba's 2026-11-13 policy note 'SpotlightLoader too fast; at first visit it must last at least 3-4 s' had no backlog id -> SABA-B-17-ENTRANCE-3-4S (Medium, Saba saw it; supersedes the 1.2-1.5 s example of SABA-B-13, today ENTRANCE_MIN_TOTAL_MS 1450 / MAX 1900, claims-487 K23); its task carries 'Why we missed it' and a lesson at its planning (policy 2026-10-28). (2) B-R487-PROFILE-EDITOR-NARROW-OVERFLOW (Medium, B pre-check): at 375x812 the name editor row (2 x w-40 inputs + 2 icon buttons, 420 px) overflows the 343 px column; Save/Cancel are off-screen and a click misses them (probe head-named.json afterMouseSave/afterMouseCancel at 375, HEAD and sketch equal); pre-existing, not widened into 487. (3) Signal SIG-R487-REPEAT-SAFE-HOME (tech-lead L3): the shared held-Enter helper lives in components/arrangement but a Store route now imports it; move to app/lib and update HS1 HELPER_PATH in a bounded task (not scheduled). Order: 487 B-R486-PROFILE-NAME-KEYBOARD, 488 SABA-B-17-ENTRANCE-3-4S, 489 B-R487-PROFILE-EDITOR-NARROW-OVERFLOW, then DPG-BUTTON-CLEANUP and the rest of DPG P1; REGRESSION first if planning is on/after 2026-11-16. Rationale for 487 before SABA-B-17: both Medium; 487 is the older finding and its sketch is fully pre-checked; SABA-B-17 needs a production-build first-frame probe (L18) at its own planning."
+    },
+    {
+      "id": "D-29z1737",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 486 -> 487 planning",
+      "decision": "Round 487 sketch v4 (sha d8f8c4ffc0c0295c36c892bbba98fcba3a1824cbc54ece2590712fad863d9baa, supersedes v3 b2eee700...) after the closing advisor check: B's Chromium browser mutants (b-round-486/probe/x/) showed active:transform-none! is load-bearing (without it the pressed transform is matrix(0.98...)) while select-text changed no measured gesture (drag from outside / on text / double-click equal to HEAD) -> v4 drops select-text (L58); tech-lead delta APPROVE. New browser rows: PN-HELD-FAST-STUBBED (instant PUT, repeats outlive the save: 1 PUT, focus on the name button; HEAD 2 PUTs + BODY; browser mutant without the trigger guard re-opens the editor) and PN-KBSAVE-500-STUBBED (keyboard Save + 500: focus First name; HEAD BODY). L50 block added to the task (18 hits on the sketch, b-round-486/l50-hits.txt, each ruled). v4 re-checked: 14 mutants red, covering 5/74, full suite 293/4273 rc 0, tsc rc 0, 18 screenshot pairs 0 px (probe/v4/). B-R486-FOCUS-OFFSET-GUARD's fix also names the Profile name button's active:transform-none!. INFO-B487-HEADER-BAND-1280 recorded in harness_facts. The v3 FIREFOX-CHECKS note for select-text is moot (class dropped)."
     }
   ],
   "retro_candidates": [
@@ -47479,6 +47503,11 @@
       "added": "2026-11-13 B round 483 -> 484 planning",
       "note": "Task 483 copied c295's natural-LoAF loafPass as the R295 criterion although C round 390 had ruled it (R301-LOAF PASS provoked, INFO-C390-LOAF); the row read inconclusive again. B found the precedent only after an advisor prompt. RETRO 495: should a regression task grep the template round's C report for each row's last ruling before copying its criterion?",
       "status": "open (D-29z1721)"
+    },
+    {
+      "id": "RC-R486-PRIMITIVE-FOCUS-EXAMPLES",
+      "added": "2026-11-13 B round 486 -> 487 planning",
+      "note": "A-round-486 code-reviewer: the focus examples in .claude/primitives FORWARDREF_COMPONENT.md / DESIGN_TOKENS.md (focus-visible:ring-2, outline-none) contradict store-focus-ring STF2 (one shared :focus-visible rule). Check at RETRO 495 (DPG rule 5, primitive staleness); proposal for Saba only."
     }
   ],
   "root_requests_b": [

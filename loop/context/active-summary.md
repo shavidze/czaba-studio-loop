@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-13T07:32:32.708Z)
+# Active loop summary (2026-11-13T08:28:45.738Z)
 
-- backlog.json 3463 KB -> active view 303 KB
-- status: G_ROOT_GATE round 485
-- servers: `{"checkedUtc":"2026-11-13T07:23:16.7727752Z","round":485,"attempt":1,"store":200}`
-- last publication: 034122994313113c9c74888b4fef2f8ee1a6144a (rounds 482-485)
-- last root gate: round 485 published - commit 034122994313113c9c74888b4fef2f8ee1a6144a pushed
+- backlog.json 3471 KB -> active view 303 KB
+- status: G_ROOT_GATE round 486
+- servers: `{"checkedUtc":"2026-11-13T08:21:09.4569561Z","round":486,"attempt":1,"store":200}`
+- last publication: bb82154592263a392511277bfad421b423f78127 (rounds 486-486)
+- last root gate: round 486 published - commit bb82154592263a392511277bfad421b423f78127 pushed
 
 ## Current items: -
 
@@ -22,9 +22,9 @@
 - **SABA-B-16-LOGO-OLD-COLORS** / medium / open (D-29z1691): header logo + entrance wordmark brass C-verified round 477 (C7, published 10791ac); asset still unnamed (questions-round-467 Q3) | open (D-29z1685): round 476 makes the entrance wordmark and header logo brass (footer already brass); asset still unconfirmed (questions-round-467 Q3); …[see backlog.json] / Logo still uses the old colours, not Obsidian & Brass (Saba 2026-11-12, "Known issues for the first review")
 - **B-R478-DEAD-LICENSE-LINK** / medium / awaiting_user (D-29z1699): user-review/questions-round-478.md Q1 (licence copy is legal content); round 479 keeps the target and only makes the link client-side / Footer "License" (every Store page) and terms.tsx "License page" link to /license, which has no route and renders the 404 page
 - **B-R478-DEAD-MUSIC-LINK** / medium / half verified (D-29z1712): account.orders.tsx -> /store C round 481 PASS (browser, stubbed L36 path), published 751e30e; stays open for the protected account.downloads.tsx half (ROOT-REQ-DOWNLOADS-MUSIC-LINK) | dispatched round 481 (D-29z1710): account.orders.tsx half -> /store; account.downloads.ts …[see backlog.json] / Empty orders/downloads state "Browse Music" links to /music (404; /collections/music is 404 too)
-- **GATE479-M1-ROUTE-ANNOUNCE** / medium / dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485, announcer in RouteTransition (sketch pre-run in browser); screen-reader half -> TLM-R485-SR-ROUTE-ANNOUNCE after C PASS | scheduled (D-29z1720): CLIENT-NAV-CONTRACT round 485 (after the REGRESSION part-2 remainder 484) | scheduled (D-29z1715): C …[see backlog.json] / Client navigation does not announce the new page title to screen readers (a full reload did); 13 footer/content links since round 479, 15 he
 - **FIREFOX-CHECKS** / medium / open_root (D-29z1707; does not block): blocked (D-29z1705): needs ROOT-REQ-PLAYWRIGHT-FIREFOX; C runs all five in one round once Firefox is installed; questions-retro-480.md Q3 / Firefox halves of five manual checks, opened as one task by L46 after two RETROs without an answer
 - **SAFARI-CHECKS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Saba on macOS Safari; questions-retro-480.md Q4 / Safari halves of the manual list, opened as one task by L46
 - **HIREUS-EMAIL-CLIENTS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Brevo and a test send to Gmail/Outlook/Apple Mail (Saba); questions-retro-480.md Q4 / Hire-Us internal e-mail in real clients, opened as a task by L46
-- **B-R480-ORDER-CARD-KEYBOARD** / medium / scheduled (D-29z1726): round 486 (after CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1720): round 486 (after REGRESSION remainder 484 and CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1715): round 485 (after REGRESSION 482-483 and CLIENT-NAV-CONTRACT 484) | scheduled (D-29z1711): round 484 (after REGRESS …[see backlog.json] / My Orders: an order card opens only on a mouse click on a <div>; keyboard and screen-reader users cannot reach the order items, licence type
+- **B-R480-ORDER-CARD-KEYBOARD** / medium / dispatched (D-29z1729): round 486 on baseline 0341229 | scheduled (D-29z1726): round 486 (after CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1720): round 486 (after REGRESSION remainder 484 and CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1715): round 485 (after REGRESSION 482-483 and CLIENT-NAV-CONTRAC …[see backlog.json] / My Orders: an order card opens only on a mouse click on a <div>; keyboard and screen-reader users cannot reach the order items, licence type
+- **B-R486-PROFILE-NAME-KEYBOARD** / medium / scheduled (D-29z1733): round 487 (after round 486; REGRESSION first if planning is on/after 2026-11-16) / Account Profile: the name is edited by clicking a <p onClick> ('Click to add name'); keyboard and screen-reader users cannot start editing t
 - ... and 966 Low/info (see backlog.json)

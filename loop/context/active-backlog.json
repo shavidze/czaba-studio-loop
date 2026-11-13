@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-13T07:32:32.708Z",
-  "current_task": "Round 485: CLIENT-NAV-CONTRACT - route announcer in RouteTransition (title, else page h1; silent first render; Studio<->Store), releaseLinkFocus try/finally + target/download skip, doc 313 slow-loader note; closes GATE479-M1 (live-region contract) + 4 Lows; baseline 751e30e (current-task.md)",
+  "_generatedUtc": "2026-11-13T08:28:45.738Z",
+  "current_task": "Round 486: B-R480-ORDER-CARD-KEYBOARD - My Orders card header becomes h3 > button (aria-expanded, aria-controls, hidden panel; APG Accordion), inset shared focus ring, 0 px visual change; tests OC1-OC4; doc 314; baseline 0341229 (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6853,16 +6853,6 @@
       "added": "2026-11-12 B round 478 -> 479 planning"
     },
     {
-      "id": "GATE479-M1-ROUTE-ANNOUNCE",
-      "severity": "medium",
-      "origin": "gate reviewer",
-      "status": "dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485, announcer in RouteTransition (sketch pre-run in browser); screen-reader half -> TLM-R485-SR-ROUTE-ANNOUNCE after C PASS | scheduled (D-29z1720): CLIENT-NAV-CONTRACT round 485 (after the REGRESSION part-2 remainder 484) | scheduled (D-29z1715): C …[see backlog.json]",
-      "title": "Client navigation does not announce the new page title to screen readers (a full reload did); 13 footer/content links since round 479, 15 header links before it",
-      "evidence": "gates/round-479/review.md finding 1; git show 75a6028:app/components/layout/Header.tsx (15 <Link>); app/root.tsx has no announcer",
-      "repro": "screen reader on: Tab to footer Support, Enter; the new page title is not spoken",
-      "added": "2026-11-12 B round 479 -> 480 planning"
-    },
-    {
       "id": "FIREFOX-CHECKS",
       "severity": "medium",
       "origin": "environment",
@@ -6910,23 +6900,26 @@
       "id": "B-R480-ORDER-CARD-KEYBOARD",
       "severity": "medium",
       "origin": "B pre-check",
-      "status": "scheduled (D-29z1726): round 486 (after CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1720): round 486 (after REGRESSION remainder 484 and CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1715): round 485 (after REGRESSION 482-483 and CLIENT-NAV-CONTRACT 484) | scheduled (D-29z1711): round 484 (after REGRESS …[see backlog.json]",
+      "status": "dispatched (D-29z1729): round 486 on baseline 0341229 | scheduled (D-29z1726): round 486 (after CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1720): round 486 (after REGRESSION remainder 484 and CLIENT-NAV-CONTRACT 485) | scheduled (D-29z1715): round 485 (after REGRESSION 482-483 and CLIENT-NAV-CONTRAC …[see backlog.json]",
       "title": "My Orders: an order card opens only on a mouse click on a <div>; keyboard and screen-reader users cannot reach the order items, licence type and prices",
       "evidence": "app/routes/account.orders.tsx l.59-62 (<div onClick> with cursor-pointer, no role/tabIndex/key handler); npx biome check app/routes/account.orders.tsx -> lint/a11y/useKeyWithClickEvents (b-round-480/sketch-biome.log); claims-481 K11",
       "repro": "signed in with at least one order (stub /api/orders/my in Playwright): Tab through /account/orders; no stop on any order card; Enter/Space cannot expand it",
       "added": "2026-11-12 B round 480 -> 481 planning",
-      "evidence_kind": "source reading + Biome lint only; not yet reproduced in a browser (round-484 planning runs the Tab probe with a one-order stub first)"
+      "evidence_kind": "reproduced in Chromium at HEAD 0341229 by B (b-round-485/probe/head.json, 0 card Tab stops at 1440x900 and 1280x720, signed-in stub); source + Biome as before"
+    },
+    {
+      "id": "B-R486-PROFILE-NAME-KEYBOARD",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "status": "scheduled (D-29z1733): round 487 (after round 486; REGRESSION first if planning is on/after 2026-11-16)",
+      "title": "Account Profile: the name is edited by clicking a <p onClick> ('Click to add name'); keyboard and screen-reader users cannot start editing their name",
+      "evidence": "app/routes/account.tsx onClick={handleNameClick} on a <p> (b-round-485/mouse-only-sweep.txt: lint/a11y/useKeyWithClickEvents account.tsx:214); claims-486 K22",
+      "repro": "signed in (localStorage.auth_user stub): Tab through /account; no stop on the name; Enter cannot open the editor",
+      "added": "2026-11-13 B round 485 -> 486 planning",
+      "evidence_kind": "source + full-app Biome sweep; not yet reproduced in a browser (round-487 planning runs the Tab probe first)"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 476,
-      "task": "current-task.md",
-      "decision": "D-29z1686",
-      "type": "DPG-P0-3a: entrance loader + header logo Obsidian & Brass (sketch b-round-475/sketch-476.patch.txt v2 sha 83341e9f)",
-      "status": "C FAIL short route (D-29z1689); STOP R1 ruled D-29z1688; tree preserved for round 477",
-      "note": "baseline HEAD edeba5a clean; claims b-round-475/claims-476.sh; tech-lead APPROVE WITH CHANGES adopted (b-round-475/sketch-review.md); product-designer b-round-475/pd-p0-3a.md; full suite on v2 287/4209"
-    },
     {
       "round": 477,
       "task": "current-task.md",
@@ -6996,8 +6989,16 @@
       "task": "current-task.md",
       "decision": "D-29z1724",
       "type": "CLIENT-NAV-CONTRACT (GATE479-M1 + 4 Lows)",
-      "status": "dispatched",
+      "status": "C PASS (browserVerified true, 15 rows, 1 Low pre-existing); gate 485 published 0341229 (D-29z1727)",
       "note": "baseline HEAD 751e30e clean; claims b-round-484/claims-485.sh; frozen manifest b-round-484/r485-tree-sha256.txt (1393); sketch b-round-484/sketch-485.patch.txt; probes b-round-484/probe"
+    },
+    {
+      "round": 486,
+      "task": "current-task.md",
+      "decision": "D-29z1729",
+      "type": "B-R480-ORDER-CARD-KEYBOARD (Medium fix)",
+      "status": "dispatched",
+      "note": "baseline HEAD 0341229 clean; claims b-round-485/claims-486.sh; frozen manifest b-round-485/r486-tree-sha256.txt (1397); sketch b-round-485/sketch-486.patch.txt; probes b-round-485/probe; sketch v2 sha 794821b0d13b4059 (D-29z1732)"
     }
   ],
   "other_keys": [
