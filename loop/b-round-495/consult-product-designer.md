@@ -1,0 +1,12 @@
+# product-designer consult — DPG-BUTTON-CLEANUP stage 1 (B round 495 -> 496 planning, 2026-11-13)
+Inputs: Button.tsx, app.css l.244-345, direction-decision.md, research/competitors.md, visual-pass.md, measure/head.json.
+
+Mechanism: one class builder exported from Button.tsx (links call it; output stays a single <a>; DESIGN_SYSTEM l.882 "Navigation (use Link)").
+(a) Radius: CHOSEN pill (9999px) via opt-in shape="pill" for Store CTAs (direction-decision.md l.8 "a brass pill 'Listen'"; 4 of 6 live sites already pills; Artlist/Epidemic pills in research). REJECTED: pill as Button base (≈51 uses in 21 files incl. Studio dialogs, unmeasured restyle); 8px everywhere (DESIGN_SYSTEM l.1062; flattens hero/404 against direction A); 6px (only the header's !rounded-sm patch). Header Sign In is not an exception (pill).
+(b) Sizes, no new xl; lg = 48px 16px/600 = today's render. 404 Back Home lg pill 48 (no change); login/search lg pill 68->48 accepted (68 was a padding accident); Hero lg pill 48, drop dead px-8 py-4, copy untouched (STORE-3); Header desktop lg pill 48; mobile menu lg pill fullWidth 48; Clear Filters primary md 40.
+(c) 404 Browse Store: text link, text-foreground hover:text-brand, min-h-12, inline-flex (suggested "Browse Store →"; B kept the existing icon + text, copy belongs to DPG-COPY-VOICE).
+(d) shadow-sm keep (record for DPG-INTERACTION-FIX); active:opacity-90 keep; links do not get button:active scale (record).
+(e) text token: text-brand-foreground (semantic pair with bg-brand; zero pixels today). B: not adopted this round (tech-lead byte-identity), recorded PD-R496-PRIMARY-TEXT-TOKEN.
+(f) states: rest bg #c9a46a / text #0e0d0c / radius 9999px / 48px / 16px 600; hover bg #d9b87f; focus-visible shared 1.5px brand outline offset 2px, none after pointer; active opacity 0.9; disabled/loading only #7. Rows: 1440 rest+hover #1 #3 #4 + #5 visible; 1280 hero + #5 no wrap; 1023 vs 1024 computed display of #5; 375 mobile menu #6 full width 48 pill; keyboard Tab+Enter on #1 #2 -> one <a>, route changes; grep gate 0.
+(g) Medium btn-secondary no rule -> fix now (c); Medium header ! classes -> max-lg:hidden, row 1023/1024; Low mobile skeleton 44 vs 48 -> h-12 if one token; Low Studio Buttons stay 8px (intended); Low hero copy/size -> STORE-3.
+Questions for Saba: Q1 delete dead AssetListingPage (default: convert, keep file); Q2 Sign In brass pill vs quiet text item (default: pill).

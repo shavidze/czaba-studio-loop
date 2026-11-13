@@ -1,13 +1,15 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 494 PASS (browserVerified/realVerified true, 0 bugs); gate 494 published 3bcf8cb; the three password-dialog Mediums are done for the client path. Not COMPLETE: many scoped items remain (DPG P1, STORE-2c..5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2, STEM-LANES), the High B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED is open with root, and deferred Lows must be fixed before final acceptance. Not BLOCKED: the RETRO round and DPG-BUTTON-CLEANUP need no external input.",
- "nextTask": "Round 495: RETRO 495 (window 480-494), no app code. A: nothing to implement (STOP only if the frozen manifest b-round-494/r495-tree-sha256.txt is not rc 0). C verifies the retro in the browser and by re-running B's data scripts: G495-AUTH, STUDIO-SMOKE-495 and RT-SCREEN at 1440x900/1280x720 (capture b-round-494/screens/capture.mjs, counts 138/168/118/144), CLAIMS (b-round-494/claims-495.sh), RT-NUM, RT-CAUSE, RT-IDS, RT-LESSONS (57,164 B, 4 new clauses), RT-CHECKERS, RT-SABA, RT-PRIMITIVES, RT-LEDGER, L57. Then 496 = DPG-BUTTON-CLEANUP (REGRESSION first if planned on/after 2026-11-16).",
+ "reason": "C round 495 (RETRO) PASS, 0 bugs, browserVerified/realVerified true; gate 495 skipped (no source change), baseline 3bcf8cb. No open C bug, so the next dependency-ordered scope is DPG P1 (Saba: before STORE-3 and all other work). Not COMPLETE: DPG P1/P2 and the DP gate, STORE-2c..5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2 and STEM-LANES remain, the High B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED is open with root, and the deferred Lows must be fixed before final acceptance. Not BLOCKED: round 496 needs no external input.",
+ "nextTask": "Round 496: DPG-BUTTON-CLEANUP stage 1. A: git apply b-round-495/sketch-496.patch.txt (tech-lead v2 APPROVE): delete .btn-primary/.button/.button-primary from app.css (byte-for-byte narrow grant), add buildButtonClassName + shape pill to Button.tsx (default byte-identical), migrate 404 (Back Home pill; dead btn-secondary Browse Store -> text link), /account/login, /search, Hero, Header desktop (max-lg:hidden) + mobile (fullWidth) + skeletons, AssetListingPage; port GS3; BC1-BC6; DESIGN_SYSTEM ### Buttons + doc 319. C: browser rows C1-C7 at 1440x900/1280x720 (+1023/1024/375 breakpoint, keyboard focus ring, nav, 404 pair, hero->store journey), C8 skeleton, C9 grep (scanner TOTAL 2 btn-icon), C10 covering tests, C11 3 mutants, C12 docs, C13 claims-496.sh, C14 scope + L57. Then DPG-BUTTON-CLEANUP-2 (REGRESSION first on/after 2026-11-16).",
  "remaining": [
   "ROOT-REQ-DOWNLOADS-MUSIC-LINK",
   "DP-GATE-RERUN-AFTER-P0",
   "DPG-FOOTER-LINKS",
   "DPG-LOGO",
   "DPG-BUTTON-CLEANUP",
+  "DPG-BUTTON-CLEANUP-2",
+  "B-R496-404-BROWSE-STORE-UNSTYLED",
   "DPG-CSS-DEDUP",
   "DPG-FONT-RESOLVE",
   "DPG-COLOR-CONSOLIDATE",
@@ -54,6 +56,8 @@
   "SYS-R495-SHARED-DIALOG",
   "SABA-DEVICE-CHECKS",
   "ROOT-REQ-SHARED-DIALOG-GRANT",
-  "STEM-LANES"
+  "STEM-LANES",
+  "SABA-Q-496-BUTTONS",
+  "PD-R496-PRIMARY-TEXT-TOKEN"
  ]
 }

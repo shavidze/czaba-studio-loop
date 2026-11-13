@@ -1,0 +1,549 @@
+diff --git a/app/components/home/HeroSection.tsx b/app/components/home/HeroSection.tsx
+index c363f7e..348dba4 100644
+--- a/app/components/home/HeroSection.tsx
++++ b/app/components/home/HeroSection.tsx
+@@ -2,6 +2,7 @@ import { Link } from '@remix-run/react';
+ import { AnimatePresence, motion } from 'framer-motion';
+ import { ArrowRight, Volume2, VolumeX } from 'lucide-react';
+ import { useEffect, useRef, useState } from 'react';
++import { buildButtonClassName } from '~/components/ui';
+ import { PageContainer } from '../layout';
+ 
+ // Hero background media - supports both images and videos
+@@ -180,7 +181,7 @@ export function HeroSection() {
+           <motion.div variants={itemVariants}>
+             <Link
+               to="/store"
+-              className="btn-primary group inline-flex items-center gap-2 px-8 py-4"
++              className={buildButtonClassName({ size: 'lg', shape: 'pill', className: 'group' })}
+             >
+               <span>Discover the Collection</span>
+               <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+diff --git a/app/components/layout/Header.tsx b/app/components/layout/Header.tsx
+index ec1f0f9..6bf9f7d 100644
+--- a/app/components/layout/Header.tsx
++++ b/app/components/layout/Header.tsx
+@@ -2,6 +2,7 @@ import { Link, useLocation } from '@remix-run/react';
+ import { Menu, ShoppingCart, User, X } from 'lucide-react';
+ import { useEffect, useRef, useState } from 'react';
+ import { CommandPalette } from '~/components/search';
++import { Button } from '~/components/ui';
+ import { useAuth } from '~/hooks';
+ 
+ interface HeaderProps {
+@@ -114,7 +115,7 @@ export function Header({ cartCount = 0 }: HeaderProps) {
+ 
+           {/* Auth section - show skeleton while initializing */}
+           {isInitializing ? (
+-            <div className="hidden lg:block w-[70px] h-[36px] bg-elevated rounded-sm animate-pulse" />
++            <div className="hidden lg:block w-24 h-12 bg-elevated rounded-full animate-pulse" />
+           ) : isAuthenticated ? (
+             <div
+               ref={userMenuRef}
+@@ -185,13 +186,15 @@ export function Header({ cartCount = 0 }: HeaderProps) {
+               </div>
+             </div>
+           ) : (
+-            <button
++            <Button
+               type="button"
++              size="lg"
++              shape="pill"
+               onClick={() => openModal('signin')}
+-              className="btn-primary cursor-pointer !rounded-sm !hidden lg:!inline-block"
++              className="max-lg:hidden"
+             >
+               Sign In
+-            </button>
++            </Button>
+           )}
+ 
+           <button
+@@ -248,18 +251,20 @@ export function Header({ cartCount = 0 }: HeaderProps) {
+             </Link>
+             <hr className="border-outline my-4" />
+             {isInitializing ? (
+-              <div className="h-[44px] bg-elevated rounded-md animate-pulse" />
++              <div className="h-12 bg-elevated rounded-full animate-pulse" />
+             ) : !isAuthenticated ? (
+-              <button
++              <Button
+                 type="button"
++                size="lg"
++                shape="pill"
++                fullWidth
+                 onClick={() => {
+                   setIsOpen(false);
+                   openModal('signin');
+                 }}
+-                className="btn-primary w-full cursor-pointer"
+               >
+                 Sign In
+-              </button>
++              </Button>
+             ) : (
+               <>
+                 <Link
+diff --git a/app/components/product/AssetListingPage.tsx b/app/components/product/AssetListingPage.tsx
+index 1ea88d9..c8b3982 100644
+--- a/app/components/product/AssetListingPage.tsx
++++ b/app/components/product/AssetListingPage.tsx
+@@ -1,5 +1,6 @@
+ import { useState } from 'react';
+ import { FilterBar } from '~/components/filters';
++import { Button } from '~/components/ui';
+ import { useFilters } from '~/hooks';
+ import type { Asset, AssetType } from '~/types';
+ import { AssetRow } from './AssetRow';
+@@ -118,9 +119,9 @@ export function AssetListingPage({
+               <line x1="21" y1="21" x2="16.65" y2="16.65" />
+             </svg>
+             <p>No {pageTitle.toLowerCase()} found matching your filters</p>
+-            <button onClick={clearAllFilters} className="button button-primary">
++            <Button type="button" onClick={clearAllFilters}>
+               Clear Filters
+-            </button>
++            </Button>
+           </div>
+         )}
+       </div>
+diff --git a/app/components/ui/Button.tsx b/app/components/ui/Button.tsx
+index dc406f9..693be6e 100644
+--- a/app/components/ui/Button.tsx
++++ b/app/components/ui/Button.tsx
+@@ -1,12 +1,14 @@
+ import { Loader2 } from 'lucide-react';
+ import { forwardRef } from 'react';
+ 
+-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'accent' | 'buy' | 'destructive';
+-type ButtonSize = 'sm' | 'md' | 'lg';
++export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'accent' | 'buy' | 'destructive';
++export type ButtonSize = 'sm' | 'md' | 'lg';
++export type ButtonShape = 'default' | 'pill';
+ 
+ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+   variant?: ButtonVariant;
+   size?: ButtonSize;
++  shape?: ButtonShape;
+   isLoading?: boolean;
+   fullWidth?: boolean;
+   children: React.ReactNode;
+@@ -60,11 +62,49 @@ const sizeStyles: Record<ButtonSize, string> = {
+   lg: 'px-6 py-3 text-base gap-2',
+ };
+ 
++const shapeStyles: Record<ButtonShape, string> = {
++  default: 'rounded-md',
++  pill: 'rounded-full',
++};
++
++export interface ButtonClassNameParams {
++  variant?: ButtonVariant;
++  size?: ButtonSize;
++  shape?: ButtonShape;
++  fullWidth?: boolean;
++  isDisabled?: boolean;
++  className?: string;
++}
++
++export function buildButtonClassName({
++  variant = 'primary',
++  size = 'md',
++  shape = 'default',
++  fullWidth = false,
++  isDisabled = false,
++  className = '',
++}: ButtonClassNameParams): string {
++  return [
++    'inline-flex items-center justify-center',
++    `font-semibold ${shapeStyles[shape]}`,
++    'transition-all duration-150',
++    'cursor-pointer',
++    variantStyles[variant],
++    sizeStyles[size],
++    fullWidth && 'w-full',
++    isDisabled && 'opacity-50 cursor-not-allowed pointer-events-none',
++    className,
++  ]
++    .filter(Boolean)
++    .join(' ');
++}
++
+ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+   (
+     {
+       variant = 'primary',
+       size = 'md',
++      shape = 'default',
+       isLoading = false,
+       fullWidth = false,
+       disabled,
+@@ -80,19 +120,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+       <button
+         ref={ref}
+         disabled={isDisabled}
+-        className={[
+-          'inline-flex items-center justify-center',
+-          'font-semibold rounded-md',
+-          'transition-all duration-150',
+-          'cursor-pointer',
+-          variantStyles[variant],
+-          sizeStyles[size],
+-          fullWidth && 'w-full',
+-          isDisabled && 'opacity-50 cursor-not-allowed pointer-events-none',
++        className={buildButtonClassName({
++          variant,
++          size,
++          shape,
++          fullWidth,
++          isDisabled,
+           className,
+-        ]
+-          .filter(Boolean)
+-          .join(' ')}
++        })}
+         {...props}
+       >
+         {isLoading ? (
+diff --git a/app/components/ui/index.ts b/app/components/ui/index.ts
+index f022099..2b40552 100644
+--- a/app/components/ui/index.ts
++++ b/app/components/ui/index.ts
+@@ -1,6 +1,14 @@
+ // Barrel export for UI components
+ 
+-export { AccentButton, Button, GhostButton, PrimaryButton, SecondaryButton } from './Button';
++export type { ButtonClassNameParams, ButtonShape, ButtonSize, ButtonVariant } from './Button';
++export {
++  AccentButton,
++  Button,
++  buildButtonClassName,
++  GhostButton,
++  PrimaryButton,
++  SecondaryButton,
++} from './Button';
+ export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './Card';
+ export { CollapsibleSocialLinks } from './CollapsibleSocialLinks';
+ export { EmptyState } from './EmptyState';
+diff --git a/app/lib/__tests__/store-button-cleanup.test.tsx b/app/lib/__tests__/store-button-cleanup.test.tsx
+new file mode 100644
+index 0000000..a6b1175
+--- /dev/null
++++ b/app/lib/__tests__/store-button-cleanup.test.tsx
+@@ -0,0 +1,113 @@
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { render, within } from '@testing-library/react';
++import type { ReactElement } from 'react';
++import { MemoryRouter } from 'react-router-dom';
++import { beforeEach, describe, expect, it, vi } from 'vitest';
++import { HeroSection } from '~/components/home/HeroSection';
++import { Header } from '~/components/layout/Header';
++import { Button, buildButtonClassName } from '~/components/ui';
++import NotFound from '~/routes/$';
++import Login from '~/routes/account_.login';
++import Search from '~/routes/search';
++import { APP_ROOT, listFiles } from './helpers/style-scan';
++
++const authMock = vi.hoisted(() => ({
++  state: { isAuthenticated: false, isInitializing: false, user: null },
++  openModal: vi.fn(),
++  signOut: vi.fn(async () => undefined),
++}));
++vi.mock('~/hooks', () => ({
++  useAuth: () => ({ ...authMock.state, openModal: authMock.openModal, signOut: authMock.signOut }),
++}));
++vi.mock('~/components/search', () => ({
++  CommandPalette: () => <button type="button">Search</button>,
++}));
++
++const HEAD_PRIMARY_MD =
++  'inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-4 py-2.5 text-sm gap-2';
++const PILL_LG = buildButtonClassName({ size: 'lg', shape: 'pill' });
++const LINK_ROWS: ReadonlyArray<{
++  ui: ReactElement;
++  name: string;
++  href: string;
++  expectedClassName: string;
++}> = [
++  { ui: <NotFound />, name: 'Back Home', href: '/', expectedClassName: PILL_LG },
++  { ui: <Login />, name: 'Back to Home', href: '/', expectedClassName: PILL_LG },
++  { ui: <Search />, name: 'Back to Home', href: '/', expectedClassName: PILL_LG },
++  {
++    ui: <HeroSection />,
++    name: 'Discover the Collection',
++    href: '/store',
++    expectedClassName: `${PILL_LG} group`,
++  },
++];
++const RETIRED =
++  /(?<![\w-])(btn-primary|btn-secondary|button-primary)(?![\w-])|className="button[ "]/;
++
++beforeEach(() => {
++  authMock.state.isAuthenticated = false;
++  authMock.state.isInitializing = false;
++});
++
++describe('DPG-BUTTON-CLEANUP', () => {
++  it('BC1: default Button classes are byte-identical to HEAD 3bcf8cb (stage-1 pin; a later visual stage updates it on purpose)', () => {
++    const { getByRole } = render(<Button>Go</Button>);
++    expect(getByRole('button', { name: 'Go' }).className).toBe(HEAD_PRIMARY_MD);
++    expect(buildButtonClassName({})).toBe(HEAD_PRIMARY_MD);
++  });
++  it('BC2: pill shape swaps only the radius', () => {
++    expect(buildButtonClassName({ shape: 'pill' })).toBe(
++      HEAD_PRIMARY_MD.replace('rounded-md', 'rounded-full'),
++    );
++    expect(PILL_LG.split(' ')).toEqual(
++      expect.arrayContaining(['rounded-full', 'px-6', 'py-3', 'text-base']),
++    );
++  });
++  it('BC3: link consumers render one anchor with the pill lg classes', () => {
++    for (const row of LINK_ROWS) {
++      const { getByRole, unmount } = render(<MemoryRouter>{row.ui}</MemoryRouter>);
++      const link = getByRole('link', { name: row.name });
++      expect(link.getAttribute('href')).toBe(row.href);
++      expect(link.className).toBe(row.expectedClassName);
++      expect(link.querySelector('button')).toBeNull();
++      unmount();
++    }
++  });
++  it('BC4: 404 Browse Store is a text link, not a button-styled link', () => {
++    const { getByRole } = render(
++      <MemoryRouter>
++        <NotFound />
++      </MemoryRouter>,
++    );
++    const link = getByRole('link', { name: 'Browse Store' });
++    expect(link.getAttribute('href')).toBe('/store');
++    expect(link.className).not.toBe(PILL_LG);
++    expect(link.className.split(' ')).toContain('hover:text-brand');
++  });
++  it('BC5: header Sign In buttons use Button pill lg', () => {
++    const { getByRole } = render(
++      <MemoryRouter>
++        <Header />
++      </MemoryRouter>,
++    );
++    const header = getByRole('banner');
++    const buttons = within(header).getAllByRole('button', { name: 'Sign In' });
++    expect(buttons).toHaveLength(2);
++    expect(buttons[0].className).toBe(`${PILL_LG} max-lg:hidden`);
++    expect(buttons[1].className).toBe(
++      buildButtonClassName({ size: 'lg', shape: 'pill', fullWidth: true }),
++    );
++    expect(buttons[1].className.split(' ')).toContain('w-full');
++    expect(buttons[0].className.split(' ')).not.toContain('w-full');
++  });
++  it('BC6: no app source names a retired button class', () => {
++    const files = listFiles(APP_ROOT, /\.(ts|tsx)$/).filter((f) => !f.includes('__tests__'));
++    expect(files.length).toBeGreaterThan(200);
++    const hits = files.filter((f) => RETIRED.test(readFileSync(join(APP_ROOT, f), 'utf8')));
++    expect(hits).toEqual([]);
++    expect(RETIRED.test('x btn-primary y')).toBe(true);
++    expect(RETIRED.test('className="button button-primary"')).toBe(true);
++  });
++});
+diff --git a/app/lib/__tests__/store-glow-shadow.test.ts b/app/lib/__tests__/store-glow-shadow.test.ts
+index 0448d44..1d95e17 100644
+--- a/app/lib/__tests__/store-glow-shadow.test.ts
++++ b/app/lib/__tests__/store-glow-shadow.test.ts
+@@ -1,5 +1,6 @@
+ // @vitest-environment node
+ import { describe, expect, it } from 'vitest';
++import { type ButtonShape, buildButtonClassName } from '~/components/ui';
+ import {
+   ANY_STYLED_SOURCE_EXTENSIONS,
+   APP_ROOT,
+@@ -47,10 +48,13 @@ const RETIRED_UTILITY_ALLOW_LIST: StyleScanAllowList = {
+   },
+ };
+ 
+-const PRIMARY_BUTTON_SELECTORS: ReadonlyArray<string> = [
++const BUTTON_SHAPES: ReadonlyArray<ButtonShape> = ['default', 'pill'];
++
++const RETIRED_BUTTON_SELECTORS: ReadonlyArray<string> = [
+   '.btn-primary',
+   '.btn-primary:hover',
+   '.btn-primary:active',
++  '.button',
+   '.button-primary',
+   '.button-primary:hover',
+ ];
+@@ -81,31 +85,22 @@ describe('store glow shadows (STORE-2b-3b)', () => {
+     });
+   });
+ 
+-  it('GS3: the primary button rules carry no glow, no teal and no teal gradient', () => {
++  it('GS3: the retired CSS button rules are gone and the primary Button classes carry no glow, no teal and no gradient', () => {
+     const css = readApp(STORE_CSS_PATH);
+-    for (const selector of PRIMARY_BUTTON_SELECTORS) {
+-      const bodies = cssRuleBodies(css, selector);
+-      expect(bodies.length, selector).toBeGreaterThanOrEqual(1);
+-      for (const body of bodies) {
+-        expect(countZeroOffsetGlowHits(body), selector).toBe(0);
+-        expect(countTealHits(body), selector).toBe(0);
+-        expect(body, selector).not.toContain('--gradient-primary');
+-      }
++    for (const selector of RETIRED_BUTTON_SELECTORS) {
++      expect(cssRuleBodies(css, selector), selector).toEqual([]);
+     }
+-    expect(cssRuleBodies(css, '.button-primary').join('')).toContain(
+-      'color: var(--color-brand-foreground);',
+-    );
+-    expect(cssRuleBodies(css, '.button-primary').join('')).toContain(
+-      'background: var(--color-brand);',
+-    );
+-    for (const selector of PRIMARY_BUTTON_SELECTORS) {
+-      for (const body of cssRuleBodies(css, selector)) {
+-        expect(body, selector).not.toMatch(/gradient\(/);
+-      }
++    for (const shape of BUTTON_SHAPES) {
++      const classes = buildButtonClassName({ variant: 'primary', shape });
++      expect(countZeroOffsetGlowHits(classes), shape).toBe(0);
++      expect(countTealHits(classes), shape).toBe(0);
++      expect(classes, shape).not.toMatch(/gradient|bg-linear|shadow-glow|teal|cyan/);
++      const tokens = classes.split(' ');
++      expect(tokens, shape).toContain('bg-brand');
++      expect(tokens, shape).toContain('text-background');
++      expect(tokens, shape).toContain('hover:bg-brand-hover');
++      expect(classes, shape).not.toMatch(/hover:opacity/);
+     }
+-    const hoverBodies = cssRuleBodies(css, '.btn-primary:hover');
+-    expect(hoverBodies.join('')).toContain('background: var(--color-brand-hover);');
+-    expect(hoverBodies.join('')).not.toContain('opacity');
+   });
+ 
+   it('GS4: the scan is non-vacuous and reads every granted file', () => {
+diff --git a/app/routes/$.tsx b/app/routes/$.tsx
+index 55d2ba6..e913bd6 100644
+--- a/app/routes/$.tsx
++++ b/app/routes/$.tsx
+@@ -2,6 +2,7 @@ import type { MetaFunction } from '@remix-run/node';
+ import { Link } from '@remix-run/react';
+ import { motion } from 'framer-motion';
+ import { Home, Search } from 'lucide-react';
++import { buildButtonClassName } from '~/components/ui';
+ 
+ export const meta: MetaFunction = () => {
+   return [
+@@ -62,11 +63,14 @@ export default function NotFound() {
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.6, delay: 0.6 }}
+         >
+-          <Link to="/" className="btn-primary inline-flex items-center gap-2">
++          <Link to="/" className={buildButtonClassName({ size: 'lg', shape: 'pill' })}>
+             <Home size={18} />
+             <span>Back Home</span>
+           </Link>
+-          <Link to="/store" className="btn-secondary inline-flex items-center gap-2">
++          <Link
++            to="/store"
++            className="inline-flex min-h-12 items-center gap-2 text-foreground hover:text-brand"
++          >
+             <Search size={18} />
+             <span>Browse Store</span>
+           </Link>
+diff --git a/app/routes/account_.login.tsx b/app/routes/account_.login.tsx
+index cb852fb..17f8b5b 100644
+--- a/app/routes/account_.login.tsx
++++ b/app/routes/account_.login.tsx
+@@ -1,5 +1,6 @@
+ import type { MetaFunction } from '@remix-run/node';
+ import { Link } from '@remix-run/react';
++import { buildButtonClassName } from '~/components/ui';
+ 
+ export const meta: MetaFunction = () => [{ title: 'Sign In | CZABA' }];
+ 
+@@ -10,7 +11,7 @@ export default function Login() {
+       <p style={{ color: 'var(--color-muted)', marginBottom: '2rem' }}>
+         Authentication coming soon...
+       </p>
+-      <Link to="/" className="button button-primary">
++      <Link to="/" className={buildButtonClassName({ size: 'lg', shape: 'pill' })}>
+         Back to Home
+       </Link>
+     </div>
+diff --git a/app/routes/search.tsx b/app/routes/search.tsx
+index 16edd5b..68b8d82 100644
+--- a/app/routes/search.tsx
++++ b/app/routes/search.tsx
+@@ -1,5 +1,6 @@
+ import type { MetaFunction } from '@remix-run/node';
+ import { Link } from '@remix-run/react';
++import { buildButtonClassName } from '~/components/ui';
+ 
+ export const meta: MetaFunction = () => [{ title: 'Search | CZABA' }];
+ 
+@@ -10,7 +11,7 @@ export default function Search() {
+       <p style={{ color: 'var(--color-muted)', marginBottom: '2rem' }}>
+         Search functionality coming soon...
+       </p>
+-      <Link to="/" className="button button-primary">
++      <Link to="/" className={buildButtonClassName({ size: 'lg', shape: 'pill' })}>
+         Back to Home
+       </Link>
+     </div>
+diff --git a/app/styles/app.css b/app/styles/app.css
+index 810efa8..441e998 100644
+--- a/app/styles/app.css
++++ b/app/styles/app.css
+@@ -246,31 +246,6 @@ html[data-focus-source="pointer"] :focus-visible {
+    Premium Micro-Interactions (Apple-style)
+    ============================================ */
+ 
+-/* Primary Button (Revenue Actions) */
+-/* მანიფესტი: მინიმალისტური, დახვეწილი ანიმაციები - არანაირი "ბერვა" */
+-.btn-primary {
+-  display: inline-flex;
+-  align-items: center;
+-  justify-content: center;
+-  gap: 0.5rem;
+-  background: var(--color-brand);
+-  color: var(--color-brand-foreground);
+-  padding: 0.70rem 1.5rem;
+-  border-radius: var(--radius-full);
+-  font-weight: 600;
+-  transition:
+-    opacity 0.2s ease,
+-    background-color 0.2s ease;
+-}
+-
+-.btn-primary:hover {
+-  background: var(--color-brand-hover);
+-}
+-
+-.btn-primary:active {
+-  opacity: 0.8;
+-}
+-
+ /* Icon Button */
+ .btn-icon {
+   padding: 0.5rem;
+@@ -319,26 +294,6 @@ body:has(.studio-container) {
+ 
+ button { cursor:pointer }
+ 
+-.button {
+-  padding: var(--spacing-6) var(--spacing-12);
+-  border-radius: var(--radius-sm);
+-  font-weight: 600;
+-  font-size: 1rem;
+-  text-decoration: none;
+-  transition: all var(--duration-normal) ease-out;
+-  cursor: pointer;
+-  border: none;
+-}
+-
+-.button-primary {
+-  background: var(--color-brand);
+-  color: var(--color-brand-foreground);
+-}
+-
+-.button-primary:hover {
+-  background: var(--color-brand-hover);
+-}
+-
+ /* ============================================
+    Audio Preview Buttons - Cinematic Style
+    ============================================ */
