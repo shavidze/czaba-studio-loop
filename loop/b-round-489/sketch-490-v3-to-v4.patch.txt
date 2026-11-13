@@ -1,0 +1,116 @@
+--- a/app/lib/__tests__/store-entrance-loader.test.tsx
++++ b/app/lib/__tests__/store-entrance-loader.test.tsx
+@@ -9,6 +9,7 @@
+   ENTRANCE_BOOT_SCRIPT,
+   ENTRANCE_COVER_ID,
+   ENTRANCE_EXIT_AFTER_TAKEOVER_MIN_MS,
++  ENTRANCE_EXIT_MS,
+   ENTRANCE_FAILSAFE_MS,
+   ENTRANCE_MAX_TOTAL_MS,
+   ENTRANCE_MIN_TOTAL_MS,
+@@ -60,13 +61,20 @@
+ }
+ 
+ function dispatchScrollGesture(type: 'wheel' | 'touchmove') {
+-  return dispatchGestureEvent(new Event(type, { bubbles: true, cancelable: true }));
++  if (type === 'wheel') {
++    return dispatchGestureEvent(
++      new WheelEvent('wheel', { bubbles: true, cancelable: true, ctrlKey: false, deltaY: 100 }),
++    );
++  }
++  const swipe = new TouchEvent('touchmove', { bubbles: true, cancelable: true });
++  Object.defineProperty(swipe, 'touches', { value: { length: 1 } });
++  return dispatchGestureEvent(swipe);
+ }
+ 
+-function dispatchZoomGesture(type: 'wheel' | 'touchmove') {
++function dispatchZoomGesture(type: 'wheel' | 'touchmove', deltaY = 100) {
+   if (type === 'wheel') {
+     return dispatchGestureEvent(
+-      new WheelEvent('wheel', { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -100 }),
++      new WheelEvent('wheel', { bubbles: true, cancelable: true, ctrlKey: true, deltaY }),
+     );
+   }
+   const pinch = new TouchEvent('touchmove', { bubbles: true, cancelable: true });
+@@ -364,9 +372,10 @@
+   });
+ 
+   it.each([
+-    ['ctrl+wheel', 'wheel'],
+-    ['two-finger touchmove', 'touchmove'],
+-  ] as const)('S3 a %s zoom gesture ends the overlay and is not blocked', (_label, type) => {
++    ['ctrl+wheel (deltaY 100)', 'wheel', 100],
++    ['ctrl+wheel (deltaY -100)', 'wheel', -100],
++    ['two-finger touchmove', 'touchmove', 0],
++  ] as const)('S3 a %s zoom gesture ends the overlay and is not blocked', (_label, type, deltaY) => {
+     const clock = { ms: 0 };
+     const { container } = mountEntranceLoader();
+     advanceTo(clock, 800);
+@@ -374,7 +383,7 @@
+ 
+     let gesture = { defaultPrevented: true, reachedPage: false };
+     act(() => {
+-      gesture = dispatchZoomGesture(type);
++      gesture = dispatchZoomGesture(type, deltaY);
+     });
+     expect(gesture).toEqual({ defaultPrevented: false, reachedPage: true });
+     expect(findOverlay(container)).toBeNull();
+@@ -740,12 +749,16 @@
+   });
+ 
+   it.each([
+-    'wheel',
+-    'touchmove',
+-  ] as const)('E8e a %s zoom gesture before hydration skips the cover and is not blocked', (type) => {
++    ['wheel', 100],
++    ['wheel', -100],
++    ['touchmove', 0],
++  ] as const)('E8e a %s (deltaY %d) zoom gesture before hydration skips the cover and is not blocked', (type, deltaY) => {
+     const cover = installHeadCover();
+     runBootScript();
+-    expect(dispatchZoomGesture(type)).toEqual({ defaultPrevented: false, reachedPage: true });
++    expect(dispatchZoomGesture(type, deltaY)).toEqual({
++      defaultPrevented: false,
++      reachedPage: true,
++    });
+     expect(cover.media).toBe('not all');
+     expect(cover.getAttribute('data-state')).toBe('skipped');
+   });
+@@ -766,7 +779,7 @@
+     installHeadCover();
+     runBootScript();
+     expect(listenersLeft()).toBe(2);
+-    vi.advanceTimersByTime(ENTRANCE_FAILSAFE_MS + 250);
++    vi.advanceTimersByTime(ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS);
+     expect(listenersLeft()).toBe(0);
+     expect(dispatchScrollGesture('wheel')).toEqual({ defaultPrevented: false, reachedPage: true });
+   });
+--- a/docs/implementation/2026/quarter-IV/316-saba-b-17-entrance-duration.md
++++ b/docs/implementation/2026/quarter-IV/316-saba-b-17-entrance-duration.md
+@@ -1,7 +1,7 @@
+ # SABA-B-17: Store-ის შესასვლელი პირველ ვიზიტზე მინიმუმ 3.5 წამი გრძელდება
+ 
+ **თარიღი:** 2026-11-13
+-**სტატუსი:** Completed (C round 489 PASS)
++**სტატუსი:** Completed (C round 490 PASS)
+ **შეცვლილი პროექტი:** Store (`app/components/loading/EntranceCover.tsx`, `app/components/loading/SpotlightLoader.tsx`, `app/lib/__tests__/store-entrance-loader.test.tsx`)
+ 
+ ## კონტექსტი
+@@ -58,12 +58,14 @@
+ - **Problem:** ბორბალი ფარდის ქვეშ გვერდს ასქროლებდა (B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER). **Solution:** wheel/touchmove ანიმაციას გამოტოვებს და გვერდი თავში რჩება.
+ - **Problem:** ერთი ფუნქცია ორ ტიპზე (wheel, touchmove) — listener-ების მთვლელი Set-ით ერთს ითვლიდა. **Solution:** ტესტის მთვლელი ტიპით და capture flag-ით ითვლის (S1, S2, E8d).
+ - **Problem:** tech-lead-ის review: ctrl+wheel (browser zoom) და pinch ფარდის დროს იბლოკებოდა. **Solution:** zoom-ის ჟესტი ანიმაციას გამოტოვებს `preventDefault`-ის გარეშე (S3, E8e).
++- **Problem:** code-reviewer-მა (round 489) აღმოაჩინა, რომ S1/S2/E8c/E8d უბრალო `Event`-ს აგზავნიდა, ამიტომ ზედმეტად ფართო zoom-ის კლასიფიკატორი (ყველა wheel ან ერთი თითი = zoom) მწვანე რჩებოდა (A-R489-REVIEW-NONZOOM-CLASSIFY). **Solution:** ტესტი ნამდვილ `WheelEvent`-სა და ერთთითიან `TouchEvent`-ს აგზავნის, ხოლო ctrl+wheel zoom S3-სა და E8e-ში ორივე ნიშნის `deltaY`-ით მოწმდება (Chromium-ის trackpad pinch-in დადებითია); MA–MH mutant-ები ახლა წითელია.
+ 
+ ## ტესტირება
+ 
+-- Unit (`store-entrance-loader.test.tsx`): L3 (3500 / 5000), E1 (failsafe 2000), E6 (timeline: 0 → 3500, 160 → 3500 ჯამი, 900 → 3900, 2000 და 2600 → 5000), E6b (გვიანი takeover-იც იღებს +2500 და 500 ms exit-ს), S1 (wheel/touchmove overlay-ს ხურავს, `defaultPrevented`, გვერდამდე არ აღწევს, listener-ები იხსნება), S2 (ბუნებრივი დასრულება და unmount), S3 (ctrl+wheel და pinch overlay-ს ხურავს, მაგრამ არ იბლოკება), E8c (wheel/touchmove hydration-მდე → skipped), E8d (boot listener-ები takeover-ზე და failsafe-ზე იხსნება), E8e (zoom-ის ჟესტი hydration-მდე → skipped, არ იბლოკება).
+-- B-ის ბრაუზერის გაზომვა sketch-ზე (production build, Chromium, mock API; `b-round-488/probe/sketch/table.txt`): ფარდის აწევა პირველი covered rAF sample-იდან 1× CPU-ზე 3451–3455 ms (boot script-ის `data-start`-იდან 3491–3503 ms — ზღვარი `data-start`-იდან ითვლება, sample ~40–50 ms-ით გვიანაა), 4× CPU-ზე 3867–3945 ms; ლოგო სრულად 1495–1737 ms, tagline 877–1069 ms (HEAD: ~1.6 წმ, ლოგო 448–708 ms, tagline 249–467 ms; `probe/head-matrix/table.txt`); 4G + 4× CPU-ზე და JS +1.5 წმ-ზე ანიმაცია თამაშობს; wheel 0.8 წმ-ზე → `scrollY` 0 (ერთი სინთეზური event); reload და reduced motion → შავი კადრი არ არის. touchmove და pinch მხოლოდ jsdom-შია შემოწმებული; რეალურ ტელეფონზე — Tech Lead (TLM-R489-TOUCH-SWIPE).
+-- C round 489 იმავე probe-ებს იმეორებს (`current-task.md` §3).
++- Unit (`store-entrance-loader.test.tsx`): L3 (3500 / 5000), E1 (failsafe 2000), E6 (timeline: 0 → 3500, 160 → 3500 ჯამი, 900 → 3900, 2000 და 2600 → 5000), E6b (გვიანი takeover-იც იღებს +2500 და 500 ms exit-ს), S1 (wheel/touchmove overlay-ს ხურავს — ნამდვილი `WheelEvent` (`deltaY` 100, Ctrl-ის გარეშე) და ერთთითიანი `TouchEvent`, `defaultPrevented`, გვერდამდე არ აღწევს, listener-ები იხსნება), S2 (ბუნებრივი დასრულება და unmount), S3 (ctrl+wheel და pinch overlay-ს ხურავს, მაგრამ არ იბლოკება), E8c (იგივე ნამდვილი wheel/touchmove hydration-მდე → skipped), E8d (boot listener-ები takeover-ზე და failsafe-ზე იხსნება), E8e (zoom-ის ჟესტი hydration-მდე → skipped, არ იბლოკება).
++- B-ის ბრაუზერის გაზომვა sketch-ზე (production build, Chromium, mock API; `b-round-488/probe/sketch/table.txt`): ფარდის აწევა პირველი covered rAF sample-იდან 1× CPU-ზე 3451–3455 ms (boot script-ის `data-start`-იდან 3491–3503 ms — ზღვარი `data-start`-იდან ითვლება, sample ~40–50 ms-ით გვიანაა), 4× CPU-ზე 3867–3945 ms; ლოგო სრულად 1495–1737 ms, tagline 877–1069 ms (HEAD: ~1.6 წმ, ლოგო 448–708 ms, tagline 249–467 ms; `probe/head-matrix/table.txt`); 4G + 4× CPU-ზე და JS +1.5 წმ-ზე ანიმაცია თამაშობს; wheel 0.8 წმ-ზე → `scrollY` 0 (ერთი სინთეზური event); reload და reduced motion → შავი კადრი არ არის. B-ის probe touch-ს არ ამოწმებს: ერთთითიანი swipe C round 489-მა Chromium-ში CDP-ით შეამოწმა (`c-round-489/touch-under-cover.txt`), pinch მხოლოდ jsdom-შია; რეალურ ტელეფონზე — Tech Lead (TLM-R489-TOUCH-SWIPE).
++- C round 489-მა იგივე probe-ები production build-ზე გაიმეორა (`c-round-489/tree-table.txt`) და დაამატა ერთთითიანი CDP touch swipe (`c-round-489/touch-under-cover.txt`); round 490-ში შეიცვალა მხოლოდ ტესტის ფაილი და ეს დოკუმენტი, C იმეორებს ძირითად ბრაუზერის სტრიქონებს (`current-task.md` §3).
++- Mutation-ის შემოწმება: 30 mutant (`b-round-489/mutants/mutants-summary.txt`), ყველა წითელია; MA–MD (ზედმეტად ფართო zoom-ის კლასიფიკატორი) S1-სა და E8c-ს აწითლებს, ME–MH (zoom `deltaY`-ის ნიშნით) S3-სა და E8e-ს.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 

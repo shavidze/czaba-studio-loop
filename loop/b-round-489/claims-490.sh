@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Round 490 claims (fix-up of round 489, SABA-B-17). Usage: bash claims-490.sh   (ROOT=<store tree> LOOP=<loop folder> may be overridden)
+# Planning output on the store tree (v3 applied, uncommitted): claims-490-planning-output.txt; on B's v3+v4 scratch: claims-490-sketch-output.txt.
+ROOT=${ROOT:-/home/runner/czaba-project/store}
+LOOP=${LOOP:-/home/runner/czaba-project/tmp/studio-real-loop}
+B8=$LOOP/b-round-488
+B=$LOOP/b-round-489
+EC=app/components/loading/EntranceCover.tsx
+SL=app/components/loading/SpotlightLoader.tsx
+T=app/lib/__tests__/store-entrance-loader.test.tsx
+D=docs/implementation/2026/quarter-IV/316-saba-b-17-entrance-duration.md
+cd "$ROOT" || exit 1
+echo "K1 gate489 $(python3 -I -c "import json;d=json.load(open('$LOOP/gates/gate-round-489.json'));print(d['status'],d.get('reason',''))") gate488 $(python3 -I -c "import json;d=json.load(open('$LOOP/gates/gate-round-488.json'));print(d['status'],d['commit'][:7])")"
+echo "K2 head $(git rev-parse --short=7 HEAD) dirty=$(git status --porcelain --untracked-files=all | wc -l) paths=$(git status --porcelain --untracked-files=all | awk '{print $2}' | sort | tr '\n' ' ')"
+echo "K3 components-equal-v3 EC=$(cmp -s $EC $B8/sketch-489/$EC && echo = || echo x) SL=$(cmp -s $SL $B8/sketch-489/$SL && echo = || echo x)"
+echo "K4 test-equal-v3 $(cmp -s $T $B8/sketch-489/$T && echo = || echo x) doc-equal-v3 $(cmp -s $D $B8/sketch-489/$D && echo = || echo x)"
+echo "K5 plain-event-dispatch $(grep -c "dispatchGestureEvent(new Event(type, { bubbles: true, cancelable: true }))" $T) real-wheel=$(grep -c "new WheelEvent('wheel', { bubbles: true, cancelable: true, ctrlKey: false, deltaY: 100 })" $T) one-touch=$(grep -c "Object.defineProperty(swipe, 'touches', { value: { length: 1 } });" $T)"
+echo "K5b zoom-fixture-param=$(grep -c "ctrlKey: true, deltaY })" $T) zoom-default=$(grep -c "function dispatchZoomGesture(type: 'wheel' | 'touchmove', deltaY = 100) {" $T) s3-rows=$(grep -cE "\['ctrl\+wheel \(deltaY -?100\)', 'wheel', -?100\]" $T) e8e-rows=$(grep -cE "^    \['wheel', -?100\],$" $T) old-fixed=$(grep -c "ctrlKey: true, deltaY: -100 })" $T)"
+echo "K6 e8d-literal plus250=$(grep -c "vi.advanceTimersByTime(ENTRANCE_FAILSAFE_MS + 250);" $T) plusExit=$(grep -c "vi.advanceTimersByTime(ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS);" $T)"
+echo "K7 root-tsx-diff $(git diff --numstat 73f994d -- app/root.tsx | wc -l) protected-diff $(git diff --numstat 73f994d -- 'app/routes/studio.$productId.tsx' app/routes/api.studio-token.ts app/routes/account.downloads.tsx app/contexts/AuthContext.tsx | wc -l)"
+echo "K8 classifier overlay-wheel=$(grep -c '  if (event instanceof WheelEvent) return event.ctrlKey;' $SL) overlay-touch=$(grep -c 'event instanceof TouchEvent && event.touches.length > 1' $SL) boot=$(grep -c 'scroll=function(e){if(!e.ctrlKey&&!(e.touches&&e.touches.length>1)){' $EC)"
+echo "K9 sketch-490-files $(cd "$B/sketch-490" && for f in $(find . -type f | sort); do cmp -s "$f" "$ROOT/$f" && echo -n "=" || echo -n "x"; done) patch=$(sha256sum "$B/sketch-490-v3-to-v4.patch.txt" | cut -c1-16) recorded=$(cut -c1-16 "$B/sketch-490.sha256")"
+echo "K10 mutants lines=$(grep -c ' red=' "$B/mutants/mutants-summary.txt") none=$(grep -c 'red=NONE' "$B/mutants/mutants-summary.txt") badanchor=$(grep -c 'BAD-ANCHOR' "$B/mutants/mutants-summary.txt") MA-MH=$(grep -E '^M[A-H]-' "$B/mutants/mutants-summary.txt" | sed 's/ rc=1//' | tr '\n' ' ') first22-equal-489=$(diff <(head -22 "$B/mutants/mutants-summary.txt") "$B8/mutants/mutants-summary.txt" >/dev/null && echo yes || echo no)"
+echo "K11 covering $(sed 's/\x1b\[[0-9;]*m//g' "$B/sketch-490-covering.log" | grep -E '^\s+(Test Files|Tests) ' | tr -s ' ' | tr '\n' ' ') $(grep -o 'rc=[0-9]*' "$B/sketch-490-covering.log")"
+echo "K12 full-suite $(sed 's/\x1b\[[0-9;]*m//g' "$B/precheck-full-490.log" | grep -E '^\s+(Test Files|Tests) ' | tr -s ' ' | tr '\n' ' ') $(grep -o 'rc=[0-9]*' "$B/precheck-full-490.log")"
+echo "K13 doc316 l4=$(sed -n 4p $D) headings=$(grep -c '^## ' $D) round490-mentions=$(grep -c 'round 490' $D)"
+echo "K14 biome $(npx biome check app/components/loading/ $T 2>&1 | grep -oE 'Found [0-9]+ (warning|error)s?' | tr '\n' ' ')"
+echo "K15 l58 $(cd "$LOOP" && python3 -I tools/l58-check.py current-task.md 2>&1 | tail -1)"
+echo "K16 cited $(for f in b-round-489/sketch-490-v3-to-v4.patch.txt b-round-489/sketch-490.sha256 b-round-489/sketch-review.md b-round-489/mutants-490.py b-round-489/mutants/mutants-summary.txt b-round-489/sketch-490-covering.log b-round-489/precheck-full-490.log b-round-489/sketch-490-typecheck.log b-round-489/sketch-490-biome.log b-round-488/sketch-489.patch.txt b-round-488/probe/frames489.mjs b-round-488/probe/run-matrix.sh b-round-488/probe/table.py b-round-488/probe/serve-prod489.sh b-round-488/probe/record.mjs b-round-488/probe/sketch-all-modes/table.txt b-round-488/probe/head-matrix-all-modes/table.txt c-round-489/tree-table.txt c-round-489/head-table.txt c-round-489/touch-under-cover.txt c-round-489/touch2.mjs c-round-489/auth.mjs c-round-489/auth.json c-round-489/rec/saba-b-17-entrance-before-1440-0500.png c-round-489/rec/saba-b-17-entrance-before-1440-2000.png c-round-489/rec/saba-b-17-entrance-before-1440-3200.png c-round-482/jn/journey.json a-round-489/review-mutants.log tasks/round-489.md b-round-489/checkpoint-request-entrance.md; do test -f "$LOOP/$f" && echo -n 1 || echo -n "0($f)"; done)"
+echo "K17 ids $(python3 -I "$LOOP/tools/find-ids.py" "$LOOP" SABA-B-17-ENTRANCE-3-4S B-R489-ENTRANCE-SLOW-FIRST-VISIT-EXPIRED B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER A-R489-REVIEW-NONZOOM-CLASSIFY | awk '{print $1":"($2=="NOT-FOUND"?"NOT-FOUND":"found")}' | tr '\n' ' ') root-req=$(python3 -I -c "import json;b=json.load(open('$LOOP/backlog.json'));print(sum(1 for r in b['root_requests_b'] if r.get('id')=='ROOT-REQ-LOOP-WEBM-EVIDENCE'))") arch-req=$(python3 -I -c "import json;b=json.load(open('$LOOP/backlog.json'));print(sum(1 for r in b['architecture_checkpoint_requests'] if r.get('id')=='ARCH-CHECKPOINT-ENTRANCE-LOADING'))")"
+echo "K18 lessons lines=$(wc -l < "$LOOP/lessons.md") real-event=$(grep -c 'real event' "$LOOP/lessons.md") example-number=$(grep -c 'example number' "$LOOP/lessons.md")"

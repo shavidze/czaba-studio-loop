@@ -1,0 +1,562 @@
+import { plainSourceFetch, type SourceFetch } from './source-fetch';
+import {
+  readStemCacheValidators,
+  STEM_CACHE_DB_NAME,
+  STEM_CACHE_SCHEMA_VERSION,
+  type StemCacheRecord,
+  selectStemCacheEvictions,
+  stemCacheBudgetBytes,
+  stemCacheConditionalHeaders,
+  stemCacheKey,
+} from './stem-cache';
+
+const STORE_NAME = 'entries';
+const SWEEP_GRACE_MS = 60_000;
+
+export interface StemCacheEntry {
+  record: StemCacheRecord;
+  bytes: ArrayBuffer;
+}
+
+export interface StemCacheStore {
+  get(key: string): Promise<StemCacheEntry | null>;
+  put(record: StemCacheRecord, bytes: ArrayBuffer): Promise<void>;
+  touch(key: string, at: number): Promise<void>;
+  delete(key: string): Promise<void>;
+  list(): Promise<StemCacheRecord[]>;
+  sweep(now: number): Promise<void>;
+}
+
+export interface CachedSourceFetchDeps {
+  store: StemCacheStore | null;
+  origin: string;
+  fetchSource?: SourceFetch;
+  now?: () => number;
+  estimateQuota?: () => Promise<number | undefined>;
+}
+
+export interface CachedSourceFetch {
+  fetchSource: SourceFetch;
+  idle: () => Promise<void>;
+}
+
+interface ListableDirectory {
+  keys(): AsyncIterable<string>;
+}
+
+function isListableDirectory(
+  directory: FileSystemDirectoryHandle,
+): directory is FileSystemDirectoryHandle & ListableDirectory {
+  return 'keys' in directory && typeof directory.keys === 'function';
+}
+
+function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export interface CompletableTransaction {
+  readonly error: DOMException | null;
+  oncomplete: ((event: Event) => void) | null;
+  onabort: ((event: Event) => void) | null;
+}
+
+export function transactionDone(transaction: CompletableTransaction): Promise<void> {
+  return new Promise((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onabort = () =>
+      reject(transaction.error ?? new DOMException('The transaction was aborted.', 'AbortError'));
+  });
+}
+
+function isStringOrNull(value: unknown): boolean {
+  return value === null || typeof value === 'string';
+}
+
+function isFiniteNumber(value: unknown): boolean {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+export function isStemCacheRecord(value: unknown): value is StemCacheRecord {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'key' in value &&
+    'fileName' in value &&
+    'etag' in value &&
+    'lastModified' in value &&
+    'contentType' in value &&
+    'size' in value &&
+    'storedAt' in value &&
+    'lastAccessedAt' in value &&
+    'schemaVersion' in value &&
+    typeof value.key === 'string' &&
+    typeof value.fileName === 'string' &&
+    isStringOrNull(value.etag) &&
+    isStringOrNull(value.lastModified) &&
+    isStringOrNull(value.contentType) &&
+    isFiniteNumber(value.size) &&
+    isFiniteNumber(value.storedAt) &&
+    isFiniteNumber(value.lastAccessedAt) &&
+    value.schemaVersion === STEM_CACHE_SCHEMA_VERSION
+  );
+}
+
+export function createBrowserStemCacheStore(): StemCacheStore | null {
+  if (
+    typeof indexedDB === 'undefined' ||
+    typeof navigator === 'undefined' ||
+    typeof navigator.storage?.getDirectory !== 'function' ||
+    typeof FileSystemFileHandle === 'undefined' ||
+    typeof FileSystemFileHandle.prototype.createWritable !== 'function'
+  ) {
+    return null;
+  }
+  let dbPromise: Promise<IDBDatabase> | null = null;
+  const openDb = (): Promise<IDBDatabase> => {
+    if (dbPromise === null) {
+      const request = indexedDB.open(STEM_CACHE_DB_NAME, STEM_CACHE_SCHEMA_VERSION);
+      request.onupgradeneeded = () => {
+        if (!request.result.objectStoreNames.contains(STORE_NAME)) {
+          request.result.createObjectStore(STORE_NAME, { keyPath: 'key' });
+        }
+      };
+      dbPromise = requestToPromise(request);
+    }
+    return dbPromise;
+  };
+  const directory = async (): Promise<FileSystemDirectoryHandle> =>
+    (await navigator.storage.getDirectory()).getDirectoryHandle(STEM_CACHE_DB_NAME, {
+      create: true,
+    });
+  const readRecord = async (key: string): Promise<StemCacheRecord | null> => {
+    const db = await openDb();
+    const value: unknown = await requestToPromise(
+      db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(key),
+    );
+    return isStemCacheRecord(value) ? value : null;
+  };
+  const writeRecord = async (record: StemCacheRecord): Promise<void> => {
+    const db = await openDb();
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    transaction.objectStore(STORE_NAME).put(record);
+    await transactionDone(transaction);
+  };
+  const deleteRecord = async (key: string): Promise<void> => {
+    const db = await openDb();
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    transaction.objectStore(STORE_NAME).delete(key);
+    await transactionDone(transaction);
+  };
+  const removeFile = async (fileName: string): Promise<void> => {
+    try {
+      await (await directory()).removeEntry(fileName);
+    } catch {
+      return;
+    }
+  };
+  const readAll = async (): Promise<unknown[]> => {
+    const db = await openDb();
+    return requestToPromise(
+      db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getAll(),
+    );
+  };
+  const remove = async (key: string): Promise<void> => {
+    const record = await readRecord(key);
+    await deleteRecord(key);
+    if (record !== null) {
+      await removeFile(record.fileName);
+    }
+  };
+  const removeIfCurrent = async (held: StemCacheRecord): Promise<void> => {
+    const db = await openDb();
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get(held.key);
+    request.onsuccess = () => {
+      const value: unknown = request.result;
+      if (isStemCacheRecord(value) && value.fileName === held.fileName) {
+        store.delete(held.key);
+      }
+    };
+    await transactionDone(transaction);
+    await removeFile(held.fileName);
+  };
+  return {
+    async get(key) {
+      const record = await readRecord(key);
+      if (record === null) {
+        return null;
+      }
+      let file: File;
+      try {
+        file = await (await (await directory()).getFileHandle(record.fileName)).getFile();
+      } catch {
+        await removeIfCurrent(record);
+        return null;
+      }
+      if (file.size !== record.size) {
+        await removeIfCurrent(record);
+        return null;
+      }
+      return { record, bytes: await file.arrayBuffer() };
+    },
+    async put(record, bytes) {
+      const previous = await readRecord(record.key);
+      if (previous !== null && previous.fileName === record.fileName) {
+        throw new DOMException('The stem cache file name is already in use.', 'InvalidStateError');
+      }
+      const handle = await (await directory()).getFileHandle(record.fileName, { create: true });
+      const writable = await handle.createWritable();
+      try {
+        await writable.write(bytes);
+        await writable.close();
+      } catch (error) {
+        await writable.abort().catch(() => undefined);
+        await removeFile(record.fileName);
+        throw error;
+      }
+      try {
+        await writeRecord(record);
+      } catch (error) {
+        await removeFile(record.fileName);
+        throw error;
+      }
+      if (previous !== null && previous.fileName !== record.fileName) {
+        await removeFile(previous.fileName);
+      }
+    },
+    async touch(key, at) {
+      const db = await openDb();
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get(key);
+      request.onsuccess = () => {
+        const value: unknown = request.result;
+        if (isStemCacheRecord(value)) {
+          store.put({ ...value, lastAccessedAt: at });
+        }
+      };
+      await transactionDone(transaction);
+    },
+    delete: remove,
+    async list() {
+      return (await readAll()).filter(isStemCacheRecord);
+    },
+    async sweep(now) {
+      const values = await readAll();
+      const known = new Set<string>();
+      for (const value of values) {
+        if (isStemCacheRecord(value)) {
+          known.add(value.fileName);
+        } else if (typeof value === 'object' && value !== null && 'key' in value) {
+          const key = value.key;
+          if (typeof key === 'string') {
+            await deleteRecord(key);
+          }
+        }
+      }
+      const dir = await directory();
+      if (!isListableDirectory(dir)) {
+        return;
+      }
+      const orphans: string[] = [];
+      for await (const name of dir.keys()) {
+        const writtenAt = Number.parseInt(name.split('-')[0] ?? '', 36);
+        const recent = Number.isFinite(writtenAt) && now - writtenAt < SWEEP_GRACE_MS;
+        if (!known.has(name) && !recent) {
+          orphans.push(name);
+        }
+      }
+      for (const name of orphans) {
+        await removeFile(name);
+      }
+    },
+  };
+}
+
+async function browserQuota(): Promise<number | undefined> {
+  if (typeof navigator === 'undefined' || typeof navigator.storage?.estimate !== 'function') {
+    return undefined;
+  }
+  return (await navigator.storage.estimate()).quota;
+}
+
+interface StemKeyWrite {
+  kind: 'write';
+  done: Promise<void>;
+  signals: Array<AbortSignal | null | undefined>;
+  open: boolean;
+}
+
+interface StemKeyDelete {
+  kind: 'delete';
+  done: Promise<void>;
+}
+
+type StemKeyOperation = StemKeyWrite | StemKeyDelete;
+
+function isStemWriteAbandoned(signals: ReadonlyArray<AbortSignal | null | undefined>): boolean {
+  return signals.every((signal) => signal?.aborted === true);
+}
+
+function isQuotaError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === 'QuotaExceededError';
+}
+
+function cachedResponse(entry: StemCacheEntry): Response {
+  const headers = new Headers();
+  if (entry.record.contentType !== null) {
+    try {
+      headers.set('content-type', entry.record.contentType);
+    } catch {
+      return new Response(entry.bytes, { status: 200 });
+    }
+  }
+  return new Response(entry.bytes, { status: 200, headers });
+}
+
+export function createCachedSourceFetch({
+  store,
+  origin,
+  fetchSource = plainSourceFetch,
+  now = () => Date.now(),
+  estimateQuota = browserQuota,
+}: CachedSourceFetchDeps): CachedSourceFetch {
+  let disabled = store === null;
+  let sweepPromise: Promise<void> | null = null;
+  let commitChain: Promise<void> = Promise.resolve();
+  let fileCount = 0;
+  const operations = new Map<string, StemKeyOperation>();
+
+  const settle = (key: string, operation: StemKeyOperation): void => {
+    if (operations.get(key) === operation) {
+      operations.delete(key);
+    }
+  };
+
+  const enqueueCommit = (task: () => Promise<void>): Promise<void> => {
+    const run = commitChain.then(task);
+    commitChain = run.catch(() => undefined);
+    return run;
+  };
+
+  const storeBytesNow = async (
+    activeStore: StemCacheStore,
+    record: StemCacheRecord,
+    bytes: ArrayBuffer,
+    abandoned: () => boolean,
+  ): Promise<void> => {
+    const cancelled = (): boolean => abandoned() || disabled;
+    if (cancelled()) {
+      return;
+    }
+    sweepPromise ??= activeStore.sweep(now()).catch(() => undefined);
+    await sweepPromise;
+    const victims = selectStemCacheEvictions(
+      await activeStore.list(),
+      record.key,
+      record.size,
+      stemCacheBudgetBytes(await estimateQuota()),
+    );
+    if (victims === null || cancelled()) {
+      return;
+    }
+    for (const victim of victims) {
+      if (cancelled()) {
+        return;
+      }
+      await activeStore.delete(victim.key);
+    }
+    if (cancelled()) {
+      return;
+    }
+    try {
+      await activeStore.put(record, bytes);
+    } catch (error) {
+      if (!isQuotaError(error)) {
+        throw error;
+      }
+      const oldest = (await activeStore.list())
+        .filter((candidate) => candidate.key !== record.key)
+        .sort((first, second) => first.lastAccessedAt - second.lastAccessedAt)[0];
+      if (oldest !== undefined) {
+        await activeStore.delete(oldest.key);
+      }
+      if (cancelled()) {
+        return;
+      }
+      await activeStore.put(record, bytes);
+    }
+  };
+
+  const storeBytes = (
+    activeStore: StemCacheStore,
+    record: StemCacheRecord,
+    bytes: ArrayBuffer,
+    abandoned: () => boolean,
+  ): Promise<void> => enqueueCommit(() => storeBytesNow(activeStore, record, bytes, abandoned));
+
+  const deleteAfterPendingOperation = (activeStore: StemCacheStore, key: string): void => {
+    const previous = operations.get(key)?.done ?? Promise.resolve();
+    const operation: StemKeyDelete = { kind: 'delete', done: Promise.resolve() };
+    operation.done = previous
+      .then(() => enqueueCommit(() => activeStore.delete(key)))
+      .catch(() => undefined)
+      .finally(() => settle(key, operation));
+    operations.set(key, operation);
+  };
+
+  const write = async (
+    activeStore: StemCacheStore,
+    key: string,
+    response: Response,
+    abandoned: () => boolean,
+    after: Promise<void>,
+  ): Promise<void> => {
+    let bytes: ArrayBuffer;
+    try {
+      bytes = await response.arrayBuffer();
+    } catch {
+      return;
+    }
+    if (abandoned() || disabled) {
+      return;
+    }
+    const validators = readStemCacheValidators(response.headers);
+    if (validators === null) {
+      return;
+    }
+    await after;
+    const at = now();
+    fileCount += 1;
+    const record: StemCacheRecord = {
+      key,
+      fileName: `${at.toString(36)}-${fileCount.toString(36)}-${Math.random().toString(36).slice(2)}`,
+      etag: validators.etag,
+      lastModified: validators.lastModified,
+      contentType: response.headers.get('content-type'),
+      size: bytes.byteLength,
+      storedAt: at,
+      lastAccessedAt: at,
+      schemaVersion: STEM_CACHE_SCHEMA_VERSION,
+    };
+    try {
+      await storeBytes(activeStore, record, bytes, abandoned);
+    } catch {
+      disabled = true;
+    }
+  };
+
+  const isStorable = (response: Response): boolean =>
+    response.status === 200 && readStemCacheValidators(response.headers) !== null;
+
+  const writeInBackground = (key: string, response: Response, init: RequestInit): void => {
+    if (store === null || disabled || !isStorable(response)) {
+      return;
+    }
+    const pending = operations.get(key);
+    if (pending?.kind === 'write' && pending.open) {
+      pending.signals.push(init.signal);
+      return;
+    }
+    let copy: Response;
+    try {
+      copy = response.clone();
+    } catch {
+      return;
+    }
+    const operation: StemKeyWrite = {
+      kind: 'write',
+      done: Promise.resolve(),
+      signals: [init.signal],
+      open: true,
+    };
+    const abandoned = (): boolean => {
+      if (isStemWriteAbandoned(operation.signals)) {
+        operation.open = false;
+        return true;
+      }
+      return false;
+    };
+    operation.done = write(store, key, copy, abandoned, pending?.done ?? Promise.resolve()).finally(
+      () => settle(key, operation),
+    );
+    operations.set(key, operation);
+  };
+
+  const cachedFetch: SourceFetch = async (url, init) => {
+    const key = disabled || store === null ? null : stemCacheKey(url, origin);
+    if (key === null || store === null) {
+      return fetchSource(url, init);
+    }
+    let entry: StemCacheEntry | null;
+    try {
+      entry = await store.get(key);
+    } catch {
+      entry = null;
+    }
+    if (entry === null) {
+      const response = await fetchSource(url, init);
+      writeInBackground(key, response, init);
+      return response;
+    }
+    let response: Response;
+    try {
+      response = await fetchSource(url, {
+        ...init,
+        cache: 'no-store',
+        headers: stemCacheConditionalHeaders(entry.record),
+      });
+    } catch (error) {
+      if (init.signal?.aborted) {
+        throw error;
+      }
+      return cachedResponse(entry);
+    }
+    if (response.status === 304) {
+      await store.touch(key, now()).catch(() => undefined);
+      return cachedResponse(entry);
+    }
+    if (response.status === 404 || response.status === 410) {
+      deleteAfterPendingOperation(store, key);
+      return response;
+    }
+    if (response.status >= 500) {
+      return cachedResponse(entry);
+    }
+    if (response.ok && !isStorable(response)) {
+      deleteAfterPendingOperation(store, key);
+      return response;
+    }
+    writeInBackground(key, response, init);
+    return response;
+  };
+
+  return {
+    fetchSource: cachedFetch,
+    idle: async () => {
+      while (operations.size > 0) {
+        await Promise.all([...operations.values()].map((operation) => operation.done));
+      }
+      await commitChain;
+    },
+  };
+}
+
+let sharedPreviewFetch: SourceFetch | null = null;
+
+export function publicPreviewSourceFetch(): SourceFetch {
+  if (typeof window === 'undefined') {
+    return plainSourceFetch;
+  }
+  if (sharedPreviewFetch === null) {
+    sharedPreviewFetch = createCachedSourceFetch({
+      store: createBrowserStemCacheStore(),
+      origin: window.location.origin,
+    }).fetchSource;
+  }
+  return sharedPreviewFetch;
+}

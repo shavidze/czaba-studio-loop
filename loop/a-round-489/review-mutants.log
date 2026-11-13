@@ -1,0 +1,83 @@
+== CONTROL M20-OVERLAY-ZOOM-BLOCKED (B: red S3)
+--- /tmp/sl.bak	2026-11-13 12:48:08.450205250 +0000
++++ app/components/loading/SpotlightLoader.tsx	2026-11-13 12:49:59.407810481 +0000
+@@ -158,7 +158,7 @@
+       if (event.key === 'Escape' || event.key === 'Tab') hideEntrance();
+     };
+     const handleEntranceSkipScroll = (event: Event) => {
+-      if (!isZoomGesture(event)) {
++      if (!isZoomGesture(event) || event.cancelable) {
+         if (event.cancelable) event.preventDefault();
+         event.stopPropagation();
+       }
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSpotlightLoader entrance (STORE-1d D10, SABA-B-13 minimum)[2m > [22mS3 a ctrl+wheel zoom gesture ends the overlay and is not blocked
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSpotlightLoader entrance (STORE-1d D10, SABA-B-13 minimum)[2m > [22mS3 a two-finger touchmove zoom gesture ends the overlay and is not blocked
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m59 passed[39m[22m[90m (61)[39m
+== CONTROL M18-BOOT-CTRL-WHEEL-BLOCKED (B: red E8e)
+--- /tmp/ec.bak	2026-11-13 12:48:08.451975672 +0000
++++ app/components/loading/EntranceCover.tsx	2026-11-13 12:50:01.673083045 +0000
+@@ -38,7 +38,7 @@
+ const sessionGate = `if(sessionStorage.getItem('${ENTRANCE_SESSION_KEY}')==='1')return;sessionStorage.setItem('${ENTRANCE_SESSION_KEY}','1');`;
+ 
+ // მდგომარეობა window-ზეა: hydration-ის შეცდომისას React <style>-ს ცვლის, window კი რჩება (A-R459-REVIEW-R1)
+-export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var c=document.getElementById('${ENTRANCE_COVER_ID}');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('${ENTRANCE_REDUCED_MOTION_QUERY}').matches)return;${sessionGate}var h={start:performance.now(),state:'pending'};window.__czabaEntrance=h;c.setAttribute('data-start',String(h.start));c.media='all';var t;var off=function(){clearTimeout(t);document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);${scrollSkipListenerOff}window.removeEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);};var end=function(){off();if(h.state==='pending')h.state='skipped';var n=document.getElementById('${ENTRANCE_COVER_ID}');if(n){n.setAttribute('data-state',h.state);n.media='not all';}};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};var scroll=function(e){if(!e.ctrlKey&&!(e.touches&&e.touches.length>1)){if(e.cancelable)e.preventDefault();e.stopPropagation();}end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);${scrollSkipListenerOn}window.addEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);t=setTimeout(off,${ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS});}catch(e){}})();`;
++export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var c=document.getElementById('${ENTRANCE_COVER_ID}');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('${ENTRANCE_REDUCED_MOTION_QUERY}').matches)return;${sessionGate}var h={start:performance.now(),state:'pending'};window.__czabaEntrance=h;c.setAttribute('data-start',String(h.start));c.media='all';var t;var off=function(){clearTimeout(t);document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);${scrollSkipListenerOff}window.removeEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);};var end=function(){off();if(h.state==='pending')h.state='skipped';var n=document.getElementById('${ENTRANCE_COVER_ID}');if(n){n.setAttribute('data-state',h.state);n.media='not all';}};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};var scroll=function(e){if(!(e.touches&&e.touches.length>1)){if(e.cancelable)e.preventDefault();e.stopPropagation();}end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);${scrollSkipListenerOn}window.addEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);t=setTimeout(off,${ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS});}catch(e){}})();`;
+ 
+ // client re-render (hydration-ის შეცდომა) ფარდას ჩართულს ტოვებს, სანამ SpotlightLoader არ ჩაიბარებს
+ function isEntrancePending(): boolean {
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSABA-B-13 static head cover and takeover[2m > [22mE8e a wheel zoom gesture before hydration skips the cover and is not blocked
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m60 passed[39m[22m[90m (61)[39m
+== MA overlay any WheelEvent = zoom
+--- /tmp/sl.bak	2026-11-13 12:48:08.450205250 +0000
++++ app/components/loading/SpotlightLoader.tsx	2026-11-13 12:50:03.971051286 +0000
+@@ -52,7 +52,7 @@
+ }
+ 
+ function isZoomGesture(event: Event): boolean {
+-  if (event instanceof WheelEvent) return event.ctrlKey;
++  if (event instanceof WheelEvent) return true;
+   return (
+     typeof TouchEvent !== 'undefined' && event instanceof TouchEvent && event.touches.length > 1
+   );
+[2m      Tests [22m [1m[32m61 passed[39m[22m[90m (61)[39m
+== MB overlay one touch = zoom
+--- /tmp/sl.bak	2026-11-13 12:48:08.450205250 +0000
++++ app/components/loading/SpotlightLoader.tsx	2026-11-13 12:50:06.220154513 +0000
+@@ -54,7 +54,7 @@
+ function isZoomGesture(event: Event): boolean {
+   if (event instanceof WheelEvent) return event.ctrlKey;
+   return (
+-    typeof TouchEvent !== 'undefined' && event instanceof TouchEvent && event.touches.length > 1
++    typeof TouchEvent !== 'undefined' && event instanceof TouchEvent && event.touches.length >= 1
+   );
+ }
+ 
+[2m      Tests [22m [1m[32m61 passed[39m[22m[90m (61)[39m
+== MC boot one touch = zoom
+--- /tmp/ec.bak	2026-11-13 12:48:08.451975672 +0000
++++ app/components/loading/EntranceCover.tsx	2026-11-13 12:50:08.511137584 +0000
+@@ -38,7 +38,7 @@
+ const sessionGate = `if(sessionStorage.getItem('${ENTRANCE_SESSION_KEY}')==='1')return;sessionStorage.setItem('${ENTRANCE_SESSION_KEY}','1');`;
+ 
+ // მდგომარეობა window-ზეა: hydration-ის შეცდომისას React <style>-ს ცვლის, window კი რჩება (A-R459-REVIEW-R1)
+-export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var c=document.getElementById('${ENTRANCE_COVER_ID}');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('${ENTRANCE_REDUCED_MOTION_QUERY}').matches)return;${sessionGate}var h={start:performance.now(),state:'pending'};window.__czabaEntrance=h;c.setAttribute('data-start',String(h.start));c.media='all';var t;var off=function(){clearTimeout(t);document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);${scrollSkipListenerOff}window.removeEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);};var end=function(){off();if(h.state==='pending')h.state='skipped';var n=document.getElementById('${ENTRANCE_COVER_ID}');if(n){n.setAttribute('data-state',h.state);n.media='not all';}};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};var scroll=function(e){if(!e.ctrlKey&&!(e.touches&&e.touches.length>1)){if(e.cancelable)e.preventDefault();e.stopPropagation();}end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);${scrollSkipListenerOn}window.addEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);t=setTimeout(off,${ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS});}catch(e){}})();`;
++export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var c=document.getElementById('${ENTRANCE_COVER_ID}');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('${ENTRANCE_REDUCED_MOTION_QUERY}').matches)return;${sessionGate}var h={start:performance.now(),state:'pending'};window.__czabaEntrance=h;c.setAttribute('data-start',String(h.start));c.media='all';var t;var off=function(){clearTimeout(t);document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);${scrollSkipListenerOff}window.removeEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);};var end=function(){off();if(h.state==='pending')h.state='skipped';var n=document.getElementById('${ENTRANCE_COVER_ID}');if(n){n.setAttribute('data-state',h.state);n.media='not all';}};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};var scroll=function(e){if(!e.ctrlKey&&!(e.touches&&e.touches.length>=1)){if(e.cancelable)e.preventDefault();e.stopPropagation();}end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);${scrollSkipListenerOn}window.addEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);t=setTimeout(off,${ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS});}catch(e){}})();`;
+ 
+ // client re-render (hydration-ის შეცდომა) ფარდას ჩართულს ტოვებს, სანამ SpotlightLoader არ ჩაიბარებს
+ function isEntrancePending(): boolean {
+[2m      Tests [22m [1m[32m61 passed[39m[22m[90m (61)[39m
+== MD boot real wheel (deltaY) not blocked
+--- /tmp/ec.bak	2026-11-13 12:48:08.451975672 +0000
++++ app/components/loading/EntranceCover.tsx	2026-11-13 12:50:10.740920760 +0000
+@@ -38,7 +38,7 @@
+ const sessionGate = `if(sessionStorage.getItem('${ENTRANCE_SESSION_KEY}')==='1')return;sessionStorage.setItem('${ENTRANCE_SESSION_KEY}','1');`;
+ 
+ // მდგომარეობა window-ზეა: hydration-ის შეცდომისას React <style>-ს ცვლის, window კი რჩება (A-R459-REVIEW-R1)
+-export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var c=document.getElementById('${ENTRANCE_COVER_ID}');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('${ENTRANCE_REDUCED_MOTION_QUERY}').matches)return;${sessionGate}var h={start:performance.now(),state:'pending'};window.__czabaEntrance=h;c.setAttribute('data-start',String(h.start));c.media='all';var t;var off=function(){clearTimeout(t);document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);${scrollSkipListenerOff}window.removeEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);};var end=function(){off();if(h.state==='pending')h.state='skipped';var n=document.getElementById('${ENTRANCE_COVER_ID}');if(n){n.setAttribute('data-state',h.state);n.media='not all';}};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};var scroll=function(e){if(!e.ctrlKey&&!(e.touches&&e.touches.length>1)){if(e.cancelable)e.preventDefault();e.stopPropagation();}end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);${scrollSkipListenerOn}window.addEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);t=setTimeout(off,${ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS});}catch(e){}})();`;
++export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var c=document.getElementById('${ENTRANCE_COVER_ID}');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('${ENTRANCE_REDUCED_MOTION_QUERY}').matches)return;${sessionGate}var h={start:performance.now(),state:'pending'};window.__czabaEntrance=h;c.setAttribute('data-start',String(h.start));c.media='all';var t;var off=function(){clearTimeout(t);document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);${scrollSkipListenerOff}window.removeEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);};var end=function(){off();if(h.state==='pending')h.state='skipped';var n=document.getElementById('${ENTRANCE_COVER_ID}');if(n){n.setAttribute('data-state',h.state);n.media='not all';}};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};var scroll=function(e){if(!e.ctrlKey&&!e.deltaY&&!(e.touches&&e.touches.length>1)){if(e.cancelable)e.preventDefault();e.stopPropagation();}end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);${scrollSkipListenerOn}window.addEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);t=setTimeout(off,${ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS});}catch(e){}})();`;
+ 
+ // client re-render (hydration-ის შეცდომა) ფარდას ჩართულს ტოვებს, სანამ SpotlightLoader არ ჩაიბარებს
+ function isEntrancePending(): boolean {
+[2m      Tests [22m [1m[32m61 passed[39m[22m[90m (61)[39m

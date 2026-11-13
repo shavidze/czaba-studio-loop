@@ -3,7 +3,7 @@
   "updated": "2026-11-13",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 489: SABA-B-17-ENTRANCE-3-4S - first-visit entrance lasts >= 3.5 s from its first painted frame (cap 5 s), slower pacing, 500 ms overlay exit, takeover window 2 s for slow first visits, wheel/touchmove skip without scrolling under the cover; baseline 73f994d (current-task.md, sketch b-round-488/sketch-489.patch.txt)",
+  "current_task": "Round 490: SABA-B-17 fix-up - entrance tests dispatch real WheelEvent/one-touch TouchEvent (A-R489-REVIEW-NONZOOM-CLASSIFY) and a positive-delta ctrl+wheel zoom fixture; 28 mutants red; components byte-equal to v3; C re-verifies the entrance in the browser + studio-lab playback; baseline 73f994d + v3 (current-task.md, delta b-round-489/sketch-490-v3-to-v4.patch.txt)",
   "advisor_used_by_B": "2026-11-12 B round 475 -> 476 planning: advisor available and consulted after orientation (advice applied: read gate-475 review + all of a-round-475; snapshot before edits; L10 STOP ruling; R1 as confirmedBy (L7); split P0-3 into 3a loader/logo and 3b docs after a docs hue scan; primitives text to root now; product-designer before the sketch; one background value for cover+loader+page; DPG-LOGO header pulled in to avoid three logo treatments; parked SpotlightLoader items ruled (L6); L23 pre-run of pinning tests; computed-style rows, pixel rows not run by B ship as record; SABA-B-16 stays open). product-designer b-round-475/pd-p0-3a.md; tech-lead APPROVE WITH CHANGES, all adopted in v2 (b-round-475/sketch-review.md)",
   "baseline": {
     "tsc_errors": 0,
@@ -12758,8 +12758,16 @@
       "task": "current-task.md",
       "decision": "D-29z1743",
       "type": "SABA-B-17-ENTRANCE-3-4S (Medium, Saba) + B-R489-ENTRANCE-SLOW-FIRST-VISIT-EXPIRED + B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER",
+      "status": "C FAIL (gate 489 skipped)",
+      "note": "baseline HEAD 73f994d clean; sketch b-round-488/sketch-489.patch.txt; claims b-round-488/claims-489.sh | C FAIL: unruled Medium A-R489-REVIEW-NONZOOM-CLASSIFY; product rows green (c-round-489.json); ruled and fixed in round 490 (D-29z1747)"
+    },
+    {
+      "round": 490,
+      "task": "current-task.md",
+      "decision": "D-29z1747",
+      "type": "fix-up of 489: A-R489-REVIEW-NONZOOM-CLASSIFY (Medium) + C re-verification of SABA-B-17-ENTRANCE-3-4S, B-R489-ENTRANCE-SLOW-FIRST-VISIT-EXPIRED, B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER",
       "status": "dispatched",
-      "note": "baseline HEAD 73f994d clean; sketch b-round-488/sketch-489.patch.txt; claims b-round-488/claims-489.sh"
+      "note": "baseline HEAD 73f994d + round-489 v3 uncommitted (4 paths); delta b-round-489/sketch-490-v3-to-v4.patch.txt; claims b-round-489/claims-490.sh"
     }
   ],
   "post_current_stage_queue": [
@@ -29310,7 +29318,7 @@
       "id": "SABA-B-17-ENTRANCE-3-4S",
       "severity": "medium",
       "origin": "Saba 2026-11-13 (policy section 'SpotlightLoader too fast')",
-      "status": "dispatched (D-29z1743): round 489 (current-task.md; sketch b-round-488/sketch-489.patch.txt) | scheduled (D-29z1740): round 489 (after the 488 fix-up; REGRESSION first if planning is on/after 2026-11-16) | scheduled (D-29z1736): round 488 (after 487; REGRESSION first if planning is on/after 2026-11-16)",
+      "status": "dispatched (D-29z1747): round 489 C FAIL only on the unruled test gap A-R489-REVIEW-NONZOOM-CLASSIFY; every real-browser row green (c-round-489/tree-table.txt, touch-under-cover.txt, auth.json; browserVerified true) but not done (V2: no PASS); fix-up round 490 (D-29z1747) | dispatched (D-29z1743): round 489 (current-task.md; sketch b-round-488/sketch-489.patch.txt) | scheduled (D-29z1740): round 489 (after the 488 fix-up; REGRESSION first if planning is on/after 2026-11-16) | scheduled (D-29z1736): round 488 (after 487; REGRESSION first if planning is on/after 2026-11-16)",
       "title": "Store entrance animation (SpotlightLoader) disappears too fast; on a first visit it must last at least 3-4 s",
       "evidence": "agent-workflow.md 'Saba feedback, 2026-11-13'; EntranceCover.tsx ENTRANCE_MIN_TOTAL_MS 1450, ENTRANCE_MAX_TOTAL_MS 1900 (claims-487 K23); SABA-B-13 (archived) delivered 1450-1900 ms",
       "added": "2026-11-13 B round 486 -> 487 planning",
@@ -29320,28 +29328,17 @@
       "id": "B-R487-PROFILE-EDITOR-NARROW-OVERFLOW",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "scheduled (D-29z1740): round 490; note the round-488 sketch changes the editor row to '<div ref={nameEditorRef} className=\"flex items-center gap-3\">' (round-487 claims K22 grep no longer matches) | scheduled (D-29z1736): round 489",
+      "status": "scheduled (D-29z1751): round 491 (after the 490 fix-up; REGRESSION first if planning is on/after 2026-11-16) | scheduled (D-29z1740): round 490; note the round-488 sketch changes the editor row to '<div ref={nameEditorRef} className=\"flex items-center gap-3\">' (round-487 claims K22 grep no longer matches) | scheduled (D-29z1736): round 489",
       "title": "Account Profile name editor overflows at 375 px: Save/Cancel icon buttons are off-screen and cannot be clicked or tapped",
       "evidence": "b-round-486/probe/head-named.json 375x812: afterClick.name.textBox width 420 in a 343 px column; afterMouseSave puts 0 / editing true; afterMouseCancel editing true (sketch v3 equal: probe/v3/sketch-named.json)",
       "repro": "375x812, signed-in stub: open the name editor; the check and X buttons sit beyond the right edge",
       "added": "2026-11-13 B round 486 -> 487 planning"
     },
     {
-      "id": "C-R487-01",
-      "severity": "medium",
-      "origin": "A code-reviewer (A-R487-REVIEW-FOCUS-STEAL), reproduced by A and C; introduced by round-487 sketch (B spec)",
-      "status": "closed (D-29z1741): C round 488 PASS (browserVerified true; IF-PASSWORD, IF-PASSWORD-NOFOCUS (Chromium emulation), IF-TABAWAY, IF-STAY, IF-REPLAY 4/4 no steal), published 73f994d (gate 488) | dispatched (D-29z1738): round 488 fix-up, sketch v3",
-      "title": "Account Profile: a name save that settles pulls focus back to the name button (200) or First name (500) even after the user moved focus elsewhere, e.g. behind the open PasswordModal",
-      "evidence": "c-round-487/focus-steal-replay.json (4/4); a-round-487/repro/focus-steal.json; b-round-487/probe/r487tree-v2-inflight.json (click-password, click-password-nofocus, tab-away)",
-      "repro": "signed-in stub, /account, PUT delayed 1500 ms: open the name editor, Save, click 'Click to change password' during the delay; after settle activeElement is the name button / First name behind the modal",
-      "added": "2026-11-13 B round 487 -> 488 planning",
-      "closedBy": "c-round-488.json; gates/gate-round-488.json"
-    },
-    {
       "id": "B-R488-PASSWORD-MODAL-DIALOG",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "scheduled (D-29z1739): round 491 (after 489 SABA-B-17 and 490 narrow overflow; REGRESSION first when due)",
+      "status": "scheduled (D-29z1751): round 492 | scheduled (D-29z1739): round 491 (after 489 SABA-B-17 and 490 narrow overflow; REGRESSION first when due)",
       "title": "Account 'Change password' modal has no dialog semantics: no role=dialog/aria-modal, no initial focus, Esc does not close it, no focus return to the trigger",
       "evidence": "b-round-487/probe/overlays-sketch.json password-modal-keys (1440/1280): dialogs [], afterOpen focus stays on the link, Esc leaves the modal open; tech-lead delta review Low 1 (b-round-487/sketch-review.md)",
       "repro": "signed-in stub, /account: click 'Click to change password'; inspect the aria tree (no dialog), press Esc (modal stays)",
@@ -29352,7 +29349,7 @@
       "id": "B-R489-ENTRANCE-SLOW-FIRST-VISIT-EXPIRED",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "dispatched (D-29z1743): fixed inside round 489 (SABA-B-17)",
+      "status": "dispatched (D-29z1747): round 489 C FAIL only on the unruled test gap A-R489-REVIEW-NONZOOM-CLASSIFY; every real-browser row green (c-round-489/tree-table.txt, touch-under-cover.txt, auth.json; browserVerified true) but not done (V2: no PASS); fix-up round 490 (D-29z1747) | dispatched (D-29z1743): fixed inside round 489 (SABA-B-17)",
       "title": "On a slow first visit (Fast 3G, or JS later than 1000 ms) the entrance never plays: ~1.3 s plain black, then the page (state expired); at 4G + 4x CPU the tagline is never fully shown",
       "evidence": "b-round-488/probe/head/f-1440-cpu1-net3g.json, f-1440-cpu1-delayjs.json, f-1440-cpu4-net4g.json",
       "added": "2026-11-13 B round 488 -> 489 planning"
@@ -29361,7 +29358,7 @@
       "id": "B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "dispatched (D-29z1743): fixed inside round 489 (SABA-B-17)",
+      "status": "dispatched (D-29z1747): round 489 C FAIL only on the unruled test gap A-R489-REVIEW-NONZOOM-CLASSIFY; every real-browser row green (c-round-489/tree-table.txt, touch-under-cover.txt, auth.json; browserVerified true) but not done (V2: no PASS); fix-up round 490 (D-29z1747) | dispatched (D-29z1743): fixed inside round 489 (SABA-B-17)",
       "title": "A wheel gesture while the entrance cover is up scrolls the page underneath unseen (600 px at HEAD); the 3.5 s floor would make it more likely",
       "evidence": "b-round-488/probe/head/f-1440-cpu1-wheel.json scrollY 600",
       "added": "2026-11-13 B round 488 -> 489 planning"
@@ -29381,6 +29378,18 @@
       "default": "2 s, no logo on the cover",
       "file": "user-review/questions-saba-b-13.md",
       "added": "2026-11-13 B round 488 -> 489 planning"
+    },
+    {
+      "id": "A-R489-REVIEW-NONZOOM-CLASSIFY",
+      "severity": "medium",
+      "origin": "A (code-reviewer)",
+      "status": "dispatched (D-29z1747): fixed in round 490 sketch v4 (b-round-489/sketch-490-v3-to-v4.patch.txt): real WheelEvent/one-touch TouchEvent in dispatchScrollGesture; MA-MD (+ ME-MH from tech-lead F1/F1b; S3/E8e over both ctrl+wheel delta signs) red on B's scratch (b-round-489/mutants/mutants-summary.txt)",
+      "title": "store-entrance-loader S1/S2/E8c/E8d dispatched a plain Event, so an over-broad zoom classifier (any wheel / one touch = zoom; any real wheel unblocked) stayed green",
+      "evidence": "a-round-489/review-mutants.log (MA-MD 61/61 green); c-round-489.json bug C-R489-A-STOP-NONZOOM-TEST-GAP",
+      "confirmedBy": [
+        "C-R489-A-STOP-NONZOOM-TEST-GAP (C round 489 reproduced MA, MB)"
+      ],
+      "added": "2026-11-13 B round 489 -> 490 planning"
     }
   ],
   "tech_lead_notes": [
@@ -29886,7 +29895,7 @@
       "id": "TLM-R489-TOUCH-SWIPE",
       "added": "2026-11-13 B round 488 -> 489 planning",
       "status": "open (D-29z1743): deadline RETRO 495 (L46); does not block (2026-10-23 root clarification class)",
-      "what": "Real phone (iOS Safari and Android Chrome): on a fresh tab of /, a one-finger swipe during the entrance skips it without scrolling the page; a two-finger pinch zooms (not blocked)"
+      "what": "Real phone (iOS Safari and Android Chrome): on a fresh tab of /, a one-finger swipe during the entrance skips it without scrolling the page; a two-finger pinch zooms (not blocked); also (TL-R490-F7, D-29z1748): a real pinch whose first touchmove carries only 1 touch is not cancelled (the zoom still works)"
     }
   ],
   "workflow_policy": {
@@ -33106,6 +33115,11 @@
       "note": "A round 487 code-reviewer Architecture note (signal 4, new state/lifecycle in account.tsx ProfileContent ~l.113-189, grown again in round 488 by the focus guard and modal ref): keep now; when the narrow-overflow fix (round 490) or PasswordModal dialog work (round 491) lands, consider one bounded task extracting a local ProfileNameEditor in the same file with PN1-PN10h unchanged. Not scheduled; a frontend-architect checkpoint request to root if a third round adds editor state.",
       "confirmedBy": "A-R488 architecture note (modal state held twice: passwordModalOpenRef + isPasswordModalOpen; 3 focus refs) and gate 488 architecture note (keep; useInlineNameEditor hook only if a second change lands)",
       "status": "checkpoint requested (D-29z1744): ARCH-CHECKPOINT-ACCOUNT-PROFILE before round 491"
+    },
+    {
+      "id": "SIG-R489-ENTRANCE-ZOOM-RULE-TWICE",
+      "added": "2026-11-13 B round 489 -> 490 planning",
+      "note": "A round 489 code-reviewer Architecture note: the zoom/scroll-skip rule exists twice (boot-script string EntranceCover.tsx ~l.41 and isZoomGesture SpotlightLoader.tsx ~l.54); only ENTRANCE_SCROLL_SKIP_EVENTS is shared. Options: generate the boot check from one rule, or a parity test over {plain wheel, ctrl wheel (+/- delta), 1 touch, 2 touches} through both paths. Signal 4 (the SpotlightLoader effect with 4 timers + 4 listeners): keep. Not scheduled; checkpoint request ARCH-CHECKPOINT-ENTRANCE-LOADING after round 490 PASS (D-29z1750)."
     }
   ],
   "vitest_floor_round64": 1574,
@@ -44220,6 +44234,16 @@
       "title": "While the first-visit entrance cover is up, scroll keys (ArrowDown, PageDown, Space, End) still scroll the page underneath unseen; only wheel/touchmove are swallowed after round 489",
       "evidence": "store-entrance-loader.test.tsx L6 \"other keys do not skip\" (HEAD contract kept); b-round-488/pd-consult.md",
       "added": "2026-11-13 B round 488 -> 489 planning"
+    },
+    {
+      "id": "A-R489-REVIEW-L3-CLASS",
+      "severity": "low",
+      "origin": "A (code-reviewer)",
+      "status": "deferred_low_polish (D-29z1748): needs a component change (round 490 keeps the components byte-equal); fix in the polish pass or the next round that touches SpotlightLoader.tsx",
+      "title": "store-entrance-loader L3 (and L4 at HEAD) assert pointer events via classList.contains('pointer-events-none') (L12 styling-class selector)",
+      "evidence": "a-round-489.md reviewer table",
+      "repro": "grep -n \"pointer-events-none\" app/lib/__tests__/store-entrance-loader.test.tsx",
+      "added": "2026-11-13 B round 489 -> 490 planning"
     }
   ],
   "regression_rounds": [
@@ -46807,7 +46831,15 @@
       "file": "b-round-488/checkpoint-request-account.md",
       "scope": "app/routes/account.tsx ProfileContent + PasswordModal (rounds 487, 488 changed it; 490 and 491 are scheduled on it)",
       "question": "keep vs extract useInlineNameEditor hook and fold passwordModalOpenRef into a PasswordModal with dialog semantics (B-R488-PASSWORD-MODAL-DIALOG); one owner, behaviour-preserving PN tests",
-      "status": "requested (D-29z1744); deadline: before round 491 planning; non-blocking for round 489/490"
+      "status": "requested (D-29z1751): deadline moved to before round 492 planning (491 = narrow overflow, 492 = PasswordModal) | requested (D-29z1744); deadline: before round 491 planning; non-blocking for round 489/490"
+    },
+    {
+      "id": "ARCH-CHECKPOINT-ENTRANCE-LOADING",
+      "added": "2026-11-13 B round 489 -> 490 planning",
+      "file": "b-round-489/checkpoint-request-entrance.md",
+      "scope": "app/components/loading/EntranceCover.tsx + SpotlightLoader.tsx (rounds 455-461, 476, 489, 490 changed them)",
+      "question": "keep vs one shared zoom/scroll-skip rule (or a parity test) for the boot string and isZoomGesture; one owner, behaviour-preserving tests",
+      "status": "to send to root after round 490 C PASS (D-29z1750); non-blocking"
     }
   ],
   "leadmagnet_dialog_rulings_d29z170": {
@@ -46818,42 +46850,6 @@
     "DEVIATION_A1_ruling_d29z171": "accepted: the wasSubmittingRef effect re-anchors focus on the email input after a failed submit; C verified it in the browser (c-round-205/out/steps/fail-tree-1280.json) and m13 red-proves it. Residual in-flight window = C-R205-01 (Low, scheduled)."
   },
   "decisions_log_b": [
-    {
-      "id": "D-29z1691",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 477 -> 478 planning",
-      "decision": "Round 477 result: C PASS, browserVerified/realVerified true (c-round-477.json), gate 477 published 10791ac. DPG-P0-3a (DPG-SPOTLIGHT-FIX + DPG-LOGO header colour) C-verified, awaiting DP gate (DPG rule 4; not done). Closed on C evidence: GATE460-2 (C3 mutant M7 red on P4), A-R460-REVIEW-5 (C1 sketch sha256 incl. comment fix), portal guard C-R190-INFO I1 / A-R190-SIGNALS Medium #1 (C3 mutant M8 red on P1). SABA-B-16 stays open (asset unnamed). C notes (product hero white edge-light in image asset; brass Sign In button on product page) recorded as DP-gate inputs, not bugs."
-    },
-    {
-      "id": "D-29z1692",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 477 -> 478 planning",
-      "decision": "Round 478 = DPG-P0-3b (DPG-DOCS-UPDATE). Hue-range scan (b-round-477/tools/hue-scan.py) over docs/design + store docs/technical/store-redesign/direction-decision.md: 82 hit lines, ruled into 4 classes: (1) stale tokens/guidance -> rewrite (DESIGN_SYSTEM, style-guide, components/button, audit-design checklist, design-tokens.json, box-render l.110, awwwards snippets); (2) competitor facts keep (design-systems-reference SOUNDRAW); (3) dated audits/measurements keep body + exact banner (wcag-audit, design-audit, star-brand-audit, design-systems-reference) and wcag-audit gains a live-palette ratio section (b-round-477/wcag-section-478.md); (4) not old identity keep (box Gold l.54-55, DESIGN_SYSTEM history row 2.1). Residual 27 lines b-round-477/residual-478.tsv (content-compared). direction-decision.md --color-obsidian-*/--color-brass-* claim (5 hits) rewritten to real tokens. Docs 307-309 l.4 -> Completed (C round 478 PASS) (L28 final stage) + new doc 310. Narrows D-29z1684 \"51 total\" (exact-value grep) to the L2 hue-range scan; residual is deliberate (root note). Awwwards glow snippets recoloured, glow-advice conflict with round-453 no-glow rule recorded as SIG-R478-AWWWARDS-GLOW for DPG-INTERACTION-FIX. Allowlist: hsl(0, 0%, 0%, 0.95) DESIGN_SYSTEM modal backdrop example (not old identity)."
-    },
-    {
-      "id": "D-29z1693",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 477 -> 478 planning",
-      "decision": "Out of round 478 by name: fonts -> DPG-FONT-RESOLVE (STORE-2c-2..4); --color-info/error reds -> DPG-COLOR-CONSOLIDATE (P1); .claude/** -> ROOT-REQ-DPG-PRIMITIVES-PATCH (root); 114 hue hit lines in docs outside docs/design (legacy Studio component docs describing frozen code, mermaid fills, other-industry prompt kits; b-round-477/scan/hue-docs-other.txt) -> signal SIG-R477-DOCS-OUTSIDE-DESIGN for the RETRO 480 staleness check; history records in docs/implementation, docs/bugs, docs/plans stay."
-    },
-    {
-      "id": "D-29z1694",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 477 -> 478 planning",
-      "decision": "Stated deviation from L56/L58 for round 478: no byte-equal sketch (A authors the Georgian prose). After-values are checker exits that read app.css at run time (residual-check.py, doc-token-check.py), each proven red on HEAD (K2 unexpected=55, K3 FAILS 134), green on a synthetic compliant tree (scan/syn-*.txt) and red on a one-value mutant (scan/syn-doc-token-mutant.txt FAILS 2). WCAG ratios are saved output of tools/wcag-ratios.py. RETRO 480 input: RC-R478-DOCS-NO-SKETCH (is the checker-proof form an acceptable L58 variant for prose rounds?). Revised after advisor: doc-token-check adds a name->value rule (catches buy #006AFF which app.css still holds as --color-blue-60); HEAD FAILS 156; mechanical parts (banners from b-round-477/banner-478.txt, WCAG append, docs 307-309 l.4) run green on a scratch clone (claims-478-mechanical-scratch.txt); STORE_ROOT override for C3; K20 0 code reads docs/; C4 baseline probe c4-computed-head.json."
-    },
-    {
-      "id": "D-29z1695",
-      "decision": "Round 478 result: C PASS C1-C10, browserVerified/realVerified true (c-round-478.json); gate 478 published 75a6028 (review COMMIT OK, 9/10). DPG-DOCS-UPDATE (DPG-P0-3b) is C-verified and awaits the DP gate (DPG rule 4), not done. DPG P0 (P0-1..P0-3b) is complete on C evidence; root re-runs the DP gate (design-philosopher + product-designer); ROOT-REQ-DPG-PRIMITIVES-PATCH should land first. C-R478-01 (Low, DESIGN_SYSTEM.md lightness prose) -> deferred_low_polish.",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 478 -> 479 planning"
-    },
-    {
-      "id": "D-29z1696",
-      "decision": "Rulings on A round 478 code-reviewer items left open: H2 accepted (L28 status line contract). M3 banner date: B-spec origin - the banner says the palette is Obsidian & Brass from 2026-10-25, but the Store direction-decision.md is dated 2026-11-05 (Studio VISUAL-A was earlier); Low B-R478-BANNER-DATE, deferred, with L9 (wcag-audit banner says old colours below while the live section is also below) and L11 (design-audit.md two blank lines) folded in. M4 (docs/design/components/card.md cool hsl(220) neutrals) and gate-478 finding 3 (shadow base hue hsl 220) -> input to DPG-COLOR-CONSOLIDATE (SIG-R478-COOL-NEUTRAL-HUE). L6 (style-guide.md glow advice) extends SIG-R478-AWWWARDS-GLOW. A architecture note direction-decision.md:18 misquote of brand-vision.md -> Low B-R478-DD-QUOTE deferred. Gate-478 architecture note (doc-token checker as a CI step) -> architecture signal SIG-R478-DOC-TOKEN-CHECKER-CI, not tasked.",
-      "date": "2026-11-12",
-      "by": "2026-11-12 B round 478 -> 479 planning"
-    },
     {
       "id": "D-29z1697",
       "decision": "Round 479 = DPG-FOOTER-LINKS (DPG P1 item 3). Order within P1: DPG-LOGO serif half is awaiting_user (SABA-Q-DPG-LOGO-FONT-SERIF); DPG-BUTTON-CLEANUP needs app/styles/app.css (globally forbidden, narrow grant per round) plus a Button.tsx migration across Header/Hero/404/search/login/AssetListing and a product-designer pass, so it is the next P1 round; FOOTER-LINKS has no dependency on it and no style change, and fits the one-feature round before REGRESSION-2026-11-13 and RETRO 480. Scope widened by root cause (full document reload on internal links), from an inventory of every <a> tag in app/** (whole-tag scan, b-round-478/sketch-479 store-internal-links.test.ts IL3 mutant): Footer 9, CookieConsent /privacy, ProductSection View all (/store), privacy /cookies, terms /license, faq /hire-us. Ruled out: ErrorBoundary \"/\" (full reload is the recovery), UserDropdown (exported from components/auth/index.ts, imported nowhere; legacy-removal signal SIG-R479-USERDROPDOWN-DEAD), SignUpForm /terms /privacy (inside the auth modal; a client navigation would leave the modal open; SIG-R479-AUTH-MODAL-LINKS), account.orders /music (dead target, B-R478-DEAD-MUSIC-LINK), account.downloads (protected), external/mailto links.",
@@ -47153,6 +47149,36 @@
       "date": "2026-11-13",
       "by": "2026-11-13 B round 488 -> 489 planning",
       "decision": "Lesson (Saba-found issue rule, SABA-B-17 Why we missed it): L18 gains the \"felt quantity\" clause (an example number in Saba's request is a lower bound to confirm, not the target; a duration/speed round ships a 1x recording for Saba and a network-throttled first-visit row). Merged into L18; lessons.md stays at 60 lines (before: b-round-488/lessons-before-489.md). Tech-lead review of the round-489 sketch v1 (fe221c54): APPROVE WITH CHANGES; M1 zoom gestures blocked and M2 doc over-claims fixed in v2; L3-L5 fixed; L6 accepted (b-round-488/sketch-review.md)."
+    },
+    {
+      "id": "D-29z1747",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 489 -> 490 planning",
+      "decision": "Round 489 C FAIL ruled (L10): the only blocker A-R489-REVIEW-NONZOOM-CLASSIFY (Medium, A code-reviewer; confirmedBy C-R489-A-STOP-NONZOOM-TEST-GAP per L7) is fixed by a test-only delta v3->v4 (b-round-489/sketch-490-v3-to-v4.patch.txt, sha in sketch-490.sha256): dispatchScrollGesture sends a real WheelEvent (deltaY 100) and a one-touch TouchEvent. Round 490 = this fix-up plus C browser re-verification; SABA-B-17 and the two B-R489 Mediums stay open (V2: no C PASS yet, though every 489 browser row was green). C15 playback half (not exercised in 489) is a 490 row."
+    },
+    {
+      "id": "D-29z1748",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 489 -> 490 planning",
+      "decision": "Round 489 Lows and tech-lead delta review: A-R489-REVIEW-E8D-LITERAL fixed in v4 (ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS); A-R489-REVIEW-L3-CLASS -> deferred_low_polish (needs a component change); A-R489-REVIEW-DOC-STATUS closed (L28). tech-lead review of 6b8f5f36: APPROVE WITH CHANGES; F1 Medium sign-keyed zoom survivor fixed (zoom fixture deltaY +100; mutants ME/MF red); re-review of 6541b85b APPROVE with Low F1b (mirror survivor ctrlKey && deltaY > 0) fixed (S3/E8e over deltaY 100 and -100; MG/MH red; covering 94), F3 doc lines fixed, F2 kept by L28, F7 added to TLM-R489-TOUCH-SWIPE. Final delta re-reviewed (b-round-489/sketch-review.md)."
+    },
+    {
+      "id": "D-29z1749",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 489 -> 490 planning",
+      "decision": "C-R489-ENV-K17-WEBM-GITIGNORED closed as environment (loop .gitignore:3 *.webm); round-490 claims cite no .webm; root request ROOT-REQ-LOOP-WEBM-EVIDENCE; C13 re-records until root answers."
+    },
+    {
+      "id": "D-29z1750",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 489 -> 490 planning",
+      "decision": "Architecture: A-R489 note recorded as SIG-R489-ENTRANCE-ZOOM-RULE-TWICE (signal only, not a task); ARCH-CHECKPOINT-ENTRANCE-LOADING to root after round 490 C PASS (feature boundary), b-round-489/checkpoint-request-entrance.md."
+    },
+    {
+      "id": "D-29z1751",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 489 -> 490 planning",
+      "decision": "Order: 490 fix-up, 491 B-R487-PROFILE-EDITOR-NARROW-OVERFLOW, 492 B-R488-PASSWORD-MODAL-DIALOG (REGRESSION first when due on/after 2026-11-16; RETRO 495). ARCH-CHECKPOINT-ACCOUNT-PROFILE deadline -> before round 492 planning. Lesson: L52 gains 'classifier rows dispatch the real event' (lessons.md stays 60 lines; before: b-round-489/lessons-before-490.md)."
     }
   ],
   "retro_candidates": [
@@ -47939,6 +47965,16 @@
       "request": "In the protected app/routes/studio.$productId.tsx add a meta export with a title from the product (e.g. '<product title> — CZABA Studio'), so that client navigation into the purchased Studio is announced and the tab is titled (WCAG 2.4.2). Can be combined with ROOT-REQ-DOWNLOADS-TITLE and the SRW-21 mount work.",
       "closes": [
         "B-R485-STUDIO-PRODUCT-TITLE"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "ROOT-REQ-LOOP-WEBM-EVIDENCE",
+      "added": "2026-11-13 B round 489 -> 490 planning",
+      "decision": "D-29z1749",
+      "request": "The loop .gitignore:3 ignores *.webm, so Saba's entrance recordings (user-review/img/saba-b-17-entrance-*.webm, C rounds 489/490) do not survive a job. Either un-ignore user-review/img/*.webm (or allow a size-capped exception) or confirm another way Saba receives the recording (TLM-R489-SABA-ENTRANCE-FEEL).",
+      "closes": [
+        "C-R489-ENV-K17-WEBM-GITIGNORED"
       ],
       "status": "open"
     }

@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-13T11:14:40.527Z",
-  "current_task": "Round 488: B-R486-PROFILE-NAME-KEYBOARD fix-up for C-R487-01 - a name save that settles moves focus only while the editor owns it (password dialog closed and activeElement null/body/inside the editor row); passwordModalOpenRef for the Safari/Firefox-mac mouse model; tests PN10-PN10h; doc 315 update; baseline bb82154 + round-487 tree (current-task.md, sketch b-round-487/sketch-488.patch.txt v3 sha 9062855b)",
+  "_generatedUtc": "2026-11-13T13:11:23.775Z",
+  "current_task": "Round 489: SABA-B-17-ENTRANCE-3-4S - first-visit entrance lasts >= 3.5 s from its first painted frame (cap 5 s), slower pacing, 500 ms overlay exit, takeover window 2 s for slow first visits, wheel/touchmove skip without scrolling under the cover; baseline 73f994d (current-task.md, sketch b-round-488/sketch-489.patch.txt)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6715,7 +6715,7 @@
     {
       "id": "SABA-Q-ENTRANCE-WORDMARK",
       "severity": "info",
-      "status": "awaiting_user (D-29z1625): non-blocking; default no static w",
+      "status": "re-asked (D-29z1743) with the round-489 slow-first-visit evi",
       "title": "Static CZABA wordmark on the black cover before hydration?"
     },
     {
@@ -6903,7 +6903,7 @@
       "id": "SABA-B-17-ENTRANCE-3-4S",
       "severity": "medium",
       "origin": "Saba 2026-11-13 (policy section 'SpotlightLoader too fast')",
-      "status": "scheduled (D-29z1740): round 489 (after the 488 fix-up; REGRESSION first if planning is on/after 2026-11-16) | scheduled (D-29z1736): round 488 (after 487; REGRESSION first if planning is on/after 2026-11-16)",
+      "status": "dispatched (D-29z1743): round 489 (current-task.md; sketch b-round-488/sketch-489.patch.txt) | scheduled (D-29z1740): round 489 (after the 488 fix-up; REGRESSION first if planning is on/after 2026-11-16) | scheduled (D-29z1736): round 488 (after 487; REGRESSION first if planning is on/after 2026-11- …[see backlog.json]",
       "title": "Store entrance animation (SpotlightLoader) disappears too fast; on a first visit it must last at least 3-4 s",
       "evidence": "agent-workflow.md 'Saba feedback, 2026-11-13'; EntranceCover.tsx ENTRANCE_MIN_TOTAL_MS 1450, ENTRANCE_MAX_TOTAL_MS 1900 (claims-487 K23); SABA-B-13 (archived) delivered 1450-1900 ms",
       "added": "2026-11-13 B round 486 -> 487 planning",
@@ -6920,16 +6920,6 @@
       "added": "2026-11-13 B round 486 -> 487 planning"
     },
     {
-      "id": "C-R487-01",
-      "severity": "medium",
-      "origin": "A code-reviewer (A-R487-REVIEW-FOCUS-STEAL), reproduced by A and C; introduced by round-487 sketch (B spec)",
-      "status": "dispatched (D-29z1738): round 488 fix-up, sketch v3",
-      "title": "Account Profile: a name save that settles pulls focus back to the name button (200) or First name (500) even after the user moved focus elsewhere, e.g. behind the open PasswordModal",
-      "evidence": "c-round-487/focus-steal-replay.json (4/4); a-round-487/repro/focus-steal.json; b-round-487/probe/r487tree-v2-inflight.json (click-password, click-password-nofocus, tab-away)",
-      "repro": "signed-in stub, /account, PUT delayed 1500 ms: open the name editor, Save, click 'Click to change password' during the delay; after settle activeElement is the name button / First name behind the modal",
-      "added": "2026-11-13 B round 487 -> 488 planning"
-    },
-    {
       "id": "B-R488-PASSWORD-MODAL-DIALOG",
       "severity": "medium",
       "origin": "pre-existing",
@@ -6939,17 +6929,37 @@
       "repro": "signed-in stub, /account: click 'Click to change password'; inspect the aria tree (no dialog), press Esc (modal stays)",
       "note": "reference: WAI-ARIA APG Dialog (Modal) pattern; the fix touches function PasswordModal in app/routes/account.tsx only; must keep C-R487-01's passwordModalOpenRef in sync",
       "added": "2026-11-13 B round 487 -> 488 planning"
+    },
+    {
+      "id": "B-R489-ENTRANCE-SLOW-FIRST-VISIT-EXPIRED",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "status": "dispatched (D-29z1743): fixed inside round 489 (SABA-B-17)",
+      "title": "On a slow first visit (Fast 3G, or JS later than 1000 ms) the entrance never plays: ~1.3 s plain black, then the page (state expired); at 4G + 4x CPU the tagline is never fully shown",
+      "evidence": "b-round-488/probe/head/f-1440-cpu1-net3g.json, f-1440-cpu1-delayjs.json, f-1440-cpu4-net4g.json",
+      "added": "2026-11-13 B round 488 -> 489 planning"
+    },
+    {
+      "id": "B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "status": "dispatched (D-29z1743): fixed inside round 489 (SABA-B-17)",
+      "title": "A wheel gesture while the entrance cover is up scrolls the page underneath unseen (600 px at HEAD); the 3.5 s floor would make it more likely",
+      "evidence": "b-round-488/probe/head/f-1440-cpu1-wheel.json scrollY 600",
+      "added": "2026-11-13 B round 488 -> 489 planning"
+    },
+    {
+      "id": "SABA-Q-ENTRANCE-SCROLL-SKIP",
+      "status": "awaiting_user (D-29z1743); non-blocking, default applied",
+      "title": ""
+    },
+    {
+      "id": "SABA-Q-ENTRANCE-SLOW-WAIT",
+      "status": "awaiting_user (D-29z1743); non-blocking, default applied",
+      "title": ""
     }
   ],
   "recent_rounds": [
-    {
-      "round": 479,
-      "task": "current-task.md",
-      "decision": "D-29z1697",
-      "type": "DPG-FOOTER-LINKS (DPG P1): Store internal links -> Remix Link + focus release",
-      "status": "c_pass_published (D-29z1700): C PASS browserVerified true, gate 479 published bbb3193",
-      "note": "baseline HEAD 75a6028 clean; claims b-round-478/claims-479.sh; sketch b-round-478/sketch-479 (11 files)"
-    },
     {
       "round": 480,
       "task": "current-task.md",
@@ -7021,6 +7031,14 @@
       "type": "B-R486-PROFILE-NAME-KEYBOARD fix-up (C-R487-01, Medium)",
       "status": "dispatched",
       "note": "baseline HEAD bb82154 + round-487 uncommitted tree (b-round-487/a-tree-start.sha256); claims b-round-487/claims-488.sh; sketch b-round-487/sketch-488.patch.txt v3 sha 9062855b25c50874; tech-lead v1 APPROVE WITH CHANGES -> v2 APPROVE -> v3 Low 3; 24 mutants red; probes b-round-487/probe"
+    },
+    {
+      "round": 489,
+      "task": "current-task.md",
+      "decision": "D-29z1743",
+      "type": "SABA-B-17-ENTRANCE-3-4S (Medium, Saba) + B-R489-ENTRANCE-SLOW-FIRST-VISIT-EXPIRED + B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER",
+      "status": "dispatched",
+      "note": "baseline HEAD 73f994d clean; sketch b-round-488/sketch-489.patch.txt; claims b-round-488/claims-489.sh"
     }
   ],
   "other_keys": [
