@@ -1,13 +1,15 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 495 (RETRO) PASS, 0 bugs, browserVerified/realVerified true; gate 495 skipped (no source change), baseline 3bcf8cb. No open C bug, so the next dependency-ordered scope is DPG P1 (Saba: before STORE-3 and all other work). Not COMPLETE: DPG P1/P2 and the DP gate, STORE-2c..5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2 and STEM-LANES remain, the High B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED is open with root, and the deferred Lows must be fixed before final acceptance. Not BLOCKED: round 496 needs no external input.",
- "nextTask": "Round 496: DPG-BUTTON-CLEANUP stage 1. A: git apply b-round-495/sketch-496.patch.txt (tech-lead v2 APPROVE): delete .btn-primary/.button/.button-primary from app.css (byte-for-byte narrow grant), add buildButtonClassName + shape pill to Button.tsx (default byte-identical), migrate 404 (Back Home pill; dead btn-secondary Browse Store -> text link), /account/login, /search, Hero, Header desktop (max-lg:hidden) + mobile (fullWidth) + skeletons, AssetListingPage; port GS3; BC1-BC6; DESIGN_SYSTEM ### Buttons + doc 319. C: browser rows C1-C7 at 1440x900/1280x720 (+1023/1024/375 breakpoint, keyboard focus ring, nav, 404 pair, hero->store journey), C8 skeleton, C9 grep (scanner TOTAL 2 btn-icon), C10 covering tests, C11 3 mutants, C12 docs, C13 claims-496.sh, C14 scope + L57. Then DPG-BUTTON-CLEANUP-2 (REGRESSION first on/after 2026-11-16).",
+ "reason": "Round 496 BLOCKED: A STOPPED on two code-reviewer Mediums in the sketch test lines (GS3 exact-selector-only guard; BC1 primary/md-only pin); C ran C0/C13/C14 only (L22), browserVerified false, gate 496 skipped, so nothing closes. B ruled option (a): a test-only addendum (8 B mutants survive A's tests, 8/8 red with the addendum; tech-lead APPROVE). Not COMPLETE: stage 1 is not C-accepted, DPG P1/P2 + DP gate, STORE-2c..5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2 and STEM-LANES remain, the High B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED is with root, and the deferred Lows must be fixed before final acceptance. Not BLOCKED: no external input is needed.",
+ "nextTask": "Round 497: DPG-BUTTON-CLEANUP stage 1 completion. Baseline 3bcf8cb + the 13-line round-496 worktree (do not re-apply sketch-496). A: git apply b-round-496/addendum-497.patch.txt (sha 853dc262; the two test files only: GS3 scans every app/**/*.css for the retired class selectors with a regex self-test; BC1b pins 288 Button variant/size/state combos against literal HEAD 3bcf8cb strings; BC3 closest(button) null; BC4 token absence) and update doc 319; typecheck, lint, 4 covering files (42 tests), code-reviewer. C: the full table C0-C15 in the browser at 1440x900/1280x720 (+1023/1024/375): rest, hover, keyboard/pointer focus, breakpoint + sign-in modal, Enter nav, 404 pair, hero->store journey, signed-in header (C15), plus grep, tests, mutants N1-N8 + M1/M2/M7 on a working-tree git copy, docs, claims, scope + L57. Then DPG-BUTTON-CLEANUP-2 (REGRESSION first on/after 2026-11-16).",
  "remaining": [
   "ROOT-REQ-DOWNLOADS-MUSIC-LINK",
   "DP-GATE-RERUN-AFTER-P0",
   "DPG-FOOTER-LINKS",
   "DPG-LOGO",
   "DPG-BUTTON-CLEANUP",
+  "A-R496-CR-BC1-PIN",
+  "A-R496-CR-GS3-GUARD",
   "DPG-BUTTON-CLEANUP-2",
   "B-R496-404-BROWSE-STORE-UNSTYLED",
   "DPG-CSS-DEDUP",

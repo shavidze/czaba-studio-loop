@@ -1,0 +1,62 @@
+app/components/home/HeroSection.tsx:138:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    137 │       {/* Sound Toggle Button - Top right, visible on load */}
+  > 138 │       <button
+        │       ^^^^^^^
+  > 139 │         onClick={toggleMute}
+  > 140 │         className="absolute top-24 right-6 z-20 flex items-center gap-2 rounded-full bg-surface-glass px-4 py-2 text-sm text-foreground/80 backdrop-blur-sm transition-all hover:bg-muted-bg hover:text-foreground"
+  > 141 │         aria-label={isMuted ? 'Turn sound on' : 'Turn sound off'}
+  > 142 │       >
+        │       ^
+    143 │         {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+    144 │         <span className="hidden sm:inline">{isMuted ? 'Sound On' : 'Sound Off'}</span>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/AssetListingPage.tsx:28:26 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━
+
+  ! This variable hasActiveFilters is unused.
+  
+    26 │   pageTitle,
+    27 │ }: AssetListingPageProps) {
+  > 28 │   const { activeFilters, hasActiveFilters, clearAllFilters } = useFilters();
+       │                          ^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │   const durationSeconds = (duration?: string) =>
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+app/routes/$.tsx:84:18 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    82 │         {[...Array(5)].map((_, i) => (
+    83 │           <motion.div
+  > 84 │             key={i}
+       │                  ^
+    85 │             className="wave-bar"
+    86 │             animate={{
+  
+  i This is the source of the key value.
+  
+    80 │       {/* Floating sound wave decoration */}
+    81 │       <div className="not-found-waves">
+  > 82 │         {[...Array(5)].map((_, i) => (
+       │                                ^
+    83 │           <motion.div
+    84 │             key={i}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+Checked 10 files in 14ms. No fixes applied.
+Found 3 warnings.
+rc=0

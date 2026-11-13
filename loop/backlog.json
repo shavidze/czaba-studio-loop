@@ -1,10 +1,13 @@
 {
-  "version": 488,
+  "version": 490,
   "updated": "2026-11-13",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 496: DPG-BUTTON-CLEANUP stage 1 (delete .btn-primary/.button/.button-primary CSS; buildButtonClassName + shape pill in Button.tsx; migrate 404, /account/login, /search, Hero, Header x2, AssetListingPage; port GS3) (current-task.md; sketch b-round-495/sketch-496.patch.txt; claims b-round-495/claims-496.sh)",
-  "advisor_used_by_B": "available; consulted after orientation (round 495 -> 496 planning) and before hand-off",
+  "current_task": "Round 497: DPG-BUTTON-CLEANUP stage 1 completion: A applies the test-only addendum b-round-496/addendum-497.patch.txt (GS3 all-CSS scan, BC1b 288-combo HEAD pin, BC3/BC4 strengthening) and updates doc 319; C runs the full C0-C15 table in the browser (current-task.md)",
+  "advisor_used_by_B": {
+    "previous": "available; consulted after orientation (round 495 -> 496 planning) and before hand-off",
+    "round_497_planning": "available; used after orientation and at the closing check (2026-11-13)"
+  },
   "baseline": {
     "tsc_errors": 0,
     "vitest_files": 32,
@@ -12822,8 +12825,16 @@
       "task": "current-task.md",
       "decision": "D-29z1775",
       "type": "DPG-BUTTON-CLEANUP stage 1",
-      "status": "dispatched",
+      "status": "BLOCKED (A STOP, C L22 rows only; gate skipped)",
       "note": "baseline 3bcf8cb clean; sketch b-round-495/sketch-496.patch.txt; claims b-round-495/claims-496.sh"
+    },
+    {
+      "round": 497,
+      "task": "current-task.md",
+      "decision": "D-29z1779",
+      "type": "DPG-BUTTON-CLEANUP stage 1 completion (test-only addendum + full C table)",
+      "status": "dispatched",
+      "note": "baseline 3bcf8cb + round-496 worktree; addendum b-round-496/addendum-497.patch.txt"
     }
   ],
   "post_current_stage_queue": [
@@ -29416,7 +29427,7 @@
       "id": "DPG-BUTTON-CLEANUP-2",
       "severity": "medium",
       "origin": "B spec",
-      "status": "scheduled (D-29z1773): next DPG P1 round after round 496",
+      "status": "scheduled (D-29z1780): after round 497 closes stage 1 | scheduled (D-29z1773): next DPG P1 round after round 496",
       "title": "Hand-rolled brand buttons outside Button.tsx (Saba DPG item 7 \"Use Button.tsx component only\")",
       "evidence": "b-round-495/stage2-bg-brand-hits.txt",
       "added": "2026-11-13 B round 495 -> 496 planning"
@@ -29442,10 +29453,28 @@
       "id": "B-R496-404-BROWSE-STORE-UNSTYLED",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "dispatched round 496 (D-29z1777): closes on C PASS of rows C2/C6",
+      "status": "dispatched round 497 (D-29z1778): round 496 STOPPED before C acceptance; closes on C PASS of C2/C6 | dispatched round 496 (D-29z1777): closes on C PASS of rows C2/C6",
       "title": "404 page \"Browse Store\" uses class btn-secondary, which has no CSS rule: renders as plain unstyled text next to the brass \"Back Home\" pill",
       "evidence": "b-round-495/measure/head.json NF-SECONDARY (bg transparent, padding 0, hover no change); claims K5",
       "added": "2026-11-13 B round 495 -> 496 planning (advisor closing check)"
+    },
+    {
+      "id": "A-R496-CR-GS3-GUARD",
+      "severity": "medium",
+      "origin": "A code-reviewer",
+      "status": "dispatched round 497 (D-29z1779): test-only addendum; closes on C PASS of C10/C11",
+      "title": "GS3 only catches the exact retired selectors in styles/app.css; :focus-visible/::after/a.button/.btn-secondary or rules in base/utilities.css would pass",
+      "evidence": "a-round-496.md STOP section; b-round-496/mutants-497-on-a496-tests.txt (8/8 survive)",
+      "added": "2026-11-13 B round 496 -> 497 planning"
+    },
+    {
+      "id": "A-R496-CR-BC1-PIN",
+      "severity": "medium",
+      "origin": "A code-reviewer",
+      "status": "dispatched round 497 (D-29z1779): test-only addendum; closes on C PASS of C10/C11",
+      "title": "BC1 pins only Button primary/md; other variants, sizes, fullWidth, disabled/loading and className position unpinned against HEAD",
+      "evidence": "a-round-496.md STOP section; b-round-496/mutants-497-on-a496-tests.txt (8/8 survive)",
+      "added": "2026-11-13 B round 496 -> 497 planning"
     }
   ],
   "tech_lead_notes": [
@@ -44696,6 +44725,66 @@
       "evidence": "b-round-495/measure/head-probe.json nestedButtonsInLinksOnHome 14; sketch2-probe.json 14",
       "repro": "document.querySelectorAll('a button').length on / after load",
       "added": "2026-11-13 B round 495 -> 496 planning (advisor closing check)"
+    },
+    {
+      "id": "A-R496-CR-LINK-DISABLED-VISUAL-ONLY",
+      "severity": "low",
+      "origin": "A code-reviewer",
+      "status": "deferred_low_polish (D-29z1780)",
+      "title": "buildButtonClassName isDisabled on a <Link> is visual only (pointer-events-none); Enter still activates; no consumer uses it",
+      "evidence": "a-round-496.md For B",
+      "repro": "see a-round-496.md For B",
+      "added": "2026-11-13 B round 496 -> 497 planning"
+    },
+    {
+      "id": "A-R496-CR-BC5-CLASS-ONLY",
+      "severity": "low",
+      "origin": "A code-reviewer",
+      "status": "deferred_low_polish (D-29z1780)",
+      "title": "BC5 compares class strings only; mobile Sign In click and skeleton sizes untested in jsdom (max-lg:hidden stays browser row C4)",
+      "evidence": "a-round-496.md For B",
+      "repro": "see a-round-496.md For B",
+      "added": "2026-11-13 B round 496 -> 497 planning"
+    },
+    {
+      "id": "A-R496-CR-SIGNED-IN-SKELETON-SHIFT",
+      "severity": "low",
+      "origin": "A code-reviewer",
+      "status": "deferred_low_polish (D-29z1780); measured by C row C15 in round 497",
+      "title": "desktop auth skeleton w-24 h-12 (96x48) resolves to the ~36px btn-icon user button for signed-in users: the skeleton-to-content shift may now hit signed-in users",
+      "evidence": "a-round-496.md For B",
+      "repro": "see a-round-496.md For B",
+      "added": "2026-11-13 B round 496 -> 497 planning"
+    },
+    {
+      "id": "A-R496-CR-BC6-BARE-BUTTON-TOKEN",
+      "severity": "low",
+      "origin": "A code-reviewer",
+      "status": "deferred_low_polish (D-29z1780)",
+      "title": "BC6 className=\"button[ \\\"]\" misses quoted/template/clsx bare button tokens (0 current hits); __tests__ filter redundant",
+      "evidence": "a-round-496.md For B",
+      "repro": "see a-round-496.md For B",
+      "added": "2026-11-13 B round 496 -> 497 planning"
+    },
+    {
+      "id": "A-R496-CR-BC3-SELF-DERIVED",
+      "severity": "low",
+      "origin": "A code-reviewer",
+      "status": "fixed by round 497 addendum (D-29z1780); closes on C PASS of C10/C11",
+      "title": "BC3 expected value derived from the builder under test; add closest(button) null",
+      "evidence": "a-round-496.md For B",
+      "repro": "see a-round-496.md For B",
+      "added": "2026-11-13 B round 496 -> 497 planning"
+    },
+    {
+      "id": "A-R496-CR-BC4-NEAR-VACUOUS",
+      "severity": "low",
+      "origin": "A code-reviewer",
+      "status": "fixed by round 497 addendum (D-29z1780); closes on C PASS of C10/C11",
+      "title": "BC4 not.toBe(PILL_LG) near-vacuous; assert bg-brand/rounded-full absent",
+      "evidence": "a-round-496.md For B",
+      "repro": "see a-round-496.md For B",
+      "added": "2026-11-13 B round 496 -> 497 planning"
     }
   ],
   "regression_rounds": [
@@ -47362,42 +47451,6 @@
   },
   "decisions_log_b": [
     {
-      "id": "D-29z1722",
-      "date": "2026-11-13",
-      "by": "2026-11-13 B round 483 -> 484 planning",
-      "decision": "Outcome after round 484 fixed in advance (current-task.md section 7): every remainder row has an allowed result and no Medium+ finding -> regression-last.json = {date: C completion date, round: 484}, REGRESSION-2026-11-13 closes, round 485 = CLIENT-NAV-CONTRACT with its sketch pre-run (D-29z1704), 486 = B-R480-ORDER-CARD-KEYBOARD, then DPG-BUTTON-CLEANUP and the rest of DPG P1. Critical/High or cloud-reproducible Medium -> its fix-up first. Only a row BLOCKED because the backend is unavailable in the cloud may move to carry_to_next_regression with the regression closing on the rest (no section-3 row needs the backend); any other non-run keeps browserVerified false and the regression open (advisor: no environment escape for rows B ran at baseline). No architecture checkpoint requested: no code change, no accumulated owner risk."
-    },
-    {
-      "id": "D-29z1723",
-      "date": "2026-11-13",
-      "by": "2026-11-13 B round 484 -> 485 planning",
-      "decision": "Round 484 result (C evidence only): REGRESSION-2026-11-13 part 2 remainder C taskStatus PASS, 8 passed lines, 0 failed, 0 inconclusive, 0 notRun, 0 bugs, browserVerified=true, realVerified=true (c-round-484.json); L57 OK (B re-run). Gate 484 skipped (no real changes), head 751e30e, so the baseline stays 751e30e (gate 481 published). Per D-29z1722: every remainder row has an allowed result and no Medium+ finding -> REGRESSION-2026-11-13 done (parts: 482 PASS bV true, 483 PASS bV false, 484 PASS bV true remainder); regression-last.json = {date 2026-11-13, round 484}; next due on or after 2026-11-16. C-R425-02 stays Low: the R-FOLLOW-OFFSET attribution shows a run-to-run scroll offset of at most 4 px vs round 389, not a layout width delta; its cause (follow-scroll quantisation) is a HYPOTHESIS, not tested. C-R425-01 unchanged (Low)."
-    },
-    {
-      "id": "D-29z1724",
-      "date": "2026-11-13",
-      "by": "2026-11-13 B round 484 -> 485 planning",
-      "decision": "Round 485 = CLIENT-NAV-CONTRACT (systemic task, D-29z1704) on baseline 751e30e: closes GATE479-M1-ROUTE-ANNOUNCE (live-region contract) and the Lows GATE479-L2-TABINDEX-FINALLY, A-R479-L1-TARGET-BLANK, A-R479-L3-DEFAULTPREVENTED-UNTESTED, A-R479-L2-SLOW-LOADER-FOCUS (doc 313). Placement ruling: the announcer lives in app/components/animations/RouteTransition.tsx (wraps every route, persists across Studio<->Store; root.tsx forbidden; Header not mounted on /studio*), not in Header as the consult suggested. A PageTransition mount signal was rejected after a browser debug run: PageTransition keys its inner motion.div on location.pathname, so the new AnimatePresence child mounts only on the next navigation. Sketch b-round-484/sketch-485.patch.txt sha256 3f06149c6bdd650ae79603488e03f46cbdd44d928aae293ca4a6d9db676ad1d3; pre-run in Chromium on a scratch dev server (b-round-484/probe/sketch-final-1440.json, -1280.json): every client nav announced, initial load silent. Tech-lead review v1 (sha 51876f9e) REQUEST CHANGES, High: an h1-only fallback reads the account.tsx layout <h1>Account</h1> on /account/orders and /account/reset; v2 adds meta titles ('<h1> | CZABA') to the 6 loop-editable title-less routes (cart, search, account, account_.login, account.orders, account.reset; HEAD document.title '' on all six, also a WCAG 2.4.2 gap), moves readRouteName to app/lib/route-name.ts, adds RA9 (Store branch via createMemoryRouter), RN1-RN3, RA6 node identity, RA4 exact; account.downloads (protected) inherits 'Account | CZABA'. v2 probe: initial load silent, same path silent, Studio<->Store announced, first Tab after a footer click unchanged from HEAD (header logo). 12 mutants red (b-round-484/mutants/red-rows.txt); full suite on the v2 sketch 291 files / 4259 tests rc 0 (b-round-484/precheck-full.log). Reference: Next.js route announcer docs (title -> h1 -> pathname); deviation: no pathname fallback, polite instead of unstated mode."
-    },
-    {
-      "id": "D-29z1725",
-      "date": "2026-11-13",
-      "by": "2026-11-13 B round 484 -> 485 planning",
-      "decision": "Rulings for round 485: reloadDocument is not detectable from the anchor DOM and has no call site -> closed by ruling in doc 313 (A-R479-L1 target/download half fixed in code). Query/hash-only navigation stays silent (same pathname). B-R479-LEADMAGNET-TIMER-CLIENT-NAV is not touched: awaiting Saba (questions-retro-480.md Q2), stays deferred (L44). The screen-reader half of GATE479-M1 becomes Tech Lead row TLM-R485-SR-ROUTE-ANNOUNCE (deadline RETRO 495, L46; does not block, 2026-10-23 root clarification class). Sketch review: b-round-484/sketch-review.md (tech-lead)."
-    },
-    {
-      "id": "D-29z1726",
-      "date": "2026-11-13",
-      "by": "2026-11-13 B round 484 -> 485 planning",
-      "decision": "Outcome after round 485 fixed in advance (current-task.md section 6): C PASS with browserVerified true -> GATE479-M1 done for the live-region contract, the 4 Lows close, CLIENT-NAV-CONTRACT done, TLM-R485-SR-ROUTE-ANNOUNCE opens; round 486 = B-R480-ORDER-CARD-KEYBOARD; then DPG-BUTTON-CLEANUP and the rest of DPG P1. FAIL -> fix-up first. PARTIAL -> same round resumes. Next REGRESSION due on or after 2026-11-16. No architecture checkpoint requested: the change is small (2 component files + 1 lib), no accumulated owner risk on animations/ or link-focus."
-    },
-    {
-      "id": "D-29z1727",
-      "date": "2026-11-13",
-      "by": "2026-11-13 B round 485 -> 486 planning",
-      "decision": "Round 485 result (C evidence only): c-round-485.json taskStatus PASS, browserVerified true, realVerified true, 15 rows passed (RA-ATTRS, RA-INITIAL, RA-BROWSER, RA-TITLES, RA-STUDIO, RA-TAB, RA-REPEAT, RA-SPEAKERS, RA-VISUAL, STUDIO-485, LF-RUNTIME, LF-FOOTER, G485-AUTH, C-SCOPE, C-APPLY); gate 485 published 034122994313113c9c74888b4fef2f8ee1a6144a on both remotes (review COMMIT OK). Per the outcome fixed in advance (D-29z1726): CLIENT-NAV-CONTRACT done; GATE479-M1-ROUTE-ANNOUNCE done for the live-region contract (screen-reader half -> TLM-R485-SR-ROUTE-ANNOUNCE, deadline RETRO 495, does not block); Lows GATE479-L2-TABINDEX-FINALLY, A-R479-L1-TARGET-BLANK, A-R479-L3-DEFAULTPREVENTED-UNTESTED, A-R479-L2-SLOW-LOADER-FOCUS closed. Caveat recorded, not rounded up: C's LF-RUNTIME checked each mutant's expected red row only, not the full red-row sets. Baseline for round 486 = 0341229 (gate 485 commit; context/head-sha.txt still showed 751e30e)."
-    },
-    {
       "id": "D-29z1728",
       "date": "2026-11-13",
       "by": "2026-11-13 B round 485 -> 486 planning",
@@ -47696,6 +47749,30 @@
       "date": "2026-11-13",
       "by": "2026-11-13 B round 495 -> 496 planning (advisor closing check)",
       "decision": "Advisor closing-check corrections to task 496: C13 compares with the claims script run on a sketch-applied copy (b-round-495/claims-496-sketch-output.txt; doc-driven K14/K15 named separately); C9 command moved out of the table (escaped pipes made it vacuous); mutant commands saved as b-round-495/mutants.sh (8 red on v2); C8 = content grep K28; C3/C4/C5/C7 run by B on HEAD and sketch v2 in the browser (b-round-495/measure/{head,sketch2}-probe.json: focus ring 1px brass/0.8 offset 2px equal to HEAD on every probed element, no ring on pointer press, Enter/click routes, sign-in modal opens by heading \"Sign in\" and closes on Esc at HEAD and sketch); sketch.json re-measured on v2 (0 diffs vs v1, kept as sketch-v1.json); reviewer Lows on sketch files are listed for B, not edited (keeps the reviewed sha); K11 widened to e2e specs. New ids B-R496-404-BROWSE-STORE-UNSTYLED (Medium, pre-existing, fixed by round 496) and B-R496-HOME-NESTED-BUTTONS-IN-LINKS (Low, pre-existing, deferred)."
+    },
+    {
+      "id": "D-29z1778",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 496 -> 497 planning",
+      "decision": "Round 496 result accepted as BLOCKED (A STOP on two code-reviewer Mediums in sketch test lines; C ran C0/C13/C14 only per L22, browserVerified false; gate 496 skipped). Nothing closes: C passed only C0 and C13; C's measure.mjs run is an extra observation, not acceptance, so B-R496-404-BROWSE-STORE-UNSTYLED and DPG-BUTTON-CLEANUP stay open. Baseline for round 497 = HEAD 3bcf8cb + the 13-line round-496 worktree (gate not published). Archive tasks/round-496.md = byte-identical copy of the round-496 current-task.md."
+    },
+    {
+      "id": "D-29z1779",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 496 -> 497 planning",
+      "decision": "Ruling on the STOP: option (a), test-only addendum (b-round-496/addendum-497.patch.txt) to store-glow-shadow.test.ts (GS3: every app/**/*.css scanned for the retired class selectors, with a positive/negative regex self-test; exact-selector loop kept) and store-button-cleanup.test.tsx (BC1b: 288 combos of variant x size x fullWidth x disabled x isLoading x className against literal HEAD 3bcf8cb strings; BC3 closest(button) null; BC4 token absence). Not option (b): both are real guard gaps (8 B mutants survive A-496 tests, all red with the addendum: b-round-496/mutants-497*.txt). The reviewer-proposed regex (?<![\\w-])\\. misses a.button (B self-test red), so the addendum uses \\.(...)(?![\\w-]). sketch-496 is not re-applied; the 10 other round-496 paths are frozen (b-round-496/r497-a496-frozen-sha256.txt)."
+    },
+    {
+      "id": "D-29z1780",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 496 -> 497 planning",
+      "decision": "Pre-ruled reviewer Lows of round 496 (a re-raise in round 497 is listed For B, not a STOP): #3 A-R496-CR-LINK-DISABLED-VISUAL-ONLY, #6 A-R496-CR-BC5-CLASS-ONLY, #7 A-R496-CR-SIGNED-IN-SKELETON-SHIFT (also C row C15), #10 A-R496-CR-BC6-BARE-BUTTON-TOKEN -> deferred_low_polish; #11 = existing SIG-R496-UNLAYERED-A-TRANSITION; #4/#5 fixed by the addendum, close on C PASS of C10/C11. Order after round 497 unchanged (D-29z1776): DPG-BUTTON-CLEANUP-2, then rest of DPG P1; REGRESSION first if planning is on/after 2026-11-16."
+    },
+    {
+      "id": "D-29z1781",
+      "date": "2026-11-13",
+      "by": "2026-11-13 B round 496 -> 497 planning (advisor closing check)",
+      "decision": "Advisor closing-check corrections to task 497: BC1b explicit 20 s timeout (2.46 s under full-suite load vs vitest default 5 s); B full suite on the addendum tree 295 files / 4316 tests rc 0 (b-round-496/precheck-full.log); final addendum sha 853dc262 (addendum-sha.txt, post-test sha regenerated, mutants 8/8 red re-run); C12 content check restored (B read the DESIGN_SYSTEM diff vs Button.tsx: matches); C11 copy excludes .git; A code-reviewer scoped to the addendum + doc 319; claims expected regenerated on the real tree."
     }
   ],
   "retro_candidates": [
@@ -48301,6 +48378,11 @@
       "added": "2026-11-13 B round 494 -> 495 planning (advisor closing check)",
       "status": "counted (D-29z1771): 1 recurrence in window 480-494",
       "note": "SABA-B-17 (entrance 3-4 s, 2026-11-13) is the same kind as SABA-B-13 (entrance too fast, 2026-11-11). A lesson existed (L18 first painted frame, D-29z1625) but it covered measurement, not \"an example number is the target\"; L18 felt-quantity clause added at round 489 planning (D-29z1746). RETRO 510 counts whether a third entrance/duration complaint comes back"
+    },
+    {
+      "id": "RC-R496-SKETCH-TEST-STRENGTH",
+      "added": "2026-11-13 B round 496 -> 497 planning (advisor closing check)",
+      "note": "A tech-lead-approved sketch (round 496) still lost a round to two code-reviewer test-strength Mediums that B-side mutants on the test guards (other selectors/files, other variants) would have exposed at planning; candidate lesson: B mutates the guard scope (neighbour selectors, sibling files, every enum member), not only the changed lines. Evidence: b-round-496/mutants-497-on-a496-tests.txt (8/8 survive)."
     }
   ],
   "root_requests_b": [

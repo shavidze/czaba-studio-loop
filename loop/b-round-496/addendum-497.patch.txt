@@ -1,0 +1,192 @@
+--- a/app/lib/__tests__/store-button-cleanup.test.tsx
++++ b/app/lib/__tests__/store-button-cleanup.test.tsx
+@@ -6,7 +6,7 @@
+ import { beforeEach, describe, expect, it, vi } from 'vitest';
+ import { HeroSection } from '~/components/home/HeroSection';
+ import { Header } from '~/components/layout/Header';
+-import { Button, buildButtonClassName } from '~/components/ui';
++import { Button, type ButtonSize, type ButtonVariant, buildButtonClassName } from '~/components/ui';
+ import NotFound from '~/routes/$';
+ import Login from '~/routes/account_.login';
+ import Search from '~/routes/search';
+@@ -26,6 +26,54 @@
+ 
+ const HEAD_PRIMARY_MD =
+   'inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-4 py-2.5 text-sm gap-2';
++const HEAD_BASE =
++  'inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer';
++const HEAD_VARIANT: Record<ButtonVariant, string> = {
++  primary: 'bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm',
++  secondary:
++    'bg-elevated text-foreground border border-outline hover:bg-outline hover:border-outline-hover active:opacity-90',
++  ghost: 'bg-transparent text-muted hover:bg-elevated hover:text-foreground active:opacity-90',
++  accent: 'bg-accent text-background hover:brightness-110 active:opacity-90 shadow-sm',
++  buy: 'bg-buy text-brand-foreground hover:bg-buy-hover active:opacity-90 shadow-sm',
++  destructive: 'bg-destructive text-brand-foreground hover:bg-destructive/90 active:opacity-90',
++};
++const HEAD_SIZE: Record<ButtonSize, string> = {
++  sm: 'px-3 py-1.5 text-sm gap-1.5',
++  md: 'px-4 py-2.5 text-sm gap-2',
++  lg: 'px-6 py-3 text-base gap-2',
++};
++const BC1B_TIMEOUT_MS = 20_000;
++const HEAD_DISABLED = 'opacity-50 cursor-not-allowed pointer-events-none';
++const VARIANTS: ReadonlyArray<ButtonVariant> = [
++  'primary',
++  'secondary',
++  'ghost',
++  'accent',
++  'buy',
++  'destructive',
++];
++const SIZES: ReadonlyArray<ButtonSize> = ['sm', 'md', 'lg'];
++const FLAGS: ReadonlyArray<boolean> = [false, true];
++const CUSTOM_CLASSES: ReadonlyArray<string> = ['', 'x custom'];
++
++function headClassName(
++  variant: ButtonVariant,
++  size: ButtonSize,
++  fullWidth: boolean,
++  isDisabled: boolean,
++  className: string,
++): string {
++  return [
++    HEAD_BASE,
++    HEAD_VARIANT[variant],
++    HEAD_SIZE[size],
++    fullWidth && 'w-full',
++    isDisabled && HEAD_DISABLED,
++    className,
++  ]
++    .filter(Boolean)
++    .join(' ');
++}
+ const PILL_LG = buildButtonClassName({ size: 'lg', shape: 'pill' });
+ const LINK_ROWS: ReadonlyArray<{
+   ui: ReactElement;
+@@ -57,6 +105,65 @@
+     expect(getByRole('button', { name: 'Go' }).className).toBe(HEAD_PRIMARY_MD);
+     expect(buildButtonClassName({})).toBe(HEAD_PRIMARY_MD);
+   });
++  it(
++    'BC1b: every Button variant, size and state renders the HEAD 3bcf8cb class string',
++    () => {
++      let combos = 0;
++      for (const variant of VARIANTS) {
++        for (const size of SIZES) {
++          for (const fullWidth of FLAGS) {
++            for (const disabled of FLAGS) {
++              for (const isLoading of FLAGS) {
++                for (const className of CUSTOM_CLASSES) {
++                  const expected = headClassName(
++                    variant,
++                    size,
++                    fullWidth,
++                    disabled || isLoading,
++                    className,
++                  );
++                  const { getByRole, unmount } = render(
++                    <Button
++                      variant={variant}
++                      size={size}
++                      fullWidth={fullWidth}
++                      disabled={disabled}
++                      isLoading={isLoading}
++                      className={className}
++                    >
++                      Go
++                    </Button>,
++                  );
++                  const label = JSON.stringify({
++                    variant,
++                    size,
++                    fullWidth,
++                    disabled,
++                    isLoading,
++                    className,
++                  });
++                  expect(getByRole('button').className, label).toBe(expected);
++                  unmount();
++                  combos += 1;
++                }
++              }
++            }
++          }
++        }
++      }
++      expect(combos).toBe(288);
++      expect(headClassName('primary', 'md', false, false, '')).toBe(HEAD_PRIMARY_MD);
++      const { getByRole } = render(
++        <Button variant="secondary" size="sm" shape="pill">
++          Pill
++        </Button>,
++      );
++      expect(getByRole('button', { name: 'Pill' }).className).toBe(
++        headClassName('secondary', 'sm', false, false, '').replace('rounded-md', 'rounded-full'),
++      );
++    },
++    BC1B_TIMEOUT_MS,
++  );
+   it('BC2: pill shape swaps only the radius', () => {
+     expect(buildButtonClassName({ shape: 'pill' })).toBe(
+       HEAD_PRIMARY_MD.replace('rounded-md', 'rounded-full'),
+@@ -72,6 +179,7 @@
+       expect(link.getAttribute('href')).toBe(row.href);
+       expect(link.className).toBe(row.expectedClassName);
+       expect(link.querySelector('button')).toBeNull();
++      expect(link.closest('button')).toBeNull();
+       unmount();
+     }
+   });
+@@ -84,6 +192,10 @@
+     const link = getByRole('link', { name: 'Browse Store' });
+     expect(link.getAttribute('href')).toBe('/store');
+     expect(link.className).not.toBe(PILL_LG);
++    const tokens = link.className.split(' ');
++    for (const token of ['bg-brand', 'rounded-full', 'rounded-md', 'shadow-sm', 'btn-secondary']) {
++      expect(tokens, token).not.toContain(token);
++    }
+     expect(link.className.split(' ')).toContain('hover:text-brand');
+   });
+   it('BC5: header Sign In buttons use Button pill lg', () => {
+--- a/app/lib/__tests__/store-glow-shadow.test.ts
++++ b/app/lib/__tests__/store-glow-shadow.test.ts
+@@ -59,6 +59,9 @@
+   '.button-primary:hover',
+ ];
+ 
++const RETIRED_BUTTON_CLASS_IN_CSS = /\.(btn-primary|btn-secondary|button|button-primary)(?![\w-])/;
++const MIN_SCANNED_CSS = 3;
++
+ function countMatches(pattern: RegExp): (source: string) => number {
+   return (source) => (source.match(pattern) ?? []).length;
+ }
+@@ -90,6 +93,28 @@
+     for (const selector of RETIRED_BUTTON_SELECTORS) {
+       expect(cssRuleBodies(css, selector), selector).toEqual([]);
+     }
++    const cssFiles = listFiles(APP_ROOT, /\.css$/);
++    expect(cssFiles.length).toBeGreaterThanOrEqual(MIN_SCANNED_CSS);
++    expect(cssFiles).toContain(STORE_CSS_PATH);
++    expect(cssFiles).toContain('styles/base/utilities.css');
++    expect(cssFiles.filter((path) => RETIRED_BUTTON_CLASS_IN_CSS.test(readApp(path)))).toEqual([]);
++    for (const sample of [
++      '.btn-primary:focus-visible {}',
++      'a.button {}',
++      '.btn-primary::after {}',
++      '.btn-secondary{',
++      '.card .button-primary, x {}',
++    ]) {
++      expect(RETIRED_BUTTON_CLASS_IN_CSS.test(sample), sample).toBe(true);
++    }
++    for (const sample of [
++      '.btn-icon {}',
++      '.buttons {}',
++      'button:focus-visible {}',
++      '.my-button {}',
++    ]) {
++      expect(RETIRED_BUTTON_CLASS_IN_CSS.test(sample), sample).toBe(false);
++    }
+     for (const shape of BUTTON_SHAPES) {
+       const classes = buildButtonClassName({ variant: 'primary', shape });
+       expect(countZeroOffsetGlowHits(classes), shape).toBe(0);
