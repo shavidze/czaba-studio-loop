@@ -766,6 +766,15 @@ The white circle (seek thumb) on the Store's audio player jumps ahead of the bra
 **Fix:** Ensure thumb position and progress bar width update in the same animation frame. This is likely a CSS transition timing mismatch — the thumb uses no transition while the bar uses a CSS transition with a delay.
 **Priority:** Medium — visible on every product page.
 
+## Saba feedback, 2026-11-13: SpotlightLoader ძალიან სწრაფია
+
+SpotlightLoader (entrance animation) ძალიან სწრაფად იკარგება. პირველად რომ შემოდის მომხმარებელი, მინიმუმ **3-4 წამი** უნდა გრძელდებოდეს. ისედაც ყოველ ჯერზე არ იტვირთება (მხოლოდ პირველ ვიზიტზე) — რა აზრი აქვს თუ ვერ ასწრებ დანახვას.
+
+**Where:** SpotlightLoader.tsx — animation duration / hold time
+**Fix:** Increase minimum display duration to 3-4 seconds (currently too fast)
+**Priority:** Medium — first impression moment, must feel intentional and cinematic
+**Note:** ეს SABA-B-13-ის მსგავსი feedback-ია (splash animation min duration)
+
 ## Saba feedback, 2026-11-12: Ctrl+K menu needs more content than header + Gift Cards in header
 
 Ctrl+K ჰედერში ჩანს და ეს ნორმალურია. მაგრამ:
