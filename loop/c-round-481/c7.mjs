@@ -1,0 +1,11 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+await ctx.addInitScript(() => { const d = new Date().toISOString().split('T')[0]; localStorage.setItem('czaba_lead_magnet', JSON.stringify({ viewCount: 0, lastResetDate: d, dismissed: true, submitted: true })); localStorage.setItem('auth_user', JSON.stringify({ id: 7, email: 'p@example.invalid', accessToken: 's', refreshToken: 'r' })); });
+const p = await ctx.newPage();
+await p.route('**/api/auth/profile', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, data: { id: 7, email: 'p@example.invalid', firstName: 'P', lastName: 'U' } }) }));
+await p.route('**/api/downloads**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, data: [] }) }));
+await p.goto('http://127.0.0.1:5173/account/downloads'); await p.getByText('No products yet').waitFor({ timeout: 60000 });
+console.log(JSON.stringify(await p.getByRole('link', { name: 'Browse Music' }).evaluateAll(a => a.map(x => x.getAttribute('href')))));
+await b.close();

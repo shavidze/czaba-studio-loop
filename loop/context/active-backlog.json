@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-12T23:13:52.532Z",
-  "current_task": "Round 480: RETRO 480 (window 465-479) + whole-screen and journey review; no app code; C verifies traceability, auth guard, Studio smoke, screen capture (current-task.md)",
+  "_generatedUtc": "2026-11-12T23:47:13.945Z",
+  "current_task": "Round 481: B-R478-DEAD-MUSIC-LINK - My Orders empty state \"Browse Music\" goes to /store instead of the 404 /music (account.orders.tsx only, stays a full document load) + test AO1/AO2; C verifies in the browser with the L36 stubbed client path (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6847,7 +6847,7 @@
       "id": "B-R478-DEAD-MUSIC-LINK",
       "severity": "medium",
       "origin": "B pre-check",
-      "status": "scheduled (D-29z1704): round 483, account.orders.tsx -> /store (L46 deadline met) | open (D-29z1699): deadline - scheduled no later than the first planning after RETRO 480 (L46); account.orders.tsx -> /store (signed-in page: stub per L36); account.downloads.tsx is protected (root/Saba); questions-ro …[see backlog.json]",
+      "status": "dispatched round 481 (D-29z1710): account.orders.tsx half -> /store; account.downloads.tsx half (protected) -> ROOT-REQ-DOWNLOADS-MUSIC-LINK; closes only when both halves are fixed | scheduled (D-29z1704): round 483, account.orders.tsx -> /store (L46 deadline met) | open (D-29z1699): deadline - sche …[see backlog.json]",
       "title": "Empty orders/downloads state \"Browse Music\" links to /music (404; /collections/music is 404 too)",
       "evidence": "app/routes/account.orders.tsx:230, app/routes/account.downloads.tsx:290; curl /music title 404",
       "added": "2026-11-12 B round 478 -> 479 planning"
@@ -6905,17 +6905,20 @@
       ],
       "evidence": "retros/retro-480.md §8",
       "added": "2026-11-12 B round 479 -> 480 planning (RETRO 480)"
+    },
+    {
+      "id": "B-R480-ORDER-CARD-KEYBOARD",
+      "severity": "medium",
+      "origin": "B pre-check",
+      "status": "scheduled (D-29z1711): round 484 (after REGRESSION 482 and CLIENT-NAV-CONTRACT 483)",
+      "title": "My Orders: an order card opens only on a mouse click on a <div>; keyboard and screen-reader users cannot reach the order items, licence type and prices",
+      "evidence": "app/routes/account.orders.tsx l.59-62 (<div onClick> with cursor-pointer, no role/tabIndex/key handler); npx biome check app/routes/account.orders.tsx -> lint/a11y/useKeyWithClickEvents (b-round-480/sketch-biome.log); claims-481 K11",
+      "repro": "signed in with at least one order (stub /api/orders/my in Playwright): Tab through /account/orders; no stop on any order card; Enter/Space cannot expand it",
+      "added": "2026-11-12 B round 480 -> 481 planning",
+      "evidence_kind": "source reading + Biome lint only; not yet reproduced in a browser (round-484 planning runs the Tab probe with a one-order stub first)"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 471,
-      "task": "current-task.md",
-      "decision": "D-29z1659",
-      "type": "STORE-2c-1: store font family tokens -> Instrument Sans / IBM Plex Mono (app.css @theme + body rule; FN4 + FN6)",
-      "status": "c_fail_short_route (D-29z1661): A STOP A-R471-REVIEW-M1; C-R471-01 Medium; gate skipped; tree kept for round 472",
-      "note": "baseline 5cd9645 (gate 470 published), clean tree; A applies b-round-470/sketch-471.patch.txt; claims b-round-470/claims-471.sh"
-    },
     {
       "round": 472,
       "task": "current-task.md",
@@ -6986,8 +6989,16 @@
       "task": "current-task.md",
       "decision": "D-29z1706",
       "type": "RETRO 480 (window 465-479)",
-      "status": "dispatched",
+      "status": "c_pass (D-29z1708): C PASS 13 rows, browserVerified true; gate 480 skipped (no real changes); HEAD bbb3193",
       "note": "baseline HEAD bbb3193 clean; claims b-round-479/claims-480.sh; manifest b-round-479/r480-tree-sha256.txt (1391)"
+    },
+    {
+      "round": 481,
+      "task": "current-task.md",
+      "decision": "D-29z1710",
+      "type": "B-R478-DEAD-MUSIC-LINK (account.orders half)",
+      "status": "dispatched",
+      "note": "baseline HEAD bbb3193 clean; claims b-round-480/claims-481.sh; frozen manifest b-round-480/r481-frozen-sha256.txt (1390 = 1391 tracked minus account.orders.tsx); sketch b-round-480/sketch-481/"
     }
   ],
   "other_keys": [

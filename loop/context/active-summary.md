@@ -1,14 +1,14 @@
-# Active loop summary (2026-11-12T23:13:52.532Z)
+# Active loop summary (2026-11-12T23:47:13.945Z)
 
-- backlog.json 3438 KB -> active view 302 KB
-- status: G_ROOT_GATE round 480
-- servers: `{"checkedUtc":"2026-11-12T23:09:02.4309822Z","round":480,"attempt":1,"store":200}`
-- last publication: bbb31935d0f64b82a77843dc9a0ea4d430e15fda (rounds 479-479)
-- last root gate: round 480 skipped - no real changes
+- backlog.json 3442 KB -> active view 303 KB
+- status: G_ROOT_GATE round 481
+- servers: `{"checkedUtc":"2026-11-12T23:35:54.0168286Z","round":481,"attempt":1,"store":200}`
+- last publication: 751e30e475abcf0e3edeb0c596cb6a2cbf11a283 (rounds 480-481)
+- last root gate: round 481 published - commit 751e30e475abcf0e3edeb0c596cb6a2cbf11a283 pushed
 
 ## Current items: -
 
-## Open findings: 983 (17 Critical/High/Medium)
+## Open findings: 984 (18 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / tracked by task SAFARI-CHECKS (D-29z1705) | listed in the Safari list (user-review/questions-retro-465.md Q2, D-29z1638); does not block | environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the c …[see backlog.json] / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
@@ -21,9 +21,10 @@
 - **TLM-R468-SABA-SCROLL-DEVICE** / medium / L46 question to Saba (D-29z1705; questions-retro-480.md Q1); new deadline RETRO 495; does not block | open_tech_lead_manual (D-29z1649): deadline RETRO 480 (L46); does not block (2026-10-23 root clarification class) | question user-review/questions-round-468.md Q1 (D-29z1651), with the Lenis-feel op …[see backlog.json] / Saba's own device: /free-downloads and / scroll on the Vercel preview after round 468 lands (mouse wheel and trackpad; Chrome DevTools Perfo
 - **SABA-B-16-LOGO-OLD-COLORS** / medium / open (D-29z1691): header logo + entrance wordmark brass C-verified round 477 (C7, published 10791ac); asset still unnamed (questions-round-467 Q3) | open (D-29z1685): round 476 makes the entrance wordmark and header logo brass (footer already brass); asset still unconfirmed (questions-round-467 Q3); …[see backlog.json] / Logo still uses the old colours, not Obsidian & Brass (Saba 2026-11-12, "Known issues for the first review")
 - **B-R478-DEAD-LICENSE-LINK** / medium / awaiting_user (D-29z1699): user-review/questions-round-478.md Q1 (licence copy is legal content); round 479 keeps the target and only makes the link client-side / Footer "License" (every Store page) and terms.tsx "License page" link to /license, which has no route and renders the 404 page
-- **B-R478-DEAD-MUSIC-LINK** / medium / scheduled (D-29z1704): round 483, account.orders.tsx -> /store (L46 deadline met) | open (D-29z1699): deadline - scheduled no later than the first planning after RETRO 480 (L46); account.orders.tsx -> /store (signed-in page: stub per L36); account.downloads.tsx is protected (root/Saba); questions-ro …[see backlog.json] / Empty orders/downloads state "Browse Music" links to /music (404; /collections/music is 404 too)
+- **B-R478-DEAD-MUSIC-LINK** / medium / dispatched round 481 (D-29z1710): account.orders.tsx half -> /store; account.downloads.tsx half (protected) -> ROOT-REQ-DOWNLOADS-MUSIC-LINK; closes only when both halves are fixed | scheduled (D-29z1704): round 483, account.orders.tsx -> /store (L46 deadline met) | open (D-29z1699): deadline - sche …[see backlog.json] / Empty orders/downloads state "Browse Music" links to /music (404; /collections/music is 404 too)
 - **GATE479-M1-ROUTE-ANNOUNCE** / medium / scheduled (D-29z1704): CLIENT-NAV-CONTRACT round 482 (B pre-runs title timing, meta fallback, remount on a sketch); else ROOT-REQ-ROUTE-ANNOUNCER | open (D-29z1700): ruling D-29z1704 / Client navigation does not announce the new page title to screen readers (a full reload did); 13 footer/content links since round 479, 15 he
 - **FIREFOX-CHECKS** / medium / open_root (D-29z1707; does not block): blocked (D-29z1705): needs ROOT-REQ-PLAYWRIGHT-FIREFOX; C runs all five in one round once Firefox is installed; questions-retro-480.md Q3 / Firefox halves of five manual checks, opened as one task by L46 after two RETROs without an answer
 - **SAFARI-CHECKS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Saba on macOS Safari; questions-retro-480.md Q4 / Safari halves of the manual list, opened as one task by L46
 - **HIREUS-EMAIL-CLIENTS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Brevo and a test send to Gmail/Outlook/Apple Mail (Saba); questions-retro-480.md Q4 / Hire-Us internal e-mail in real clients, opened as a task by L46
+- **B-R480-ORDER-CARD-KEYBOARD** / medium / scheduled (D-29z1711): round 484 (after REGRESSION 482 and CLIENT-NAV-CONTRACT 483) / My Orders: an order card opens only on a mouse click on a <div>; keyboard and screen-reader users cannot reach the order items, licence type
 - ... and 966 Low/info (see backlog.json)
