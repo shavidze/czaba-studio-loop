@@ -1,0 +1,10 @@
+# B 484->485 checkpoint
+- step1: archived tasks/round-484.md, backups made
+- step2: backlog v474 D-29z1723 regression closed, regression-last 2026-11-13/484
+- step3: GO decision for CLIENT-NAV in RouteTransition (persistent across Studio<->Store; root.tsx untouched). Scratch /tmp/b485-scratch (cacheDir /tmp/b485-vite-cache), dev :5185. Probe b-round-484/probe/announce-probe.mjs; HEAD: meta-less routes title '' (cart/search/account/login). Sketch v1 double-fire fixed by PageMountSignal path prop + announcedPathRef.
+- step4: sketch frozen sketch-485.patch.txt sha 51876f9e…; mutants M1-M10 red (mutants/red-rows.txt); precheck-full.log 290/4255 rc0; next: final browser probe, tech-lead review, claims, task
+- step5: current-task.md written (round 485); waiting tech-lead review; then sketch-review.md, backlog v475, feature-status, claims output, b-round-484.md, b-next.json
+- step6: feature-status updated (.done), b-round-484.md draft, b-next.json written, update-backlog-2.py drafted (not yet applied). Waiting tech-lead review -> sketch-review.md, then apply backlog-2, claims planning output, l58, cleanup scratch+server :5185
+- step7: tech-lead v1 REQUEST CHANGES (High: account layout h1). v2 sketch sha 3f06149c… (13 files: +meta on 6 routes, route-name.ts, RN1-3, RA9, RA6 node, RA4 exact); 12 mutants red; full 291/4259 rc0; probes redone incl /account/orders,/account/reset. Delta re-review running. Next: task text v2, sketch-review.md, backlog-2, claims output, cleanup
+- step8: v2 APPROVE; sketch-review.md; backlog v475 (D-29z1724-1726, B-R485-DOWNLOADS-TITLE, ROOT-REQ-DOWNLOADS-TITLE); scratch+server removed; claims planning output saved; L58 OK. Remaining: final advisor check
+- step9: advisor closing items applied (claims delta from sketch, HEAD captures probe/extra, RA-REPEAT pair, STUDIO-485, perf ruling K22, K21 tags, mutants guard, logs). Final: claims planning output regenerated, L58 OK, store clean, scratch removed. DONE (K21/K22/extended K14 were added after the sketch claims run; they read files the sketch does not change).

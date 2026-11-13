@@ -1,0 +1,97 @@
+{
+ "taskStatus": "PASS",
+ "summary": "All 8 browser/offline rows of the round-484 task ran on HEAD 751e30e (clean tree, claims identical at start and end). 0 bugs. Two environment-invalid attempts (dev dep re-optimisation) were replaced within the budget. Round 483's three not-run browser sub-rows (follow attribution, cross-lane fibers, alt worker) and the inconclusive LoAF row now have allowed results.",
+ "passed": [
+  "G484-SCOPE start/end: HEAD 751e30e, status 0, claims output identical to planning output both times (c-round-484/claims-start.txt, claims-end.txt)",
+  "R-DEV-WARMUP: /studio-lab loaded, 'Demo collection ready', 1 clip, one MP3 export to the end (czaba-studio-lab.mp3 4055208 B, 320 kbps CBR 4224 frames, 48 kHz, 'MP3 created: 01:41.352'), 0 pageErrors/consoleErrors (out/warm/real-1440x900-5173.json, warmup.txt)",
+  "R295-LOAF-RERUN: c295 observerError null at both viewports, authPass true (loafPass false recorded, not criterion; history r390 false, r425 true, r483 false); provoked-LoAF loaf.cjs: 1440 one entry 147 ms with 1 script, 1280 one entry 154 ms with 1 script (t301/r295/c295.json, out/loaf-c390.json)",
+  "R-FOLLOW-OFFSET-ATTR: 3 valid runs per viewport; asserted in all six files against round 483's follow output: play0.playing true, follow pressed true, manual dashed true + 'Follow paused by manual navigation...' status, stop status 'Stopped \u2014 Space plays from the insert marker at 00:00.000.'; playheadXInScroller within [0, clientWidth] in all 6 runs (c-round-484/follow-summary.txt, out/follow/)",
+  "R-CROSS-LANE-FIBERS-LANES: 4 files, 0 behaviour diffs vs c-round-483/out/cross-*.json (mountedLanes removed, cmp2.py dir form); mountedLanes {lanes 4, clips 1} for every label at both viewports (out/cross/cmp.json, out/cross/mountedLanes.json)",
+  "R423-STEM-WORKER-ALT: throw = round 414 (no diff); short differs from round 414 only in audioSeek 206 count (2 vs 3, allowed); vs round-483 proxy only coverTwice (alt 404 h0g0c0 404 h0g0c0; proxy 200 h0g1c0 304 h0g1c1) and audioSeek count (worker414/*.sum.txt)",
+  "R425-PARKED-COMPARE: rp-c301-01, rp-c331-01, rp-status-race, rp301: 0 diffs; rp-fold-selection 16 diffs = 8 random clip ids + 8 Detail texts, all 8 checked: they differ only by the round-436 rename 'Source offset'->'Clip origin' plus the probe's fixed-length slice; posctl 6 record diffs recorded with valid=false in every run (old r342 also valid=false), seams 0, contiguous true in all 6 r483 runs; ESC-drag signal at both viewports: startMid 3.75, afterEsc 3.75, release 5.0, Undo 'Move clip' (parked-compare.txt)",
+  "G484-AUTH: anonymous /studio-lab = demo workspace + badge, auth_user null, both viewports; /studio/middle-east 'Sign in required', 0 audio[src]; token API 401 (no header), 400 (bare), 403 (fake Bearer, mock), no token in any body. Premium not bypassed (out/g484-auth.json)"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [],
+ "carried": [
+  "Every PASS line of c-round-483.json passed (identical tree K3)",
+  "RR-PERF / PERF-LIB / RG-SMOKE (from round 482)",
+  "c250 splitPlaying (resolved by round-483 continuous probe, D-29z1721)",
+  "R425-RVM-FRESH (replaced by R-RVM, ran in full in round 483)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "RR-OSS"
+ ],
+ "notRun": [],
+ "bugs": [],
+ "observations": [
+  "R-FOLLOW-OFFSET-ATTR attribution (measured): round-389 oracle play1.sl is 1178 (1440) and 1447 (1280). Now: 1440 = 1178, 1180, 1182 (delta 0, +2, +4); 1280 = 1445, 1450, 1450 (delta -2, +3, +3). So the offset against round 389 is within \u00b14 px and varies from run to run; it is not a constant. It is not a layout width delta: clientWidth 1142/982, laneHeaderWidth 224, scrollerLeft 288, scrollWidth 11191 are identical in all six runs. sl + playheadXInScroller = 2005.06 in five of six runs (2002.98 in one, 1440 run 2), i.e. the playhead sits at the same content position at the sample; only sl moves by a few px. Cause of that scroll variation: HYPOTHESIS (follow-scroll quantisation), not tested. No page turn landed at the sample. C-R425-02 stays Low: playheadXInScroller 555-560 (1280) and 823-827 (1440) inside [0, clientWidth].",
+  "R-CROSS-LANE rendered per commit label (all 4 files identical): [12,12,44,12,44,1,1,1,1,67]",
+  "R-DEV-WARMUP: deps mtime 06:03:35.83 (before) -> 06:04:28.71 (first failed attempt) -> 06:08:20.87 (after successful export) -> 06:12:44.57. The last change happened between 06:08:20 and my legacy re-probe at 06:13:44 (probe/legacy.cjs; out/peek.png is 06:08:12), coinciding with the first c295 attempt; I did not time it exactly. mtime re-checked at the end of the round (after the worker and auth rows): still 06:12:44.57, so rows after the c295 replacement ran on a stable deps dir. warmup.txt lists the changes up to 06:08:20; this note adds 06:12:44.",
+  "c295 auth.token: GET 401, POST 405 in round 484 and identical in round 483's c295.json; G484-AUTH's own recipe (bare 400, no-header 401, fake Bearer 403) is the K20 assert.",
+  "worker tools: c-round-483/worker414 copies of browser-probe.cjs, summarize-414.py, worker-server.mjs are byte-identical (cmp) to the b-round-483/probe versions I used. Outside c-round-484/ only root's servers logs, context-watch-status.json and c-browse.json changed during the round; no round folder or store file was written.",
+  "Backend (:5199) not available in cloud; mock started for G484-AUTH only and stopped (PID 4109)."
+ ],
+ "invalidRuns": [
+  {
+   "row": "R-DEV-WARMUP attempt 1",
+   "reason": "cold dev server; deps re-optimised at 06:04:28; 'Demo collection ready' wait timed out",
+   "replacement": "attempt 2 (killed by my own 110 s shell timeout, environment-invalid), attempt 3 ran to the end (PASS)"
+  },
+  {
+   "row": "R295-LOAF-RERUN c295 attempt 1",
+   "reason": "waitForSelector body timeout on /studio/middle-east; deps mtime changed to 06:12:44 during this attempt (dev re-optimise); legacy page re-probed fine",
+   "replacement": "c295 attempt 2 (valid)"
+  }
+ ],
+ "lookups": [
+  "rp-fold-selection 8 Detail text diffs = round 436 label rename (Source offset -> Clip origin) plus the probe's fixed-length slice",
+  "rp-fold-selection 8 id diffs = random clip ids",
+  "posctl 6 record diffs (len 3 vs 1, contiguous) recorded; Task 425 \u00a76: not a finding, no behaviour change"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-13T06:03:52.6569794Z",
+  "round": 484,
+  "attempt": 1,
+  "store": 200
+ },
+ "stopSignal": null,
+ "progressFile": "c-round-484/progress.json",
+ "manifestPaths": 1393,
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": "not timed; each claims-484.sh run took well under 1 minute (round 483's value 2 was not reused)",
+ "assertsSpecified": "per-row asserts of task 484 \u00a73: behaviour fields equal round 483 (follow), cmp2 zero diffs (cross-lane, parked), summarize-414 line diffs only as allowed (worker), observerError null + provoked LoAF entry with scripts (loaf), auth 401/400/403 + Sign in required + 0 audio[src] (auth)",
+ "mutantsRecorded": "none (regression round)",
+ "mutantRedOnSketch": null,
+ "mutantRedOnSketchReason": "regression round, no sketch",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "RR-OSS"
+ ],
+ "gateChecksRunOnSketch": "not claimed (root gate)",
+ "chainHeadGateRunGreen": "not claimed (root gate)",
+ "affectedChecksNamed": [
+  "R-DEV-WARMUP",
+  "R-FOLLOW-OFFSET-ATTR",
+  "R-CROSS-LANE-FIBERS-LANES",
+  "R423-STEM-WORKER-ALT",
+  "R425-PARKED-COMPARE",
+  "R295-LOAF-RERUN",
+  "G484-AUTH"
+ ],
+ "affectedChecksRunOnSketch": "all run on HEAD 751e30e dev server :5173; no sketch in a regression round",
+ "browserVerifiedReason": "every browser row of task 484 \u00a73 ran at both viewports where specified (worker rows: 1440 only per round-414 rule); no row needed the backend"
+}

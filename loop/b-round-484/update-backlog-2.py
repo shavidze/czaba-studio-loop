@@ -1,0 +1,33 @@
+import json, os, sys
+L='/home/runner/czaba-project/tmp/studio-real-loop'
+mark=os.path.join(L,'b-round-484/update-backlog-2.done')
+if os.path.exists(mark): sys.exit('already applied')
+p=os.path.join(L,'backlog.json'); b=json.load(open(p,encoding='utf-8'))
+by='2026-11-13 B round 484 -> 485 planning'
+sha=open(os.path.join(L,'b-round-484/sketch-485.sha256')).read().split()[0]
+D=b['decisions_log_b']
+D.append({"id":"D-29z1724","date":"2026-11-13","by":by,"decision":"Round 485 = CLIENT-NAV-CONTRACT (systemic task, D-29z1704) on baseline 751e30e: closes GATE479-M1-ROUTE-ANNOUNCE (live-region contract) and the Lows GATE479-L2-TABINDEX-FINALLY, A-R479-L1-TARGET-BLANK, A-R479-L3-DEFAULTPREVENTED-UNTESTED, A-R479-L2-SLOW-LOADER-FOCUS (doc 313). Placement ruling: the announcer lives in app/components/animations/RouteTransition.tsx (wraps every route, persists across Studio<->Store; root.tsx forbidden; Header not mounted on /studio*), not in Header as the consult suggested. A PageTransition mount signal was rejected after a browser debug run: PageTransition keys its inner motion.div on location.pathname, so the new AnimatePresence child mounts only on the next navigation. Sketch b-round-484/sketch-485.patch.txt sha256 "+sha+"; pre-run in Chromium on a scratch dev server (b-round-484/probe/sketch-final-1440.json, -1280.json): every client nav announced, initial load silent. Tech-lead review v1 (sha 51876f9e) REQUEST CHANGES, High: an h1-only fallback reads the account.tsx layout <h1>Account</h1> on /account/orders and /account/reset; v2 adds meta titles ('<h1> | CZABA') to the 6 loop-editable title-less routes (cart, search, account, account_.login, account.orders, account.reset; HEAD document.title '' on all six, also a WCAG 2.4.2 gap), moves readRouteName to app/lib/route-name.ts, adds RA9 (Store branch via createMemoryRouter), RN1-RN3, RA6 node identity, RA4 exact; account.downloads (protected) inherits 'Account | CZABA'. v2 probe: initial load silent, same path silent, Studio<->Store announced, first Tab after a footer click unchanged from HEAD (header logo). 12 mutants red (b-round-484/mutants/red-rows.txt); full suite on the v2 sketch 291 files / 4259 tests rc 0 (b-round-484/precheck-full.log). Reference: Next.js route announcer docs (title -> h1 -> pathname); deviation: no pathname fallback, polite instead of unstated mode."})
+D.append({"id":"D-29z1725","date":"2026-11-13","by":by,"decision":"Rulings for round 485: reloadDocument is not detectable from the anchor DOM and has no call site -> closed by ruling in doc 313 (A-R479-L1 target/download half fixed in code). Query/hash-only navigation stays silent (same pathname). B-R479-LEADMAGNET-TIMER-CLIENT-NAV is not touched: awaiting Saba (questions-retro-480.md Q2), stays deferred (L44). The screen-reader half of GATE479-M1 becomes Tech Lead row TLM-R485-SR-ROUTE-ANNOUNCE (deadline RETRO 495, L46; does not block, 2026-10-23 root clarification class). Sketch review: b-round-484/sketch-review.md (tech-lead)."})
+D.append({"id":"D-29z1726","date":"2026-11-13","by":by,"decision":"Outcome after round 485 fixed in advance (current-task.md section 6): C PASS with browserVerified true -> GATE479-M1 done for the live-region contract, the 4 Lows close, CLIENT-NAV-CONTRACT done, TLM-R485-SR-ROUTE-ANNOUNCE opens; round 486 = B-R480-ORDER-CARD-KEYBOARD; then DPG-BUTTON-CLEANUP and the rest of DPG P1. FAIL -> fix-up first. PARTIAL -> same round resumes. Next REGRESSION due on or after 2026-11-16. No architecture checkpoint requested: the change is small (2 component files + 1 lib), no accumulated owner risk on animations/ or link-focus."})
+for f in b['open_findings']:
+    if f.get('id')=='GATE479-M1-ROUTE-ANNOUNCE':
+        f['status']='dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485, announcer in RouteTransition (sketch pre-run in browser); screen-reader half -> TLM-R485-SR-ROUTE-ANNOUNCE after C PASS | '+f['status']
+    if f.get('id')=='B-R480-ORDER-CARD-KEYBOARD':
+        f['status']='scheduled (D-29z1726): round 486 (after CLIENT-NAV-CONTRACT 485) | '+f['status']
+for f in b['deferred_low_polish']:
+    if f.get('id') in ('GATE479-L2-TABINDEX-FINALLY','A-R479-L1-TARGET-BLANK','A-R479-L3-DEFAULTPREVENTED-UNTESTED','A-R479-L2-SLOW-LOADER-FOCUS'):
+        f['status']='dispatched (D-29z1724): CLIENT-NAV-CONTRACT round 485; closes on C PASS | '+f['status']
+for t in b['systemic_tasks']:
+    if t.get('id')=='CLIENT-NAV-CONTRACT':
+        t['status']='dispatched round 485 (D-29z1724): RouteTransition placement (not Header) + meta titles on 6 routes, sketch-485 sha '+sha[:16]+' | '+t['status']
+b['deferred_low_polish'].append({"id":"B-R485-DOWNLOADS-TITLE","severity":"low","origin":"B","status":"deferred_low_polish (D-29z1725): needs ROOT-REQ-DOWNLOADS-TITLE (protected file)","title":"account.downloads.tsx (protected) has no meta: after round 485 it inherits 'Account | CZABA', so client nav /account -> /account/downloads re-announces 'Account | CZABA' (repeat mark) while the h1 is 'My Downloads'; also account.tsx new import sits above its leading comment (style, accepted)","evidence":"b-round-484/sketch-review.md v2 N1/N2 (tech-lead delta re-review)","repro":"signed-in client nav /account -> /account/downloads; read [data-route-announcer]","added":"2026-11-13 B round 484 -> 485 planning"})
+rr=b.get('root_requests_b')
+entry={"id":"ROOT-REQ-DOWNLOADS-TITLE","added":"2026-11-13 B round 484 -> 485 planning","decision":"D-29z1725","request":"In the protected app/routes/account.downloads.tsx add `export const meta: MetaFunction = () => [{ title: 'My Downloads | CZABA' }];` (pattern of the 6 routes titled in round 485); can be combined with ROOT-REQ-DOWNLOADS-MUSIC-LINK","closes":["B-R485-DOWNLOADS-TITLE"],"status":"open"}
+if isinstance(rr,list): rr.append(entry)
+elif isinstance(rr,dict): rr[entry['id']]=entry
+else: b['root_requests_b']=[entry]
+b['rounds'].append({"round":485,"task":"current-task.md","decision":"D-29z1724","type":"CLIENT-NAV-CONTRACT (GATE479-M1 + 4 Lows)","status":"dispatched","note":"baseline HEAD 751e30e clean; claims b-round-484/claims-485.sh; frozen manifest b-round-484/r485-tree-sha256.txt (1393); sketch b-round-484/sketch-485.patch.txt; probes b-round-484/probe"})
+b['current_task']='Round 485: CLIENT-NAV-CONTRACT - route announcer in RouteTransition (title, else page h1; silent first render; Studio<->Store), releaseLinkFocus try/finally + target/download skip, doc 313 slow-loader note; closes GATE479-M1 (live-region contract) + 4 Lows; baseline 751e30e (current-task.md)'
+b['version']=b['version']+1; b['updated']='2026-11-13'
+json.dump(b,open(p,'w',encoding='utf-8'),ensure_ascii=False,indent=2)
+open(mark,'w').write('ok\n'); print('v',b['version'])

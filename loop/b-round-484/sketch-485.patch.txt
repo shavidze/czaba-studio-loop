@@ -1,0 +1,632 @@
+diff --git a/app/components/animations/RouteTransition.tsx b/app/components/animations/RouteTransition.tsx
+index 08ea824..a357197 100644
+--- a/app/components/animations/RouteTransition.tsx
++++ b/app/components/animations/RouteTransition.tsx
+@@ -1,6 +1,10 @@
+ import { AnimatePresence } from 'framer-motion';
+-import type { ReactNode } from 'react';
++import { type ReactNode, useEffect, useRef, useState } from 'react';
++import { readRouteName } from '~/lib/route-name';
+ import { PageTransition } from './PageTransition';
++import { RouteAnnouncer } from './RouteAnnouncer';
++
++const REPEAT_MARK = String.fromCharCode(160);
+ 
+ interface RouteTransitionProps {
+   pathname: string;
+@@ -9,17 +13,42 @@ interface RouteTransitionProps {
+ }
+ 
+ export function RouteTransition({ pathname, isStudioPage, children }: RouteTransitionProps) {
++  const [announcement, setAnnouncement] = useState('');
++  const announcedPathRef = useRef<string | null>(null);
++
++  useEffect(() => {
++    if (announcedPathRef.current === null) {
++      announcedPathRef.current = pathname;
++      return;
++    }
++    if (announcedPathRef.current === pathname) return;
++    announcedPathRef.current = pathname;
++    const frame = requestAnimationFrame(() => {
++      const name = readRouteName(document);
++      setAnnouncement((previous) =>
++        name !== '' && previous === name ? `${name}${REPEAT_MARK}` : name,
++      );
++    });
++    return () => cancelAnimationFrame(frame);
++  }, [pathname]);
++
+   if (isStudioPage) {
+     return (
+-      <div key={pathname} className="page-transition-wrapper">
+-        {children}
+-      </div>
++      <>
++        <RouteAnnouncer message={announcement} />
++        <div key={pathname} className="page-transition-wrapper">
++          {children}
++        </div>
++      </>
+     );
+   }
+ 
+   return (
+-    <AnimatePresence mode="wait">
+-      <PageTransition key={pathname}>{children}</PageTransition>
+-    </AnimatePresence>
++    <>
++      <RouteAnnouncer message={announcement} />
++      <AnimatePresence mode="wait">
++        <PageTransition key={pathname}>{children}</PageTransition>
++      </AnimatePresence>
++    </>
+   );
+ }
+diff --git a/app/components/animations/RouteAnnouncer.tsx b/app/components/animations/RouteAnnouncer.tsx
+new file mode 100644
+index 0000000..e60cce0
+--- /dev/null
++++ b/app/components/animations/RouteAnnouncer.tsx
+@@ -0,0 +1,11 @@
++interface RouteAnnouncerProps {
++  message: string;
++}
++
++export function RouteAnnouncer({ message }: RouteAnnouncerProps) {
++  return (
++    <div aria-live="polite" aria-atomic="true" className="sr-only" data-route-announcer="">
++      {message}
++    </div>
++  );
++}
+diff --git a/app/lib/route-name.ts b/app/lib/route-name.ts
+new file mode 100644
+index 0000000..c264380
+--- /dev/null
++++ b/app/lib/route-name.ts
+@@ -0,0 +1,6 @@
++export function readRouteName(doc: Document): string {
++  const title = doc.title.trim();
++  if (title !== '') return title;
++  const heading = doc.querySelector('.page-transition-wrapper h1');
++  return heading?.textContent?.trim() ?? '';
++}
+diff --git a/app/lib/link-focus.ts b/app/lib/link-focus.ts
+index 7317d0c..b2a2410 100644
+--- a/app/lib/link-focus.ts
++++ b/app/lib/link-focus.ts
+@@ -11,11 +11,23 @@ function isPlainPrimaryActivation(event: MouseEvent<HTMLAnchorElement>): boolean
+   );
+ }
+ 
++function opensInSameDocument(anchor: HTMLAnchorElement): boolean {
++  const target = anchor.getAttribute('target');
++  return (
++    (target === null || target === '' || target === '_self') && !anchor.hasAttribute('download')
++  );
++}
++
+ export function releaseLinkFocus(event: MouseEvent<HTMLAnchorElement>): void {
+   if (!isPlainPrimaryActivation(event)) return;
+-  const { body } = event.currentTarget.ownerDocument;
++  const anchor = event.currentTarget;
++  if (!opensInSameDocument(anchor)) return;
++  const { body } = anchor.ownerDocument;
+   const hadTabIndex = body.hasAttribute('tabindex');
+   if (!hadTabIndex) body.tabIndex = -1;
+-  body.focus({ preventScroll: true });
+-  if (!hadTabIndex) body.removeAttribute('tabindex');
++  try {
++    body.focus({ preventScroll: true });
++  } finally {
++    if (!hadTabIndex) body.removeAttribute('tabindex');
++  }
+ }
+diff --git a/app/lib/__tests__/link-focus.test.tsx b/app/lib/__tests__/link-focus.test.tsx
+index 51c14c7..4bf4f0c 100644
+--- a/app/lib/__tests__/link-focus.test.tsx
++++ b/app/lib/__tests__/link-focus.test.tsx
+@@ -82,4 +82,104 @@ describe('releaseLinkFocus (DPG-FOOTER-LINKS)', () => {
+     expect(document.activeElement).toBe(link);
+     expect(document.body.hasAttribute('tabindex')).toBe(false);
+   });
++
++  it('LF4 a click whose default an earlier handler prevented keeps focus on the link', () => {
++    render(
++      <a
++        href="/faq"
++        onClick={(event) => {
++          event.preventDefault();
++          releaseLinkFocus(event);
++        }}
++      >
++        FAQ
++      </a>,
++    );
++    const link = screen.getByRole('link', { name: 'FAQ' });
++    link.focus();
++    const bodyFocus = vi.spyOn(document.body, 'focus');
++
++    fireEvent.click(link);
++
++    expect(bodyFocus).not.toHaveBeenCalled();
++    expect(document.activeElement).toBe(link);
++  });
++
++  it.each([
++    ['target="_blank"', { target: '_blank' }],
++    ['target="_top"', { target: '_top' }],
++    ['download', { download: '' }],
++  ])('LF5 a %s link keeps focus (it does not replace this document)', (_label, extra) => {
++    render(
++      <a
++        href="/faq"
++        {...extra}
++        onClick={(event) => {
++          releaseLinkFocus(event);
++          event.preventDefault();
++        }}
++      >
++        FAQ
++      </a>,
++    );
++    const link = screen.getByRole('link', { name: 'FAQ' });
++    link.focus();
++    const bodyFocus = vi.spyOn(document.body, 'focus');
++
++    fireEvent.click(link);
++
++    expect(bodyFocus).not.toHaveBeenCalled();
++    expect(document.activeElement).toBe(link);
++  });
++
++  it('LF6 target="_self" still releases focus', () => {
++    render(
++      <a
++        href="/faq"
++        target="_self"
++        onClick={(event) => {
++          releaseLinkFocus(event);
++          event.preventDefault();
++        }}
++      >
++        FAQ
++      </a>,
++    );
++    const link = screen.getByRole('link', { name: 'FAQ' });
++    link.focus();
++
++    fireEvent.click(link);
++
++    expect(document.activeElement).toBe(document.body);
++  });
++
++  it('LF7 removes the temporary body tabindex even when focusing the body throws', () => {
++    const failure = new Error('focus failed');
++    let caught: unknown = null;
++    render(
++      <a
++        href="/faq"
++        onClick={(event) => {
++          try {
++            releaseLinkFocus(event);
++          } catch (error) {
++            caught = error;
++          }
++          event.preventDefault();
++        }}
++      >
++        FAQ
++      </a>,
++    );
++    const link = screen.getByRole('link', { name: 'FAQ' });
++    vi.spyOn(document.body, 'focus').mockImplementation(() => {
++      expect(document.body.getAttribute('tabindex')).toBe('-1');
++      throw failure;
++    });
++
++    fireEvent.click(link);
++
++    expect(caught).toBe(failure);
++    expect(document.body.hasAttribute('tabindex')).toBe(false);
++  });
+ });
+diff --git a/app/lib/__tests__/route-name.test.ts b/app/lib/__tests__/route-name.test.ts
+new file mode 100644
+index 0000000..2de1683
+--- /dev/null
++++ b/app/lib/__tests__/route-name.test.ts
+@@ -0,0 +1,29 @@
++import { afterEach, describe, expect, it } from 'vitest';
++import { readRouteName } from '~/lib/route-name';
++
++afterEach(() => {
++  document.title = '';
++  document.body.innerHTML = '';
++});
++
++describe('readRouteName (CLIENT-NAV-CONTRACT)', () => {
++  it('RN1 prefers the trimmed document title over the page heading', () => {
++    document.title = '  FAQ | CZABA  ';
++    document.body.innerHTML =
++      '<div class="page-transition-wrapper"><h1>Frequently Asked Questions</h1></div>';
++    expect(readRouteName(document)).toBe('FAQ | CZABA');
++  });
++
++  it('RN2 falls back to the first heading inside the page wrapper when the title is empty', () => {
++    document.title = '';
++    document.body.innerHTML =
++      '<h1>Outside</h1><div class="page-transition-wrapper"><h1> My Orders </h1><h1>Second</h1></div>';
++    expect(readRouteName(document)).toBe('My Orders');
++  });
++
++  it('RN3 returns an empty name when there is no title and no heading in the wrapper', () => {
++    document.title = '';
++    document.body.innerHTML = '<h1>Outside</h1><div class="page-transition-wrapper"><p>x</p></div>';
++    expect(readRouteName(document)).toBe('');
++  });
++});
+diff --git a/app/components/animations/__tests__/route-transition.test.tsx b/app/components/animations/__tests__/route-transition.test.tsx
+index ca4ae9e..db32195 100644
+--- a/app/components/animations/__tests__/route-transition.test.tsx
++++ b/app/components/animations/__tests__/route-transition.test.tsx
+@@ -1,7 +1,14 @@
+-import { render } from '@testing-library/react';
++import { act, render } from '@testing-library/react';
++import { StrictMode } from 'react';
+ import { renderToString } from 'react-dom/server';
+-import { MemoryRouter } from 'react-router-dom';
+-import { describe, expect, it } from 'vitest';
++import {
++  createMemoryRouter,
++  MemoryRouter,
++  Outlet,
++  RouterProvider,
++  useLocation,
++} from 'react-router-dom';
++import { afterEach, describe, expect, it } from 'vitest';
+ import { RouteTransition } from '../RouteTransition';
+ 
+ function Page({ label }: { label: string }) {
+@@ -61,3 +68,243 @@ describe('RouteTransition', () => {
+     expect(getByTestId('page')).toBe(first);
+   });
+ });
++
++function announcerText(container: HTMLElement): string | null {
++  return container.ownerDocument.querySelector('[data-route-announcer]')?.textContent ?? null;
++}
++
++function nextFrame(): Promise<void> {
++  return new Promise((resolve) => {
++    requestAnimationFrame(() => resolve());
++  });
++}
++
++describe('RouteTransition route announcement (CLIENT-NAV-CONTRACT)', () => {
++  afterEach(() => {
++    document.title = '';
++  });
++
++  function StudioPage({ heading }: { heading: string }) {
++    return <h1>{heading}</h1>;
++  }
++
++  it('RA1 renders one polite, atomic, visually hidden region that stays silent on the first render', async () => {
++    document.title = 'CZABA Studio — Demo collection';
++    const { container } = render(
++      <RouteTransition pathname="/studio-lab" isStudioPage>
++        <StudioPage heading="CZABA Studio" />
++      </RouteTransition>,
++    );
++    await act(nextFrame);
++    const regions = document.querySelectorAll('[data-route-announcer]');
++    expect(regions).toHaveLength(1);
++    const region = regions[0];
++    expect(region.getAttribute('aria-live')).toBe('polite');
++    expect(region.getAttribute('aria-atomic')).toBe('true');
++    expect(region.hasAttribute('role')).toBe(false);
++    expect(region.className).toBe('sr-only');
++    expect(announcerText(container)).toBe('');
++  });
++
++  it('RA2 a path change announces the new document title after the next frame', async () => {
++    document.title = 'CZABA Studio — Demo collection';
++    const { container, rerender } = render(
++      <RouteTransition pathname="/studio-lab" isStudioPage>
++        <StudioPage heading="CZABA Studio" />
++      </RouteTransition>,
++    );
++    await act(nextFrame);
++    document.title = 'Middle East | CZABA';
++    rerender(
++      <RouteTransition pathname="/studio/middle-east" isStudioPage>
++        <StudioPage heading="Middle East" />
++      </RouteTransition>,
++    );
++    expect(announcerText(container)).toBe('');
++    await act(nextFrame);
++    expect(announcerText(container)).toBe('Middle East | CZABA');
++  });
++
++  it('RA3 an empty title falls back to the new page heading', async () => {
++    document.title = 'FAQ | CZABA';
++    const { container, rerender } = render(
++      <RouteTransition pathname="/studio/a" isStudioPage>
++        <StudioPage heading="Old heading" />
++      </RouteTransition>,
++    );
++    await act(nextFrame);
++    document.title = '';
++    rerender(
++      <RouteTransition pathname="/studio/b" isStudioPage>
++        <StudioPage heading="Your Collection" />
++      </RouteTransition>,
++    );
++    await act(nextFrame);
++    expect(announcerText(container)).toBe('Your Collection');
++  });
++
++  it('RA4 two paths with the same name still change the region text', async () => {
++    document.title = '';
++    const { container, rerender } = render(
++      <RouteTransition pathname="/studio/a" isStudioPage>
++        <StudioPage heading="Start" />
++      </RouteTransition>,
++    );
++    await act(nextFrame);
++    rerender(
++      <RouteTransition pathname="/studio/b" isStudioPage>
++        <StudioPage heading="Sign in required" />
++      </RouteTransition>,
++    );
++    await act(nextFrame);
++    const first = announcerText(container);
++    rerender(
++      <RouteTransition pathname="/studio/c" isStudioPage>
++        <StudioPage heading="Sign in required" />
++      </RouteTransition>,
++    );
++    await act(nextFrame);
++    const second = announcerText(container);
++    rerender(
++      <RouteTransition pathname="/studio/d" isStudioPage>
++        <StudioPage heading="Sign in required" />
++      </RouteTransition>,
++    );
++    await act(nextFrame);
++    const third = announcerText(container);
++    expect(first).toBe('Sign in required');
++    expect(second).toBe(`Sign in required${String.fromCharCode(160)}`);
++    expect(third).toBe('Sign in required');
++  });
++
++  it('RA5 a re-render on the same path announces nothing', async () => {
++    document.title = 'Support | CZABA';
++    const { container, rerender } = render(
++      <RouteTransition pathname="/studio/a" isStudioPage>
++        <StudioPage heading="A" />
++      </RouteTransition>,
++    );
++    await act(nextFrame);
++    rerender(
++      <RouteTransition pathname="/studio/a" isStudioPage>
++        <StudioPage heading="A again" />
++      </RouteTransition>,
++    );
++    await act(nextFrame);
++    expect(announcerText(container)).toBe('');
++  });
++
++  it('RA6 Studio to Store and back keeps one region and announces both arrivals', async () => {
++    document.title = 'CZABA Studio — Demo collection';
++    const { container, rerender } = render(
++      <MemoryRouter initialEntries={['/studio-lab']}>
++        <RouteTransition pathname="/studio-lab" isStudioPage>
++          <StudioPage heading="CZABA Studio" />
++        </RouteTransition>
++      </MemoryRouter>,
++    );
++    await act(nextFrame);
++    const regionBefore = document.querySelector('[data-route-announcer]');
++    document.title = 'CZABA | Premium Cinematic Sound Design';
++    rerender(
++      <MemoryRouter initialEntries={['/studio-lab']}>
++        <RouteTransition pathname="/" isStudioPage={false}>
++          <StudioPage heading="CZABA" />
++        </RouteTransition>
++      </MemoryRouter>,
++    );
++    await act(nextFrame);
++    expect(document.querySelectorAll('[data-route-announcer]')).toHaveLength(1);
++    expect(document.querySelector('[data-route-announcer]')).toBe(regionBefore);
++    expect(announcerText(container)).toBe('CZABA | Premium Cinematic Sound Design');
++    document.title = 'CZABA Studio — Demo collection';
++    rerender(
++      <MemoryRouter initialEntries={['/studio-lab']}>
++        <RouteTransition pathname="/studio-lab" isStudioPage>
++          <StudioPage heading="CZABA Studio" />
++        </RouteTransition>
++      </MemoryRouter>,
++    );
++    await act(nextFrame);
++    expect(document.querySelector('[data-route-announcer]')).toBe(regionBefore);
++    expect(announcerText(container)).toBe('CZABA Studio — Demo collection');
++  });
++
++  it('RA7 two path changes inside one frame announce only the last page', async () => {
++    document.title = 'Start';
++    const { container, rerender } = render(
++      <RouteTransition pathname="/studio/a" isStudioPage>
++        <StudioPage heading="A" />
++      </RouteTransition>,
++    );
++    await act(nextFrame);
++    const writes: string[] = [];
++    const observer = new MutationObserver(() => {
++      writes.push(announcerText(container) ?? '');
++    });
++    const region = document.querySelector('[data-route-announcer]');
++    if (region) observer.observe(region, { childList: true, characterData: true, subtree: true });
++    document.title = 'B page';
++    rerender(
++      <RouteTransition pathname="/studio/b" isStudioPage>
++        <StudioPage heading="B" />
++      </RouteTransition>,
++    );
++    document.title = 'C page';
++    rerender(
++      <RouteTransition pathname="/studio/c" isStudioPage>
++        <StudioPage heading="C" />
++      </RouteTransition>,
++    );
++    await act(nextFrame);
++    await act(nextFrame);
++    observer.disconnect();
++    expect(writes).toEqual(['C page']);
++  });
++
++  it('RA8 the first render stays silent under StrictMode (effects run twice)', async () => {
++    document.title = 'FAQ | CZABA';
++    const { container } = render(
++      <StrictMode>
++        <RouteTransition pathname="/studio/a" isStudioPage>
++          <StudioPage heading="A" />
++        </RouteTransition>
++      </StrictMode>,
++    );
++    await act(nextFrame);
++    expect(announcerText(container)).toBe('');
++  });
++
++  it('RA9 a Store navigation through the router with an empty title announces the new page heading', async () => {
++    function Shell() {
++      const location = useLocation();
++      return (
++        <RouteTransition pathname={location.pathname} isStudioPage={false}>
++          <Outlet />
++        </RouteTransition>
++      );
++    }
++    const router = createMemoryRouter(
++      [
++        {
++          path: '/',
++          element: <Shell />,
++          children: [
++            { path: 'faq', element: <h1>Frequently Asked Questions</h1> },
++            { path: 'cart', element: <h1>Your Collection</h1> },
++          ],
++        },
++      ],
++      { initialEntries: ['/faq'] },
++    );
++    document.title = '';
++    const { container } = render(<RouterProvider router={router} />);
++    await act(nextFrame);
++    expect(announcerText(container)).toBe('');
++    await act(async () => {
++      await router.navigate('/cart');
++    });
++    await act(nextFrame);
++    expect(announcerText(container)).toBe('Your Collection');
++  });
++});
+diff --git a/app/routes/cart.tsx b/app/routes/cart.tsx
+index ecbe783..913816f 100644
+--- a/app/routes/cart.tsx
++++ b/app/routes/cart.tsx
+@@ -1,3 +1,4 @@
++import type { MetaFunction } from '@remix-run/node';
+ import { Link } from '@remix-run/react';
+ import {
+   AlertTriangle,
+@@ -18,6 +19,8 @@ import { useAuth, useCart, usePurchases } from '~/hooks';
+ import { formatPrice } from '~/lib/cart-utils';
+ import type { AppliedDiscount, AppliedGiftCard, CartItem } from '~/types/cart';
+ 
++export const meta: MetaFunction = () => [{ title: 'Your Collection | CZABA' }];
++
+ // Ownership status for cart item
+ type OwnershipStatus =
+   | { type: 'not_owned' }
+diff --git a/app/routes/search.tsx b/app/routes/search.tsx
+index 4b7abbf..16edd5b 100644
+--- a/app/routes/search.tsx
++++ b/app/routes/search.tsx
+@@ -1,5 +1,8 @@
++import type { MetaFunction } from '@remix-run/node';
+ import { Link } from '@remix-run/react';
+ 
++export const meta: MetaFunction = () => [{ title: 'Search | CZABA' }];
++
+ export default function Search() {
+   return (
+     <div className="container" style={{ padding: '4rem 1.5rem', textAlign: 'center' }}>
+diff --git a/app/routes/account.tsx b/app/routes/account.tsx
+index cd4ef03..ee5a16f 100644
+--- a/app/routes/account.tsx
++++ b/app/routes/account.tsx
+@@ -1,3 +1,4 @@
++import type { MetaFunction } from '@remix-run/node';
+ /**
+  * My Account Page - მინიმალისტური პროფილის გვერდი
+  */
+@@ -11,6 +12,8 @@ import { Button } from '~/components/ui';
+ import { useAuth, useToast } from '~/hooks';
+ import { AUTH_ERRORS } from '~/types/auth';
+ 
++export const meta: MetaFunction = () => [{ title: 'Account | CZABA' }];
++
+ export default function AccountPage() {
+   return (
+     <RequireAuth>
+diff --git a/app/routes/account_.login.tsx b/app/routes/account_.login.tsx
+index 9e45edf..cb852fb 100644
+--- a/app/routes/account_.login.tsx
++++ b/app/routes/account_.login.tsx
+@@ -1,5 +1,8 @@
++import type { MetaFunction } from '@remix-run/node';
+ import { Link } from '@remix-run/react';
+ 
++export const meta: MetaFunction = () => [{ title: 'Sign In | CZABA' }];
++
+ export default function Login() {
+   return (
+     <div className="container" style={{ padding: '4rem 1.5rem', textAlign: 'center' }}>
+diff --git a/app/routes/account.orders.tsx b/app/routes/account.orders.tsx
+index 5541dce..22982a1 100644
+--- a/app/routes/account.orders.tsx
++++ b/app/routes/account.orders.tsx
+@@ -1,9 +1,12 @@
++import type { MetaFunction } from '@remix-run/node';
+ import { Calendar, ChevronDown, ChevronUp, CreditCard, Package } from 'lucide-react';
+ import { useEffect, useState } from 'react';
+ import { RequireAuth } from '~/components/auth';
+ import { useAuth } from '~/hooks';
+ import { apiClient, type Order } from '~/services/api/client';
+ 
++export const meta: MetaFunction = () => [{ title: 'My Orders | CZABA' }];
++
+ function formatDate(dateString: string): string {
+   const date = new Date(dateString);
+   const months = [
+diff --git a/app/routes/account.reset.$id.$token.tsx b/app/routes/account.reset.$id.$token.tsx
+index c8f5d35..e682bea 100644
+--- a/app/routes/account.reset.$id.$token.tsx
++++ b/app/routes/account.reset.$id.$token.tsx
+@@ -1,3 +1,4 @@
++import type { MetaFunction } from '@remix-run/node';
+ import { useNavigate, useParams } from '@remix-run/react';
+ import { CheckCircle, XCircle } from 'lucide-react';
+ import { useEffect, useState } from 'react';
+@@ -6,6 +7,8 @@ import { useAuth } from '~/hooks';
+ import { customerResetPassword, validatePassword } from '~/lib/auth';
+ import { AUTH_ERRORS } from '~/types/auth';
+ 
++export const meta: MetaFunction = () => [{ title: 'Reset Your Password | CZABA' }];
++
+ export default function ResetPassword() {
+   const { id, token } = useParams();
+   const navigate = useNavigate();

@@ -1,0 +1,9 @@
+B round 484->485 planning, rejected mount-signal sketch (PageMountSignal inside PageTransition, console.log('PMS', path, announcedPathRef.current) on the scratch :5185).
+Script: goto /, wait 2.5 s; router.navigate('/faq'), wait 2.5 s; router.navigate('/cart'), wait 2.5 s. Console lines as printed (copied by B from the tool output; the scratch was removed afterwards):
+PMS / null
+--nav faq
+PMS / /
+--nav cart
+PMS / /
+PMS /faq /
+Reading: on the nav to /faq only the exiting wrapper's re-keyed child fired (stale path '/'); the /faq mount fired only during the next navigation. Hence the pathname-effect design.
