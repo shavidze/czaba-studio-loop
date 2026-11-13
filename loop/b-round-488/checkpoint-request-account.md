@@ -1,0 +1,6 @@
+# Architecture checkpoint request for root — ARCH-CHECKPOINT-ACCOUNT-PROFILE (D-29z1744)
+
+- **Scope (read-only frontend-architect, per `store/.claude/references/architecture-checkpoint.md`):** `app/routes/account.tsx` — `ProfileContent` (name editor: 5 refs, focus-claim guard, save-in-flight guard; rounds 487–488) and `PasswordModal` (no dialog semantics; B-R488-PASSWORD-MODAL-DIALOG, round 491).
+- **Why now:** one owner file changed in rounds 487 and 488 and is scheduled again in 490 (375 px overflow) and 491 (modal dialog). Signals: SIG-R487-PROFILE-NAME-EDITOR-EXTRACT (A-R487, A-R488 and gate-488 architecture notes: keep now; extract `useInlineNameEditor` if a second change lands), modal state held twice (`passwordModalOpenRef` + `isPasswordModalOpen`), SIG-R487-REPEAT-SAFE-HOME (a Studio helper imported by the account route).
+- **Question:** keep vs extract (a) a `useInlineNameEditor` hook, (b) `PasswordModal` onto the shared `~/components/ui` Modal/dialog primitive with focus return (folding the ref), (c) the repeat-safe helper to a neutral module. Answer format: keep/extract argument, value, risk, ≤ 3 sentences each.
+- **Deadline:** before round 491 planning. Non-blocking for rounds 489–490; an unanswered request does not stop round 491 (it is planned on the current structure).

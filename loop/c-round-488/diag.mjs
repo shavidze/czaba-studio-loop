@@ -1,0 +1,10 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const b = await chromium.launch(); const ctx = await b.newContext({viewport:{width:1440,height:900}});
+await ctx.addInitScript(()=>{localStorage.setItem('czaba_lead_magnet',JSON.stringify({viewCount:0,lastResetDate:new Date().toISOString().slice(0,10),dismissed:true,submitted:false}));localStorage.setItem('auth_user',JSON.stringify({id:7,email:'p@example.invalid',accessToken:'s',refreshToken:'r'}));});
+await ctx.route('**/api/auth/profile',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:{id:7,email:'p@example.invalid',firstName:'Probe',lastName:'User',authProvider:'Email'}})}));
+const p = await ctx.newPage(); p.on('console',m=>console.log('C:',m.text().slice(0,150))); p.on('pageerror',e=>console.log('E:',e.message.slice(0,200)));
+await p.goto('http://127.0.0.1:5173/account',{waitUntil:'load'}); await p.waitForTimeout(8000);
+console.log((await p.innerText('body')).slice(0,400)); await p.screenshot({path:process.argv[2]});
+await b.close();

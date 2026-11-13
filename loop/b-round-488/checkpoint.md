@@ -1,0 +1,16 @@
+# B round 488 -> 489 checkpoint
+- [x] archive tasks/round-488.md (cmp equal), backup b-round-488/current-task-before-489.md
+- [ ] backlog update (C-R487-01, B-R486 done; D-29z1741+)
+- [ ] SABA-B-17 HEAD probe / sketch / claims / mutants / review
+- [ ] current-task.md, feature-status.md, lessons, b-round-488.md, b-next.json
+- [x] HEAD probes b-round-488/probe/head/ (fresh 1440/1280 cpu1/4; net4g, net3g, delayjs, wheel)
+- [x] product-designer x2 consulted (answers summarised in b-round-488/pd-consult.md - to write)
+- [x] sketch written in /tmp/b489-scratch (EntranceCover.tsx, SpotlightLoader.tsx, test: 57 pass)
+- [ ] sketch prod build :5191, probes, doc 316, patch, mutants, tech-lead review, claims
+- [x] v1 review (tech-lead APPROVE WITH CHANGES) -> v2 (APPROVE) -> v3 doc numbers only (delta review pending)
+- [x] v2 sketch matrix probe/sketch/table.txt; HEAD matrix probe/head-matrix/table.txt; v1 matrix probe/sketch-v1/
+- [x] mutants v3: 22 red (mutants/mutants-summary.txt)
+- [x] current-task.md written; feature-status, backlog (D-29z1741..1746), lessons L18, questions-saba-b-13 updated
+- [x] full suite v3 4292/4292; covering 92; css compare equal; claims planning+sketch outputs (stderr empty); L58 OK; b-round-488.md; b-next.json
+- [x] final advisor (follow-ups applied: probe modes delay800/delay3000/esc1500/tab1500/click1500, clientnav mark, hydrationErrors; task text fixes; claims regenerated)
+- DONE: round 489 dispatched

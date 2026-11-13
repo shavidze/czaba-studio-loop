@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-13T10:06:50.821Z",
-  "current_task": "Round 487: B-R486-PROFILE-NAME-KEYBOARD - Account Profile name <p onClick> becomes a native button (aria-labelledby 'Full Name <value>'), focus returns to it after Esc/Cancel/save, First name after failures, held Enter guarded by the shared helper (1 PUT, HEAD 6), labelled inputs and icon buttons; tests PN1-PN9; doc 315; baseline bb82154 (current-task.md)",
+  "_generatedUtc": "2026-11-13T11:14:40.527Z",
+  "current_task": "Round 488: B-R486-PROFILE-NAME-KEYBOARD fix-up for C-R487-01 - a name save that settles moves focus only while the editor owns it (password dialog closed and activeElement null/body/inside the editor row); passwordModalOpenRef for the Safari/Firefox-mac mouse model; tests PN10-PN10h; doc 315 update; baseline bb82154 + round-487 tree (current-task.md, sketch b-round-487/sketch-488.patch.txt v3 sha 9062855b)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6863,7 +6863,8 @@
         "TLM-SABA-B-12-FIREFOX-SAFARI",
         "TLM-R454-FIREFOX-SAFARI-SCROLLBAR",
         "TLM-R455-FIREFOX-SEEK-THUMB",
-        "TLM-R459-FIREFOX-SAFARI-ENTRANCE"
+        "TLM-R459-FIREFOX-SAFARI-ENTRANCE",
+        "C-R487-01-FIREFOX-MAC (same as the Safari half)"
       ],
       "evidence": "retros/retro-480.md §8",
       "added": "2026-11-12 B round 479 -> 480 planning (RETRO 480)"
@@ -6879,7 +6880,9 @@
         "TLM-R449-WEBKIT-HEADING-INK",
         "TLM-R454-FIREFOX-SAFARI-SCROLLBAR",
         "TLM-R459-FIREFOX-SAFARI-ENTRANCE",
-        "A-R73-SAFARI-FLAG-FOCUS"
+        "A-R73-SAFARI-FLAG-FOCUS",
+        "C-R487-01-SAFARI (round 488 IF-PASSWORD-NOFOCUS is a Chromium emulation; real WebKit mouse click on the password link during a save)",
+        "B-R488-SAFARI-MENU-SETTLE-FOCUS"
       ],
       "evidence": "retros/retro-480.md §8",
       "added": "2026-11-12 B round 479 -> 480 planning (RETRO 480)"
@@ -6897,21 +6900,10 @@
       "added": "2026-11-12 B round 479 -> 480 planning (RETRO 480)"
     },
     {
-      "id": "B-R486-PROFILE-NAME-KEYBOARD",
-      "severity": "medium",
-      "origin": "pre-existing",
-      "status": "dispatched (D-29z1735): round 487 on baseline bb82154 | scheduled (D-29z1733): round 487 (after round 486; REGRESSION first if planning is on/after 2026-11-16)",
-      "title": "Account Profile: the name is edited by clicking a <p onClick> ('Click to add name'); keyboard and screen-reader users cannot start editing their name",
-      "evidence": "app/routes/account.tsx onClick={handleNameClick} on a <p> (b-round-485/mouse-only-sweep.txt: lint/a11y/useKeyWithClickEvents account.tsx:214); claims-486 K22",
-      "repro": "signed in (localStorage.auth_user stub): Tab through /account; no stop on the name; Enter cannot open the editor",
-      "added": "2026-11-13 B round 485 -> 486 planning",
-      "evidence_kind": "reproduced in Chromium at HEAD bb82154 by B (b-round-486/probe/head-named.json: nameStop 0; Esc/X/save focus BODY; held Enter 6 PUTs; noname-head.json paragraph); source + Biome as before"
-    },
-    {
       "id": "SABA-B-17-ENTRANCE-3-4S",
       "severity": "medium",
       "origin": "Saba 2026-11-13 (policy section 'SpotlightLoader too fast')",
-      "status": "scheduled (D-29z1736): round 488 (after 487; REGRESSION first if planning is on/after 2026-11-16)",
+      "status": "scheduled (D-29z1740): round 489 (after the 488 fix-up; REGRESSION first if planning is on/after 2026-11-16) | scheduled (D-29z1736): round 488 (after 487; REGRESSION first if planning is on/after 2026-11-16)",
       "title": "Store entrance animation (SpotlightLoader) disappears too fast; on a first visit it must last at least 3-4 s",
       "evidence": "agent-workflow.md 'Saba feedback, 2026-11-13'; EntranceCover.tsx ENTRANCE_MIN_TOTAL_MS 1450, ENTRANCE_MAX_TOTAL_MS 1900 (claims-487 K23); SABA-B-13 (archived) delivered 1450-1900 ms",
       "added": "2026-11-13 B round 486 -> 487 planning",
@@ -6921,22 +6913,35 @@
       "id": "B-R487-PROFILE-EDITOR-NARROW-OVERFLOW",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "scheduled (D-29z1736): round 489",
+      "status": "scheduled (D-29z1740): round 490; note the round-488 sketch changes the editor row to '<div ref={nameEditorRef} className=\"flex items-center gap-3\">' (round-487 claims K22 grep no longer matches) | scheduled (D-29z1736): round 489",
       "title": "Account Profile name editor overflows at 375 px: Save/Cancel icon buttons are off-screen and cannot be clicked or tapped",
       "evidence": "b-round-486/probe/head-named.json 375x812: afterClick.name.textBox width 420 in a 343 px column; afterMouseSave puts 0 / editing true; afterMouseCancel editing true (sketch v3 equal: probe/v3/sketch-named.json)",
       "repro": "375x812, signed-in stub: open the name editor; the check and X buttons sit beyond the right edge",
       "added": "2026-11-13 B round 486 -> 487 planning"
+    },
+    {
+      "id": "C-R487-01",
+      "severity": "medium",
+      "origin": "A code-reviewer (A-R487-REVIEW-FOCUS-STEAL), reproduced by A and C; introduced by round-487 sketch (B spec)",
+      "status": "dispatched (D-29z1738): round 488 fix-up, sketch v3",
+      "title": "Account Profile: a name save that settles pulls focus back to the name button (200) or First name (500) even after the user moved focus elsewhere, e.g. behind the open PasswordModal",
+      "evidence": "c-round-487/focus-steal-replay.json (4/4); a-round-487/repro/focus-steal.json; b-round-487/probe/r487tree-v2-inflight.json (click-password, click-password-nofocus, tab-away)",
+      "repro": "signed-in stub, /account, PUT delayed 1500 ms: open the name editor, Save, click 'Click to change password' during the delay; after settle activeElement is the name button / First name behind the modal",
+      "added": "2026-11-13 B round 487 -> 488 planning"
+    },
+    {
+      "id": "B-R488-PASSWORD-MODAL-DIALOG",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "status": "scheduled (D-29z1739): round 491 (after 489 SABA-B-17 and 490 narrow overflow; REGRESSION first when due)",
+      "title": "Account 'Change password' modal has no dialog semantics: no role=dialog/aria-modal, no initial focus, Esc does not close it, no focus return to the trigger",
+      "evidence": "b-round-487/probe/overlays-sketch.json password-modal-keys (1440/1280): dialogs [], afterOpen focus stays on the link, Esc leaves the modal open; tech-lead delta review Low 1 (b-round-487/sketch-review.md)",
+      "repro": "signed-in stub, /account: click 'Click to change password'; inspect the aria tree (no dialog), press Esc (modal stays)",
+      "note": "reference: WAI-ARIA APG Dialog (Modal) pattern; the fix touches function PasswordModal in app/routes/account.tsx only; must keep C-R487-01's passwordModalOpenRef in sync",
+      "added": "2026-11-13 B round 487 -> 488 planning"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 478,
-      "task": "current-task.md",
-      "decision": "D-29z1692",
-      "type": "DPG-P0-3b design reference docs (docs only)",
-      "status": "c_pass_published (D-29z1695): C PASS browserVerified true, gate 478 published 75a6028",
-      "note": "baseline HEAD 10791ac clean; claims b-round-477/claims-478.sh; residual b-round-477/residual-478.tsv"
-    },
     {
       "round": 479,
       "task": "current-task.md",
@@ -7006,8 +7011,16 @@
       "task": "current-task.md",
       "decision": "D-29z1735",
       "type": "B-R486-PROFILE-NAME-KEYBOARD (Medium fix)",
-      "status": "dispatched",
+      "status": "c_fail (C-R487-01, D-29z1738); gate skipped; fix-up round 488",
       "note": "baseline HEAD bb82154 clean; claims b-round-486/claims-487.sh; frozen manifest b-round-486/r487-tree-sha256.txt (1399); sketch b-round-486/sketch-487.patch.txt v4 sha d8f8c4ffc0c0295c (D-29z1737); probes b-round-486/probe"
+    },
+    {
+      "round": 488,
+      "task": "current-task.md",
+      "decision": "D-29z1738",
+      "type": "B-R486-PROFILE-NAME-KEYBOARD fix-up (C-R487-01, Medium)",
+      "status": "dispatched",
+      "note": "baseline HEAD bb82154 + round-487 uncommitted tree (b-round-487/a-tree-start.sha256); claims b-round-487/claims-488.sh; sketch b-round-487/sketch-488.patch.txt v3 sha 9062855b25c50874; tech-lead v1 APPROVE WITH CHANGES -> v2 APPROVE -> v3 Low 3; 24 mutants red; probes b-round-487/probe"
     }
   ],
   "other_keys": [

@@ -1,0 +1,291 @@
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-488/sketch-489-v1/app/components/loading/EntranceCover.tsx	2026-11-13 11:57:56.711365171 +0000
++++ /home/runner/czaba-project/tmp/studio-real-loop/b-round-488/sketch-489/app/components/loading/EntranceCover.tsx	2026-11-13 11:59:46.106773802 +0000
+@@ -6,6 +6,7 @@
+ export const ENTRANCE_FAILSAFE_MS = 2000;
+ export const ENTRANCE_EXIT_MS = 250;
+ export const ENTRANCE_OVERLAY_EXIT_MS = 500;
++export const ENTRANCE_EXIT_AFTER_TAKEOVER_MIN_MS = 2500;
+ export const ENTRANCE_SCROLL_SKIP_EVENTS = ['wheel', 'touchmove'] as const;
+ export const ENTRANCE_TAKEOVER_EVENT = 'czaba-entrance-takeover';
+ export const ENTRANCE_REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+@@ -25,11 +26,19 @@
+ 
+ export const ENTRANCE_COVER_CSS = `@media (prefers-reduced-motion: no-preference){body::before{content:"";position:fixed;inset:0;z-index:60;background:var(--color-background);animation:czaba-entrance-failsafe ${ENTRANCE_EXIT_MS}ms ease-in-out ${ENTRANCE_FAILSAFE_MS}ms forwards}}@keyframes czaba-entrance-failsafe{to{opacity:0;visibility:hidden}}`;
+ 
++// zoom-ის ჟესტი (ctrl+wheel, pinch) ანიმაციას გამოტოვებს, მაგრამ არ იბლოკება (SABA-B-17)
++const scrollSkipListenerOn = ENTRANCE_SCROLL_SKIP_EVENTS.map(
++  (type) => `window.addEventListener('${type}',scroll,{capture:true,passive:false});`,
++).join('');
++const scrollSkipListenerOff = ENTRANCE_SCROLL_SKIP_EVENTS.map(
++  (type) => `window.removeEventListener('${type}',scroll,true);`,
++).join('');
++
+ // ერთხელ tab-ზე (D10): ამ ხაზის წაშლით ანიმაცია ყოველ ჩატვირთვაზე ითამაშებს (SABA-Q-ENTRANCE-RELOAD)
+ const sessionGate = `if(sessionStorage.getItem('${ENTRANCE_SESSION_KEY}')==='1')return;sessionStorage.setItem('${ENTRANCE_SESSION_KEY}','1');`;
+ 
+ // მდგომარეობა window-ზეა: hydration-ის შეცდომისას React <style>-ს ცვლის, window კი რჩება (A-R459-REVIEW-R1)
+-export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var c=document.getElementById('${ENTRANCE_COVER_ID}');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('${ENTRANCE_REDUCED_MOTION_QUERY}').matches)return;${sessionGate}var h={start:performance.now(),state:'pending'};window.__czabaEntrance=h;c.setAttribute('data-start',String(h.start));c.media='all';var t;var off=function(){clearTimeout(t);document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);window.removeEventListener('wheel',scroll,true);window.removeEventListener('touchmove',scroll,true);window.removeEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);};var end=function(){off();if(h.state==='pending')h.state='skipped';var n=document.getElementById('${ENTRANCE_COVER_ID}');if(n){n.setAttribute('data-state',h.state);n.media='not all';}};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};var scroll=function(e){if(e.cancelable)e.preventDefault();e.stopPropagation();end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);window.addEventListener('wheel',scroll,{capture:true,passive:false});window.addEventListener('touchmove',scroll,{capture:true,passive:false});window.addEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);t=setTimeout(off,${ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS});}catch(e){}})();`;
++export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var c=document.getElementById('${ENTRANCE_COVER_ID}');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('${ENTRANCE_REDUCED_MOTION_QUERY}').matches)return;${sessionGate}var h={start:performance.now(),state:'pending'};window.__czabaEntrance=h;c.setAttribute('data-start',String(h.start));c.media='all';var t;var off=function(){clearTimeout(t);document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);${scrollSkipListenerOff}window.removeEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);};var end=function(){off();if(h.state==='pending')h.state='skipped';var n=document.getElementById('${ENTRANCE_COVER_ID}');if(n){n.setAttribute('data-state',h.state);n.media='not all';}};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};var scroll=function(e){if(!e.ctrlKey&&!(e.touches&&e.touches.length>1)){if(e.cancelable)e.preventDefault();e.stopPropagation();}end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);${scrollSkipListenerOn}window.addEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);t=setTimeout(off,${ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS});}catch(e){}})();`;
+ 
+ // client re-render (hydration-ის შეცდომა) ფარდას ჩართულს ტოვებს, სანამ SpotlightLoader არ ჩაიბარებს
+ function isEntrancePending(): boolean {
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-488/sketch-489-v1/app/components/loading/SpotlightLoader.tsx	2026-11-13 11:57:56.711393605 +0000
++++ /home/runner/czaba-project/tmp/studio-real-loop/b-round-488/sketch-489/app/components/loading/SpotlightLoader.tsx	2026-11-13 11:59:46.110237454 +0000
+@@ -4,6 +4,7 @@
+ import { cn } from '~/lib/utils';
+ import {
+   ENTRANCE_COVER_ID,
++  ENTRANCE_EXIT_AFTER_TAKEOVER_MIN_MS,
+   ENTRANCE_FAILSAFE_MS,
+   ENTRANCE_MAX_TOTAL_MS,
+   ENTRANCE_MIN_TOTAL_MS,
+@@ -18,7 +19,6 @@
+ 
+ const LOGO_AFTER_TAKEOVER_MS = 400;
+ const HOLD_AFTER_TAKEOVER_MS = 1100;
+-export const EXIT_AFTER_TAKEOVER_MIN_MS = 2500;
+ const SPOTLIGHT_DURATION = 0.8;
+ const LOGO_FADE_DURATION = 0.7;
+ const LOGO_TRACKING_DURATION = 0.9;
+@@ -38,7 +38,7 @@
+   const exitAt = Math.min(
+     Math.max(
+       ENTRANCE_MIN_TOTAL_MS - ENTRANCE_OVERLAY_EXIT_MS,
+-      elapsed + EXIT_AFTER_TAKEOVER_MIN_MS,
++      elapsed + ENTRANCE_EXIT_AFTER_TAKEOVER_MIN_MS,
+     ),
+     ENTRANCE_MAX_TOTAL_MS - ENTRANCE_OVERLAY_EXIT_MS,
+   );
+@@ -51,6 +51,13 @@
+   };
+ }
+ 
++function isZoomGesture(event: Event): boolean {
++  if (event instanceof WheelEvent) return event.ctrlKey;
++  return (
++    typeof TouchEvent !== 'undefined' && event instanceof TouchEvent && event.touches.length > 1
++  );
++}
++
+ function findEntranceCover(): HTMLStyleElement | null {
+   const cover = document.getElementById(ENTRANCE_COVER_ID);
+   return cover instanceof HTMLStyleElement ? cover : null;
+@@ -151,8 +158,10 @@
+       if (event.key === 'Escape' || event.key === 'Tab') hideEntrance();
+     };
+     const handleEntranceSkipScroll = (event: Event) => {
+-      if (event.cancelable) event.preventDefault();
+-      event.stopPropagation();
++      if (!isZoomGesture(event)) {
++        if (event.cancelable) event.preventDefault();
++        event.stopPropagation();
++      }
+       hideEntrance();
+     };
+     const overlay = overlayRef.current;
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-488/sketch-489-v1/app/lib/__tests__/store-entrance-loader.test.tsx	2026-11-13 11:57:56.711460926 +0000
++++ /home/runner/czaba-project/tmp/studio-real-loop/b-round-488/sketch-489/app/lib/__tests__/store-entrance-loader.test.tsx	2026-11-13 11:59:46.113970642 +0000
+@@ -8,6 +8,7 @@
+ import {
+   ENTRANCE_BOOT_SCRIPT,
+   ENTRANCE_COVER_ID,
++  ENTRANCE_EXIT_AFTER_TAKEOVER_MIN_MS,
+   ENTRANCE_FAILSAFE_MS,
+   ENTRANCE_MAX_TOTAL_MS,
+   ENTRANCE_MIN_TOTAL_MS,
+@@ -15,11 +16,7 @@
+   ENTRANCE_TAKEOVER_EVENT,
+   EntranceCoverHead,
+ } from '~/components/loading/EntranceCover';
+-import {
+-  EXIT_AFTER_TAKEOVER_MIN_MS,
+-  entranceTimeline,
+-  SpotlightLoader,
+-} from '~/components/loading/SpotlightLoader';
++import { entranceTimeline, SpotlightLoader } from '~/components/loading/SpotlightLoader';
+ 
+ const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+ const SESSION_KEY = 'czaba_entrance_seen';
+@@ -63,25 +60,48 @@
+ }
+ 
+ function dispatchScrollGesture(type: 'wheel' | 'touchmove') {
+-  const event = new Event(type, { bubbles: true, cancelable: true });
++  return dispatchGestureEvent(new Event(type, { bubbles: true, cancelable: true }));
++}
++
++function dispatchZoomGesture(type: 'wheel' | 'touchmove') {
++  if (type === 'wheel') {
++    return dispatchGestureEvent(
++      new WheelEvent('wheel', { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -100 }),
++    );
++  }
++  const pinch = new TouchEvent('touchmove', { bubbles: true, cancelable: true });
++  Object.defineProperty(pinch, 'touches', { value: { length: 2 } });
++  return dispatchGestureEvent(pinch);
++}
++
++function dispatchGestureEvent(event: Event) {
+   const bubbled = vi.fn();
+-  window.addEventListener(type, bubbled);
++  window.addEventListener(event.type, bubbled);
+   document.body.dispatchEvent(event);
+-  window.removeEventListener(type, bubbled);
++  window.removeEventListener(event.type, bubbled);
+   return { defaultPrevented: event.defaultPrevented, reachedPage: bubbled.mock.calls.length > 0 };
+ }
+ 
++function listenerCaptureFlag(options: boolean | AddEventListenerOptions | undefined) {
++  return typeof options === 'boolean' ? options : options?.capture === true;
++}
++
+ function trackWindowScrollSkipListeners() {
+   const addSpy = vi.spyOn(window, 'addEventListener');
+   const removeSpy = vi.spyOn(window, 'removeEventListener');
+   return () => {
+-    const added = new Map<string, Set<EventListenerOrEventListenerObject>>([
+-      ['wheel', new Set()],
+-      ['touchmove', new Set()],
+-    ]);
+-    for (const call of addSpy.mock.calls) added.get(call[0])?.add(call[1]);
+-    for (const call of removeSpy.mock.calls) added.get(call[0])?.delete(call[1]);
+-    return [...added.values()].reduce((total, listeners) => total + listeners.size, 0);
++    const added = new Map<EventListenerOrEventListenerObject, Set<string>>();
++    for (const [type, listener, options] of addSpy.mock.calls) {
++      if ((type !== 'wheel' && type !== 'touchmove') || !listener) continue;
++      const keys = added.get(listener) ?? new Set<string>();
++      keys.add(`${type}:${listenerCaptureFlag(options)}`);
++      added.set(listener, keys);
++    }
++    for (const [type, listener, options] of removeSpy.mock.calls) {
++      if (!listener) continue;
++      added.get(listener)?.delete(`${type}:${listenerCaptureFlag(options)}`);
++    }
++    return [...added.values()].reduce((total, keys) => total + keys.size, 0);
+   };
+ }
+ 
+@@ -343,6 +363,23 @@
+     expect(dispatchScrollGesture(type)).toEqual({ defaultPrevented: false, reachedPage: true });
+   });
+ 
++  it.each([
++    ['ctrl+wheel', 'wheel'],
++    ['two-finger touchmove', 'touchmove'],
++  ] as const)('S3 a %s zoom gesture ends the overlay and is not blocked', (_label, type) => {
++    const clock = { ms: 0 };
++    const { container } = mountEntranceLoader();
++    advanceTo(clock, 800);
++    expect(findOverlay(container)).not.toBeNull();
++
++    let gesture = { defaultPrevented: true, reachedPage: false };
++    act(() => {
++      gesture = dispatchZoomGesture(type);
++    });
++    expect(gesture).toEqual({ defaultPrevented: false, reachedPage: true });
++    expect(findOverlay(container)).toBeNull();
++  });
++
+   it('S2 the scroll-skip listeners are gone after the natural finish and on unmount', () => {
+     const listenersLeft = trackWindowScrollSkipListeners();
+     const clock = { ms: 0 };
+@@ -647,13 +684,11 @@
+ 
+   it('E6b a takeover at the end of the window still gets the full post-takeover floor', () => {
+     expect(ENTRANCE_MAX_TOTAL_MS).toBe(
+-      ENTRANCE_FAILSAFE_MS + EXIT_AFTER_TAKEOVER_MIN_MS + ENTRANCE_OVERLAY_EXIT_MS,
++      ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_AFTER_TAKEOVER_MIN_MS + ENTRANCE_OVERLAY_EXIT_MS,
+     );
+-    expect(ENTRANCE_OVERLAY_EXIT_MS).toBe(500);
+     for (const elapsed of [0, 160, 500, 900, 1500, ENTRANCE_FAILSAFE_MS - 1]) {
+       const timeline = entranceTimeline(elapsed);
+-      expect(timeline.exitInMs).toBeGreaterThanOrEqual(EXIT_AFTER_TAKEOVER_MIN_MS);
+-      expect(timeline.exitInMs - timeline.holdInMs).toBeGreaterThanOrEqual(1400);
++      expect(timeline.exitInMs).toBeGreaterThanOrEqual(ENTRANCE_EXIT_AFTER_TAKEOVER_MIN_MS);
+       expect(timeline.endInMs - timeline.exitInMs).toBe(ENTRANCE_OVERLAY_EXIT_MS);
+       expect(elapsed + timeline.endInMs).toBeGreaterThanOrEqual(ENTRANCE_MIN_TOTAL_MS);
+       expect(elapsed + timeline.endInMs).toBeLessThanOrEqual(ENTRANCE_MAX_TOTAL_MS);
+@@ -704,6 +739,17 @@
+     expect(dispatchScrollGesture(type)).toEqual({ defaultPrevented: false, reachedPage: true });
+   });
+ 
++  it.each([
++    'wheel',
++    'touchmove',
++  ] as const)('E8e a %s zoom gesture before hydration skips the cover and is not blocked', (type) => {
++    const cover = installHeadCover();
++    runBootScript();
++    expect(dispatchZoomGesture(type)).toEqual({ defaultPrevented: false, reachedPage: true });
++    expect(cover.media).toBe('not all');
++    expect(cover.getAttribute('data-state')).toBe('skipped');
++  });
++
+   it('E8d after the takeover or the failsafe the boot scroll-skip listeners are gone', () => {
+     const listenersLeft = trackWindowScrollSkipListeners();
+     installHeadCover();
+@@ -722,6 +768,7 @@
+     expect(listenersLeft()).toBe(2);
+     vi.advanceTimersByTime(ENTRANCE_FAILSAFE_MS + 250);
+     expect(listenersLeft()).toBe(0);
++    expect(dispatchScrollGesture('wheel')).toEqual({ defaultPrevented: false, reachedPage: true });
+   });
+ 
+   it('E8b other keys before hydration keep the cover', () => {
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-488/sketch-489-v1/docs/implementation/2026/quarter-IV/316-saba-b-17-entrance-duration.md	2026-11-13 11:57:56.711580992 +0000
++++ /home/runner/czaba-project/tmp/studio-real-loop/b-round-488/sketch-489/docs/implementation/2026/quarter-IV/316-saba-b-17-entrance-duration.md	2026-11-13 11:59:46.117545761 +0000
+@@ -17,7 +17,8 @@
+ - **ხანგრძლივობა იზომება პირველი შავი კადრიდან** (boot script-ის `performance.now()`, როგორც doc 300-ში): მინიმუმ `ENTRANCE_MIN_TOTAL_MS` = 3500 ms, მაქსიმუმ `ENTRANCE_MAX_TOTAL_MS` = 5000 ms.
+ - **ტემპი (takeover-იდან):** spotlight 800 ms-ში ჩნდება; ლოგო +400 ms-ზე, 700 ms fade-ით; ხაზი და tagline +1100 ms-ზე, 500 ms fade-ით; exit არაუადრეს +2500 ms-ისა; overlay-ის exit fade 500 ms (`ENTRANCE_OVERLAY_EXIT_MS`). JS-ის გარეშე CSS failsafe-ის fade 250 ms-ად რჩება (`ENTRANCE_EXIT_MS`).
+ - **takeover-ის ფანჯარა 1000 → 2000 ms** (`ENTRANCE_FAILSAFE_MS`): ნელ პირველ ვიზიტზე შავი ფარდა JS-ს 2 წმ-მდე ელოდება. cap = 2000 + 2500 + 500 = 5000, ამიტომ გვიანი takeover-იც სრულ ტემპს იღებს.
+-- **wheel და touchmove** ფარდის დროს (hydration-მდეც და მის შემდეგაც) ანიმაციას გამოტოვებს და გვერდს არ ასქროლებს: `window`-ზე capture listener, `preventDefault` + `stopPropagation` (Lenis `window`-ის bubble ფაზაში უსმენს). Esc/Tab/click უცვლელია; სხვა ღილაკები (ისრები, PageDown, Space) ისევ არ გამოტოვებენ.
++- **wheel და touchmove** ფარდის დროს (hydration-მდეც და მის შემდეგაც) ანიმაციას გამოტოვებს, ხოლო ჟესტის პირველი event გვერდს არ ასქროლებს: `window`-ზე capture listener, `preventDefault` + `stopPropagation` (Lenis `window`-ის bubble ფაზაში უსმენს). trackpad-ის ან inertia-ს მომდევნო event-ები ფარდის მოხსნის შემდეგ ჩვეულებრივ ასქროლებს. zoom-ის ჟესტი (ctrl+wheel, ორი თითით pinch) ანიმაციას გამოტოვებს, მაგრამ არ იბლოკება. Esc/Tab/click უცვლელია; სხვა ღილაკები (ისრები, PageDown, Space) ისევ არ გამოტოვებენ.
++- listener-ების სია ერთ ადგილასაა (`ENTRANCE_SCROLL_SKIP_EVENTS`): boot script-ის სტრიქონიც მისგან იწყობა. post-takeover-ის მინიმუმი `ENTRANCE_EXIT_AFTER_TAKEOVER_MIN_MS` (2500) `EntranceCover.tsx`-შია.
+ - **უარყოფილი ალტერნატივები:**
+   - 3000 / 4000 ms: Saba-ს „მინიმუმ 3–4 წამის“ ქვედა ზღვარზე იქნებოდა.
+   - ერთი საერთო 500 ms exit: no-JS failsafe-ის შეცვლა საჭირო არ იყო.
+@@ -37,31 +38,36 @@
+         React->>Cover: live, ფარდა off, overlay on
+         React->>React: ლოგო +400, tagline +1100, exit ≥ +2500, fade 500
+         Note over React: სულ 3500–5000 ms პირველი კადრიდან
+-    else JS-ის გარეშე ან > 2000 ms
+-        Cover->>Cover: CSS fade 250 ms (2000 ms-ზე), expired, ანიმაცია აღარ თამაშობს
++    else JS-ის გარეშე
++        Cover->>Cover: CSS fade 250 ms (2000 ms-ზე); data-state არ იწერება
++    else JS > 2000 ms
++        React->>Cover: expired, ანიმაცია აღარ თამაშობს
+     end
+ ```
+ 
+ ## შეცვლილი ფაილები
+ 
+-- `app/components/loading/EntranceCover.tsx` — 3500 / 5000 / 2000 ms, ახალი `ENTRANCE_OVERLAY_EXIT_MS` და `ENTRANCE_SCROLL_SKIP_EVENTS`; boot script-ში wheel/touchmove skip.
+-- `app/components/loading/SpotlightLoader.tsx` — ტემპის კონსტანტები, `EXIT_AFTER_TAKEOVER_MIN_MS` (export), timeline-ში overlay exit, wheel/touchmove skip listener-ები.
+-- `app/lib/__tests__/store-entrance-loader.test.tsx` — L3, E1, E6 ახალ მნიშვნელობებზე; ახალი S1, S2, E6b, E8c, E8d.
++- `app/components/loading/EntranceCover.tsx` — 3500 / 5000 / 2000 ms, ახალი `ENTRANCE_OVERLAY_EXIT_MS`, `ENTRANCE_EXIT_AFTER_TAKEOVER_MIN_MS` და `ENTRANCE_SCROLL_SKIP_EVENTS`; boot script-ში wheel/touchmove skip (zoom-ის ჟესტი არ იბლოკება).
++- `app/components/loading/SpotlightLoader.tsx` — ტემპის კონსტანტები, timeline-ში overlay exit, wheel/touchmove skip listener-ები, `isZoomGesture`.
++- `app/lib/__tests__/store-entrance-loader.test.tsx` — L3, E1, E6 ახალ მნიშვნელობებზე; ახალი S1, S2, S3, E6b, E8c, E8d, E8e.
+ 
+ ## პრობლემები და გადაწყვეტები
+ 
+ - **Problem:** Saba ანიმაციას ვერ ასწრებდა დანახვას (~1.55 წმ). **Solution:** მინიმუმ 3500 ms პირველი კადრიდან და ნელი ტემპი; ლოგო ~1.7 წმ ჩანს სრულად (`b-round-488/probe/sketch/`).
+ - **Problem:** ნელ პირველ ვიზიტზე ანიმაცია არ თამაშობდა (B-R489-ENTRANCE-SLOW-FIRST-VISIT-EXPIRED). **Solution:** takeover-ის ფანჯარა 2000 ms და cap 5000 ms; Fast 3G (~2.3 წმ) ისევ ვერ ასწრებს — ეს Saba-ს კითხვაა (SABA-Q-ENTRANCE-SLOW-WAIT).
+ - **Problem:** ბორბალი ფარდის ქვეშ გვერდს ასქროლებდა (B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER). **Solution:** wheel/touchmove ანიმაციას გამოტოვებს და გვერდი თავში რჩება.
+-- **Problem:** ერთი ფუნქცია ორ ტიპზე (wheel, touchmove) — listener-ების მთვლელი Set-ით ერთს ითვლიდა. **Solution:** ტესტის მთვლელი ტიპის მიხედვით ითვლის (S1, S2, E8d).
++- **Problem:** ერთი ფუნქცია ორ ტიპზე (wheel, touchmove) — listener-ების მთვლელი Set-ით ერთს ითვლიდა. **Solution:** ტესტის მთვლელი ტიპით და capture flag-ით ითვლის (S1, S2, E8d).
++- **Problem:** tech-lead-ის review: ctrl+wheel (browser zoom) და pinch ფარდის დროს იბლოკებოდა. **Solution:** zoom-ის ჟესტი ანიმაციას გამოტოვებს `preventDefault`-ის გარეშე (S3, E8e).
+ 
+ ## ტესტირება
+ 
+-- Unit (`store-entrance-loader.test.tsx`): L3 (3500 / 5000), E1 (failsafe 2000), E6 (timeline: 0 → 3500, 160 → 3500 ჯამი, 900 → 3900, 2000 და 2600 → 5000), E6b (გვიანი takeover-იც იღებს +2500 და 500 ms exit-ს), S1 (wheel/touchmove overlay-ს ხურავს, `defaultPrevented`, გვერდამდე არ აღწევს, listener-ები იხსნება), S2 (ბუნებრივი დასრულება და unmount), E8c (wheel/touchmove hydration-მდე → skipped), E8d (boot listener-ები takeover-ზე და failsafe-ზე იხსნება).
+-- ბრაუზერი (production build, Chromium, mock API; C round 489): პირველი კადრიდან ფარდის აწევამდე 1× CPU-ზე ≥ 3.4 წმ, 4× CPU-ზე ≤ 5 წმ; ლოგო ≥ 1.2 წმ, tagline ≥ 0.6 წმ; 4G + 4× CPU-ზე და JS +1.5 წმ-ზე ანიმაცია თამაშობს; wheel → `scrollY` 0; reload და reduced motion → შავი კადრი არ არის.
++- Unit (`store-entrance-loader.test.tsx`): L3 (3500 / 5000), E1 (failsafe 2000), E6 (timeline: 0 → 3500, 160 → 3500 ჯამი, 900 → 3900, 2000 და 2600 → 5000), E6b (გვიანი takeover-იც იღებს +2500 და 500 ms exit-ს), S1 (wheel/touchmove overlay-ს ხურავს, `defaultPrevented`, გვერდამდე არ აღწევს, listener-ები იხსნება), S2 (ბუნებრივი დასრულება და unmount), S3 (ctrl+wheel და pinch overlay-ს ხურავს, მაგრამ არ იბლოკება), E8c (wheel/touchmove hydration-მდე → skipped), E8d (boot listener-ები takeover-ზე და failsafe-ზე იხსნება), E8e (zoom-ის ჟესტი hydration-მდე → skipped, არ იბლოკება).
++- B-ის ბრაუზერის გაზომვა sketch-ზე (production build, Chromium, mock API; `b-round-488/probe/sketch/summary.jsonl`): ფარდის აწევა პირველი covered rAF sample-იდან 1× CPU-ზე 3453–3463 ms (boot script-ის `data-start`-იდან 3477–3510 ms — ზღვარი `data-start`-იდან ითვლება, sample ~50 ms-ით გვიანაა), 4× CPU-ზე 3732–3865 ms; ლოგო სრულად 1549–1717 ms, tagline 845–1067 ms; 4G + 4× CPU-ზე და JS +1.5 წმ-ზე ანიმაცია თამაშობს; wheel 0.8 წმ-ზე → `scrollY` 0 (ერთი სინთეზური event); reload და reduced motion → შავი კადრი არ არის. touchmove და pinch მხოლოდ jsdom-შია შემოწმებული; რეალურ ტელეფონზე — Tech Lead (TLM-R489-TOUCH-SWIPE).
++- C round 489 იმავე probe-ებს იმეორებს (`current-task.md` §3).
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+ - Saba-ს პასუხები: SABA-Q-ENTRANCE-SCROLL-SKIP, SABA-Q-ENTRANCE-SLOW-WAIT, SABA-Q-ENTRANCE-WORDMARK, SABA-Q-ENTRANCE-BACKGROUND-TAB.
+ - ისრები / PageDown / Space ფარდის ქვეშ ისევ ასქროლებს (Low B-R489-ENTRANCE-SCROLL-KEYS-UNDER-COVER, Saba-ს პასუხის შემდეგ).
+-- Saba ამოწმებს Vercel preview-ზე **ახალ tab-ში** (TLM-R489-SABA-ENTRANCE-FEEL).
++- Saba ამოწმებს Vercel preview-ზე **ახალ tab-ში** (TLM-R489-SABA-ENTRANCE-FEEL); touch/pinch რეალურ ტელეფონზე (TLM-R489-TOUCH-SWIPE).
++- exit fade-ის 500 ms-ში wheel-ის პირველი event ისევ იბლოკება (tech-lead Low 6; მიღებულია).

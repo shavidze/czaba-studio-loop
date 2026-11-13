@@ -1,0 +1,448 @@
+diff --git a/app/components/loading/EntranceCover.tsx b/app/components/loading/EntranceCover.tsx
+index 178b81b..9fe58d7 100644
+--- a/app/components/loading/EntranceCover.tsx
++++ b/app/components/loading/EntranceCover.tsx
+@@ -1,10 +1,12 @@
+ // შესასვლელის სტატიკური ფარდა: <head>-ში, რომ პირველივე კადრი შავი იყოს (SABA-B-13)
+ export const ENTRANCE_COVER_ID = 'czaba-entrance-cover';
+ export const ENTRANCE_SESSION_KEY = 'czaba_entrance_seen';
+-export const ENTRANCE_MIN_TOTAL_MS = 1450;
+-export const ENTRANCE_MAX_TOTAL_MS = 1900;
+-export const ENTRANCE_FAILSAFE_MS = 1000;
++export const ENTRANCE_MIN_TOTAL_MS = 3500;
++export const ENTRANCE_MAX_TOTAL_MS = 5000;
++export const ENTRANCE_FAILSAFE_MS = 2000;
+ export const ENTRANCE_EXIT_MS = 250;
++export const ENTRANCE_OVERLAY_EXIT_MS = 500;
++export const ENTRANCE_SCROLL_SKIP_EVENTS = ['wheel', 'touchmove'] as const;
+ export const ENTRANCE_TAKEOVER_EVENT = 'czaba-entrance-takeover';
+ export const ENTRANCE_REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+ 
+@@ -27,7 +29,7 @@ export const ENTRANCE_COVER_CSS = `@media (prefers-reduced-motion: no-preference
+ const sessionGate = `if(sessionStorage.getItem('${ENTRANCE_SESSION_KEY}')==='1')return;sessionStorage.setItem('${ENTRANCE_SESSION_KEY}','1');`;
+ 
+ // მდგომარეობა window-ზეა: hydration-ის შეცდომისას React <style>-ს ცვლის, window კი რჩება (A-R459-REVIEW-R1)
+-export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var c=document.getElementById('${ENTRANCE_COVER_ID}');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('${ENTRANCE_REDUCED_MOTION_QUERY}').matches)return;${sessionGate}var h={start:performance.now(),state:'pending'};window.__czabaEntrance=h;c.setAttribute('data-start',String(h.start));c.media='all';var t;var off=function(){clearTimeout(t);document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);window.removeEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);};var end=function(){off();if(h.state==='pending')h.state='skipped';var n=document.getElementById('${ENTRANCE_COVER_ID}');if(n){n.setAttribute('data-state',h.state);n.media='not all';}};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);window.addEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);t=setTimeout(off,${ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS});}catch(e){}})();`;
++export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var c=document.getElementById('${ENTRANCE_COVER_ID}');if(!c||location.pathname!=='/')return;if(window.matchMedia&&window.matchMedia('${ENTRANCE_REDUCED_MOTION_QUERY}').matches)return;${sessionGate}var h={start:performance.now(),state:'pending'};window.__czabaEntrance=h;c.setAttribute('data-start',String(h.start));c.media='all';var t;var off=function(){clearTimeout(t);document.removeEventListener('keydown',key,true);document.removeEventListener('click',end,true);window.removeEventListener('wheel',scroll,true);window.removeEventListener('touchmove',scroll,true);window.removeEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);};var end=function(){off();if(h.state==='pending')h.state='skipped';var n=document.getElementById('${ENTRANCE_COVER_ID}');if(n){n.setAttribute('data-state',h.state);n.media='not all';}};var key=function(e){if(e.key==='Escape'||e.key==='Tab')end();};var scroll=function(e){if(e.cancelable)e.preventDefault();e.stopPropagation();end();};document.addEventListener('keydown',key,true);document.addEventListener('click',end,true);window.addEventListener('wheel',scroll,{capture:true,passive:false});window.addEventListener('touchmove',scroll,{capture:true,passive:false});window.addEventListener('${ENTRANCE_TAKEOVER_EVENT}',off);t=setTimeout(off,${ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS});}catch(e){}})();`;
+ 
+ // client re-render (hydration-ის შეცდომა) ფარდას ჩართულს ტოვებს, სანამ SpotlightLoader არ ჩაიბარებს
+ function isEntrancePending(): boolean {
+diff --git a/app/components/loading/SpotlightLoader.tsx b/app/components/loading/SpotlightLoader.tsx
+index b4e9c90..f733dae 100644
+--- a/app/components/loading/SpotlightLoader.tsx
++++ b/app/components/loading/SpotlightLoader.tsx
+@@ -4,23 +4,26 @@ import { createPortal } from 'react-dom';
+ import { cn } from '~/lib/utils';
+ import {
+   ENTRANCE_COVER_ID,
+-  ENTRANCE_EXIT_MS,
+   ENTRANCE_FAILSAFE_MS,
+   ENTRANCE_MAX_TOTAL_MS,
+   ENTRANCE_MIN_TOTAL_MS,
++  ENTRANCE_OVERLAY_EXIT_MS,
+   ENTRANCE_REDUCED_MOTION_QUERY,
++  ENTRANCE_SCROLL_SKIP_EVENTS,
+   ENTRANCE_SESSION_KEY,
+   ENTRANCE_TAKEOVER_EVENT,
+   type EntranceHandshake,
+   type EntranceHandshakeState,
+ } from './EntranceCover';
+ 
+-const LOGO_AFTER_TAKEOVER_MS = 120;
+-const HOLD_AFTER_TAKEOVER_MS = 300;
+-const EXIT_AFTER_TAKEOVER_MIN_MS = 1050;
+-const SPOTLIGHT_DURATION = 0.3;
+-const LOGO_FADE_DURATION = 0.25;
+-const EXIT_DURATION = ENTRANCE_EXIT_MS / 1000;
++const LOGO_AFTER_TAKEOVER_MS = 400;
++const HOLD_AFTER_TAKEOVER_MS = 1100;
++export const EXIT_AFTER_TAKEOVER_MIN_MS = 2500;
++const SPOTLIGHT_DURATION = 0.8;
++const LOGO_FADE_DURATION = 0.7;
++const LOGO_TRACKING_DURATION = 0.9;
++const TAGLINE_FADE_DURATION = 0.5;
++const EXIT_DURATION = ENTRANCE_OVERLAY_EXIT_MS / 1000;
+ 
+ export interface EntranceTimeline {
+   logoInMs: number;
+@@ -29,19 +32,22 @@ export interface EntranceTimeline {
+   endInMs: number;
+ }
+ 
+-// დრო ითვლება claimEntranceStart-ის performance.now()-დან: მოცილება >= 1450 ms, <= 1900 ms
++// დრო ითვლება claimEntranceStart-ის performance.now()-დან: მოცილება >= 3500 ms, <= 5000 ms (SABA-B-17)
+ export function entranceTimeline(elapsedAtTakeoverMs: number): EntranceTimeline {
+   const elapsed = Math.max(0, elapsedAtTakeoverMs);
+   const exitAt = Math.min(
+-    Math.max(ENTRANCE_MIN_TOTAL_MS - ENTRANCE_EXIT_MS, elapsed + EXIT_AFTER_TAKEOVER_MIN_MS),
+-    ENTRANCE_MAX_TOTAL_MS - ENTRANCE_EXIT_MS,
++    Math.max(
++      ENTRANCE_MIN_TOTAL_MS - ENTRANCE_OVERLAY_EXIT_MS,
++      elapsed + EXIT_AFTER_TAKEOVER_MIN_MS,
++    ),
++    ENTRANCE_MAX_TOTAL_MS - ENTRANCE_OVERLAY_EXIT_MS,
+   );
+   const exitInMs = exitAt - elapsed;
+   return {
+     logoInMs: Math.min(LOGO_AFTER_TAKEOVER_MS, exitInMs),
+     holdInMs: Math.min(HOLD_AFTER_TAKEOVER_MS, exitInMs),
+     exitInMs,
+-    endInMs: exitInMs + ENTRANCE_EXIT_MS,
++    endInMs: exitInMs + ENTRANCE_OVERLAY_EXIT_MS,
+   };
+ }
+ 
+@@ -144,9 +150,17 @@ export function SpotlightLoader() {
+     const handleEntranceSkipKey = (event: KeyboardEvent) => {
+       if (event.key === 'Escape' || event.key === 'Tab') hideEntrance();
+     };
++    const handleEntranceSkipScroll = (event: Event) => {
++      if (event.cancelable) event.preventDefault();
++      event.stopPropagation();
++      hideEntrance();
++    };
+     const overlay = overlayRef.current;
+     document.addEventListener('keydown', handleEntranceSkipKey);
+     overlay?.addEventListener('click', hideEntrance);
++    for (const type of ENTRANCE_SCROLL_SKIP_EVENTS) {
++      window.addEventListener(type, handleEntranceSkipScroll, { capture: true, passive: false });
++    }
+     const handshake = window.__czabaEntrance;
+     if (handshake?.state === 'skipped') {
+       hideEntrance();
+@@ -160,6 +174,9 @@ export function SpotlightLoader() {
+       for (const timer of timers) clearTimeout(timer);
+       document.removeEventListener('keydown', handleEntranceSkipKey);
+       overlay?.removeEventListener('click', hideEntrance);
++      for (const type of ENTRANCE_SCROLL_SKIP_EVENTS) {
++        window.removeEventListener(type, handleEntranceSkipScroll, { capture: true });
++      }
+     };
+   }, [isVisible, startMs]);
+ 
+@@ -270,7 +287,7 @@ export function SpotlightLoader() {
+             animate={{
+               letterSpacing: showLogo ? '0.2em' : '0.3em',
+             }}
+-            transition={{ duration: 0.4, ease: 'easeOut' }}
++            transition={{ duration: LOGO_TRACKING_DURATION, ease: 'easeOut' }}
+             className="block text-5xl md:text-7xl font-bold text-brand"
+           >
+             CZABA
+@@ -282,7 +299,7 @@ export function SpotlightLoader() {
+               opacity: phase === 'holding' || phase === 'exit' ? 1 : 0,
+               width: phase === 'holding' || phase === 'exit' ? '100%' : 0,
+             }}
+-            transition={{ duration: 0.2, delay: 0.05 }}
++            transition={{ duration: TAGLINE_FADE_DURATION, delay: 0.05 }}
+             className="h-[1px] mx-auto mt-4 mb-4 bg-brand/50"
+           />
+ 
+@@ -292,7 +309,7 @@ export function SpotlightLoader() {
+               opacity: phase === 'holding' || phase === 'exit' ? 1 : 0,
+               y: phase === 'holding' || phase === 'exit' ? 0 : 10,
+             }}
+-            transition={{ duration: 0.2, delay: 0.1 }}
++            transition={{ duration: TAGLINE_FADE_DURATION, delay: 0.1 }}
+             className="text-sm text-muted tracking-[0.3em] uppercase"
+           >
+             Cinematic Sound Design
+diff --git a/app/lib/__tests__/store-entrance-loader.test.tsx b/app/lib/__tests__/store-entrance-loader.test.tsx
+index 80ce2e4..15c6d5b 100644
+--- a/app/lib/__tests__/store-entrance-loader.test.tsx
++++ b/app/lib/__tests__/store-entrance-loader.test.tsx
+@@ -11,10 +11,15 @@ import {
+   ENTRANCE_FAILSAFE_MS,
+   ENTRANCE_MAX_TOTAL_MS,
+   ENTRANCE_MIN_TOTAL_MS,
++  ENTRANCE_OVERLAY_EXIT_MS,
+   ENTRANCE_TAKEOVER_EVENT,
+   EntranceCoverHead,
+ } from '~/components/loading/EntranceCover';
+-import { entranceTimeline, SpotlightLoader } from '~/components/loading/SpotlightLoader';
++import {
++  EXIT_AFTER_TAKEOVER_MIN_MS,
++  entranceTimeline,
++  SpotlightLoader,
++} from '~/components/loading/SpotlightLoader';
+ 
+ const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+ const SESSION_KEY = 'czaba_entrance_seen';
+@@ -57,6 +62,29 @@ function advanceTo(current: { ms: number }, target: number) {
+   current.ms = target;
+ }
+ 
++function dispatchScrollGesture(type: 'wheel' | 'touchmove') {
++  const event = new Event(type, { bubbles: true, cancelable: true });
++  const bubbled = vi.fn();
++  window.addEventListener(type, bubbled);
++  document.body.dispatchEvent(event);
++  window.removeEventListener(type, bubbled);
++  return { defaultPrevented: event.defaultPrevented, reachedPage: bubbled.mock.calls.length > 0 };
++}
++
++function trackWindowScrollSkipListeners() {
++  const addSpy = vi.spyOn(window, 'addEventListener');
++  const removeSpy = vi.spyOn(window, 'removeEventListener');
++  return () => {
++    const added = new Map<string, Set<EventListenerOrEventListenerObject>>([
++      ['wheel', new Set()],
++      ['touchmove', new Set()],
++    ]);
++    for (const call of addSpy.mock.calls) added.get(call[0])?.add(call[1]);
++    for (const call of removeSpy.mock.calls) added.get(call[0])?.delete(call[1]);
++    return [...added.values()].reduce((total, listeners) => total + listeners.size, 0);
++  };
++}
++
+ describe('SpotlightLoader entrance (STORE-1d D10, SABA-B-13 minimum)', () => {
+   beforeEach(() => {
+     window.__czabaEntrance = undefined;
+@@ -92,14 +120,16 @@ describe('SpotlightLoader entrance (STORE-1d D10, SABA-B-13 minimum)', () => {
+     expect(overlay?.textContent).toContain('CZABA');
+   });
+ 
+-  it('L3 stays on screen for the 1450 ms minimum, exit fade included, never past 1900 ms', () => {
+-    expect(TOTAL).toBe(1450);
+-    expect(ENTRANCE_MAX_TOTAL_MS).toBe(1900);
++  it('L3 stays on screen for the 3500 ms minimum, exit fade included, never past 5000 ms', () => {
++    expect(TOTAL).toBe(3500);
++    expect(ENTRANCE_MAX_TOTAL_MS).toBe(5000);
+     const clock = { ms: 0 };
+     const { container } = mountEntranceLoader();
+ 
+     advanceTo(clock, 600);
+     expect(findOverlay(container)).not.toBeNull();
++    advanceTo(clock, 2999);
++    expect(findOverlay(container)?.classList.contains('pointer-events-none')).toBe(false);
+     advanceTo(clock, TOTAL - 1);
+     expect(findOverlay(container)).not.toBeNull();
+     advanceTo(clock, TOTAL);
+@@ -290,6 +320,47 @@ describe('SpotlightLoader entrance (STORE-1d D10, SABA-B-13 minimum)', () => {
+     expect(container && findOverlay(container)).toBeNull();
+   });
+ 
++  it.each([
++    ['wheel', 'wheel'],
++    ['touchmove', 'touchmove'],
++  ] as const)('S1 a %s gesture ends the overlay without scrolling the page', (_label, type) => {
++    const listenersLeft = trackWindowScrollSkipListeners();
++    const clock = { ms: 0 };
++    const { container } = mountEntranceLoader();
++    advanceTo(clock, 800);
++    expect(findOverlay(container)).not.toBeNull();
++    expect(listenersLeft()).toBe(2);
++
++    let gesture = { defaultPrevented: false, reachedPage: true };
++    act(() => {
++      gesture = dispatchScrollGesture(type);
++    });
++    expect(gesture).toEqual({ defaultPrevented: true, reachedPage: false });
++    expect(findOverlay(container)).toBeNull();
++    expect(vi.getTimerCount()).toBe(0);
++    expect(listenersLeft()).toBe(0);
++
++    expect(dispatchScrollGesture(type)).toEqual({ defaultPrevented: false, reachedPage: true });
++  });
++
++  it('S2 the scroll-skip listeners are gone after the natural finish and on unmount', () => {
++    const listenersLeft = trackWindowScrollSkipListeners();
++    const clock = { ms: 0 };
++    const finished = mountEntranceLoader();
++    advanceTo(clock, TOTAL);
++    expect(findOverlay(finished.container)).toBeNull();
++    expect(listenersLeft()).toBe(0);
++    expect(dispatchScrollGesture('wheel')).toEqual({ defaultPrevented: false, reachedPage: true });
++    finished.unmount();
++
++    window.sessionStorage.clear();
++    const mid = mountEntranceLoader();
++    advanceTo(clock, TOTAL + 400);
++    expect(listenersLeft()).toBe(2);
++    mid.unmount();
++    expect(listenersLeft()).toBe(0);
++  });
++
+   it('L11 leaves no stray timers or state updates after unmount', () => {
+     const consoleError = vi.spyOn(console, 'error');
+     const clock = { ms: 0 };
+@@ -486,7 +557,7 @@ describe('SABA-B-13 static head cover and takeover', () => {
+     expect(html).toContain(`250ms ease-in-out ${ENTRANCE_FAILSAFE_MS}ms forwards`);
+     expect(html).toContain('prefers-reduced-motion: no-preference');
+     expect(html).toContain('<script>');
+-    expect(ENTRANCE_FAILSAFE_MS).toBe(1000);
++    expect(ENTRANCE_FAILSAFE_MS).toBe(2000);
+   });
+ 
+   it('E1b the server render keeps the cover off even when a pending handshake exists', () => {
+@@ -553,25 +624,42 @@ describe('SABA-B-13 static head cover and takeover', () => {
+     expect(findOverlay(container)).toBeNull();
+   });
+ 
+-  it('E6 the timeline counts from the first cover frame: 1450 ms minimum, 1900 ms cap', () => {
++  it('E6 the timeline counts from the first cover frame: 3500 ms minimum, 5000 ms cap', () => {
+     expect(entranceTimeline(0)).toEqual({
+-      logoInMs: 120,
+-      holdInMs: 300,
+-      exitInMs: 1200,
+-      endInMs: 1450,
++      logoInMs: 400,
++      holdInMs: 1100,
++      exitInMs: 3000,
++      endInMs: 3500,
+     });
+     expect(entranceTimeline(160)).toEqual({
+-      logoInMs: 120,
+-      holdInMs: 300,
+-      exitInMs: 1050,
+-      endInMs: 1300,
++      logoInMs: 400,
++      holdInMs: 1100,
++      exitInMs: 2840,
++      endInMs: 3340,
+     });
+-    expect(160 + entranceTimeline(160).endInMs).toBe(1460);
+-    expect(900 + entranceTimeline(900).endInMs).toBe(ENTRANCE_MAX_TOTAL_MS);
+-    expect(999 + entranceTimeline(999).endInMs).toBe(ENTRANCE_MAX_TOTAL_MS);
++    expect(160 + entranceTimeline(160).endInMs).toBe(ENTRANCE_MIN_TOTAL_MS);
++    expect(900 + entranceTimeline(900).endInMs).toBe(3900);
++    expect(1999 + entranceTimeline(1999).endInMs).toBe(4999);
++    expect(2000 + entranceTimeline(2000).endInMs).toBe(ENTRANCE_MAX_TOTAL_MS);
++    expect(2600 + entranceTimeline(2600).endInMs).toBe(ENTRANCE_MAX_TOTAL_MS);
+     expect(entranceTimeline(-50)).toEqual(entranceTimeline(0));
+   });
+ 
++  it('E6b a takeover at the end of the window still gets the full post-takeover floor', () => {
++    expect(ENTRANCE_MAX_TOTAL_MS).toBe(
++      ENTRANCE_FAILSAFE_MS + EXIT_AFTER_TAKEOVER_MIN_MS + ENTRANCE_OVERLAY_EXIT_MS,
++    );
++    expect(ENTRANCE_OVERLAY_EXIT_MS).toBe(500);
++    for (const elapsed of [0, 160, 500, 900, 1500, ENTRANCE_FAILSAFE_MS - 1]) {
++      const timeline = entranceTimeline(elapsed);
++      expect(timeline.exitInMs).toBeGreaterThanOrEqual(EXIT_AFTER_TAKEOVER_MIN_MS);
++      expect(timeline.exitInMs - timeline.holdInMs).toBeGreaterThanOrEqual(1400);
++      expect(timeline.endInMs - timeline.exitInMs).toBe(ENTRANCE_OVERLAY_EXIT_MS);
++      expect(elapsed + timeline.endInMs).toBeGreaterThanOrEqual(ENTRANCE_MIN_TOTAL_MS);
++      expect(elapsed + timeline.endInMs).toBeLessThanOrEqual(ENTRANCE_MAX_TOTAL_MS);
++    }
++  });
++
+   it('E7 a takeover after the failsafe never replays the entrance', () => {
+     const cover = installHeadCover();
+     runBootScript();
+@@ -600,6 +688,42 @@ describe('SABA-B-13 static head cover and takeover', () => {
+     expect(overlayMounted()).toBe(false);
+   });
+ 
++  it.each([
++    'wheel',
++    'touchmove',
++  ] as const)('E8c a %s before hydration skips the cover without scrolling the page', (type) => {
++    const cover = installHeadCover();
++    runBootScript();
++    expect(dispatchScrollGesture(type)).toEqual({ defaultPrevented: true, reachedPage: false });
++    expect(cover.media).toBe('not all');
++    expect(cover.getAttribute('data-state')).toBe('skipped');
++    const overlayMounted = watchOverlayMounts();
++    const { container } = render(<SpotlightLoader />);
++    expect(findOverlay(container)).toBeNull();
++    expect(overlayMounted()).toBe(false);
++    expect(dispatchScrollGesture(type)).toEqual({ defaultPrevented: false, reachedPage: true });
++  });
++
++  it('E8d after the takeover or the failsafe the boot scroll-skip listeners are gone', () => {
++    const listenersLeft = trackWindowScrollSkipListeners();
++    installHeadCover();
++    runBootScript();
++    expect(listenersLeft()).toBe(2);
++    const { container } = render(<SpotlightLoader />);
++    expect(findOverlay(container)).not.toBeNull();
++    expect(listenersLeft()).toBe(2);
++    cleanup();
++    expect(listenersLeft()).toBe(0);
++
++    window.__czabaEntrance = undefined;
++    window.sessionStorage.clear();
++    installHeadCover();
++    runBootScript();
++    expect(listenersLeft()).toBe(2);
++    vi.advanceTimersByTime(ENTRANCE_FAILSAFE_MS + 250);
++    expect(listenersLeft()).toBe(0);
++  });
++
+   it('E8b other keys before hydration keep the cover', () => {
+     const cover = installHeadCover();
+     runBootScript();
+diff --git a/docs/implementation/2026/quarter-IV/316-saba-b-17-entrance-duration.md b/docs/implementation/2026/quarter-IV/316-saba-b-17-entrance-duration.md
+new file mode 100644
+index 0000000..1e150bb
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/316-saba-b-17-entrance-duration.md
+@@ -0,0 +1,67 @@
++# SABA-B-17: Store-ის შესასვლელი პირველ ვიზიტზე მინიმუმ 3.5 წამი გრძელდება
++
++**თარიღი:** 2026-11-13
++**სტატუსი:** Completed (C round 489 PASS)
++**შეცვლილი პროექტი:** Store (`app/components/loading/EntranceCover.tsx`, `app/components/loading/SpotlightLoader.tsx`, `app/lib/__tests__/store-entrance-loader.test.tsx`)
++
++## კონტექსტი
++
++- Saba-მ (2026-11-13) დაწერა, რომ შესასვლელი ანიმაცია (SpotlightLoader) ძალიან სწრაფად ქრება: პირველ ვიზიტზე მინიმუმ 3–4 წამი უნდა გრძელდებოდეს, რადგან ისედაც მხოლოდ ერთხელ ჩანს tab-ზე. ეს Medium-ია (Saba-მ თავად დაინახა).
++- SABA-B-13-მა (doc 300) პირველი კადრი შავი გახადა და ხანგრძლივობა 1450–1900 ms-ზე დააყენა. B-მ HEAD `73f994d` production build-ზე გაზომა (`b-round-488/probe/head/`): ფარდა პირველი კადრიდან ~1.55 წმ-ში იწევს, ლოგო სრულად ~0.71 წმ ჩანს, tagline ~0.47 წმ.
++- იმავე გაზომვამ ორი დაკავშირებული ხარვეზი აჩვენა, რომლებსაც გრძელი ანიმაცია გააძლიერებდა:
++  - **ნელი პირველი ვიზიტი:** თუ JavaScript 1000 ms-ზე გვიან მოვიდა (Fast 3G, JS +1.5 წმ), ანიმაცია საერთოდ არ თამაშობს (`expired`), ჩანს მხოლოდ ~1.3 წმ შავი ეკრანი. 4G + 4× CPU-ზე tagline სრულად არასდროს ჩანს.
++  - **ბორბალი ფარდის ქვეშ:** ფარდის დროს მაუსის ბორბალი გვერდს უხილავად 600 px-ით ჩამოწევდა.
++
++## მიდგომა
++
++- **ხანგრძლივობა იზომება პირველი შავი კადრიდან** (boot script-ის `performance.now()`, როგორც doc 300-ში): მინიმუმ `ENTRANCE_MIN_TOTAL_MS` = 3500 ms, მაქსიმუმ `ENTRANCE_MAX_TOTAL_MS` = 5000 ms.
++- **ტემპი (takeover-იდან):** spotlight 800 ms-ში ჩნდება; ლოგო +400 ms-ზე, 700 ms fade-ით; ხაზი და tagline +1100 ms-ზე, 500 ms fade-ით; exit არაუადრეს +2500 ms-ისა; overlay-ის exit fade 500 ms (`ENTRANCE_OVERLAY_EXIT_MS`). JS-ის გარეშე CSS failsafe-ის fade 250 ms-ად რჩება (`ENTRANCE_EXIT_MS`).
++- **takeover-ის ფანჯარა 1000 → 2000 ms** (`ENTRANCE_FAILSAFE_MS`): ნელ პირველ ვიზიტზე შავი ფარდა JS-ს 2 წმ-მდე ელოდება. cap = 2000 + 2500 + 500 = 5000, ამიტომ გვიანი takeover-იც სრულ ტემპს იღებს.
++- **wheel და touchmove** ფარდის დროს (hydration-მდეც და მის შემდეგაც) ანიმაციას გამოტოვებს და გვერდს არ ასქროლებს: `window`-ზე capture listener, `preventDefault` + `stopPropagation` (Lenis `window`-ის bubble ფაზაში უსმენს). Esc/Tab/click უცვლელია; სხვა ღილაკები (ისრები, PageDown, Space) ისევ არ გამოტოვებენ.
++- **უარყოფილი ალტერნატივები:**
++  - 3000 / 4000 ms: Saba-ს „მინიმუმ 3–4 წამის“ ქვედა ზღვარზე იქნებოდა.
++  - ერთი საერთო 500 ms exit: no-JS failsafe-ის შეცვლა საჭირო არ იყო.
++  - ფარდაზე სტატიკური CSS ლოგო (product-designer-ის რჩევა ნელი ვიზიტისთვის): ვიზუალის ცვლილებაა, Saba-ს კითხვაა (SABA-Q-ENTRANCE-WORDMARK).
++- **Saba-ს კითხვები** (default-ით მუშაობს): SABA-Q-ENTRANCE-SCROLL-SKIP, SABA-Q-ENTRANCE-SLOW-WAIT (`loop/user-review/questions-saba-b-13.md`).
++
++## არქიტექტურა
++
++```mermaid
++sequenceDiagram
++    participant Head as head boot script
++    participant Cover as body::before ფარდა
++    participant React as SpotlightLoader
++    Head->>Cover: პირველი კადრი შავი (data-start)
++    Note over Head: Esc / Tab / click / wheel / touchmove → skipped
++    alt takeover < 2000 ms
++        React->>Cover: live, ფარდა off, overlay on
++        React->>React: ლოგო +400, tagline +1100, exit ≥ +2500, fade 500
++        Note over React: სულ 3500–5000 ms პირველი კადრიდან
++    else JS-ის გარეშე ან > 2000 ms
++        Cover->>Cover: CSS fade 250 ms (2000 ms-ზე), expired, ანიმაცია აღარ თამაშობს
++    end
++```
++
++## შეცვლილი ფაილები
++
++- `app/components/loading/EntranceCover.tsx` — 3500 / 5000 / 2000 ms, ახალი `ENTRANCE_OVERLAY_EXIT_MS` და `ENTRANCE_SCROLL_SKIP_EVENTS`; boot script-ში wheel/touchmove skip.
++- `app/components/loading/SpotlightLoader.tsx` — ტემპის კონსტანტები, `EXIT_AFTER_TAKEOVER_MIN_MS` (export), timeline-ში overlay exit, wheel/touchmove skip listener-ები.
++- `app/lib/__tests__/store-entrance-loader.test.tsx` — L3, E1, E6 ახალ მნიშვნელობებზე; ახალი S1, S2, E6b, E8c, E8d.
++
++## პრობლემები და გადაწყვეტები
++
++- **Problem:** Saba ანიმაციას ვერ ასწრებდა დანახვას (~1.55 წმ). **Solution:** მინიმუმ 3500 ms პირველი კადრიდან და ნელი ტემპი; ლოგო ~1.7 წმ ჩანს სრულად (`b-round-488/probe/sketch/`).
++- **Problem:** ნელ პირველ ვიზიტზე ანიმაცია არ თამაშობდა (B-R489-ENTRANCE-SLOW-FIRST-VISIT-EXPIRED). **Solution:** takeover-ის ფანჯარა 2000 ms და cap 5000 ms; Fast 3G (~2.3 წმ) ისევ ვერ ასწრებს — ეს Saba-ს კითხვაა (SABA-Q-ENTRANCE-SLOW-WAIT).
++- **Problem:** ბორბალი ფარდის ქვეშ გვერდს ასქროლებდა (B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER). **Solution:** wheel/touchmove ანიმაციას გამოტოვებს და გვერდი თავში რჩება.
++- **Problem:** ერთი ფუნქცია ორ ტიპზე (wheel, touchmove) — listener-ების მთვლელი Set-ით ერთს ითვლიდა. **Solution:** ტესტის მთვლელი ტიპის მიხედვით ითვლის (S1, S2, E8d).
++
++## ტესტირება
++
++- Unit (`store-entrance-loader.test.tsx`): L3 (3500 / 5000), E1 (failsafe 2000), E6 (timeline: 0 → 3500, 160 → 3500 ჯამი, 900 → 3900, 2000 და 2600 → 5000), E6b (გვიანი takeover-იც იღებს +2500 და 500 ms exit-ს), S1 (wheel/touchmove overlay-ს ხურავს, `defaultPrevented`, გვერდამდე არ აღწევს, listener-ები იხსნება), S2 (ბუნებრივი დასრულება და unmount), E8c (wheel/touchmove hydration-მდე → skipped), E8d (boot listener-ები takeover-ზე და failsafe-ზე იხსნება).
++- ბრაუზერი (production build, Chromium, mock API; C round 489): პირველი კადრიდან ფარდის აწევამდე 1× CPU-ზე ≥ 3.4 წმ, 4× CPU-ზე ≤ 5 წმ; ლოგო ≥ 1.2 წმ, tagline ≥ 0.6 წმ; 4G + 4× CPU-ზე და JS +1.5 წმ-ზე ანიმაცია თამაშობს; wheel → `scrollY` 0; reload და reduced motion → შავი კადრი არ არის.
++
++## TODO / შემდეგი ნაბიჯები
++
++- Saba-ს პასუხები: SABA-Q-ENTRANCE-SCROLL-SKIP, SABA-Q-ENTRANCE-SLOW-WAIT, SABA-Q-ENTRANCE-WORDMARK, SABA-Q-ENTRANCE-BACKGROUND-TAB.
++- ისრები / PageDown / Space ფარდის ქვეშ ისევ ასქროლებს (Low B-R489-ENTRANCE-SCROLL-KEYS-UNDER-COVER, Saba-ს პასუხის შემდეგ).
++- Saba ამოწმებს Vercel preview-ზე **ახალ tab-ში** (TLM-R489-SABA-ENTRANCE-FEEL).

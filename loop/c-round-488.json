@@ -1,0 +1,60 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "C-SCOPE",
+  "C-APPLY",
+  "IF-PASSWORD",
+  "IF-PASSWORD-NOFOCUS",
+  "IF-TABAWAY",
+  "IF-STAY",
+  "IF-LEAVE",
+  "IF-OVERLAYS",
+  "IF-REPLAY",
+  "PN-REG",
+  "PN-UNIT",
+  "DOC",
+  "G488-AUTH"
+ ],
+ "blocked": [
+  "OWN-BACKEND: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-13T10:56:52.7865159Z",
+  "round": 488,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": null,
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": null,
+ "mutantsRecorded": 24,
+ "mutantRedOnSketch": true,
+ "notes": "Safari/Firefox-mac behaviour is Chromium emulation only (SAFARI-CHECKS). Known Lows B-R488-SAFARI-MENU-SETTLE-FOCUS and PasswordModal dialog semantics (Medium B-R488-PASSWORD-MODAL-DIALOG, round 491) are pre-existing/scheduled, not new. Source untouched by C. Harness fields not applicable to this round are null.",
+ "evidence": {
+  "C-SCOPE": "claims start == end; K1-K4 = planning output; K12 2 of 2; K14 L58 OK (c-round-488/claims-start.txt, claims-end.txt)",
+  "C-APPLY": "K12 sketch-files-equal-store 2 of 2",
+  "IF-PASSWORD": "click-password 200/500 x 2 viewports: modal open before/after, final BUTTON||Click to change password, 1 PUT, editor closed on 200 / open on 500 (inflight.json); r487 tree differed (name button / First name) per B's probe",
+  "IF-PASSWORD-NOFOCUS": "emulated Safari model (Chromium, not real Safari): final BODY, not name button / First name, modal open, 1 PUT. BODY is record only",
+  "IF-TABAWAY": "tab-away: BUTTON||Click to change password|fv=true, 1 PUT, closed on 200 / open on 500",
+  "IF-STAY": "stay-enter: name button(200)/First name(500), fv true; stay-mouse same with fv=false on 200; never BODY final",
+  "IF-LEAVE": "orders-tab: /account/orders, BODY as r487 (unchanged, round 485 contract)",
+  "IF-OVERLAYS": "Search keeps focus in its own INPUT; menu results record-only; overlays.json == B's overlays-sketch.json",
+  "IF-REPLAY": "focus-steal-replay: all 4 runs afterSettle=Click to change password, modal open, 1 PUT",
+  "PN-REG": "profile-probe named + extra-487: 0 diffs vs c-round-487 and vs B v3 sketch values",
+  "PN-UNIT": "82 tests/5 files pass, 18 PN tests; 24 mutants identical red-sets to B summary (mutants.log)",
+  "DOC": "l.4 exact; focus rows, C-R487-01 Problem->Solution exist; every cited PN id exists in test file",
+  "G488-AUTH": "fresh context no creds, both viewports: /account Sign in required, 0 Full Name; /studio-lab demo, auth_user null; /studio/middle-east Sign in required, 0 audio[src]"
+ }
+}
