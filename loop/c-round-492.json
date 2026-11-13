@@ -1,0 +1,83 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-13T16:48:40.5192853Z",
+  "round": 492,
+  "attempt": 1,
+  "store": 200
+ },
+ "stoppedRoutedToB": true,
+ "bugs": [
+  {
+   "id": "C-R492-01",
+   "severity": "low",
+   "steps": [
+    "Read docs/implementation/2026/quarter-IV/318-password-dialog-semantics.md l.22",
+    "Compare with the task Deviation bullet, app/styles/app.css:241 (html[data-focus-source=pointer] :focus-visible {outline:none}) and b-round-491/probe/open-pxdiff.txt (0 px at 3 viewports)",
+    "C5 P2 (mouse open) in c-round-492/pw-check.txt"
+   ],
+   "expected": "Doc 318 states only true behaviour (ring on first field only for a keyboard open; none for a mouse open; ring on the trigger after a keyboard close)",
+   "actual": "l.22 says visuals are unchanged except that on open the Current Password field shows a focus ring. False for a mouse open: C5 P16/P2 report outline 'none 0px' with focusSource pointer; it holds only for a keyboard open (P18 shows solid 1px). A's STOP clause (doc line false at hand-over) therefore stands; A correctly stopped. Needs a one-line B ruling and edit.",
+   "evidence": "c-round-492.md section 3; c-round-492/pw-check.txt; a-round-492.md STOP",
+   "origin": "B spec"
+  }
+ ],
+ "passed": [
+  "C1-SOURCE-SCOPE",
+  "C2-CLAIMS",
+  "C3-APPLY-K5",
+  "C5-DIALOG-browser-client-path (18 rows x 3 viewports, PW-CHECK PASS)",
+  "C8-AUTH-anonymous-account-and-studio-gated",
+  "C8-STUDIO-LAB-anonymous-demo-opens-add-play"
+ ],
+ "blocked": [
+  "OWN-BACKEND: backend unavailable in cloud; updatePassword always throws (B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED)",
+  "TLM-R492-SR-PASSWORD-DIALOG manual screen-reader row (Saba/NVDA, deadline RETRO 510)"
+ ],
+ "gate": [
+  "C4 covering vitest (A ran 6 files/97 tests; C did not rerun)",
+  "verify/build/full suite"
+ ],
+ "notRun": [
+  "C6 mutants",
+  "C9 DOC full check (only l.22 checked)",
+  "C10 L57 check",
+  "C7 keyboard-open crop review"
+ ],
+ "manifestPaths": [
+  "app/routes/account.tsx",
+  "app/lib/__tests__/account-profile-name.test.tsx",
+  "app/lib/__tests__/account-password-dialog.test.tsx",
+  "docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md",
+  "docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md",
+  "docs/implementation/2026/quarter-IV/318-password-dialog-semantics.md"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": null,
+ "assertsSpecifiedReason": "short FAIL route (L22): no assertion audit run",
+ "mutantsRecorded": null,
+ "mutantsRecordedReason": "C6 not run on a STOP route",
+ "mutantRedOnSketch": "b-round-491/mutants/mutants-summary.txt and b-round-491/probe/pw-check-mutO.txt (B's files, not rerun by C)",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "gateChecksRunOnSketch": null,
+ "gateChecksRunOnSketchReason": "gate-only rows, root runs them",
+ "chainHeadGateRunGreen": null,
+ "chainHeadGateRunGreenReason": "gate 492 not run; gate 491 published e4e1d1c",
+ "affectedChecksNamed": [
+  "covering vitest (6 files/97)",
+  "C5 pw-492 probe 18 rows x3 viewports"
+ ],
+ "affectedChecksRunOnSketch": [
+  "C5 pw-check PASS (C ran); covering 97 passed (A ran, C did not rerun)"
+ ]
+}

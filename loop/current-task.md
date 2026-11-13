@@ -1,222 +1,160 @@
-# Round 492: B-R488-PASSWORD-MODAL-DIALOG. The Account "Change Password" window becomes a real modal dialog: named, focus moves in, Tab stays in, Esc closes, focus returns
+# Round 493: re-dispatch of B-R488-PASSWORD-MODAL-DIALOG with a docs-only v5 (C-R492-01): doc 318 l.22 tells the true focus-ring story, and the round number moves to 493
 
-**Planned by:** B, at the round 491 → 492 planning on 2026-11-13 (`b-round-491.md`, `b-round-491/checkpoint.md`).
-- **Archive:** the round-491 task is copied byte-equal (`cmp`) to `tasks/round-491.md`. B's second copy is `b-round-491/current-task-before-492.md`.
-- **Decisions:** D-29z1755 … D-29z1757 (`backlog.json`, `decisions_log_b`).
+**Planned by:** B, at the round 492 → 493 planning on 2026-11-13 (`b-round-492.md`, `b-round-492/checkpoint.md`).
+- **Archive:** the round-492 task is copied byte-equal (`cmp`) to `tasks/round-492.md`. B's second copy is `b-round-492/current-task-before-493.md`.
+- **Decisions:** D-29z1758 … D-29z1760 (`backlog.json`, `decisions_log_b`).
 
 ## Read first
 - `lessons.md`, in full.
 - This task.
-- `b-round-491/sketch-review.md`: three `tech-lead` reviews and B's ruling on every finding.
-- `b-round-491/claims-492.sh` and its two saved outputs.
+- `b-round-492/sketch-review.md`: the docs-only delta reviews (v4 CHANGES REQUIRED, v5 APPROVE) and B's rulings.
+- `b-round-491/sketch-review.md`: the v1–v3 code reviews. They still rule every code finding.
+- `b-round-492/claims-493.sh` and its two saved outputs.
 
 Look up any other id with `python3 -I tools/find-ids.py "$(pwd -P)" <ID>`.
 
-## Baseline: HEAD `e4e1d1c`, clean
-- Gate 491 was published at `e4e1d1c` on both remotes [K1].
-- Planning ran on the clean tree. `claims-492-planning-output.txt` is the start check.
+## Baseline: HEAD `e4e1d1c`, tree holds sketch v3 (as A left it in round 492)
+- Gate 492 was **skipped** (C FAIL). Gate 491 is the last publication, `e4e1d1c` [K1].
+- The store tree holds the round-492 sketch v3 on exactly the 6 granted paths [K2, K5 `v3-files ======`]. Nothing is reverted.
+- Planning ran on that tree. `b-round-492/claims-493-planning-output.txt` is the start check.
 
 ## 0. Why this round
-- **Bug gate.** Open Mediums are fixed first, so this round takes B-R488-PASSWORD-MODAL-DIALOG, as scheduled in D-29z1754.
-- **No REGRESSION is due.** The last one was 2026-11-13; the next is due on or after 2026-11-16. RETRO comes at round 495.
-- **HEAD bug, measured by B** on a production build of `e4e1d1c`, at 1440×900, 1280×720 and 375×812 [K11], with the signed-in stub. Both `/api/downloads` and `/api/auth/login` are stubbed.
-  - The page has no `role="dialog"` [K4] and no `aria-modal`.
-  - After opening, focus stays on the trigger.
-  - Esc does not close the window.
-  - Cancel drops focus to `<body>`.
-  - The three password fields have no accessible name (bare `<label>` with no `htmlFor`) [K4].
-  - The three eye buttons have an empty name.
-  - The error text is not announced.
-- **Three Mediums share one owner** (≤ 3 tightly related bugs):
+- **C round 492: FAIL, "STOPPED — routed to B"** [K22]. `browserVerified` true. C5 `PW-CHECK PASS` (54 rows) on v3. The only bug is C-R492-01 (Low, origin B spec).
+  - Doc 318 l.22 said the Current Password field shows a focus ring on open. That holds only for a keyboard open.
+  - On a mouse open the ring is hidden: `outline none 0px`, `focusSource pointer` (C5 P2) [K22]. This comes from the SABA-B-4 rule [K19].
+  - A STOPped correctly under the no-floor clause "a doc line is false at hand-over".
+- **Bug gate.** The three Mediums of round 492 are still open, because C did not pass them. Fixing them is still the top priority:
   - B-R488-PASSWORD-MODAL-DIALOG;
-  - B-R492-PASSWORD-FIELDS-UNNAMED (WCAG 1.3.1 / 4.1.2; L14: empty duplicate button names in a dialog we touch);
-  - B-R492-PASSWORD-ERROR-NOT-ANNOUNCED (WCAG 4.1.3).
-- **Also closes A-R488-REVIEW-L1-EXIT-ANIMATION-WINDOW** (Low, its recorded home): focus now returns to the trigger at close.
-- **Found by B and out of scope:** B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED (High, root).
-  - `app/lib/auth.ts` `updatePassword` checks the current password through login.
-  - It then always throws "Password change is not yet implemented. Please use the forgot password feature." [K19].
-  - A real password change therefore never succeeds. The fix needs a backend endpoint and a change to the protected `auth.ts`, so it goes to root and Saba. This round makes the error path accessible. The success path is jsdom-only (PD6, PD7).
+  - B-R492-PASSWORD-FIELDS-UNNAMED;
+  - B-R492-PASSWORD-ERROR-NOT-ANNOUNCED.
+- No REGRESSION is due (next due on or after 2026-11-16). RETRO comes at round 495.
 
-## Rulings on round 491 findings (L7, L10)
-- **C round 491 PASS** (`browserVerified` true, 0 bugs), and gate 491 published `e4e1d1c`. B-R487-PROFILE-EDITOR-NARROW-OVERFLOW is **done** for the client path (D-29z1755).
-- **A's reviewer notes:**
-  - A-R491-REVIEW-PWMODAL-WORDING (Low) is closed by this sketch: the doc 317 TODO line is rewritten.
-  - A-R491-REVIEW-420-WORDING, -PS-LABELS and -RESOLVED-IN-TODO are info and go to `deferred_low_polish`.
-  - The Architecture note is "keep". It is recorded as `confirmedBy` on SIG-R487-PROFILE-NAME-EDITOR-EXTRACT.
-- **Gate 491 reviewer:**
-  - "No focus-visible on ✓/✕" came from a code-only read. C's evidence contradicts it: C8 `tree-ring-320x640` shows the global `:focus-visible` ring on ✕, unclipped, and C6 records `kbSave`/`kbCancel` with `focusVisible` true. Ruled **not a bug** (GATE491-I1, closed).
-  - The 32 px target passes WCAG 2.5.8 AA. This is info, as A's reviewer said.
-  - "94 px input at 320" → `confirmedBy` on TLM-R491-PHONE-NAME-EDITOR.
-  - "No automated guard" → `confirmedBy` on B-R491-NARROW-EDITOR-E2E-GUARD.
-- **C info** C-R491-INFO-STUDIO-ROWS-SMOKE-ONLY: noted. Studio audio and export were outside round 491.
+## Ruling on the STOP (L10)
+- **C-R492-01 → accepted delta.** B grants a docs-only v5. A's suggested wording is used, made precise from C's rows [K22]:
+  - keyboard open: ring on Current Password (P7 `solid 1px`);
+  - Esc close: ring on the trigger (P6);
+  - mouse open, mouse Cancel and backdrop click: no ring (P2, P8, P9 `none 0px`).
+- **Round number.** The fix now lands in round 493. Under L28, doc 318 l.4 becomes `Completed (C round 493 PASS)`. B also renumbers the "round 492" lines of docs 315 and 317 to 493 [K10 `round492-in-docs`]. Finding ids such as `B-R492-*` and `TL-R492-*` keep their names.
+- **More doc-truth fixes in v5.** B re-read doc 318 line by line, and a `tech-lead` sentence-by-sentence review rejected v4. Together they found these (`b-round-492/sketch-review.md`):
+  - l.63 cited "browser R7", a key from B's private probe. It now cites C5 rows P11 and P12, the rows that prove it [K10 `d318-P11P12`].
+  - l.76's PD8 line now states what PD8 pins: Tab on the middle field is not `preventDefault`ed. This relates to A-R492-REVIEW-L6, below.
+  - TL-R493-D1: the "0 px" pixel match is true only at the probe's 16/255 threshold [K10 `open-pxdiff-threshold`]. The line now states the threshold and the unthresholded residue (823–1158 px, ≤ 8/255).
+  - TL-R493-D2: the Ctrl+K line said "one Esc closes both (HEAD too)". At HEAD, Esc did not close the modal. The line now says that only the stacking exists at HEAD [K10 `d318-ctrlk`].
+  - TL-R493-D3: "the same instance keeps typed values (HEAD too)" is untested. It is now worded as an inference (l.25, l.94 at v5) [K10 `d318-inference`].
+  - B re-ran the two numeric and behaviour claims that the new lines carry, rather than relying on the reviewer [K25]:
+    - The zero-threshold pixel diff gives 823 / 823 / 1158 px, max 8/255 (`b-round-492/probe/open-pxdiff-zero.txt`).
+    - Ctrl+K and then Esc on production builds, 1440×900, signed-in stub: at HEAD the palette opens over the dialog and Esc closes only the palette. On v5 one Esc closes both (`b-round-492/probe/ctrlk-esc-probe.json`, screenshots `ctrlk-*-esc.png`).
+- **No code change.** `account.tsx` and both test files are byte-equal to v3 [K5].
+  - The production build of v5 is byte-identical to v3: `build/` diff empty, CSS sha equal [K21]. Tailwind scans the docs, so B checked this.
+  - So C's v3 browser evidence and B's v3 mutants, full suite and typecheck carry over as pre-checks [K8, K9, K13]. C still re-runs the rows (§3).
+
+## Rulings on A's round-492 reviewer findings (L7, L10)
+All go to `deferred_low_polish` (D-29z1759). They are **already ruled and not a STOP**. Any code fix here would void the mutant and browser evidence of an unchanged code sketch.
+
+| Id | Sev | Ruling |
+|---|---|---|
+| A-R492-REVIEW-L1-IME-KEYCODE229 | Low | Deferred. The LeadMagnet precedent checks only `isComposing` too [K24]; both are fixed together in the deferred polish pass. A Safari-only path, also on the SAFARI-CHECKS list |
+| A-R492-REVIEW-L2-REPEAT-ALERT | Low | Deferred |
+| A-R492-REVIEW-L3-DISMISSED-ERROR-SILENT | Low | Deferred. Reachable today only because `updatePassword` always throws [K19]; fix with B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED |
+| A-R492-REVIEW-L4-REOPEN-MOUSE | Low | Deferred, next to TL-R492-V2-L1 |
+| A-R492-REVIEW-L5-TABBABLE-SELECTOR | Low | Deferred. Correct for today's markup (P5) |
+| A-R492-REVIEW-L6-PD8-VACUOUS | Low | Deferred as a test-quality Low. PD8's `fireEvent.keyDown(middle) === true` (not prevented) assert can fail; only its following `activeElement` assert is vacuous. The doc line now claims only the first. Browser P5 proves native Tab order inside the dialog |
+| A-R492-REVIEW-L7-PD10-WEAK, -L8-PD3-PARTIAL, -L9-DISABLED-FOCUS-BROWSER | Low | Deferred. C5 P11 is the browser row for L9 |
+| A-R492-REVIEW-I1-PALETTE-TRAP | Info | Recorded with TL-R492-L4 |
+
+- **Architecture note:** keep. Recorded as `confirmedBy` on SIG-R487-PROFILE-NAME-EDITOR-EXTRACT. ARCH-CHECKPOINT-ACCOUNT-PROFILE is still waiting for root and does not block.
 
 ## Reference: how established practice does it
-Source: WAI-ARIA APG, Dialog (Modal) pattern, https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/ (fetched 2026-11-13). Store page, so there is no Ableton claim. The in-repo precedent is the LeadMagnet dialog ruling R109 (`leadmagnet_dialog_rulings_d29z170`): role, labelled, initial focus, Esc ignored while `isComposing`, Tab containment, focus restore.
+Unchanged from round 492 (`tasks/round-492.md`, section "Reference"): WAI-ARIA APG Dialog (Modal) pattern, with the same table and deviations. It is a Store page, so no Ableton claim applies. **product-designer:** not consulted. There is no new element, copy or layout. **Screen budget:** no persistent element is added.
 
-| APG point | CZABA after this round | C row |
-|---|---|---|
-| Container `role="dialog"`, `aria-modal="true"`, `aria-labelledby` the visible title | yes: title "Change Password" [K4] | PD1; C5 P1 |
-| On open, focus moves into the dialog, generally the first focusable | Current Password field | PD1; C5 P2, P7 |
-| Tab / Shift+Tab move inside and wrap | yes; also from `<body>` or from a control that became disabled | PD8, PD9, PD11, PD15; C5 P5, P10 |
-| Escape closes | yes; ignored while an IME composition ends (`isComposing`) | PD4, PD13; C5 P6 |
-| On close, focus returns to the invoking element | trigger "Click to change password", for Cancel, Esc, backdrop and success | PD4–PD6; C5 P6, P8, P9 |
-| Content outside is inert | pointer: the backdrop covers the header and page (C5 P4); keyboard: the Tab trap | C5 P4, P5 |
+## 1. What changes
+- **The sketch:** `b-round-492/sketch-493.patch.txt` (v5, full diff against `e4e1d1c`), sha256 in `b-round-492/sketch-493.sha256`.
+- **The delta:** `b-round-492/sketch-493-delta-v3-to-v4.patch.txt` (v3 → v5, docs only; the file name keeps "v4"), sha256 in `b-round-492/sketch-493-delta.sha256`.
 
-**Deviations (with reasons):**
-- **Mouse-opened dialog: no ring on the first field.** The site-wide focus rule (Saba, SABA-B-4) hides rings after a pointer press: `html[data-focus-source="pointer"] :focus-visible { outline: none }` [K19]. The caret still shows focus. A keyboard-opened dialog shows the ring (C5 P7). Recorded, not a STOP.
-- **No scroll lock and no `inert` on the background while open.** APG asks for neither. The backdrop blocks the pointer and the trap blocks the keyboard. The shared protected `Modal.tsx` is not used, because it would change the backdrop (`bg-black/95`, `z-[1000]`, portal), and it also lacks initial focus, the trap and focus return (shared-modal-no-focus-management, root) [K20].
-- **No extraction.** ARCH-CHECKPOINT-ACCOUNT-PROFILE has no root answer, so the request is re-sent (`b-round-491/checkpoint-request-account-492.md`) and does not block.
+Six paths: the same as round 492, with identical code and tests. Only the three docs differ from v3 [K5]:
+1. `app/routes/account.tsx`: v3, unchanged.
+2. `app/lib/__tests__/account-password-dialog.test.tsx`: v3, unchanged (PD1–PD15).
+3. `app/lib/__tests__/account-profile-name.test.tsx`: v3, unchanged (PN10f/PN10g).
+4. `docs/implementation/2026/quarter-IV/318-password-dialog-semantics.md`:
+   - l.4 `**სტატუსი:** Completed (C round 493 PASS)`;
+   - l.22 rewritten (ring by modality, 0 px mouse-open pixel diff);
+   - l.63 "browser P11, P12";
+   - the PD8 line;
+   - l.25, the Ctrl+K TODO line and the reopen TODO line (TL-R493-D1…D3) [K10].
+5. `docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md`: three "round 492" mentions become "round 493" (l.39, l.105, l.117 at v3) [K10].
+6. `docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md`: one "round 492" becomes "round 493" [K10].
 
-**product-designer:** not consulted. There is no new element, no copy change and no layout change. At rest the open dialog is pixel-equal to HEAD at all three viewports (`b-round-491/probe/open-pxdiff.txt`: 0 px) [K12]. **Screen budget:** no persistent element is added.
-
-## 1. What changes (sketch `b-round-491/sketch-492.patch.txt`, sha256 in `b-round-491/sketch-492.sha256`)
-Six paths. A applies the sketch byte-equal and changes no sketch line.
-1. `app/routes/account.tsx`:
-   - `PasswordModal`:
-     - `useIsPresent()`;
-     - an `[isPresent]` effect: `inert = !isPresent`, and focus on Current Password when present;
-     - a document `keydown` effect, active only while present: Esc (not composing) → `onClose`, and the Tab trap over enabled `input, button`;
-     - `role="dialog"`, `aria-modal`, `aria-labelledby`;
-     - `htmlFor`/`id` on the three labels;
-     - eye-button `aria-label`s ("Show/Hide current password", "Show/Hide new password", "Show/Hide password confirmation");
-     - `role="alert"` on the error box;
-     - `data-testid="password-dialog-backdrop"`.
-   - `ProfileContent`:
-     - `passwordTriggerRef` and `type="button"` on the trigger;
-     - `closePasswordModal` returns early when already closed, otherwise closes and focuses the trigger [K4].
-2. `app/lib/__tests__/account-password-dialog.test.tsx` (new): PD1–PD15.
-3. `app/lib/__tests__/account-profile-name.test.tsx`: PN10f and PN10g.
-   - New contract: after the open click, focus is on Current Password.
-   - Then a `blur()` (focus on `<body>`, as a click on the dialog heading does in Chromium, C5 P10). The old body asserts follow, unchanged.
-   - No assertion is lost: the body asserts stay and one stronger assert is added. Mutant MK (the ref guard removed) is red only through these rows.
-4. `docs/implementation/2026/quarter-IV/318-password-dialog-semantics.md` (new). l.4 is `**სტატუსი:** Completed (C round 492 PASS)` (L28) [K10].
-5. `docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md`, three lines:
-   - the ref rationale;
-   - PN10f/PN10g;
-   - the B-R488 TODO, now marked fixed [K10].
-6. `docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md`: the B-R488 TODO line [K10].
-
-**Ruling lines (L4):**
-- PN10f/PN10g's "focus on `<body>` right after opening": the new dialog contract wins. The body asserts stay after the explicit blur.
-- Reopen during the fade keeps the typed values: the deferred Low TL-R492-V2-L1 wins over "fresh dialog". This is the same as at HEAD.
-
-**Sweep (L23):**
-- The added testid `password-dialog-backdrop` is pinned only by the new test [K6].
-- Tests that use the dialog's names are listed by K6.
-- Tests that read `account.tsx`: at HEAD `account-profile-name.test.tsx`, `store-focus-ring.test.ts`, `store-theme-tokens.test.ts`; the sketch adds the new `account-password-dialog.test.tsx` [K6]. All of them are in the covering set.
-- Biome on `account.tsx`: 0 warnings on the sketch (HEAD had 4 a11y warnings, all fixed here) [K9].
-
-**L50 focus origins.**
-- The grep: `grep -nE 'onPointerDown(Capture)?|onBlur|settleEditor\(|\.focus\(|^\s*\{[^}]*(\.map\(|&&|\?)' app/routes/account.tsx`. It gives 18 hits at HEAD and 22 on the sketch [K18].
-- Rulings:
-
-| Hits (sketch line numbers, K18 `lines=`) [K18] | Ruling |
-|---|---|
-| l.48, 65, 82, 100 (account nav and layout) | Out of scope, unchanged |
-| l.135, 140, 188, 202, 233, 283 (name editor) | PN1–PN10h unchanged |
-| l.155 (trigger focus at close) | PD4–PD7, P6/P8/P9 |
-| l.295 (`canChangePassword` trigger) | Static per user |
-| l.308 (dialog unmount) | Target = trigger: PD4–PD6 |
-| l.349 (initial focus) | PD1, PD14, P2/P7/P18 |
-| l.383 / 386 (trap wrap) | PD8, PD9, PD15 |
-| l.475, 500, 526 (eye icon swap; the button stays mounted) | PD3 |
-| l.530, 532 (match indicator, not focusable) | No row |
-| l.548 (alert render) | PD12, P15 |
-
-**Pre-checks B ran on the sketch-applied scratch:**
-- typecheck: rc 0 [K9];
-- covering: 6 files / 97 tests [K7];
-- full suite: 294 files / 4309 tests, rc 0 [K8];
-- 20 jsdom mutants, all red [K13].
+Every round-492 ruling line, sweep (K6) and L50 focus-origin table (K18, 22 hits, same lines) carries over unchanged. See `tasks/round-492.md` §1.
 
 ## 2. A: grants, forbidden, checks
-- **Granted paths (only these):** the 6 paths of §1, changed only by the sketch. A changes no sketch line.
-- **Forbidden:**
+- **Granted paths (only these):** the 6 paths of §1, changed only by the delta (or the full v5 sketch, see below). A changes no sketch line.
+- **Forbidden:** as in round 492:
   - every other path;
-  - `global_forbidden_files`, including `app/root.tsx`, `app/styles/**`, `app/contexts/AuthContext.tsx`, `app/lib/auth*`, and the shared `app/components/ui/Modal.tsx`;
-  - the protected purchase files (`app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`) [K3];
+  - `global_forbidden_files`, including `app/root.tsx`, `app/styles/**`, `app/contexts/AuthContext.tsx`, `app/lib/auth*` and `app/components/ui/Modal.tsx`;
+  - the protected purchase files `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts` and `app/routes/account.downloads.tsx` [K3];
   - `global_forbidden_actions`: commit, push, stash, checkout, reset, deploy, and restarting the :5173 dev server.
 - **STOP threshold (the only statement of it; L10).** STOP and report, editing nothing, if:
   - the start check differs (except K14 if root rewrote the task);
-  - `git apply` fails, or K5 is not `======`;
+  - `git apply` fails, or after the apply K5 is not `======` on both `sketch-493-files` and the patch/delta sha pairs;
   - a covering test fails or exceeds 50 % of its timeout;
-  - a Medium+ finding from your code-reviewer is not ruled in this task or in `b-round-491/sketch-review.md`;
+  - a Medium+ finding from your code-reviewer is not ruled in this task, `b-round-492/sketch-review.md` or `b-round-491/sketch-review.md`;
   - a doc 318, 315 or 317 line is false at hand-over;
   - a path outside the grants would need to change.
 - **Already ruled, not a STOP, whatever severity your reviewer gives them:**
-  - TL-R492-L2: a late success from an earlier open closes the next one; unreachable today;
-  - TL-R492-L4: Ctrl+K palette over the dialog, pre-existing;
-  - TL-R492-V2-L1: reopen during the fade keeps values;
-  - TL-R492-V3-N1/N2;
-  - no ring after a mouse open (SABA-B-4 rule);
-  - no scroll lock;
-  - shared `Modal` not used;
-  - no extraction (checkpoint pending);
-  - `inert` read as a jsdom property (PD10/PD14); the behaviour proof is browser rows P11, P12 and P18;
+  - every item listed under "Already ruled" in `tasks/round-492.md` §2;
+  - every A-R492-REVIEW id in the table above;
   - doc l.4 written before C (L28).
 - **A runs:**
-  - the start check: `bash ../tmp/studio-real-loop/b-round-491/claims-492.sh`, which must equal `claims-492-planning-output.txt`;
-  - `git apply ../tmp/studio-real-loop/b-round-491/sketch-492.patch.txt`;
-  - the claims script again, which must equal `claims-492-sketch-output.txt`;
-  - `npm run typecheck`, `npm run lint`, and `npx biome check app/routes/account.tsx` (expected: 0 warnings) [K9];
-  - `npx vitest run app/lib/__tests__/account-password-dialog.test.tsx app/lib/__tests__/account-profile-name.test.tsx app/lib/__tests__/store-focus-ring.test.ts app/lib/__tests__/store-theme-tokens.test.ts app/lib/__tests__/store-internal-links.test.ts app/lib/arrangement/__tests__/held-enter-source-scan.test.ts` (expected: 6 files / 97 tests) [K7];
-  - the code-reviewer on the changed files (6 paths, 3+ files).
-- **A does not run** the full suite, the build or browser probes. B ran the full suite on the sketch [K8], and the gate runs it again.
-- **Report in `a-round-492.md`:**
+  - The start check: `bash ../tmp/studio-real-loop/b-round-492/claims-493.sh`.
+    - **Tree holds v3 (expected):** the output must equal `b-round-492/claims-493-planning-output.txt`. Then `git apply ../tmp/studio-real-loop/b-round-492/sketch-493-delta-v3-to-v4.patch.txt`.
+    - **Tree clean at `e4e1d1c`** (the job restore lost the v3 work): the output must equal `b-round-492/claims-493-clean-start-output.txt`, which B ran on a clean `e4e1d1c` copy. Its stderr must equal `b-round-492/claims-493-clean-stderr.txt` (doc 318 does not exist yet). Then `git apply ../tmp/studio-real-loop/b-round-492/sketch-493.patch.txt`.
+    - Any other start state is a STOP. Record which case applied. Either case ends with the same 6 files.
+  - The claims script again. It must equal `b-round-492/claims-493-sketch-output.txt`.
+  - `npm run typecheck` and `npm run lint`.
+  - The covering vitest command from `tasks/round-492.md` §2 (expected: 6 files / 97 tests; B's run on v5: `b-round-492/sketch-493-covering.log`, slowest 1442 ms) [K7].
+  - The code-reviewer on the three changed docs, with the instruction "check every sentence of doc 318 against `c-round-492/pw-check.txt`".
+- **A does not run** the full suite, the build or browser probes.
+- **Report in `a-round-493.md`:**
   - the start HEAD and `git status`;
   - the start check;
-  - the `git apply` output and K5;
+  - which apply case was used, its output, and K5;
   - the commands with their pass counts;
-  - the reviewer findings, each mapped to a ruling id or a STOP;
-  - the Architecture note.
+  - each reviewer finding mapped to a ruling id or a STOP.
 
 ## 3. C: rows
-**Setup.** Production builds. L38: probes run alone, after one untimed warm-up load of `/account`.
-- **Tree server:** `bash b-round-491/probe/serve-prod.sh start <abs c-round-492>/tree 5193 TREE > <abs c-round-492>/serve-start.log 2>&1`. SRC unset means the store tree. Use a free port.
-- **HEAD control:** B's `b-round-491/probe/headprod-pw.json`, a production build of `e4e1d1c`. C may rebuild it with `serve-prod.sh start <abs>/head 5194 e4e1d1c`.
-- **Environment facts:**
-  - `pw-492.mjs` stubs `/api/downloads` with 200 `[]` (HF-MOCKAPI-DOWNLOADS-401-SIGNOUT), `/api/auth/profile`, and `/api/auth/login` (200 after 1.5 s).
-  - A signed-out page is environment-invalid, not a FAIL.
-  - Stubbed rows prove the client path only (L36).
+The full §3 table of `tasks/round-492.md` applies, with these changes:
+- the output folder is `c-round-493/`;
+- the claims script is `b-round-492/claims-493.sh`;
+- every round number is 493.
 
-| Row | What | Pass when |
+C runs every row; this is not a short route.
+
+| Row | Change from round 492 | Pass when |
 |---|---|---|
-| C1 SOURCE-SCOPE | `git status --porcelain --untracked-files=all`; K3 | Exactly these 6 paths: ` M` `account.tsx`, ` M` `account-profile-name.test.tsx`, ` M` docs 315 and 317, `??` `account-password-dialog.test.tsx`, `??` doc 318. K3 reads `0 … 0 … 0` |
-| C2 CLAIMS | `bash b-round-491/claims-492.sh`, at start and at end; L29's grep over this task | Every line equals `b-round-491/claims-492-sketch-output.txt`. K14 may differ only if root rewrote this task. Stderr empty |
-| C3 APPLY | K5 | `======`, and the patch sha equals `recorded` |
-| C4 COVERING | A's covering command | 6 files / 97 tests green |
-| C5 DIALOG (browser) | `node b-round-491/probe/pw-492.mjs http://127.0.0.1:5193 <abs out>/tree-pw.json <abs out>/shots tree`, then `python3 -I b-round-491/probe/pw-check.py <abs out>/tree-pw.json` | rc 0 and the last line `PW-CHECK PASS`: 18 rows × 1440×900, 1280×720 and 375×812. B's sketch run: `b-round-491/probe/pw-check-sketch.txt`. HEAD: `pw-check-head.txt`, 48 RED, with only P4 and P17 passing [K11, K12]. Rows: P1 semantics; P2 mouse-open focus; P3 names; P4 pointer outside hits the backdrop; P5 Tab trap (8 Tabs, wrap, Shift+Tab); P6 Esc returns focus to the trigger with a ring; P7 keyboard open with the ring `solid`; P8 mouse Cancel; P9 backdrop; P10 heading click → `<body>` → Tab enters; P11 Esc during a pending submit plus `inert`; P12 Tab in the exit window equals the no-dialog control R0; P13 late settle steals nothing; P14 double Esc; P15 error in `role="alert"`; P16 name save during the dialog steals nothing; P17 no console errors; P18 reopen during the fade |
-| C6 MUTANTS | jsdom, on a **copy** of the tree, never the store tree (L60): `rsync -a --exclude node_modules --exclude build --exclude .git <store>/ <abs c-round-492>/mut-tree/ && ln -s <store>/node_modules <abs c-round-492>/mut-tree/node_modules`, then `python3 -I b-round-491/mutants/run-mutants.py <abs c-round-492>/mut-tree <abs c-round-492>/mutants` | `M0` 33 passed; MA … MT: 20 RED, 0 SURVIVED, 0 NOT-APPLIED, as in `b-round-491/mutants/mutants-summary.txt` [K13]. Browser mutant (B only): `b-round-491/probe/pw-check-mutO.txt`, with `inert` removed: P11, P12 and P13 RED at all three viewports |
-| C7 VISUAL | Screenshots from C5 (`tree-open-*`, `tree-error-*`), plus one keyboard-opened crop of the Current Password field per viewport | Open-dialog screenshots look like HEAD's (B: 0 px difference, `b-round-491/probe/open-pxdiff.txt`). The keyboard-open crop shows the brass ring on the field. The error screenshot shows the error box |
-| C8 AUTH + STUDIO | Fresh context, no credentials, at 1440×900 and 1280×720 | `/account` shows "Sign in required" and no "Change Password". `/studio/middle-east` shows "Sign in required" and 0 `audio[src]`. `/studio-lab` opens anonymously (`auth_user` null) and shows `Demo collection ready`. Enter on a library item adds 1 clip. Space → `Playing`, with the clock above `00:00.000` about 1.5 s later (record the value). Space → `Stopped`. One screenshot per step |
-| C9 DOC | Docs 318, 315 and 317 | Doc 318 l.4 byte-exact `**სტატუსი:** Completed (C round 492 PASS)`. Its `## ` headings equal TEMPLATE's 7, in order (L26). `C round N pending` count 0 (K10). Every PD id doc 318 names exists in the test file (`grep -c "it('PD<n> "`). "20" mutants matches `mutants-summary.txt`. Docs 315 and 317 hold the K10 lines |
-| C10 L57 | `python3 -I tools/l57-check.py c-round-492.json c-round-492/l57-check.txt` | rc 0. All L57 fields are written. `mutantRedOnSketch` = `b-round-491/mutants/mutants-summary.txt` and `b-round-491/probe/pw-check-mutO.txt` |
-| OWN-BACKEND | A real password change against the .NET backend | BLOCKED: backend unavailable in cloud. Also, `updatePassword` always throws (B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED). Not in `passed` |
-| gate | Full vitest, typecheck, build, Biome, `npm run verify` | Root gate only; never in `passed` |
+| C1 SOURCE-SCOPE | — | The same 6 paths. K3 reads `0 … 0 … 0` |
+| C2 CLAIMS | `bash b-round-492/claims-493.sh`, at start and at end | Every line equals `b-round-492/claims-493-sketch-output.txt`. Stderr is empty. K14 may differ only if root rewrote this task |
+| C3 APPLY | K5 | `sketch-493-files ======`; `patch` = `recorded`; `delta` = `delta-recorded` |
+| C4 COVERING | — | 6 files / 97 tests green |
+| C5 DIALOG (browser) | Fresh production build of the v5 tree; out `c-round-493/` | `PW-CHECK PASS`, 18 rows × 3 viewports. K21 predicts the build equals v3 byte for byte; C may record the `build/` sha comparison |
+| C6 MUTANTS | On a copy, as in round 492 (L60) | `M0` 33 passed; MA … MT: 20 RED, 0 SURVIVED, 0 NOT-APPLIED |
+| C7 VISUAL | Also one keyboard-opened crop of Current Password per viewport | The brass ring shows on a keyboard open. Mouse-open screenshots look like HEAD's |
+| C8 AUTH + STUDIO | The playback state is read from `[data-testid="arrangement-playback-state"]` `textContent`. That span is `hidden`, so visible-text regexes miss it [K23] | `/account` and `/studio/middle-east` show "Sign in required" (0 `audio[src]`). `/studio-lab`: `auth_user` null, `Demo collection ready`. Enter adds 1 clip. Space → `Playing`, clock > `00:00.000`. Space → `Stopped`. B's probe: `Stopped → Playing → Stopped` at both viewports [K23] |
+| C9 DOC | Full truth check of doc 318, plus the changed lines of 315 and 317, against `c-round-493` C5 rows | l.4 is byte-exact `**სტატუსი:** Completed (C round 493 PASS)`. 7 TEMPLATE headings. `C round N pending` count 0. `pd-ids-missing` empty. `round492-in-docs` 0 for all three files. l.22 agrees with C5: P2, P8, P9 `none 0px`; P6, P7 `solid 1px` |
+| C10 L57 | `python3 -I tools/l57-check.py c-round-493.json c-round-493/l57-check.txt` | rc 0. `mutantRedOnSketch` = `b-round-491/mutants/mutants-summary.txt` and `b-round-491/probe/pw-check-mutO.txt` |
+| OWN-BACKEND | — | BLOCKED: backend unavailable in cloud, and `updatePassword` always throws. Not in `passed` |
+| gate | — | Root gate only |
 
-- **L22:** if A STOPs with no diff, C runs only C1, C2 and C8 and reports "STOPPED — routed to B".
-- **Manual row (does not block; deadline RETRO 510, L46):** TLM-R492-SR-PASSWORD-DIALOG, with NVDA or VoiceOver plus real WebKit and Firefox. Checks:
-  - the dialog is announced as "Change Password, dialog";
-  - the fields read their labels;
-  - the eye buttons read Show/Hide;
-  - the error is announced;
-  - Esc and Tab behave as in C5.
+- **L22:** if A STOPs with no diff, run only C1, C2 and C8 and report "STOPPED — routed to B".
+- **Manual row:** TLM-R492-SR-PASSWORD-DIALOG. It does not block; deadline RETRO 510.
 
 ## 4. Sketch review and mutants (L58)
-- `b-round-491/sketch-review.md` names the dispatched sha256 (v3) and the history: v1 got CHANGES REQUIRED, v2 got APPROVE WITH LOWS, v3 (docs only) got APPROVE [K14].
-  - Every finding is ruled there.
-  - The Medium TL-R492-M1 (reopen during the fade) was fixed in v2. Its rows are PD14 and P18.
-  - The file also holds the ordering matrix.
-- **Mutants:**
-  - 20 jsdom mutants on the sketch, all red (`b-round-491/mutants/mutants-summary.txt`).
-  - 1 browser mutant, a production build with `inert` removed: `pw-check-mutO.txt` is RED on P11, P12 and P13.
-  - HEAD is the pre-fix control: `pw-check-head.txt`, RED 48.
+`b-round-492/sketch-review.md` names the full v5 sha256 and the delta sha256 (plus the rejected v4), with the `tech-lead` delta verdict. It also names the v3 sha and points to `b-round-491/sketch-review.md` for the code reviews and the ordering matrix. The mutants are unchanged (code equals v3): `b-round-491/mutants/mutants-summary.txt`, 20 RED [K13], and the browser mutant `pw-check-mutO.txt` [K12].
 
 ## 5. Outcome fixed in advance
 - **C PASS with `browserVerified` true:**
-  - B-R488-PASSWORD-MODAL-DIALOG, B-R492-PASSWORD-FIELDS-UNNAMED and B-R492-PASSWORD-ERROR-NOT-ANNOUNCED become done for the client path.
-  - A-R488-REVIEW-L1-EXIT-ANIMATION-WINDOW and A-R491-REVIEW-PWMODAL-WORDING close.
-  - OWN-BACKEND and B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED stay open (root).
-- **Next:** DPG-BUTTON-CLEANUP (DPG-FIX P1). If planning happens on or after 2026-11-16, a REGRESSION round comes first. RETRO is at round 495.
+  - The three Mediums become done for the client path.
+  - These close: A-R488-REVIEW-L1-EXIT-ANIMATION-WINDOW, A-R491-REVIEW-PWMODAL-WORDING and C-R492-01.
+  - OWN-BACKEND and B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED stay open with root.
+- **Next:** DPG-BUTTON-CLEANUP (DPG-FIX P1). RETRO at round 495. A REGRESSION round comes first if planning happens on or after 2026-11-16.
 - **FAIL:** a fix-up comes first.
-- **PARTIAL (time):** the same round resumes from `c-round-492/progress.json`.
+- **PARTIAL (time):** the same round resumes from `c-round-493/progress.json`.
