@@ -1,0 +1,2 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/playwright/index.mjs';
+const b=await chromium.launch();const r={};for(const [w,h] of [[1440,900],[1280,720]]){const c=await b.newContext({viewport:{width:w,height:h}});const p=await c.newPage();await p.goto('http://127.0.0.1:5173/account/orders',{waitUntil:'load'});await p.waitForTimeout(3000);r[w]={url:p.url(),signIn:await p.getByText(/Sign in required/i).count(),text:(await p.locator('main').innerText().catch(()=>'')).slice(0,100)};await c.close()}console.log(JSON.stringify(r));await b.close();

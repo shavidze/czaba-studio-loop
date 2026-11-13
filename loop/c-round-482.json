@@ -1,0 +1,89 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-13T00:11:02.0518431Z",
+  "round": 482,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "G482-SCOPE-start",
+  "RR-PERF",
+  "PERF-LIB",
+  "R482-SCROLL",
+  "R482-HELD-ENTER",
+  "R482-SPIN",
+  "R482-RADIOS",
+  "R482-PROGRESS",
+  "R482-SEARCH-CLEAR",
+  "R482-DIALOG-SCROLLBAR",
+  "R482-COPY",
+  "R482-EXPORT-VIS",
+  "R482-IME",
+  "R482-OVERVIEW(record)",
+  "R482-FONTS",
+  "R482-LEADMAGNET",
+  "R482-STORE-COLOUR",
+  "R482-SEEK-THUMB",
+  "R482-ENTRANCE",
+  "R482-CLIENT-NAV",
+  "R482-ORDERS",
+  "REG-CART",
+  "R482-JOURNEY",
+  "RG-SMOKE",
+  "G482-AUTH",
+  "G482-SCOPE-end"
+ ],
+ "failed": [],
+ "blocked": [
+  "G482-AUTH fake-Bearer studio-token check: backend unavailable in cloud (does not affect browserVerified)"
+ ],
+ "gate": [
+  "full vitest, typecheck, build, Biome, npm run verify (root gate)"
+ ],
+ "notRun": [],
+ "origin": null,
+ "manifestPaths": 1393,
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": "per-row asserts of the task (compare scripts ALL OK counts; scroll p95<=17 / control>=33; entrance window 1450-1900; WAV 24-bit/48k/101.352s/RMS>0)",
+ "mutantsRecorded": "none (regression round)",
+ "mutantRedOnSketch": null,
+ "mutantRedOnSketchReason": "regression round, no sketch",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "gateChecksRunOnSketch": "not claimed (root gate)",
+ "chainHeadGateRunGreen": "not claimed (root gate)",
+ "affectedChecksNamed": [
+  "R482 rows 1-26 of c-round-482.md"
+ ],
+ "affectedChecksRunOnSketch": "all run on HEAD 751e30e dev server :5173 (+ production builds of 751e30e and 9ba13ac for R482-SCROLL)",
+ "regressionPart": "part 1 of REGRESSION-2026-11-13 (rounds 426-481); part 2 (round 483) still owed; regression-last.json must NOT be updated yet",
+ "notes": [
+  "R482-OVERVIEW (record): empty and with-clip Overview box 956x64 (1440) / 796x64 (1280); Ctrl+Alt+O hides (hidden-slot present) and shows again.",
+  "Observation (not a finding, outside this round's scope): the home StudioShowcase mock shows a saturated yellow Solo and red Mute chip (screenshot c-round-482/look/shots/studio-showcase-1280-tree.png); a design-gate reviewer may rule on them.",
+  "Mock API (127.0.0.1:5199) started by C for the Store rows and stopped (PID 5844); production-build servers on :3482/:3483 stopped; scratch node_modules symlinks and build dirs removed.",
+  "R482-HELD-ENTER 426: first cell LMUTE@1440 was an invalid TimeoutError (cold start, and the held-Enter chain ran at the same time as the spin/radio/progress probes on the same dev server, L38); kept as p426/LMUTE-1440x900.attempt1-error.json; one replacement run -> ALL OK (28 cells). 427=18, 428=13, 429=8 cells ALL OK, equal to each round's own compare counts.",
+  "R482-PROGRESS: attempt 1 (1440) 'ENV warm-up MP3 did not download' also ran while the held-Enter chain was active on :5173 (L38); kept in progress.log / progress-probe-attempt1.json; the replacement run, with nothing else running, is ALL OK.",
+  "R482-SCROLL (re-run after review of my own first pass, which had only 3 passes per viewport): production build of 751e30e rebuilt, tree probe run 3x alone = 9 passes per viewport. Tree / p95 16.7-16.8 in 9/9 at both viewports, movingOver33 median 0, moving >= 175, finalY 2400; /free-downloads 9/9 p95<=16.8, 0 slow frames, finalY==maxScroll (575 at 1440, 755 at 1280). Full page / (3 passes): median 0.5, finalY 4121==max, moving>=275; /gift-cards 0 slow. Control 9ba13ac / p95 33.3-33.4 in 6/6 passes (valid control). Look band recorded: ratioToHead 0.88-1.04 (record only); screenshots show no ring, seam or banding. Files: scroll/tree-head*.json, scroll/full-head.json, scroll/tree-ctl.json.",
+  "R482-CLIENT-NAV (re-run with the real generator): copied c-round-479/scripts/nav.mjs to c-round-482/nav2/ (OUT retargeted), mock API OFF as in the oracle (home y 3704 region), 31 runs; deep-compare to c-round-479/nav.json minus date: EQUAL True, no diff. This includes footer Support/FAQ/Contact, Ctrl+click/Ctrl+Enter/middle-click new-page rows and the 400 ms / 3 s scrollY samples. nav/ (my first, different-schema probe) is superseded and is not claimed.",
+  "R482-STORE-COLOUR (e) (re-recorded; my first measurement hit the wrong targets): glow/glow2.mjs, mock API on, both viewports, /store and /products/middle-east. Primary Button (header 'Sign In', brass fill rgb(201,164,106) -> hover rgb(217,184,127)): box-shadow none at rest and hover. Whole-page scan of every element for a zero-offset coloured box-shadow (offset 0 0, blur > 0): 0 hits on both pages at both viewports. Sticky headers/purchase column: shadow none. A brass icon button on the product page has 0 4px 20px of near-black rgba 0.6 (offset y=4, a drop shadow, not a coloured zero-offset glow). Earlier hire-glow.json is superseded (it hovered Add to Cart/Buy Now only; those also read none). Scanner unit tests belong to the gate.",
+  "R482-EXPORT-VIS: summary.txt identical to c-round-437; narrow-probe.json identical; WAV 29189420 B, 24-bit, 48 kHz stereo, 101.352 s, RMS 0.172, peak 1.0, at both viewports; the play-wav.mjs output is byte-identical to round 437's, including its clock samples (c1 reads 00:00.000 after 1.5 s, c2 00:00.371, c3 00:01.070); I did not establish why, and real playback is measured in R482-JOURNEY (arrangement-position 00:01.271 after 1.3 s of Space).",
+  "REG-CART: stub must use the {success:true,data:cart} envelope; the dialog's scroll holder has class styled-scrollbar and computed scrollbar-color rgb(115, 107, 96) rgba(0, 0, 0, 0), which equals the .styled-scrollbar rule in app/styles/base/utilities.css (var(--color-outline-strong)=#736b60, transparent). The brass 0.4 scrollbar of R482-STORE-COLOUR (b) is the separate rule at utilities.css:73."
+ ],
+ "knownOpenNotFindings": [
+  "B-R478-DEAD-MUSIC-LINK protected half (downloads still /music)",
+  "B-R478-DEAD-LICENSE-LINK /license 404",
+  "GATE479-M1 route announce",
+  "C-R470-F1 isolated frame near y~372 not observed"
+ ]
+}

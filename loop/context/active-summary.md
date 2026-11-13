@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-12T23:47:13.945Z)
+# Active loop summary (2026-11-13T01:28:59.208Z)
 
-- backlog.json 3442 KB -> active view 303 KB
-- status: G_ROOT_GATE round 481
-- servers: `{"checkedUtc":"2026-11-12T23:35:54.0168286Z","round":481,"attempt":1,"store":200}`
+- backlog.json 3446 KB -> active view 303 KB
+- status: G_ROOT_GATE round 482
+- servers: `{"checkedUtc":"2026-11-13T00:11:02.0518431Z","round":482,"attempt":1,"store":200}`
 - last publication: 751e30e475abcf0e3edeb0c596cb6a2cbf11a283 (rounds 480-481)
-- last root gate: round 481 published - commit 751e30e475abcf0e3edeb0c596cb6a2cbf11a283 pushed
+- last root gate: round 482 skipped - no real changes
 
 ## Current items: -
 
@@ -21,10 +21,10 @@
 - **TLM-R468-SABA-SCROLL-DEVICE** / medium / L46 question to Saba (D-29z1705; questions-retro-480.md Q1); new deadline RETRO 495; does not block | open_tech_lead_manual (D-29z1649): deadline RETRO 480 (L46); does not block (2026-10-23 root clarification class) | question user-review/questions-round-468.md Q1 (D-29z1651), with the Lenis-feel op …[see backlog.json] / Saba's own device: /free-downloads and / scroll on the Vercel preview after round 468 lands (mouse wheel and trackpad; Chrome DevTools Perfo
 - **SABA-B-16-LOGO-OLD-COLORS** / medium / open (D-29z1691): header logo + entrance wordmark brass C-verified round 477 (C7, published 10791ac); asset still unnamed (questions-round-467 Q3) | open (D-29z1685): round 476 makes the entrance wordmark and header logo brass (footer already brass); asset still unconfirmed (questions-round-467 Q3); …[see backlog.json] / Logo still uses the old colours, not Obsidian & Brass (Saba 2026-11-12, "Known issues for the first review")
 - **B-R478-DEAD-LICENSE-LINK** / medium / awaiting_user (D-29z1699): user-review/questions-round-478.md Q1 (licence copy is legal content); round 479 keeps the target and only makes the link client-side / Footer "License" (every Store page) and terms.tsx "License page" link to /license, which has no route and renders the 404 page
-- **B-R478-DEAD-MUSIC-LINK** / medium / dispatched round 481 (D-29z1710): account.orders.tsx half -> /store; account.downloads.tsx half (protected) -> ROOT-REQ-DOWNLOADS-MUSIC-LINK; closes only when both halves are fixed | scheduled (D-29z1704): round 483, account.orders.tsx -> /store (L46 deadline met) | open (D-29z1699): deadline - sche …[see backlog.json] / Empty orders/downloads state "Browse Music" links to /music (404; /collections/music is 404 too)
-- **GATE479-M1-ROUTE-ANNOUNCE** / medium / scheduled (D-29z1704): CLIENT-NAV-CONTRACT round 482 (B pre-runs title timing, meta fallback, remount on a sketch); else ROOT-REQ-ROUTE-ANNOUNCER | open (D-29z1700): ruling D-29z1704 / Client navigation does not announce the new page title to screen readers (a full reload did); 13 footer/content links since round 479, 15 he
+- **B-R478-DEAD-MUSIC-LINK** / medium / half verified (D-29z1712): account.orders.tsx -> /store C round 481 PASS (browser, stubbed L36 path), published 751e30e; stays open for the protected account.downloads.tsx half (ROOT-REQ-DOWNLOADS-MUSIC-LINK) | dispatched round 481 (D-29z1710): account.orders.tsx half -> /store; account.downloads.ts …[see backlog.json] / Empty orders/downloads state "Browse Music" links to /music (404; /collections/music is 404 too)
+- **GATE479-M1-ROUTE-ANNOUNCE** / medium / scheduled (D-29z1715): CLIENT-NAV-CONTRACT round 484 (after REGRESSION parts 482-483) | scheduled (D-29z1704): CLIENT-NAV-CONTRACT round 482 (B pre-runs title timing, meta fallback, remount on a sketch); else ROOT-REQ-ROUTE-ANNOUNCER | open (D-29z1700): ruling D-29z1704 / Client navigation does not announce the new page title to screen readers (a full reload did); 13 footer/content links since round 479, 15 he
 - **FIREFOX-CHECKS** / medium / open_root (D-29z1707; does not block): blocked (D-29z1705): needs ROOT-REQ-PLAYWRIGHT-FIREFOX; C runs all five in one round once Firefox is installed; questions-retro-480.md Q3 / Firefox halves of five manual checks, opened as one task by L46 after two RETROs without an answer
 - **SAFARI-CHECKS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Saba on macOS Safari; questions-retro-480.md Q4 / Safari halves of the manual list, opened as one task by L46
 - **HIREUS-EMAIL-CLIENTS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Brevo and a test send to Gmail/Outlook/Apple Mail (Saba); questions-retro-480.md Q4 / Hire-Us internal e-mail in real clients, opened as a task by L46
-- **B-R480-ORDER-CARD-KEYBOARD** / medium / scheduled (D-29z1711): round 484 (after REGRESSION 482 and CLIENT-NAV-CONTRACT 483) / My Orders: an order card opens only on a mouse click on a <div>; keyboard and screen-reader users cannot reach the order items, licence type
+- **B-R480-ORDER-CARD-KEYBOARD** / medium / scheduled (D-29z1715): round 485 (after REGRESSION 482-483 and CLIENT-NAV-CONTRACT 484) | scheduled (D-29z1711): round 484 (after REGRESSION 482 and CLIENT-NAV-CONTRACT 483) / My Orders: an order card opens only on a mouse click on a <div>; keyboard and screen-reader users cannot reach the order items, licence type
 - ... and 966 Low/info (see backlog.json)
