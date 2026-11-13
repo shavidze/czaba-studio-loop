@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-13T17:24:27.838Z",
-  "current_task": "Round 493: re-dispatch of B-R488-PASSWORD-MODAL-DIALOG (+ B-R492-PASSWORD-FIELDS-UNNAMED, B-R492-PASSWORD-ERROR-NOT-ANNOUNCED) with docs-only v5 fixing C-R492-01 (doc 318 l.22 ring by modality; round 492 -> 493 in docs 315/317/318); baseline e4e1d1c with v3 in the tree (current-task.md, delta b-round-492/sketch-493-delta-v3-to-v4.patch.txt c70366db, full b-round-492/sketch-493.patch.txt ea441270)",
+  "_generatedUtc": "2026-11-13T18:16:33.692Z",
+  "current_task": "Round 494: re-dispatch of B-R488-PASSWORD-MODAL-DIALOG (+ B-R492-PASSWORD-FIELDS-UNNAMED, B-R492-PASSWORD-ERROR-NOT-ANNOUNCED) with docs-only v6 fixing C-R493-01 (doc 318 l.36 backdrop 40 px short; F2-F7 doc truth fixes; round 493 -> 494 in docs 315/317/318); baseline e4e1d1c with v5 in the tree (current-task.md, delta b-round-493/sketch-494-delta-v5-to-v6.patch.txt 29a0ec9e, full b-round-493/sketch-494.patch.txt a4799d47, ledger b-round-493/doc-ledger.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6922,19 +6922,56 @@
     {
       "id": "C-R492-01",
       "severity": "low",
-      "status": "dispatched (D-29z1758): round 493 docs-only v5 rewrites doc ",
+      "status": "re-dispatched (D-29z1761): v5 l.22 fix carried in v6; closes",
       "title": "Doc 318 l.22 claimed the Current Password field shows a focus ring on open; false for a mouse open ("
+    },
+    {
+      "id": "B-R488-PASSWORD-MODAL-DIALOG",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "status": "open (D-29z1761): re-dispatched as round 494 with docs-only v6; C round 493 failed on a doc line only (C-R493-01); awaiting C round 494 browser acceptance",
+      "title": "Account 'Change password' modal has no dialog semantics: no role=dialog/aria-modal, no initial focus, Esc does not close it, no focus return to the trigger",
+      "evidence": "b-round-487/probe/overlays-sketch.json password-modal-keys (1440/1280): dialogs [], afterOpen focus stays on the link, Esc leaves the modal open; tech-lead delta review Low 1 (b-round-487/sketch-review.md)",
+      "repro": "signed-in stub, /account: click 'Click to change password'; inspect the aria tree (no dialog), press Esc (modal stays)",
+      "note": "reference: WAI-ARIA APG Dialog (Modal) pattern; the fix touches function PasswordModal in app/routes/account.tsx only; must keep C-R487-01's passwordModalOpenRef in sync",
+      "added": "2026-11-13 B round 487 -> 488 planning",
+      "restored_from_archive": "2026-11-13 B round 493 -> 494 planning (D-29z1761): still open (no C acceptance yet); archive copy left untouched; root note ROOT-NOTE-R494-OPEN-MEDIUMS-ARCHIVED",
+      "status_history": "re-dispatched (D-29z1758): round 493 docs-only v5; C round 492 FAIL only on C-R492-01 (doc line); C5 browser rows PASS on v3 (c-round-492/pw-check.txt) are evidence, not done (C verdict FAIL) | dispatched (D-29z1756): round 492, sketch b-round-491/sketch-492.patch.txt v3 f530e0f3 (role=dialog, aria- …[see backlog.json]"
+    },
+    {
+      "id": "B-R492-PASSWORD-FIELDS-UNNAMED",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "status": "open (D-29z1761): re-dispatched as round 494 with docs-only v6; C round 493 failed on a doc line only (C-R493-01); awaiting C round 494 browser acceptance",
+      "title": "Account 'Change Password' fields have no accessible name (label without htmlFor) and the three eye toggle buttons have an empty name",
+      "evidence": "b-round-491/probe/headprod-pw.json R1_openMouse.fields (inputs [null,null,null], buttons [\"\",\"\",\"\"...]); Biome 3x noLabelWithoutControl at HEAD (b-round-490/sketch-491-biome.log)",
+      "repro": "signed-in stub, /account, open 'Click to change password'; inspect accessible names of the three inputs and eye buttons",
+      "note": "WCAG 1.3.1, 4.1.2; L14 (unique names in a dialog we touch)",
+      "added": "2026-11-13 B round 491 -> 492 planning",
+      "restored_from_archive": "2026-11-13 B round 493 -> 494 planning (D-29z1761): still open (no C acceptance yet); archive copy left untouched; root note ROOT-NOTE-R494-OPEN-MEDIUMS-ARCHIVED",
+      "status_history": "re-dispatched (D-29z1758): round 493 docs-only v5; C round 492 FAIL only on C-R492-01 (doc line); C5 browser rows PASS on v3 (c-round-492/pw-check.txt) are evidence, not done (C verdict FAIL) | dispatched (D-29z1756): round 492 (same owner as B-R488-PASSWORD-MODAL-DIALOG)"
+    },
+    {
+      "id": "B-R492-PASSWORD-ERROR-NOT-ANNOUNCED",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "status": "open (D-29z1761): re-dispatched as round 494 with docs-only v6; C round 493 failed on a doc line only (C-R493-01); awaiting C round 494 browser acceptance",
+      "title": "Account 'Change Password' error message is not announced (no role=alert / live region); every real attempt ends in this error today",
+      "evidence": "b-round-491/probe/headprod-pw.json R9_errorPath (error text visible, no alert); sketch alertText in sketchprod-pw.json",
+      "repro": "signed-in stub, open the dialog, fill valid values, Update Password; the error appears silently",
+      "note": "WCAG 4.1.3",
+      "added": "2026-11-13 B round 491 -> 492 planning",
+      "restored_from_archive": "2026-11-13 B round 493 -> 494 planning (D-29z1761): still open (no C acceptance yet); archive copy left untouched; root note ROOT-NOTE-R494-OPEN-MEDIUMS-ARCHIVED",
+      "status_history": "re-dispatched (D-29z1758): round 493 docs-only v5; C round 492 FAIL only on C-R492-01 (doc line); C5 browser rows PASS on v3 (c-round-492/pw-check.txt) are evidence, not done (C verdict FAIL) | dispatched (D-29z1756): round 492 (role=alert on the error box)"
+    },
+    {
+      "id": "C-R493-01",
+      "severity": "low",
+      "status": "open (D-29z1761): round 494 docs-only v6 rewrites doc 318 l.",
+      "title": "Doc 318 l.36 said the backdrop blocks the pointer on the background; the bottom 40 px strip is outsi"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 484,
-      "task": "current-task.md",
-      "decision": "D-29z1720",
-      "type": "REGRESSION-2026-11-13 part 2 remainder (C-only; A no change)",
-      "status": "C PASS (browserVerified true, 0 bugs); gate 484 skipped (no real changes) (D-29z1723)",
-      "note": "baseline HEAD 751e30e clean; claims b-round-483/claims-484.sh; frozen manifest b-round-483/r484-tree-sha256.txt (1393); B baseline probes in b-round-483/probe"
-    },
     {
       "round": 485,
       "task": "current-task.md",
@@ -7004,8 +7041,16 @@
       "task": "current-task.md",
       "decision": "D-29z1758",
       "type": "re-dispatch B-R488-PASSWORD-MODAL-DIALOG + B-R492-PASSWORD-FIELDS-UNNAMED + B-R492-PASSWORD-ERROR-NOT-ANNOUNCED (Medium x3) with docs-only v5 (C-R492-01)",
-      "status": "dispatched",
+      "status": "c_fail_stopped_routed_to_b (D-29z1761): C round 493 FAIL short route L22 (browserVerified/realVerified false: C5/C7 not run); A STOP on doc 318 l.36 correct (C-R493-01 Low, origin B spec, confirmed in browser c-round-493/f1.json); C1/C2/C3/C8 PASS; gate 493 skipped (C taskStatus FAIL); nothing published",
       "note": "baseline HEAD e4e1d1c with sketch v3 in the tree (6 paths); delta b-round-492/sketch-493-delta-v3-to-v4.patch.txt (c70366db), full b-round-492/sketch-493.patch.txt (ea441270); claims b-round-492/claims-493.sh; v3/v5 production builds byte-identical (b-round-492/css-compare.txt, build-diff.txt)"
+    },
+    {
+      "round": 494,
+      "task": "current-task.md",
+      "decision": "D-29z1761",
+      "type": "re-dispatch B-R488-PASSWORD-MODAL-DIALOG + B-R492-PASSWORD-FIELDS-UNNAMED + B-R492-PASSWORD-ERROR-NOT-ANNOUNCED (Medium x3) with docs-only v6 (C-R493-01)",
+      "status": "dispatched",
+      "note": "baseline HEAD e4e1d1c with sketch v5 in the tree (6 paths); delta b-round-493/sketch-494-delta-v5-to-v6.patch.txt (29a0ec9e); full b-round-493/sketch-494.patch.txt (a4799d47); code/tests byte-equal v3; v6 CSS equal v5 (b-round-493/css-compare-v6.txt); covering 6/97 on v6"
     }
   ],
   "other_keys": [
