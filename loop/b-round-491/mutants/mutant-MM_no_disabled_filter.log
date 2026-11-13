@@ -1,0 +1,68 @@
+
+ RUN  v4.0.16 /tmp/b492-scratch
+
+ ✓ app/lib/__tests__/account-profile-name.test.tsx (18 tests) 1357ms
+ ❯ app/lib/__tests__/account-password-dialog.test.tsx (15 tests | 1 failed) 1632ms
+     ✓ PD1 opening is a labelled modal dialog with focus on Current Password 289ms
+     ✓ PD2 the three fields are labelled and every dialog button has one unique name 161ms
+     ✓ PD3 a visibility toggle shows the field and renames itself 142ms
+     ✓ PD4 Escape closes the dialog and returns focus to the trigger 96ms
+     ✓ PD5 Cancel and a backdrop click return focus to the trigger 133ms
+     ✓ PD6 a successful update closes the dialog and returns focus to the trigger 114ms
+     ✓ PD7 an update that settles after Escape does not pull focus back to the trigger 126ms
+     ✓ PD8 Tab wraps from the last control to the first and Shift+Tab from the first to the last 54ms
+     ✓ PD9 Tab with focus outside the open dialog moves focus into it 68ms
+     ✓ PD10 after the dialog closes, it is inert while it fades and Tab and Escape are no longer handled by it 93ms
+     × PD11 while an update is pending, Shift+Tab from the first field skips the disabled Update button 116ms
+     ✓ PD12 a failed update is announced as an alert and keeps the dialog open 71ms
+     ✓ PD13 an Escape that ends an IME composition does not close the dialog 45ms
+     ✓ PD14 reopening while the closed dialog still fades gives a live dialog with focus on Current Password 59ms
+     ✓ PD15 Tab from a control that became disabled while focused moves focus to the first field 60ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 32 passed (33)
+   Start at  16:10:46
+   Duration  3.22s (transform 615ms, setup 0ms, import 1.70s, tests 2.99s, environment 1.11s)
+
+
+::error file=/tmp/b492-scratch/app/lib/__tests__/account-password-dialog.test.tsx,title=app/lib/__tests__/account-password-dialog.test.tsx > Account password dialog (B-R488-PASSWORD-MODAL-DIALOG) > PD11 while an update is pending%2C Shift+Tab from the first field skips the disabled Update button,line=234,column=36::AssertionError: expected <input id=":r35:" …(3)></input> to be <button …(2)></button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- <button%0A-   class="inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-elevated text-foreground border border-outline hover:bg-outline hover:border-outline-hover active:opacity-90 px-6 py-3 text-base gap-2 w-full rounded-xl"%0A-   type="button"%0A- >%0A-   Cancel%0A- </button>%0A+ <input%0A+   class="w-full px-4 py-3 pr-12 bg-elevated border border-outline-strong rounded-xl text-foreground placeholder:text-dim transition-colors"%0A+   id=":r35:"%0A+   type="password"%0A+   value="old-pass-1"%0A+ />%0A%0A ❯ app/lib/__tests__/account-password-dialog.test.tsx:234:36%0A%0A
+stderr | app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN1 the name is a native button named by the Full Name label and its value
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | app/lib/__tests__/account-password-dialog.test.tsx > Account password dialog (B-R488-PASSWORD-MODAL-DIALOG) > PD1 opening is a labelled modal dialog with focus on Current Password
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/account-password-dialog.test.tsx > Account password dialog (B-R488-PASSWORD-MODAL-DIALOG) > PD11 while an update is pending, Shift+Tab from the first field skips the disabled Update button
+AssertionError: expected <input id=":r35:" …(3)></input> to be <button …(2)></button> // Object.is equality
+
+- Expected
++ Received
+
+- <button
+-   class="inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-elevated text-foreground border border-outline hover:bg-outline hover:border-outline-hover active:opacity-90 px-6 py-3 text-base gap-2 w-full rounded-xl"
+-   type="button"
+- >
+-   Cancel
+- </button>
++ <input
++   class="w-full px-4 py-3 pr-12 bg-elevated border border-outline-strong rounded-xl text-foreground placeholder:text-dim transition-colors"
++   id=":r35:"
++   type="password"
++   value="old-pass-1"
++ />
+
+ ❯ app/lib/__tests__/account-password-dialog.test.tsx:234:36
+    232|     current.focus();
+    233|     expect(fireEvent.keyDown(current, { key: 'Tab', shiftKey: true }))…
+    234|     expect(document.activeElement).toBe(within(dialog).getByRole('butt…
+       |                                    ^
+    235|     await act(async () => {
+    236|       pending.resolve();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

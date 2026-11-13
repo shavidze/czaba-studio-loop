@@ -1,0 +1,132 @@
+3c3
+< index 0000000..d3125df
+---
+> index 0000000..3ea9f4c
+6c6
+< @@ -0,0 +1,262 @@
+---
+> @@ -0,0 +1,295 @@
+267a268,300
+> +  it('PD14 reopening while the closed dialog still fades gives a live dialog with focus on Current Password', () => {
+> +    renderProfile();
+> +    const dialog = openDialog();
+> +    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+> +    expect(dialog.inert).toBe(true);
+> +    fireEvent.click(trigger());
+> +    const reopened = screen.getByRole('dialog', { name: 'Change Password' });
+> +    expect(reopened.inert).toBe(false);
+> +    expect(document.activeElement).toBe(screen.getByLabelText('Current Password'));
+> +    fireEvent.keyDown(screen.getByLabelText('Current Password'), { key: 'Escape' });
+> +    expect(document.activeElement).toBe(trigger());
+> +  });
+> +
+> +  it('PD15 Tab from a control that became disabled while focused moves focus to the first field', async () => {
+> +    const pending = deferred();
+> +    spies.updatePassword.mockReturnValue(pending.promise);
+> +    renderProfile();
+> +    const dialog = openDialog();
+> +    fillValid();
+> +    const update = within(dialog).getByRole('button', { name: 'Update Password' });
+> +    update.focus();
+> +    act(() => {
+> +      fireEvent.click(update);
+> +    });
+> +    expect(update.hasAttribute('disabled')).toBe(true);
+> +    expect(document.activeElement).toBe(update);
+> +    expect(fireEvent.keyDown(update, { key: 'Tab' })).toBe(false);
+> +    expect(document.activeElement).toBe(screen.getByLabelText('Current Password'));
+> +    await act(async () => {
+> +      pending.resolve();
+> +      await pending.promise;
+> +    });
+> +  });
+296c329
+< index 4f69e0f..7212c7a 100644
+---
+> index 4f69e0f..74f6113 100644
+338c371
+< @@ -326,6 +333,60 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+---
+> @@ -326,6 +333,62 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+351,352c384,390
+< +    currentPasswordRef.current?.focus();
+< +  }, []);
+---
+> +    if (dialogRef.current) {
+> +      dialogRef.current.inert = !isPresent;
+> +    }
+> +    if (isPresent) {
+> +      currentPasswordRef.current?.focus();
+> +    }
+> +  }, [isPresent]);
+356,358d393
+< +      if (dialogRef.current) {
+< +        dialogRef.current.inert = true;
+< +      }
+384c419
+< +      const inside = active instanceof Node && dialog.contains(active);
+---
+> +      const inside = tabbable.some((el) => el === active);
+399c434
+< @@ -369,24 +430,35 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+---
+> @@ -369,24 +432,35 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+437c472
+< @@ -395,6 +467,7 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+---
+> @@ -395,6 +469,7 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+445c480
+< @@ -404,9 +477,12 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+---
+> @@ -404,9 +479,12 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+459c494
+< @@ -416,6 +492,7 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+---
+> @@ -416,6 +494,7 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+467c502
+< @@ -425,9 +502,12 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+---
+> @@ -425,9 +504,12 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+481c516
+< @@ -436,6 +516,9 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+---
+> @@ -436,6 +518,9 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+491c526
+< @@ -461,7 +544,10 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+---
+> @@ -461,7 +546,10 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+546c581
+< index 0000000..e59aaff
+---
+> index 0000000..a1aaf29
+549c584
+< @@ -0,0 +1,89 @@
+---
+> @@ -0,0 +1,94 @@
+574,575c609,610
+< +- **საწყისი focus:** mount-ზე Current Password ველი.
+< +- **Tab-ის ჩაკეტვა:** document `keydown` listener. ბოლო ჩართული control-იდან Tab პირველზე გადადის, პირველიდან Shift+Tab ბოლოზე. თუ focus ფანჯრის გარეთაა (მაგალითად, სათაურზე click-ის შემდეგ `<body>`-ზე), Tab ფანჯარაში შედის. Disabled ღილაკი (pending "Update Password") სიაში არ ჯდება.
+---
+> +- **საწყისი focus:** Current Password ველი. ეფექტი `isPresent`-ზეა მიბმული, ამიტომ თუ ფანჯარა გაქრობის დროს ხელახლა გაიხსნა, `inert` იხსნება და focus ისევ Current Password-ზე გადადის.
+> +- **Tab-ის ჩაკეტვა:** document `keydown` listener. ბოლო ჩართული control-იდან Tab პირველზე გადადის, პირველიდან Shift+Tab ბოლოზე. თუ focus ჩართულ control-ზე არ არის (მაგალითად, სათაურზე click-ის შემდეგ `<body>`-ზე, ან ღილაკზე, რომელიც focus-ის დროს disabled გახდა), Tab ფანჯარაში შედის. Disabled ღილაკი (pending "Update Password") სიაში არ ჯდება.
+594a630
+> +    Exiting --> Open: trigger again before the animation ends
+602c638
+< +- `app/lib/__tests__/account-password-dialog.test.tsx` — ახალი, PD1–PD13.
+---
+> +- `app/lib/__tests__/account-password-dialog.test.tsx` — ახალი, PD1–PD15.
+629c665,667
+< +  - PD13 — composition-ის Esc ფანჯარას არ ხურავს, ჩვეულებრივი Esc ხურავს.
+---
+> +  - PD13 — composition-ის Esc ფანჯარას არ ხურავს, ჩვეულებრივი Esc ხურავს;
+> +  - PD14 — გაქრობის დროს ხელახლა გახსნა: ფანჯარა `inert` აღარ არის და focus Current Password-ზეა;
+> +  - PD15 — focus-ის დროს disabled გამხდარი ღილაკიდან Tab პირველ ველზე გადადის.
+631,632c669,670
+< +- B-ის მუტანტები (17): თითოეული ცვლილების წაშლა მინიმუმ ერთ PD/PN ტესტს წითლად აქცევს.
+< +- Browser (Chromium, production build, 1440×900, 1280×720, 375×812, signed-in stub): ერთი dialog სახელით "Change Password", focus Current Password-ზე mouse-ით და keyboard-ით გახსნისას, 8 Tab ფანჯრის შიგნით რჩება, Esc/Cancel/backdrop focus-ს trigger-ზე აბრუნებს, Esc-ის შემდეგ ქრებად ფანჯარაში Tab არ შედის, შეცდომა `role="alert"`-შია.
+---
+> +- B-ის მუტანტები (20): თითოეული ცვლილების წაშლა მინიმუმ ერთ PD/PN ტესტს წითლად აქცევს.
+> +- Browser (B-ის გაზომვა, Chromium, production build, 1440×900, 1280×720, 375×812, signed-in stub; C ამოწმებს ამ რაუნდში): ერთი dialog სახელით "Change Password", focus Current Password-ზე mouse-ით და keyboard-ით გახსნისას, 8 Tab ფანჯრის შიგნით რჩება, Esc/Cancel/backdrop focus-ს trigger-ზე აბრუნებს, Esc-ის შემდეგ ქრებად ფანჯარაში Tab არ შედის, შეცდომა `role="alert"`-შია.
+638a677,678
+> +- Ctrl+K-ით CommandPalette ღია ფანჯრის ზემოთ იხსნება და ერთი Esc ორივეს ხურავს (HEAD-შიც ასეა) — ცალკე Low.
+> +- წინა გახსნის დაგვიანებული წარმატება შემდეგ გახსნილ ფანჯარას დახურავს — დღეს მიუღწევადია (`updatePassword` ყოველთვის აგდებს), Low; გამოსწორდეს backend-ის endpoint-თან ერთად.

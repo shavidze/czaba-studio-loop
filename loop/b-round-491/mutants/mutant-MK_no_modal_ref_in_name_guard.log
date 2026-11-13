@@ -1,0 +1,68 @@
+
+ RUN  v4.0.16 /tmp/b492-scratch
+
+ ❯ app/lib/__tests__/account-profile-name.test.tsx (18 tests | 2 failed) 1349ms
+     ✓ PN1 the name is a native button named by the Full Name label and its value 216ms
+     ✓ PN1b with no name the button keeps the visible copy in its name 39ms
+     ✓ PN2 opening the editor focuses a labelled First name field; controls have unique names 114ms
+     ✓ PN3 Escape and Cancel close the editor and return focus to the name button 103ms
+     ✓ PN4 Enter saves once and returns focus to the name button 53ms
+     ✓ PN5 a repeated Enter and a second Enter during the save do not send another save 69ms
+     ✓ PN6 an empty first name keeps the editor open and focuses First name 34ms
+     ✓ PN7 a failed save keeps the editor open, re-enables it and focuses First name 61ms
+     ✓ PN9 Escape during a pending save keeps the editor open; the save then returns focus to the name button 58ms
+     ✓ PN10 focus moved off the editor during a save stays there when the save succeeds 38ms
+     ✓ PN10b focus moved off the editor during a save stays there when the save fails 61ms
+     ✓ PN10c a Save name click with focus on the body returns focus to the name button 53ms
+     ✓ PN10d a Save name click with focus on the body focuses First name when the save fails 48ms
+     ✓ PN10e focus on a clicked account tab during a save stays on that tab after the save settles 64ms
+     × PN10f an unfocused click that opens the password dialog during a save keeps focus off the editor when the save succeeds 123ms
+     × PN10g an unfocused click that opens the password dialog during a save keeps focus off First name when the save fails 93ms
+     ✓ PN10h after the password dialog is cancelled, a later save returns focus to the name button 106ms
+     ✓ PN8 a repeated Enter on the name button is suppressed; a first Enter is not 13ms
+ ✓ app/lib/__tests__/account-password-dialog.test.tsx (15 tests) 1595ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 31 passed (33)
+   Start at  16:10:38
+   Duration  3.17s (transform 574ms, setup 0ms, import 1.69s, tests 2.94s, environment 1.11s)
+
+
+::error file=/tmp/b492-scratch/app/lib/__tests__/account-profile-name.test.tsx,title=app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10f an unfocused click that opens the password dialog during a save keeps focus off the editor when the save succeeds,line=318,column=40::AssertionError: expected <button id=":r1q:" …(3)></button> not to be <button id=":r1q:" …(3)></button> // Object.is equality%0A ❯ app/lib/__tests__/account-profile-name.test.tsx:318:40%0A%0A
+
+::error file=/tmp/b492-scratch/app/lib/__tests__/account-profile-name.test.tsx,title=app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10g an unfocused click that opens the password dialog during a save keeps focus off First name when the save fails,line=344,column=40::AssertionError: expected <input type="text" …(4)></input> not to be <input type="text" …(4)></input> // Object.is equality%0A ❯ app/lib/__tests__/account-profile-name.test.tsx:344:40%0A%0A
+stderr | app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN1 the name is a native button named by the Full Name label and its value
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | app/lib/__tests__/account-password-dialog.test.tsx > Account password dialog (B-R488-PASSWORD-MODAL-DIALOG) > PD1 opening is a labelled modal dialog with focus on Current Password
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10f an unfocused click that opens the password dialog during a save keeps focus off the editor when the save succeeds
+AssertionError: expected <button id=":r1q:" …(3)></button> not to be <button id=":r1q:" …(3)></button> // Object.is equality
+ ❯ app/lib/__tests__/account-profile-name.test.tsx:318:40
+    316|     expect(spies.updateProfile).toHaveBeenCalledTimes(1);
+    317|     expect(screen.queryByRole('textbox', { name: 'First name' })).toBe…
+    318|     expect(document.activeElement).not.toBe(nameButton());
+       |                                        ^
+    319|     expect(document.activeElement).toBe(document.body);
+    320|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN10g an unfocused click that opens the password dialog during a save keeps focus off First name when the save fails
+AssertionError: expected <input type="text" …(4)></input> not to be <input type="text" …(4)></input> // Object.is equality
+ ❯ app/lib/__tests__/account-profile-name.test.tsx:344:40
+    342|     });
+    343|     expect(spies.showToast).toHaveBeenCalledWith('Stub failure', 'erro…
+    344|     expect(document.activeElement).not.toBe(screen.getByRole('textbox'…
+       |                                        ^
+    345|     expect(document.activeElement).toBe(document.body);
+    346|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

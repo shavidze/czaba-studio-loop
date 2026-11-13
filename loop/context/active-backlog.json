@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-13T14:10:01.407Z",
-  "current_task": "Round 490: SABA-B-17 fix-up - entrance tests dispatch real WheelEvent/one-touch TouchEvent (A-R489-REVIEW-NONZOOM-CLASSIFY) and a positive-delta ctrl+wheel zoom fixture; 28 mutants red; components byte-equal to v3; C re-verifies the entrance in the browser + studio-lab playback; baseline 73f994d + v3 (current-task.md, delta b-round-489/sketch-490-v3-to-v4.patch.txt)",
+  "_generatedUtc": "2026-11-13T15:09:47.069Z",
+  "current_task": "Round 491: B-R487-PROFILE-EDITOR-NARROW-OVERFLOW - min-w-0 on both Full Name inputs so Save/Cancel stay on-screen and clickable/tappable at 375/360/320 px; desktop boxes equal HEAD; baseline 53ff249 (current-task.md, sketch b-round-490/sketch-491.patch.txt)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6903,7 +6903,7 @@
       "id": "B-R487-PROFILE-EDITOR-NARROW-OVERFLOW",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "scheduled (D-29z1751): round 491 (after the 490 fix-up; REGRESSION first if planning is on/after 2026-11-16) | scheduled (D-29z1740): round 490; note the round-488 sketch changes the editor row to '<div ref={nameEditorRef} className=\"flex items-center gap-3\">' (round-487 claims K22 grep no longer ma …[see backlog.json]",
+      "status": "dispatched (D-29z1754): round 491, sketch b-round-490/sketch-491.patch.txt (min-w-0 on both name inputs); B browser evidence b-round-490/probe/ | scheduled (D-29z1751): round 491 (after the 490 fix-up; REGRESSION first if planning is on/after 2026-11-16) | scheduled (D-29z1740): round 490; note the  …[see backlog.json]",
       "title": "Account Profile name editor overflows at 375 px: Save/Cancel icon buttons are off-screen and cannot be clicked or tapped",
       "evidence": "b-round-486/probe/head-named.json 375x812: afterClick.name.textBox width 420 in a 343 px column; afterMouseSave puts 0 / editing true; afterMouseCancel editing true (sketch v3 equal: probe/v3/sketch-named.json)",
       "repro": "375x812, signed-in stub: open the name editor; the check and X buttons sit beyond the right edge",
@@ -6913,7 +6913,7 @@
       "id": "B-R488-PASSWORD-MODAL-DIALOG",
       "severity": "medium",
       "origin": "pre-existing",
-      "status": "scheduled (D-29z1751): round 492 | scheduled (D-29z1739): round 491 (after 489 SABA-B-17 and 490 narrow overflow; REGRESSION first when due)",
+      "status": "scheduled (D-29z1754): round 492 (REGRESSION first if planning is on/after 2026-11-16) | scheduled (D-29z1751): round 492 | scheduled (D-29z1739): round 491 (after 489 SABA-B-17 and 490 narrow overflow; REGRESSION first when due)",
       "title": "Account 'Change password' modal has no dialog semantics: no role=dialog/aria-modal, no initial focus, Esc does not close it, no focus return to the trigger",
       "evidence": "b-round-487/probe/overlays-sketch.json password-modal-keys (1440/1280): dialogs [], afterOpen focus stays on the link, Esc leaves the modal open; tech-lead delta review Low 1 (b-round-487/sketch-review.md)",
       "repro": "signed-in stub, /account: click 'Click to change password'; inspect the aria tree (no dialog), press Esc (modal stays)",
@@ -6929,29 +6929,9 @@
       "id": "SABA-Q-ENTRANCE-SLOW-WAIT",
       "status": "awaiting_user (D-29z1743); non-blocking, default applied",
       "title": ""
-    },
-    {
-      "id": "A-R489-REVIEW-NONZOOM-CLASSIFY",
-      "severity": "medium",
-      "origin": "A (code-reviewer)",
-      "status": "dispatched (D-29z1747): fixed in round 490 sketch v4 (b-round-489/sketch-490-v3-to-v4.patch.txt): real WheelEvent/one-touch TouchEvent in dispatchScrollGesture; MA-MD (+ ME-MH from tech-lead F1/F1b; S3/E8e over both ctrl+wheel delta signs) red on B's scratch (b-round-489/mutants/mutants-summary.txt)",
-      "title": "store-entrance-loader S1/S2/E8c/E8d dispatched a plain Event, so an over-broad zoom classifier (any wheel / one touch = zoom; any real wheel unblocked) stayed green",
-      "evidence": "a-round-489/review-mutants.log (MA-MD 61/61 green); c-round-489.json bug C-R489-A-STOP-NONZOOM-TEST-GAP",
-      "confirmedBy": [
-        "C-R489-A-STOP-NONZOOM-TEST-GAP (C round 489 reproduced MA, MB)"
-      ],
-      "added": "2026-11-13 B round 489 -> 490 planning"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 481,
-      "task": "current-task.md",
-      "decision": "D-29z1710",
-      "type": "B-R478-DEAD-MUSIC-LINK (account.orders half)",
-      "status": "c_pass_published (D-29z1712): C PASS 8 rows, browserVerified true, 0 bugs; gate 481 published 751e30e",
-      "note": "baseline HEAD bbb3193 clean; claims b-round-480/claims-481.sh; frozen manifest b-round-480/r481-frozen-sha256.txt (1390 = 1391 tracked minus account.orders.tsx); sketch b-round-480/sketch-481/"
-    },
     {
       "round": 482,
       "task": "current-task.md",
@@ -7021,8 +7001,16 @@
       "task": "current-task.md",
       "decision": "D-29z1747",
       "type": "fix-up of 489: A-R489-REVIEW-NONZOOM-CLASSIFY (Medium) + C re-verification of SABA-B-17-ENTRANCE-3-4S, B-R489-ENTRANCE-SLOW-FIRST-VISIT-EXPIRED, B-R489-ENTRANCE-WHEEL-SCROLLS-UNDER-COVER",
-      "status": "dispatched",
+      "status": "C PASS (browserVerified true); gate 490 published 53ff249 (with round 489)",
       "note": "baseline HEAD 73f994d + round-489 v3 uncommitted (4 paths); delta b-round-489/sketch-490-v3-to-v4.patch.txt; claims b-round-489/claims-490.sh"
+    },
+    {
+      "round": 491,
+      "task": "current-task.md",
+      "decision": "D-29z1754",
+      "type": "B-R487-PROFILE-EDITOR-NARROW-OVERFLOW (Medium)",
+      "status": "dispatched",
+      "note": "baseline HEAD 53ff249 clean; sketch b-round-490/sketch-491.patch.txt; claims b-round-490/claims-491.sh; probes b-round-490/probe/narrow-491.mjs, mut-491.mjs"
     }
   ],
   "other_keys": [

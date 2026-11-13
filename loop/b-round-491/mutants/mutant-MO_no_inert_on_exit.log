@@ -1,0 +1,79 @@
+
+ RUN  v4.0.16 /tmp/b492-scratch
+
+ ✓ app/lib/__tests__/account-profile-name.test.tsx (18 tests) 1335ms
+ ❯ app/lib/__tests__/account-password-dialog.test.tsx (15 tests | 2 failed) 1561ms
+     ✓ PD1 opening is a labelled modal dialog with focus on Current Password 291ms
+     ✓ PD2 the three fields are labelled and every dialog button has one unique name 178ms
+     ✓ PD3 a visibility toggle shows the field and renames itself 114ms
+     ✓ PD4 Escape closes the dialog and returns focus to the trigger 80ms
+     ✓ PD5 Cancel and a backdrop click return focus to the trigger 132ms
+     ✓ PD6 a successful update closes the dialog and returns focus to the trigger 114ms
+     ✓ PD7 an update that settles after Escape does not pull focus back to the trigger 121ms
+     ✓ PD8 Tab wraps from the last control to the first and Shift+Tab from the first to the last 54ms
+     ✓ PD9 Tab with focus outside the open dialog moves focus into it 80ms
+     × PD10 after the dialog closes, it is inert while it fades and Tab and Escape are no longer handled by it 70ms
+     ✓ PD11 while an update is pending, Shift+Tab from the first field skips the disabled Update button 109ms
+     ✓ PD12 a failed update is announced as an alert and keeps the dialog open 71ms
+     ✓ PD13 an Escape that ends an IME composition does not close the dialog 44ms
+     × PD14 reopening while the closed dialog still fades gives a live dialog with focus on Current Password 42ms
+     ✓ PD15 Tab from a control that became disabled while focused moves focus to the first field 58ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 31 passed (33)
+   Start at  16:10:54
+   Duration  3.15s (transform 656ms, setup 0ms, import 1.73s, tests 2.90s, environment 1.10s)
+
+
+::error file=/tmp/b492-scratch/app/lib/__tests__/account-password-dialog.test.tsx,title=app/lib/__tests__/account-password-dialog.test.tsx > Account password dialog (B-R488-PASSWORD-MODAL-DIALOG) > PD10 after the dialog closes%2C it is inert while it fades and Tab and Escape are no longer handled by it,line=213,column=26::AssertionError: expected undefined to be true // Object.is equality%0A%0A- Expected: %0Atrue%0A%0A+ Received: %0Aundefined%0A%0A ❯ app/lib/__tests__/account-password-dialog.test.tsx:213:26%0A%0A
+
+::error file=/tmp/b492-scratch/app/lib/__tests__/account-password-dialog.test.tsx,title=app/lib/__tests__/account-password-dialog.test.tsx > Account password dialog (B-R488-PASSWORD-MODAL-DIALOG) > PD14 reopening while the closed dialog still fades gives a live dialog with focus on Current Password,line=266,column=26::AssertionError: expected undefined to be true // Object.is equality%0A%0A- Expected: %0Atrue%0A%0A+ Received: %0Aundefined%0A%0A ❯ app/lib/__tests__/account-password-dialog.test.tsx:266:26%0A%0A
+stderr | app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN1 the name is a native button named by the Full Name label and its value
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | app/lib/__tests__/account-password-dialog.test.tsx > Account password dialog (B-R488-PASSWORD-MODAL-DIALOG) > PD1 opening is a labelled modal dialog with focus on Current Password
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/account-password-dialog.test.tsx > Account password dialog (B-R488-PASSWORD-MODAL-DIALOG) > PD10 after the dialog closes, it is inert while it fades and Tab and Escape are no longer handled by it
+AssertionError: expected undefined to be true // Object.is equality
+
+- Expected: 
+true
+
++ Received: 
+undefined
+
+ ❯ app/lib/__tests__/account-password-dialog.test.tsx:213:26
+    211|     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    212|     expect(document.activeElement).toBe(trigger());
+    213|     expect(dialog.inert).toBe(true);
+       |                          ^
+    214|     expect(fireEvent.keyDown(trigger(), { key: 'Tab' })).toBe(true);
+    215|     expect(fireEvent.keyDown(trigger(), { key: 'Escape' })).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  app/lib/__tests__/account-password-dialog.test.tsx > Account password dialog (B-R488-PASSWORD-MODAL-DIALOG) > PD14 reopening while the closed dialog still fades gives a live dialog with focus on Current Password
+AssertionError: expected undefined to be true // Object.is equality
+
+- Expected: 
+true
+
++ Received: 
+undefined
+
+ ❯ app/lib/__tests__/account-password-dialog.test.tsx:266:26
+    264|     const dialog = openDialog();
+    265|     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    266|     expect(dialog.inert).toBe(true);
+       |                          ^
+    267|     fireEvent.click(trigger());
+    268|     const reopened = screen.getByRole('dialog', { name: 'Change Passwo…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

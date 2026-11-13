@@ -1,0 +1,58 @@
+
+ RUN  v4.0.16 /tmp/b492-scratch
+
+ ✓ app/lib/__tests__/account-profile-name.test.tsx (18 tests) 1326ms
+ ❯ app/lib/__tests__/account-password-dialog.test.tsx (15 tests | 1 failed) 1571ms
+     ✓ PD1 opening is a labelled modal dialog with focus on Current Password 287ms
+     ✓ PD2 the three fields are labelled and every dialog button has one unique name 165ms
+     ✓ PD3 a visibility toggle shows the field and renames itself 114ms
+     ✓ PD4 Escape closes the dialog and returns focus to the trigger 75ms
+     ✓ PD5 Cancel and a backdrop click return focus to the trigger 140ms
+     ✓ PD6 a successful update closes the dialog and returns focus to the trigger 120ms
+     ✓ PD7 an update that settles after Escape does not pull focus back to the trigger 116ms
+     ✓ PD8 Tab wraps from the last control to the first and Shift+Tab from the first to the last 53ms
+     ✓ PD9 Tab with focus outside the open dialog moves focus into it 67ms
+     ✓ PD10 after the dialog closes, it is inert while it fades and Tab and Escape are no longer handled by it 92ms
+     ✓ PD11 while an update is pending, Shift+Tab from the first field skips the disabled Update button 115ms
+     ✓ PD12 a failed update is announced as an alert and keeps the dialog open 70ms
+     × PD13 an Escape that ends an IME composition does not close the dialog 34ms
+     ✓ PD14 reopening while the closed dialog still fades gives a live dialog with focus on Current Password 63ms
+     ✓ PD15 Tab from a control that became disabled while focused moves focus to the first field 58ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 32 passed (33)
+   Start at  16:11:02
+   Duration  3.16s (transform 582ms, setup 0ms, import 1.65s, tests 2.90s, environment 1.14s)
+
+
+::error file=/tmp/b492-scratch/app/lib/__tests__/account-password-dialog.test.tsx,title=app/lib/__tests__/account-password-dialog.test.tsx > Account password dialog (B-R488-PASSWORD-MODAL-DIALOG) > PD13 an Escape that ends an IME composition does not close the dialog,line=256,column=78::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/__tests__/account-password-dialog.test.tsx:256:78%0A%0A
+stderr | app/lib/__tests__/account-profile-name.test.tsx > Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD) > PN1 the name is a native button named by the Full Name label and its value
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | app/lib/__tests__/account-password-dialog.test.tsx > Account password dialog (B-R488-PASSWORD-MODAL-DIALOG) > PD1 opening is a labelled modal dialog with focus on Current Password
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/account-password-dialog.test.tsx > Account password dialog (B-R488-PASSWORD-MODAL-DIALOG) > PD13 an Escape that ends an IME composition does not close the dialog
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ app/lib/__tests__/account-password-dialog.test.tsx:256:78
+    254|     openDialog();
+    255|     const current = screen.getByLabelText('Current Password');
+    256|     expect(fireEvent.keyDown(current, { key: 'Escape', isComposing: tr…
+       |                                                                              ^
+    257|     expect(screen.getByRole('dialog', { name: 'Change Password' })).to…
+    258|     expect(document.activeElement).toBe(current);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

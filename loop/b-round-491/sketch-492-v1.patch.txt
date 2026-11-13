@@ -1,0 +1,638 @@
+diff --git a/app/lib/__tests__/account-password-dialog.test.tsx b/app/lib/__tests__/account-password-dialog.test.tsx
+new file mode 100644
+index 0000000..d3125df
+--- /dev/null
++++ b/app/lib/__tests__/account-password-dialog.test.tsx
+@@ -0,0 +1,262 @@
++import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { MemoryRouter } from 'react-router-dom';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import AccountPage from '~/routes/account';
++
++const spies = vi.hoisted(() => ({
++  updateProfile: vi.fn<(firstName: string, lastName: string) => Promise<void>>(),
++  updatePassword: vi.fn<(currentPassword: string, newPassword: string) => Promise<void>>(),
++  showToast: vi.fn(),
++  user: {
++    id: 7,
++    email: 'buyer@example.invalid',
++    firstName: 'Probe',
++    lastName: 'User',
++    name: 'Probe User',
++    registrationSource: 'email',
++  },
++}));
++
++vi.mock('~/hooks', () => ({
++  useAuth: () => ({
++    user: spies.user,
++    updateProfile: spies.updateProfile,
++    updatePassword: spies.updatePassword,
++    isLoading: false,
++  }),
++  useToast: () => ({ showToast: spies.showToast }),
++}));
++vi.mock('~/components/auth', () => ({
++  RequireAuth: ({ children }: { children: ReactNode }) => <>{children}</>,
++}));
++
++function renderProfile() {
++  return render(
++    <MemoryRouter initialEntries={['/account']}>
++      <AccountPage />
++    </MemoryRouter>,
++  );
++}
++
++function trigger() {
++  return screen.getByRole('button', { name: 'Click to change password' });
++}
++
++function openDialog() {
++  fireEvent.click(trigger());
++  return screen.getByRole('dialog', { name: 'Change Password' });
++}
++
++function deferred() {
++  let resolve: () => void = () => {};
++  let reject: (error: Error) => void = () => {};
++  const promise = new Promise<void>((res, rej) => {
++    resolve = res;
++    reject = rej;
++  });
++  return { promise, resolve, reject };
++}
++
++function fillValid() {
++  fireEvent.change(screen.getByLabelText('Current Password'), { target: { value: 'old-pass-1' } });
++  fireEvent.change(screen.getByLabelText('New Password'), { target: { value: 'new-pass-12' } });
++  fireEvent.change(screen.getByLabelText('Confirm New Password'), {
++    target: { value: 'new-pass-12' },
++  });
++}
++
++beforeEach(() => {
++  vi.clearAllMocks();
++  spies.updatePassword.mockResolvedValue(undefined);
++  spies.updateProfile.mockResolvedValue(undefined);
++});
++afterEach(() => cleanup());
++
++describe('Account password dialog (B-R488-PASSWORD-MODAL-DIALOG)', () => {
++  it('PD1 opening is a labelled modal dialog with focus on Current Password', () => {
++    renderProfile();
++    expect(screen.queryByRole('dialog')).toBeNull();
++    const dialog = openDialog();
++    expect(screen.getAllByRole('dialog')).toHaveLength(1);
++    expect(dialog.getAttribute('aria-modal')).toBe('true');
++    const current = screen.getByLabelText('Current Password');
++    expect(dialog.contains(current)).toBe(true);
++    expect(document.activeElement).toBe(current);
++  });
++
++  it('PD2 the three fields are labelled and every dialog button has one unique name', () => {
++    renderProfile();
++    const dialog = openDialog();
++    for (const label of ['Current Password', 'New Password', 'Confirm New Password']) {
++      const field = within(dialog).getByLabelText(label);
++      expect(field.tagName).toBe('INPUT');
++      expect(field.getAttribute('type')).toBe('password');
++    }
++    const names = within(dialog)
++      .getAllByRole('button')
++      .map((button) => button.getAttribute('aria-label') ?? button.textContent?.trim() ?? '');
++    expect(names).toEqual([
++      'Show current password',
++      'Show new password',
++      'Show password confirmation',
++      'Cancel',
++      'Update Password',
++    ]);
++    for (const name of names) {
++      expect(within(dialog).getAllByRole('button', { name })).toHaveLength(1);
++    }
++  });
++
++  it('PD3 a visibility toggle shows the field and renames itself', () => {
++    renderProfile();
++    openDialog();
++    fireEvent.click(screen.getByRole('button', { name: 'Show new password' }));
++    expect(screen.getByLabelText('New Password').getAttribute('type')).toBe('text');
++    expect(screen.getByRole('button', { name: 'Hide new password' })).toBeTruthy();
++    expect(screen.queryByRole('button', { name: 'Show new password' })).toBeNull();
++  });
++
++  it('PD4 Escape closes the dialog and returns focus to the trigger', async () => {
++    renderProfile();
++    openDialog();
++    fireEvent.keyDown(screen.getByLabelText('Current Password'), { key: 'Escape' });
++    expect(document.activeElement).toBe(trigger());
++    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
++    expect(spies.updatePassword).not.toHaveBeenCalled();
++  });
++
++  it('PD5 Cancel and a backdrop click return focus to the trigger', async () => {
++    renderProfile();
++    openDialog();
++    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
++    expect(document.activeElement).toBe(trigger());
++    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
++    openDialog();
++    fireEvent.click(screen.getByTestId('password-dialog-backdrop'));
++    expect(document.activeElement).toBe(trigger());
++    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
++  });
++
++  it('PD6 a successful update closes the dialog and returns focus to the trigger', async () => {
++    renderProfile();
++    openDialog();
++    fillValid();
++    await act(async () => {
++      fireEvent.click(screen.getByRole('button', { name: 'Update Password' }));
++    });
++    expect(spies.updatePassword).toHaveBeenCalledWith('old-pass-1', 'new-pass-12');
++    expect(spies.showToast).toHaveBeenCalledWith('Password updated successfully', 'success');
++    expect(document.activeElement).toBe(trigger());
++    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
++  });
++
++  it('PD7 an update that settles after Escape does not pull focus back to the trigger', async () => {
++    const pending = deferred();
++    spies.updatePassword.mockReturnValue(pending.promise);
++    renderProfile();
++    openDialog();
++    fillValid();
++    act(() => {
++      fireEvent.click(screen.getByRole('button', { name: 'Update Password' }));
++    });
++    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
++    expect(document.activeElement).toBe(trigger());
++    const nameButton = screen.getByRole('button', { name: 'Full Name Probe User' });
++    nameButton.focus();
++    await act(async () => {
++      pending.resolve();
++      await pending.promise;
++    });
++    expect(spies.updatePassword).toHaveBeenCalledTimes(1);
++    expect(document.activeElement).toBe(nameButton);
++  });
++
++  it('PD8 Tab wraps from the last control to the first and Shift+Tab from the first to the last', () => {
++    renderProfile();
++    const dialog = openDialog();
++    const current = screen.getByLabelText('Current Password');
++    const update = within(dialog).getByRole('button', { name: 'Update Password' });
++    update.focus();
++    expect(fireEvent.keyDown(update, { key: 'Tab' })).toBe(false);
++    expect(document.activeElement).toBe(current);
++    expect(fireEvent.keyDown(current, { key: 'Tab', shiftKey: true })).toBe(false);
++    expect(document.activeElement).toBe(update);
++    const middle = within(dialog).getByLabelText('New Password');
++    middle.focus();
++    expect(fireEvent.keyDown(middle, { key: 'Tab' })).toBe(true);
++    expect(document.activeElement).toBe(middle);
++  });
++
++  it('PD9 Tab with focus outside the open dialog moves focus into it', () => {
++    renderProfile();
++    openDialog();
++    act(() => {
++      screen.getByLabelText('Current Password').blur();
++    });
++    expect(document.activeElement).toBe(document.body);
++    expect(fireEvent.keyDown(document.body, { key: 'Tab' })).toBe(false);
++    expect(document.activeElement).toBe(screen.getByLabelText('Current Password'));
++    act(() => {
++      screen.getByLabelText('Current Password').blur();
++    });
++    expect(fireEvent.keyDown(document.body, { key: 'Tab', shiftKey: true })).toBe(false);
++    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Update Password' }));
++  });
++
++  it('PD10 after the dialog closes, it is inert while it fades and Tab and Escape are no longer handled by it', async () => {
++    renderProfile();
++    const dialog = openDialog();
++    expect(dialog.inert).not.toBe(true);
++    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
++    expect(document.activeElement).toBe(trigger());
++    expect(dialog.inert).toBe(true);
++    expect(fireEvent.keyDown(trigger(), { key: 'Tab' })).toBe(true);
++    expect(fireEvent.keyDown(trigger(), { key: 'Escape' })).toBe(true);
++    expect(document.activeElement).toBe(trigger());
++    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
++  });
++  it('PD11 while an update is pending, Shift+Tab from the first field skips the disabled Update button', async () => {
++    const pending = deferred();
++    spies.updatePassword.mockReturnValue(pending.promise);
++    renderProfile();
++    const dialog = openDialog();
++    fillValid();
++    act(() => {
++      fireEvent.click(within(dialog).getByRole('button', { name: 'Update Password' }));
++    });
++    expect(
++      within(dialog).getByRole('button', { name: 'Loading...' }).hasAttribute('disabled'),
++    ).toBe(true);
++    const current = screen.getByLabelText('Current Password');
++    current.focus();
++    expect(fireEvent.keyDown(current, { key: 'Tab', shiftKey: true })).toBe(false);
++    expect(document.activeElement).toBe(within(dialog).getByRole('button', { name: 'Cancel' }));
++    await act(async () => {
++      pending.resolve();
++      await pending.promise;
++    });
++  });
++  it('PD12 a failed update is announced as an alert and keeps the dialog open', async () => {
++    spies.updatePassword.mockRejectedValue(new Error('Stub failure'));
++    renderProfile();
++    openDialog();
++    fillValid();
++    await act(async () => {
++      fireEvent.click(screen.getByRole('button', { name: 'Update Password' }));
++    });
++    expect(screen.getByRole('alert').textContent).toContain('Stub failure');
++    expect(screen.getByRole('dialog', { name: 'Change Password' })).toBeTruthy();
++    expect(spies.showToast).not.toHaveBeenCalled();
++  });
++  it('PD13 an Escape that ends an IME composition does not close the dialog', () => {
++    renderProfile();
++    openDialog();
++    const current = screen.getByLabelText('Current Password');
++    expect(fireEvent.keyDown(current, { key: 'Escape', isComposing: true })).toBe(true);
++    expect(screen.getByRole('dialog', { name: 'Change Password' })).toBeTruthy();
++    expect(document.activeElement).toBe(current);
++    fireEvent.keyDown(current, { key: 'Escape' });
++    expect(document.activeElement).toBe(trigger());
++  });
++});
+diff --git a/app/lib/__tests__/account-profile-name.test.tsx b/app/lib/__tests__/account-profile-name.test.tsx
+index 0ac9d4f..f809ac1 100644
+--- a/app/lib/__tests__/account-profile-name.test.tsx
++++ b/app/lib/__tests__/account-profile-name.test.tsx
+@@ -304,6 +304,10 @@ describe('Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD)', () => {
+     act(() => {
+       fireEvent.click(screen.getByRole('button', { name: 'Click to change password' }));
+     });
++    expect(document.activeElement).toBe(screen.getByLabelText('Current Password'));
++    act(() => {
++      screen.getByLabelText('Current Password').blur();
++    });
+     expect(document.activeElement).toBe(document.body);
+     await act(async () => {
+       pending.resolve();
+@@ -327,6 +331,10 @@ describe('Account profile name editor (B-R486-PROFILE-NAME-KEYBOARD)', () => {
+     act(() => {
+       fireEvent.click(screen.getByRole('button', { name: 'Click to change password' }));
+     });
++    expect(document.activeElement).toBe(screen.getByLabelText('Current Password'));
++    act(() => {
++      screen.getByLabelText('Current Password').blur();
++    });
+     expect(document.activeElement).toBe(document.body);
+     await act(async () => {
+       pending.reject(new Error('Stub failure'));
+diff --git a/app/routes/account.tsx b/app/routes/account.tsx
+index 4f69e0f..7212c7a 100644
+--- a/app/routes/account.tsx
++++ b/app/routes/account.tsx
+@@ -4,7 +4,7 @@ import type { MetaFunction } from '@remix-run/node';
+  */
+ 
+ import { NavLink, Outlet, useLocation } from '@remix-run/react';
+-import { AnimatePresence, motion } from 'framer-motion';
++import { AnimatePresence, motion, useIsPresent } from 'framer-motion';
+ import { AlertCircle, Check, Eye, EyeOff, X } from 'lucide-react';
+ import { useEffect, useId, useRef, useState } from 'react';
+ import { preventRepeatedEnterKeyDown } from '~/components/arrangement/studio-repeat-safe';
+@@ -118,6 +118,7 @@ function ProfileContent() {
+   const nameButtonRef = useRef<HTMLButtonElement>(null);
+   const nameEditorRef = useRef<HTMLDivElement>(null);
+   const passwordModalOpenRef = useRef(false);
++  const passwordTriggerRef = useRef<HTMLButtonElement>(null);
+   const restoreNameFocusRef = useRef(false);
+   const nameSaveInFlightRef = useRef(false);
+   const nameLabelId = useId();
+@@ -146,8 +147,12 @@ function ProfileContent() {
+   };
+ 
+   const closePasswordModal = () => {
++    if (!passwordModalOpenRef.current) {
++      return;
++    }
+     passwordModalOpenRef.current = false;
+     setIsPasswordModalOpen(false);
++    passwordTriggerRef.current?.focus();
+   };
+ 
+   const isNameEditorFocusUnclaimed = () => {
+@@ -289,6 +294,8 @@ function ProfileContent() {
+       {/* Change Password Link */}
+       {canChangePassword && (
+         <button
++          ref={passwordTriggerRef}
++          type="button"
+           onClick={openPasswordModal}
+           className="text-brand/80 hover:text-brand underline underline-offset-4 text-sm transition-colors"
+         >
+@@ -326,6 +333,60 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+   const [error, setError] = useState('');
+   const [saving, setSaving] = useState(false);
++  const isPresent = useIsPresent();
++  const dialogRef = useRef<HTMLDivElement>(null);
++  const currentPasswordRef = useRef<HTMLInputElement>(null);
++  const titleId = useId();
++  const currentPasswordId = useId();
++  const newPasswordId = useId();
++  const confirmPasswordId = useId();
++
++  useEffect(() => {
++    currentPasswordRef.current?.focus();
++  }, []);
++
++  useEffect(() => {
++    if (!isPresent) {
++      if (dialogRef.current) {
++        dialogRef.current.inert = true;
++      }
++      return;
++    }
++    const handleKeyDown = (e: KeyboardEvent) => {
++      if (e.key === 'Escape') {
++        if (e.isComposing) {
++          return;
++        }
++        e.preventDefault();
++        onClose();
++        return;
++      }
++      const dialog = dialogRef.current;
++      if (e.key !== 'Tab' || !dialog) {
++        return;
++      }
++      const tabbable = [...dialog.querySelectorAll('input, button')].filter(
++        (el): el is HTMLInputElement | HTMLButtonElement =>
++          (el instanceof HTMLInputElement || el instanceof HTMLButtonElement) && !el.disabled,
++      );
++      const first = tabbable[0];
++      const last = tabbable[tabbable.length - 1];
++      if (!first || !last) {
++        return;
++      }
++      const active = document.activeElement;
++      const inside = active instanceof Node && dialog.contains(active);
++      if (e.shiftKey && (!inside || active === first)) {
++        e.preventDefault();
++        last.focus();
++      } else if (!e.shiftKey && (!inside || active === last)) {
++        e.preventDefault();
++        first.focus();
++      }
++    };
++    document.addEventListener('keydown', handleKeyDown);
++    return () => document.removeEventListener('keydown', handleKeyDown);
++  }, [isPresent, onClose]);
+ 
+   const handleSubmit = async (e: React.FormEvent) => {
+     e.preventDefault();
+@@ -369,24 +430,35 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+         animate={{ opacity: 1 }}
+         exit={{ opacity: 0 }}
+         onClick={onClose}
++        data-testid="password-dialog-backdrop"
+         className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
+       />
+ 
+       {/* Modal */}
+       <motion.div
++        ref={dialogRef}
++        role="dialog"
++        aria-modal="true"
++        aria-labelledby={titleId}
+         initial={{ opacity: 0, scale: 0.95 }}
+         animate={{ opacity: 1, scale: 1 }}
+         exit={{ opacity: 0, scale: 0.95 }}
+         className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-modal bg-surface border border-outline rounded-2xl p-6 z-50"
+       >
+-        <h2 className="text-xl font-semibold text-foreground mb-6">Change Password</h2>
++        <h2 id={titleId} className="text-xl font-semibold text-foreground mb-6">
++          Change Password
++        </h2>
+ 
+         <form onSubmit={handleSubmit} className="space-y-4">
+           {/* Current Password */}
+           <div>
+-            <label className="block text-sm text-muted mb-2">Current Password</label>
++            <label htmlFor={currentPasswordId} className="block text-sm text-muted mb-2">
++              Current Password
++            </label>
+             <div className="relative">
+               <input
++                ref={currentPasswordRef}
++                id={currentPasswordId}
+                 type={showCurrentPassword ? 'text' : 'password'}
+                 value={currentPassword}
+                 onChange={(e) => setCurrentPassword(e.target.value)}
+@@ -395,6 +467,7 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+               <button
+                 type="button"
+                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
++                aria-label={showCurrentPassword ? 'Hide current password' : 'Show current password'}
+                 className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors"
+               >
+                 {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+@@ -404,9 +477,12 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+ 
+           {/* New Password */}
+           <div>
+-            <label className="block text-sm text-muted mb-2">New Password</label>
++            <label htmlFor={newPasswordId} className="block text-sm text-muted mb-2">
++              New Password
++            </label>
+             <div className="relative">
+               <input
++                id={newPasswordId}
+                 type={showNewPassword ? 'text' : 'password'}
+                 value={newPassword}
+                 onChange={(e) => setNewPassword(e.target.value)}
+@@ -416,6 +492,7 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+               <button
+                 type="button"
+                 onClick={() => setShowNewPassword(!showNewPassword)}
++                aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
+                 className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors"
+               >
+                 {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+@@ -425,9 +502,12 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+ 
+           {/* Confirm Password */}
+           <div>
+-            <label className="block text-sm text-muted mb-2">Confirm New Password</label>
++            <label htmlFor={confirmPasswordId} className="block text-sm text-muted mb-2">
++              Confirm New Password
++            </label>
+             <div className="relative">
+               <input
++                id={confirmPasswordId}
+                 type={showConfirmPassword ? 'text' : 'password'}
+                 value={confirmPassword}
+                 onChange={(e) => setConfirmPassword(e.target.value)}
+@@ -436,6 +516,9 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+               <button
+                 type="button"
+                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
++                aria-label={
++                  showConfirmPassword ? 'Hide password confirmation' : 'Show password confirmation'
++                }
+                 className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors"
+               >
+                 {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+@@ -461,7 +544,10 @@ function PasswordModal({ onClose, onSubmit, isLoading }: PasswordModalProps) {
+ 
+           {/* Error Message */}
+           {error && (
+-            <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-xl">
++            <div
++              role="alert"
++              className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-xl"
++            >
+               <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
+               <p className="text-sm text-destructive">{error}</p>
+             </div>
+diff --git a/docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md b/docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md
+index 4d92e09..54f636e 100644
+--- a/docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md
++++ b/docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md
+@@ -36,7 +36,7 @@
+ | ✓-ით (mouse) შენახვა, focus `<body>`-ზეა | წარმატება — სახელის ღილაკი; შეცდომა — First name | PN10c, PN10d, IF-STAY |
+ | შენახვა სრულდება მას შემდეგ, რაც მომხმარებელმა focus სხვაგან გადაიტანა ან password dialog გახსნა | focus არ გადაადგილდება (წარმატებისას რედაქტორი იხურება, შეცდომისას ღია რჩება) | PN10, PN10b, PN10e, PN10f, PN10g, IF-PASSWORD, IF-PASSWORD-NOFOCUS, IF-TABAWAY, IF-REPLAY |
+ 
+-**წესი (round 488):** შენახვის დასრულებისას (წარმატება ან API შეცდომა) focus მხოლოდ მაშინ გადადის, როცა რედაქტორი ჯერ კიდევ "ფლობს" focus-ს: password dialog დახურულია **და** `document.activeElement` არის null, `<body>` ან რედაქტორის row-ის შიგნით (`nameEditorRef`). ვალიდაციის შეცდომა, გახსნა, Esc და Cancel მომხმარებლის მოქმედებაა და ამ წესს არ ექვემდებარება. Dialog-ის მდგომარეობა `passwordModalOpenRef`-ით მოწმდება და არა `activeElement`-ით: Safari-სა და Firefox-mac-ზე mouse click ღილაკს focus-ს არ აძლევს, ამიტომ dialog-ის გახსნის შემდეგ `activeElement` `<body>` რჩება და მხოლოდ body-ზე დაფუძნებული guard focus-ს მაინც მოიპარავდა. Ref (და არა state) იმიტომ, რომ მიმდინარე `handleNameSave` closure-ში `isPasswordModalOpen`-ის ძველ მნიშვნელობას წაიკითხავდა. წყარო: WCAG 2.2 SC 3.2.1 / 3.2.2 — async დასრულება მომხმარებლის მოთხოვნა არ არის (B-ის დასკვნა, არა ციტირებული წესი).
++**წესი (round 488):** შენახვის დასრულებისას (წარმატება ან API შეცდომა) focus მხოლოდ მაშინ გადადის, როცა რედაქტორი ჯერ კიდევ "ფლობს" focus-ს: password dialog დახურულია **და** `document.activeElement` არის null, `<body>` ან რედაქტორის row-ის შიგნით (`nameEditorRef`). ვალიდაციის შეცდომა, გახსნა, Esc და Cancel მომხმარებლის მოქმედებაა და ამ წესს არ ექვემდებარება. Dialog-ის მდგომარეობა `passwordModalOpenRef`-ით მოწმდება და არა `activeElement`-ით: Safari-სა და Firefox-mac-ზე mouse click ღილაკს focus-ს არ აძლევს, ამიტომ dialog-ის გახსნის შემდეგ `activeElement` `<body>` რჩებოდა და მხოლოდ body-ზე დაფუძნებული guard focus-ს მაინც მოიპარავდა (round 492-დან dialog გახსნისას focus-ს თვითონ იღებს, მაგრამ dialog-ის არა-focusable ნაწილზე click focus-ს ისევ `<body>`-ზე აგდებს, ამიტომ ref რჩება). Ref (და არა state) იმიტომ, რომ მიმდინარე `handleNameSave` closure-ში `isPasswordModalOpen`-ის ძველ მნიშვნელობას წაიკითხავდა. წყარო: WCAG 2.2 SC 3.2.1 / 3.2.2 — async დასრულება მომხმარებლის მოთხოვნა არ არის (B-ის დასკვნა, არა ციტირებული წესი).
+ 
+ ### რატომ არის ღილაკი მთელ სიგანეზე
+ 
+@@ -102,7 +102,7 @@ flowchart TD
+   - PN10 / PN10b — შენახვის დროს focus password link-ზე გადავიდა; წარმატება/შეცდომის შემდეგ ის იქვე რჩება (შეცდომისას რედაქტორი ღიაა, ✓ ხელახლა აქტიურია).
+   - PN10c / PN10d — ✓-ით შენახვა, focus `<body>`-ზეა; წარმატება — სახელის ღილაკი, შეცდომა — First name.
+   - PN10e — შენახვის დროს focus Orders tab-ის link-ზეა და იქვე რჩება.
+-  - PN10f / PN10g — focus-ის გარეშე click password dialog-ს ხსნის ✓-ით შენახვის დროს; დასრულების შემდეგ focus `<body>`-ზე რჩება, არა სახელის ღილაკზე / First name-ზე.
++  - PN10f / PN10g — focus-ის გარეშე click password dialog-ს ხსნის ✓-ით შენახვის დროს; dialog focus-ს Current Password-ზე გადაიტანს (round 492, doc 318), შემდეგ focus `<body>`-ზე გადადის; დასრულების შემდეგ ის `<body>`-ზე რჩება, არა სახელის ღილაკზე / First name-ზე.
+   - PN10h — dialog-ის Cancel-ის შემდეგ ახალი Enter-შენახვა focus-ს ისევ სახელის ღილაკზე აბრუნებს.
+ - A-ს გაშვებები (round 487): `npm run typecheck` rc 0; `npm run lint` rc 0; scoped Biome — 4 წინასწარ არსებული warning (`PasswordModal`/password link); 5 covering ტესტის ფაილი — 74 passed (HS1 scan-ის ჩათვლით).
+ - A-ს გაშვებები (round 488): `npm run typecheck` rc 0; `npm run lint` rc 0; scoped Biome — იგივე 4 წინასწარ არსებული warning; 5 covering ტესტის ფაილი — 82 passed.
+@@ -114,5 +114,5 @@ flowchart TD
+ - TODO: SIG-R487-REPEAT-SAFE-HOME — `preventRepeatedEnterKeyDown` Store-ისა და Studio-ს საერთო helper-ია, მაგრამ `app/components/arrangement/`-შია; მისი `app/lib`-ში გადატანა ცალკე B დავალებაა.
+ - B-R487-PROFILE-EDITOR-NARROW-OVERFLOW (Medium) — 375×812-ზე რედაქტორის row სვეტზე განიერი იყო და ✓/✕ ეკრანს გარეთ; გამოსწორდა round 491-ში (doc 317).
+ - რეალური profile update-ის შემოწმება .NET backend-ით (OWN-BACKEND), როცა backend ხელმისაწვდომი იქნება.
+-- TODO: B-R488-PASSWORD-MODAL-DIALOG (Medium) — `PasswordModal`-ს არ აქვს `role="dialog"`/`aria-modal`, საწყისი focus, Esc-ით დახურვა და focus-ის დაბრუნება; დაგეგმილია round 490-ის შემდეგ.
++- B-R488-PASSWORD-MODAL-DIALOG (Medium) — გამოსწორდა round 492-ში (doc 318): `role="dialog"`/`aria-modal`, საწყისი focus, Tab-ის ჩაკეტვა, Esc-ით დახურვა და focus-ის დაბრუნება.
+ - TODO: B-R488-SAFARI-MENU-SETTLE-FOCUS (Low, `deferred_low_polish`) — Safari model-ში User/Toggle menu-ის focus-ის გარეშე გახსნა შენახვის დროს ჯერ კიდევ იღებს focus-ის დაბრუნებას; რეალური WebKit/Firefox-mac შემოწმება SAFARI-CHECKS/FIREFOX-CHECKS-შია.
+diff --git a/docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md b/docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md
+index a0823b6..eab0767 100644
+--- a/docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md
++++ b/docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md
+@@ -42,6 +42,6 @@
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- B-R488-PASSWORD-MODAL-DIALOG (Medium): "Change password" modal-ს dialog semantics აკლია; დაგეგმილია შემდეგ რაუნდში.
++- B-R488-PASSWORD-MODAL-DIALOG (Medium): "Change password" modal-ს dialog semantics აკლდა; გამოსწორდა round 492-ში (doc 318).
+ - გაზომილია მხოლოდ Chromium-ში. რეალურ ტელეფონზე (iOS Safari, Android Chrome: touch, ვირტუალური კლავიატურა) და WebKit/Firefox-ში შემოწმება Tech Lead-ის ხელით შესამოწმებელ სიაშია (TLM-R491-PHONE-NAME-EDITOR).
+ - მუდმივი ავტომატური guard: role-ით მოძებნილი Save/Cancel-ის viewport-ში ყოფნის Playwright ტესტი 375 px-ზე (signed-in stub-ით) შემდგომი დავალებაა; დღეს smoke config-ს signed-in stub არ აქვს.
+diff --git a/docs/implementation/2026/quarter-IV/318-password-dialog-semantics.md b/docs/implementation/2026/quarter-IV/318-password-dialog-semantics.md
+new file mode 100644
+index 0000000..e59aaff
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/318-password-dialog-semantics.md
+@@ -0,0 +1,89 @@
++# B-R488-PASSWORD-MODAL-DIALOG: Account-ის "Change Password" ფანჯარა ნამდვილი modal dialog-ია
++
++**თარიღი:** 2026-11-13
++**სტატუსი:** Completed (C round 492 PASS)
++**შეცვლილი პროექტი:** Store (1 route, 1 ახალი და 1 შეცვლილი ტესტის ფაილი, ეს დოკუმენტი, doc 315-ისა და 317-ის ხაზები)
++
++## კონტექსტი
++
++`/account`-ზე "Click to change password" ხსნიდა `PasswordModal`-ს, რომელიც მხოლოდ ვიზუალურად იყო modal. B-მ HEAD `e4e1d1c`-ის production build-ზე 1440×900, 1280×720 და 375×812-ზე დაადასტურა:
++
++- accessibility tree-ში `role="dialog"` არ იყო (0 dialog), არც `aria-modal` და არც სახელი;
++- გახსნის შემდეგ focus trigger-ზე რჩებოდა, ფანჯარაში არ გადადიოდა;
++- Esc ფანჯარას არ ხურავდა;
++- Cancel-ის შემდეგ focus `<body>`-ზე ეცემოდა, trigger-ზე არ ბრუნდებოდა;
++- სამ password ველს accessible name არ ჰქონდა (`<label>`-ს `htmlFor` აკლდა), სამ "თვალის" ღილაკს სახელი საერთოდ არ ჰქონდა;
++- შეცდომის ტექსტი screen reader-ს არ ეუბნებოდა (არც `role="alert"`).
++
++ეს არის B-R488-PASSWORD-MODAL-DIALOG (Medium), B-R492-PASSWORD-FIELDS-UNNAMED (Medium) და B-R492-PASSWORD-ERROR-NOT-ANNOUNCED (Medium). წყარო: WAI-ARIA APG, Dialog (Modal) pattern; WCAG 2.2 SC 1.3.1, 2.1.2, 2.4.3, 4.1.2, 4.1.3.
++
++## მიდგომა
++
++ცვლილება მხოლოდ `app/routes/account.tsx`-შია, `PasswordModal`-სა და `ProfileContent`-ის trigger-ზე. ვიზუალი უცვლელია, გარდა იმისა, რომ გახსნისას Current Password ველს focus ring უჩნდება (APG: focus ფანჯრის პირველ ველზე გადადის).
++
++- **Semantics:** ფანჯრის კონტეინერს აქვს `role="dialog"`, `aria-modal="true"` და `aria-labelledby` სათაურზე "Change Password".
++- **საწყისი focus:** mount-ზე Current Password ველი.
++- **Tab-ის ჩაკეტვა:** document `keydown` listener. ბოლო ჩართული control-იდან Tab პირველზე გადადის, პირველიდან Shift+Tab ბოლოზე. თუ focus ფანჯრის გარეთაა (მაგალითად, სათაურზე click-ის შემდეგ `<body>`-ზე), Tab ფანჯარაში შედის. Disabled ღილაკი (pending "Update Password") სიაში არ ჯდება.
++- **Esc:** ხურავს ფანჯარას ისევე, როგორც Cancel. IME composition-ის დამამთავრებელ Esc-ს (`isComposing`) იგნორირებს, როგორც LeadMagnet-ის dialog.
++- **დახურვა:** ყველა გზა (Cancel, Esc, backdrop, წარმატება) `closePasswordModal`-ით გადის. ის focus-ს trigger-ზე აბრუნებს და idempotent-ია: თუ ფანჯარა უკვე დახურულია, არაფერს აკეთებს. ამიტომ Esc-ის შემდეგ დასრულებული update focus-ს უკან აღარ წაიღებს.
++- **გაქრობის ფაზა:** `AnimatePresence` ფანჯარას გაქრობის ანიმაციის დროს DOM-ში ტოვებს. `useIsPresent()` false-ზე listener იხსნება და კონტეინერი `inert` ხდება, ამიტომ Tab trigger-იდან ქრებად ველზე ვეღარ გადადის.
++- **სახელები:** სამ ველს `htmlFor`/`id` (`useId`), "თვალის" ღილაკებს `aria-label` ("Show/Hide current password", "Show/Hide new password", "Show/Hide password confirmation"). Trigger-ს `type="button"`. შეცდომის ბლოკს `role="alert"`.
++
++უარყოფილი ვარიანტები:
++
++- **საერთო `Modal` (`~/components/ui/Modal.tsx`):** ცვლის backdrop-ს (`bg-black/95`, `z-[1000]`, portal) და მასაც არ აქვს საწყისი focus, Tab-ის ჩაკეტვა და focus-ის დაბრუნება. ის დაცული საერთო ფაილია; ეს ცალკე საკითხია (shared-modal-no-focus-management).
++- **`useInlineNameEditor` / ProfileNameEditor-ის გამოყოფა:** ARCH-CHECKPOINT-ACCOUNT-PROFILE-ზე root-ის პასუხი ჯერ არ არის, ამიტომ `passwordModalOpenRef` თავის ადგილზე რჩება.
++- **Scroll lock და `inert` ფონზე ღია ფანჯრის დროს:** APG scroll lock-ს არ მოითხოვს. Pointer-ს ფონზე backdrop ბლოკავს, keyboard-ს Tab-ის ჩაკეტვა.
++
++## არქიტექტურა
++
++```mermaid
++stateDiagram-v2
++    [*] --> Closed
++    Closed --> Open: trigger click / Enter
++    Open --> Exiting: Cancel / Esc / backdrop / success
++    Exiting --> Closed: exit animation ends
++    note right of Open: role=dialog, aria-modal, focus on Current Password, Tab trapped
++    note right of Exiting: focus on trigger, inert, no key listener
++```
++
++## შეცვლილი ფაილები
++
++- `app/routes/account.tsx` — `PasswordModal` (semantics, focus, Tab, Esc, inert, სახელები, alert) და `ProfileContent` (trigger-ის ref და `type`, idempotent `closePasswordModal` focus-ის დაბრუნებით).
++- `app/lib/__tests__/account-password-dialog.test.tsx` — ახალი, PD1–PD13.
++- `app/lib/__tests__/account-profile-name.test.tsx` — PN10f / PN10g: გახსნის შემდეგ focus Current Password-ზეა, შემდეგ blur `<body>`-ზე და იგივე body assert-ი.
++- `docs/implementation/2026/quarter-IV/315-profile-name-keyboard.md` — სამი ხაზი (ref-ის მიზეზი, PN10f/PN10g, B-R488 TODO).
++- `docs/implementation/2026/quarter-IV/317-profile-editor-narrow-overflow.md` — B-R488 TODO ხაზი.
++- ეს დოკუმენტი.
++
++## პრობლემები და გადაწყვეტები
++
++- **პრობლემა:** Esc-ით დახურვის შემდეგ ჯერ კიდევ მიმდინარე update-ის დასრულება `onClose()`-ს მეორედ იძახებდა და focus-ს trigger-ზე დააბრუნებდა, თუნდაც მომხმარებელი უკვე სხვაგან იყოს (C-R487-01-ის კლასი). → **გადაწყვეტა:** `closePasswordModal` `passwordModalOpenRef`-ს ამოწმებს და დახურულ ფანჯარაზე არაფერს აკეთებს (PD7).
++- **პრობლემა:** B-ის პირველ sketch-ზე browser-მა აჩვენა, რომ გაქრობის ანიმაციის დროს trigger-იდან Tab ქრებად ფანჯარაში შედიოდა, ხოლო ანიმაციის ბოლოს focus `<body>`-ზე ეცემოდა. → **გადაწყვეტა:** `useIsPresent()` false-ზე კონტეინერი `inert` ხდება (PD10, browser R7).
++- **პრობლემა:** A-R488-REVIEW-L1-EXIT-ANIMATION-WINDOW — დახურვისას ref მაშინვე იწმინდებოდა, focus კი ქრებად Cancel-ზე რჩებოდა. → **გადაწყვეტა:** დახურვა focus-ს მაშინვე trigger-ზე გადაიტანს.
++
++## ტესტირება
++
++- `account-password-dialog.test.tsx` (jsdom):
++  - PD1 — ერთი dialog, `aria-modal="true"`, სახელი "Change Password", focus Current Password-ზე;
++  - PD2 — სამი ველი label-ით, dialog-ის ღილაკების სახელები უნიკალურია;
++  - PD3 — "Show new password" ველს ტექსტად აჩენს და სახელს "Hide new password"-ად ცვლის;
++  - PD4 — Esc ხურავს და focus trigger-ზე ბრუნდება;
++  - PD5 — Cancel და backdrop click: focus trigger-ზე;
++  - PD6 — წარმატებული update: toast, დახურვა, focus trigger-ზე;
++  - PD7 — Esc-ის შემდეგ დასრულებული update focus-ს არ იპარავს;
++  - PD8 — Tab ბოლოდან პირველზე, Shift+Tab პირველიდან ბოლოზე, შუაში native Tab;
++  - PD9 — focus ფანჯრის გარეთ: Tab და Shift+Tab ფანჯარაში შედის;
++  - PD10 — დახურვის შემდეგ ფანჯარა `inert`-ია და Tab/Esc აღარ მუშავდება;
++  - PD11 — pending update-ის დროს Shift+Tab disabled ღილაკს გამოტოვებს;
++  - PD12 — შეცდომა `role="alert"`-შია და ფანჯარა ღია რჩება;
++  - PD13 — composition-ის Esc ფანჯარას არ ხურავს, ჩვეულებრივი Esc ხურავს.
++- `account-profile-name.test.tsx`: PN10f / PN10g განახლდა, დანარჩენი PN უცვლელია.
++- B-ის მუტანტები (17): თითოეული ცვლილების წაშლა მინიმუმ ერთ PD/PN ტესტს წითლად აქცევს.
++- Browser (Chromium, production build, 1440×900, 1280×720, 375×812, signed-in stub): ერთი dialog სახელით "Change Password", focus Current Password-ზე mouse-ით და keyboard-ით გახსნისას, 8 Tab ფანჯრის შიგნით რჩება, Esc/Cancel/backdrop focus-ს trigger-ზე აბრუნებს, Esc-ის შემდეგ ქრებად ფანჯარაში Tab არ შედის, შეცდომა `role="alert"`-შია.
++
++## TODO / შემდეგი ნაბიჯები
++
++- B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED (High, root) — `app/lib/auth.ts` `updatePassword` მიმდინარე პაროლს ამოწმებს და შემდეგ ყოველთვის აგდებს "Password change is not yet implemented"; საჭიროა backend endpoint და დაცული ფაილის ცვლილება.
++- shared-modal-no-focus-management — საერთო `Modal`-ს არ აქვს საწყისი focus, Tab-ის ჩაკეტვა და focus-ის დაბრუნება.
++- რეალური screen reader-ით შემოწმება (dialog-ის სახელი, alert) — Tech Lead-ის ხელით შემოწმება.
