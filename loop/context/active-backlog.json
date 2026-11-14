@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-14T12:10:14.187Z",
-  "current_task": "Round 513: DPG-BUTTON-CLEANUP-2-NONBRAND N3 cookie banner on HEAD cbc5709: git apply b-round-512/sketch-513.patch.txt (sha cd995844) - CookieConsent Decline/Accept -> Button secondary sm pill (equal weight, SABA-Q-507 default), Close -> IconButton ghost sm; rows N3-1..N3-6; doc 331. C verifies on a second dev server with VITE_GA4_MEASUREMENT_ID set (own Vite cacheDir): 1440/1280/375 rest/hover/keyboard/press/actions/consent storage, /studio-lab no banner, protection.",
+  "_generatedUtc": "2026-11-14T13:15:15.246Z",
+  "current_task": "Round 514: cookie banner focus return + Close overlap on HEAD 4c85587: git apply b-round-513/sketch-514.patch.txt (focus returns to the element focused before the banner, else header logo, else first header link; keyboard focus(), pointer preventScroll; Close IconButton md 40 px, X 20, text px-10 below sm; rows R514-F1..F8, N3-3 updated); doc 332. C verifies on a GA4-env dev server.",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -7173,14 +7173,17 @@
       "id": "DPG-BUTTON-CLEANUP-2-NONBRAND",
       "severity": "medium",
       "origin": "B spec",
-      "status": "in_progress (D-29z1860, D-29z1862, D-29z1865): N1 (round 508, cf89736) and N2 PurchaseHeader (rounds 511+512, published cbc5709) are C-verified; round 513 = N3 cookie banner; N4-N9 and the StemsPlayerModal pair remain. Old status chain moved to status_history_d29z1865 so the optimizer substring matc …[see backlog.json]",
+      "status": "in_progress (D-29z1866): N1 (round 508), N2 PurchaseHeader (rounds 511+512) and N3 cookie banner (C round 513 PASS, browserVerified true, published 4c85587) are C-verified; N4-N9 and the StemsPlayerModal pair remain; round 514 fixes two pre-existing banner Mediums before N4",
       "title": "Hand-rolled controls without a brand fill bypass Button.tsx (Saba DPG item 7): whole-tag scan 58 tags / 29 files at 3021b30 + LeadMagnet Close X + 3 scanner misses; 29 to Button/IconButton, 28 keep, 2 root",
       "evidence": "b-round-506/scan-nonbrand-head.json (58); b-round-506/consult-product-designer.md (rulings, stages); b-round-497/other-handrolled-count.txt (old record 30/18)",
       "added": "2026-11-13 B round 497 -> 498 planning",
       "note_d29z1815": "includes the PurchaseHeader in-card siblings (Open in Studio, Downloads, Add to Cart, Buy Now radius) -> 8 px default shape, so the purchase card is one system again (product-designer, round 504 consult)",
       "note_d29z1824": "includes the LeadMagnet Close X (NONBRAND per round 506); B2E-6 bans any bg-brand literal in LeadMagnetPopup.tsx (pre-ruled Low #2) - a NONBRAND change there updates B2E-6",
       "restored_d29z1860": "restored from archive/findings-archived.json: cloud/optimize-backlog.py archived it while in_progress (status text contained a closed-like word); same class as ROOT-REQ-OPTIMIZER-ARCHIVES-OPEN",
-      "status_history_d29z1865": "in_progress (D-29z1860, D-29z1862): N1 (round 508, cf89736) and N2 PurchaseHeader (rounds 511+512, C round 512 PASS, browserVerified true, published cbc5709) are C-verified; round 513 = N3 cookie banner; N4-N9 and the StemsPlayerModal pair remain | in_progress (D-29z1856): N2 PurchaseHeader code ver …[see backlog.json]"
+      "status_history_d29z1865": "in_progress (D-29z1860, D-29z1862): N1 (round 508, cf89736) and N2 PurchaseHeader (rounds 511+512, C round 512 PASS, browserVerified true, published cbc5709) are C-verified; round 513 = N3 cookie banner; N4-N9 and the StemsPlayerModal pair remain | in_progress (D-29z1856): N2 PurchaseHeader code ver …[see backlog.json]",
+      "status_history_d29z1866": [
+        "in_progress (D-29z1860, D-29z1862, D-29z1865): N1 (round 508, cf89736) and N2 PurchaseHeader (rounds 511+512, published cbc5709) are C-verified; round 513 = N3 cookie banner; N4-N9 and the StemsPlayerModal pair remain. Old status chain moved to status_history_d29z1865 so the optimizer substring matc …[see backlog.json]"
+      ]
     },
     {
       "id": "B-R512-COOKIE-DISMISS-FOCUS-LOST",
@@ -7190,7 +7193,7 @@
       "title": "Cookie banner: after Enter on Decline or Accept (or a tap on Close) the banner unmounts and focus falls to body; the next Tab starts at the page top (CZABA logo link). Pre-existing at HEAD cbc5709, unchanged by N3",
       "evidence": "b-round-512/probe/head/n3.json and sketch/n3.json actions[*].focusAfter = BODY, firstTabAfter = \"CZABA\" at 1440/1280/375; product-designer consult (Medium, pre-existing)",
       "repro": "node b-round-512/probe/n3-banner.mjs <GA4-env base> <dir>",
-      "status": "open (D-29z1864, D-29z1865): scheduled round 514 together with B-R512-COOKIE-CLOSE-OVERLAPS-TEXT (same banner); task names the focus target (L47) with product-designer"
+      "status": "dispatched round 514 (D-29z1868): focus returns to the element focused before the banner (keyboard: focus(), pointer: preventScroll), else header logo, else first header link; product-designer ruling b-round-513/consult-product-designer*.md | open (D-29z1864, D-29z1865): scheduled round 514 together …[see backlog.json]"
     },
     {
       "id": "DPG2-OFF-PALETTE",
@@ -7250,19 +7253,19 @@
       "title": "Cookie banner at 375 px: the mobile Close X (absolute top-2 right-2) sits on the end of the first text line and covers the \"Privacy\" link glyphs; the X and the link tap targets collide. Same at HEAD (34x34) and on the N3 sketch (32x32)",
       "evidence": "b-round-512/probe/head/banner-375.png, probe/sketch/banner-375.png; probe/*/n3.json rest 375 (text box right 359, Close x 333/335, y 696/698)",
       "repro": "node b-round-512/probe/n3-banner.mjs <GA4-env base> <dir>; open banner-375.png",
-      "status": "open (D-29z1865): round 514 with B-R512-COOKIE-DISMISS-FOCUS-LOST (same banner, same file; at most 3 related bugs); product-designer row \"X must not cover the text\" is ruled pre-existing for round 513 (C1 records, equal to HEAD)"
+      "status": "dispatched round 514 (D-29z1868): Close IconButton md 40 px with X 20, text px-10 below sm; B probe: no overlap at 320/375/639, 1280/1440 boxes equal to HEAD | open (D-29z1865): round 514 with B-R512-COOKIE-DISMISS-FOCUS-LOST (same banner, same file; at most 3 related bugs); product-designer row \"X  …[see backlog.json]",
+      "confirmedBy": [
+        "gates/round-513/review.md finding 1: Close is 32 px, below the 44 px touch guideline; round 514 makes it md 40 px (D-29z1867)"
+      ]
+    },
+    {
+      "id": "SABA-Q-513-CLOSE-AS-DECLINE",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1867): question in user-review/questions",
+      "title": "Cookie banner: the mobile Close X (label \"Close\") silently records a decline. Keep, relabel (\"Declin"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 504,
-      "task": "current-task.md",
-      "decision": "D-29z1814",
-      "type": "DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader: Go to Downloads, Upgrade to Premium, Unlock Premium)",
-      "status": "C PASS (browserVerified/realVerified true, 0 bugs; owner states -STUBBED, PURCHASE-REAL-BACKEND blocked in cloud); gate 504 published e3e9e49 (both remotes)",
-      "note": "baseline b806cad clean; sketch b-round-503/sketch-504.patch.txt v3 sha 84cc9df3; pre-check b-round-503/precheck-*.log (full 301/4363 rc0, build rc0); mutants M1-M13 OK; probes b-round-503/probe/ (owner states -STUBBED, purchase journeys J1-J5)",
-      "result_note": "C0-C14 PASS (c-round-504.json); review COMMIT OK; D-29z1817/D-29z1818"
-    },
     {
       "round": 505,
       "task": "current-task.md",
@@ -7335,8 +7338,16 @@
       "task": "current-task.md",
       "decision": "D-29z1862",
       "type": "NONBRAND N3 cookie banner (Accept/Decline Button secondary sm pill, Close IconButton ghost sm)",
-      "status": "dispatched",
+      "status": "C PASS (browserVerified true), gate 513 published 4c85587 (D-29z1866)",
       "note": "baseline HEAD cbc5709 clean; sketch b-round-512/sketch-513.patch.txt (sha cd995844); pins r513-tree-sha256.txt (1428), r513-pre-sha.txt, r513-post-sketch-sha.txt; claims b-round-512/claims-513.sh K1-K24; browser via a GA4-env dev server"
+    },
+    {
+      "round": 514,
+      "task": "current-task.md",
+      "decision": "D-29z1868",
+      "type": "Cookie banner bugs: B-R512-COOKIE-DISMISS-FOCUS-LOST + B-R512-COOKIE-CLOSE-OVERLAPS-TEXT (both Medium, same file)",
+      "status": "dispatched",
+      "note": "baseline HEAD 4c85587 clean; sketch b-round-513/sketch-514.patch.txt; pins r514-tree-sha256.txt (1429), r514-pre-sha.txt, r514-post-sketch-sha.txt; claims b-round-513/claims-514.sh; browser via a GA4-env dev server"
     }
   ],
   "other_keys": [

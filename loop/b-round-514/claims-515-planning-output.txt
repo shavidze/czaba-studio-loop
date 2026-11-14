@@ -1,0 +1,159 @@
+== K1 HEAD
+b7cb61fab51f38dcf0015e1a8ef3cda47a9542fd
+== K2 changed paths
+== K3 gate 514
+published b7cb61fab51f38dcf0015e1a8ef3cda47a9542fd
+== K4 c-round-514
+PASS True True ['C-R514-01:low'] 10
+== K5 focus sites at HEAD b7cb61fab51f38dcf0015e1a8ef3cda47a9542fd
+25:function focusAfterCookieDismiss(
+32:  const candidates = [
+33:    previous,
+41:      candidate.focus({ preventScroll: true });
+69:  const handleBannerFocus = (event: ReactFocusEvent<HTMLDivElement>) => {
+72:    focusBeforeBannerRef.current = from instanceof HTMLElement ? from : null;
+99:      onFocus={handleBannerFocus}
+== K6 fallback selectors at HEAD
+21:  'header a[href="/"]',
+22:  'header a[href], header button',
+== K7 gate 514 review findings
+7:1. **Medium (mobile, real-browser): the keyboard can reopen after a tap.** `CookieConsen
+11:2. **Low: stale DOM reference.** `CookieConsent.tsx:50` and `:72`. `focusBeforeBannerRe
+14:3. **Low: the fallback selector is not scoped to the site header.** `CookieConsent.tsx:
+17:4. **Low, informational: `detail === 0` is only a proxy for keyboard use.** `CookieCons
+== K8 browser r515 probe HEAD vs sketch (P1 email, P2 no-focus click, P3 hire-us textarea/select)
+head errors 0
+head P1-pointer-from-email 375 INPUT  fv True sy 3483 3483 gone True value None 
+head P2-nofocus-click-after-leaving 375 A Cookie Polic fv True sy None 4831 gone True value None 
+head P3-hireus-textarea 375 TEXTAREA  fv True sy 814 814 gone True value abc 
+head P3-hireus-select 375 SELECT Select a ran fv True sy 646 646 gone True value None 
+head P1-pointer-from-email 1280 INPUT  fv True sy 3200 3200 gone True value None 
+head P2-nofocus-click-after-leaving 1280 A Cookie Polic fv True sy None 4043 gone True value None 
+head P3-hireus-textarea 1280 TEXTAREA  fv True sy 592 592 gone True value abc 
+head P3-hireus-select 1280 SELECT Select a ran fv True sy 424 424 gone True value None 
+sketch errors 0
+sketch P1-pointer-from-email 375 A CZABA fv False sy 3483 3483 gone True value None 
+sketch P2-nofocus-click-after-leaving 375 A CZABA fv True sy None 4831 gone True value None 
+sketch P3-hireus-textarea 375 A CZABA fv False sy 814 814 gone True value abc 
+sketch P3-hireus-select 375 SELECT Select a ran fv True sy 646 646 gone True value None 
+sketch P1-pointer-from-email 1280 A CZABA fv False sy 3200 3200 gone True value None 
+sketch P2-nofocus-click-after-leaving 1280 A CZABA fv True sy None 4043 gone True value None 
+sketch P3-hireus-textarea 1280 A CZABA fv False sy 592 592 gone True value abc 
+sketch P3-hireus-select 1280 SELECT Select a ran fv True sy 424 424 gone True value None 
+== K9 round-514 probe on the final sketch equals round-514 sketch values
+focus rows 22 identical True layout identical True BODY 0 errors 0
+== K10 banner renders only with a GA4 id
+9:export const GA4_MEASUREMENT_ID = import.meta.env.VITE_GA4_MEASUREMENT_ID || '';
+56:    if (!GA4_MEASUREMENT_ID) return;
+== K11 sketch sha, applies at HEAD in a temp copy, equals the post-sketch pin; L58 + ledger
+353e4239b7caca842a96843a59daeb812b67bea4ba55b71b67604705565a397d
+apply+post-pin rc 0
+L58 OK
+LEDGER OK
+== K12 sketch tsc and scoped biome
+tsc=0
+Checked 2 files in 15ms. No fixes applied.
+== K13 mutants (each red on its named rows)
+M1-no-skip 1 ['R515-T1']
+M2-skip-keyboard-too 1 ['R515-T2']
+M3-no-onblur 1 ['R515-T3', 'R515-T7']
+M4-blur-always-clears 1 ['R514-F6', 'R515-T4']
+M5-no-header-button 1 ['R515-T5']
+M6-no-textarea 1 ['R515-T1']
+M7-skip-select-too 1 ['R515-T6']
+M8-no-contenteditable 1 ['R515-T1']
+M9-checkbox-skipped 1 ['R515-T6']
+M10-no-text-input 1 ['R515-T1']
+M11-contenteditable-false-skipped 1 ['R515-T6']
+== K14 rows against the HEAD product file
+R514-F8: without any header or previous element the decision is still 
+R515-T1: a pointer dismissal entered from an email input skips it and 
+R515-T2: a keyboard dismissal entered from an email input returns focu
+R515-T1: a pointer dismissal entered from a textarea skips it and focu
+R515-T2: a keyboard dismissal entered from a textarea returns focus to
+R515-T1: a pointer dismissal entered from a contenteditable element sk
+R515-T2: a keyboard dismissal entered from a contenteditable element r
+R515-T6: a pointer dismissal entered from a select returns focus to it
+R515-T6: a pointer dismissal entered from a checkbox returns focus to 
+R515-T6: a pointer dismissal entered from a contenteditable="false" el
+R515-T3: after focus leaves the banner, a pointer dismissal that does 
+R515-T7: focus moved from the banner straight to the page body, then a
+R515-T4: moving focus between banner controls keeps the stored entry e
+R515-T5: with only a header button and nothing focused before, a keybo
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+R515-T1: a pointer dismissal entered from an email input skips it and 
+R515-T1: a pointer dismissal entered from a textarea skips it and focu
+R515-T1: a pointer dismissal entered from a contenteditable element sk
+R515-T3: after focus leaves the banner, a pointer dismissal that does 
+R515-T7: focus moved from the banner straight to the page body, then a
+      Tests  5 failed | 34 passed (39)
+== K15 frozen pins
+tree rc 0 (1430 entries)
+protected rc 0
+pre-sha rc 0
+== K16 covering set on the sketch
+app/components/common/__tests__/CookieConsent.test.tsx
+app/lib/__tests__/store-internal-links.test.ts
+app/lib/__tests__/store-gradient-text.test.ts
+app/lib/__tests__/store-focus-ring.test.ts
+app/lib/__tests__/store-theme-tokens.test.ts
+app/lib/__tests__/studio-naming.test.tsx
+ Test Files  6 passed (6)
+      Tests  112 passed (112)
+rc=0
+slowest: 187ms
+== K17 lint and scanner on the sketch (HEAD 171 / 50)
+Found 171 warnings.
+scanner 50 cookie 0
+== K18 journey on the sketch
+1440x900 {'consent': 'denied', 'buttons': 0} 0 0 0
+1280x720 {'consent': 'denied', 'buttons': 0} 0 0 0
+== K19 fields on /hire-us and checkbox inventory
+196:                <input
+209:                <input
+210:                  type="email"
+225:              <select
+259:              <textarea
+app/components/recordings/SfxQuickEdit.tsx
+app/components/recordings/SfxVideoSync.tsx
+app/components/recordings/SfxSceneBuilder.tsx
+app/components/studio/ExportDialog.tsx
+== K20 findings and decisions in backlog
+version 521
+open_findings B-R512-COOKIE-DISMISS-FOCUS-LOST closed (D-29z1869): C round 514 C3 (22 keyboard/Space rows, BODY 0/22,
+open_findings B-R512-COOKIE-CLOSE-OVERLAPS-TEXT closed (D-29z1869): C round 514 C1 (no overlap at 320/375/639, min gap
+open_findings GATE514-M1-POINTER-FIELD-KEYBOARD dispatched round 515 (D-29z1871): pointer branch skips keyboard-openin
+open_findings C-R514-01 dispatched round 515 (D-29z1871): the round-515 sketch addresses it wi
+open_findings A-R514-R2-HEADER-BUTTON-ROW dispatched round 515 (D-29z1871): row R515-T5 (mutant M5 red)
+open_findings A-R514-R3-F8-BODY dispatched round 515 (D-29z1871): R514-F8 now asserts document.body (s
+deferred_low_polish GATE514-L2-STALE-REF deferred_low_polish (D-29z1870): round 515 onBlur clears the ref whene
+deferred_low_polish GATE514-L3-HEADER-SELECTOR deferred_low_polish (D-29z1870): needs Header.tsx (data-site-header) o
+['D-29z1869', 'D-29z1870', 'D-29z1871']
+== K21 regression date
+2026-11-13 484
+== K23 site header renders on every non-/studio route; banner hides on /studio (same prefix)
+136:  const isStudioPage = location.pathname.startsWith('/studio');
+143:      {!isStudioPage && <Header cartCount={cartCount} />}
+158:      <CookieConsent />
+52:  const isStudioRoute = pathname.startsWith('/studio');
+== K24 full vitest on the sketch (B pre-check, not an A/C row)
+ Test Files  306 passed (306)
+      Tests  4435 passed (4435)
+rc=0
+== K22 artifacts
+ok consult-product-designer.md
+ok sketch-review.md
+ok doc-ledger-template.md
+ok mutants-515.py
+ok covering-files.txt
+ok l50-focus-origins.txt
+ok probe/r515-focus.mjs
+ok probe/r514-banner.mjs
+ok probe/n3-journey.mjs
+ok probe/head/r515.json
+ok probe/sketch/r515.json
+ok probe/sketch-r514/r514.json
+ok probe/sketch-journey.log
+ok r515-rows-on-head.log
+ok mut-logs/mutants-summary.json
+ok precheck-full.log

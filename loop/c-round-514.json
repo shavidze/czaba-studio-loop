@@ -1,0 +1,70 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-14T12:57:57.9319370Z",
+  "round": 514,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R514-01",
+   "severity": "low",
+   "origin": "B pre-check",
+   "steps": [
+    "Enter the banner from element A (Shift+Tab/Tab)",
+    "Tab out to element B",
+    "Click empty page space so focus goes to BODY",
+    "Pointer-click Accept in a browser that does not focus a clicked button (Safari/iOS)"
+   ],
+   "expected": "Focus goes to a sensible visible target",
+   "actual": "Code reading only (A's code-reviewer R1): the stored element is still the old A, so focus returns to A, possibly off-screen. NOT reproduced: Chromium focuses a clicked button, and WebKit is not installed in the cloud runner (only chromium-1200).",
+   "evidence": "a-round-514/code-review.md R1; c-round-514.md section 'Unverified'"
+  }
+ ],
+ "passed": [
+  "C0 SOURCE-SCOPE",
+  "C1 LAYOUT 320/375/639/1280/1440",
+  "C2 NEIGHBOURS journey 1440+1280",
+  "C3 KEYBOARD FOCUS 22 rows incl. Space",
+  "C4 POINTER FOCUS",
+  "C5 STUDIO+PROTECTION",
+  "C6 COVERING 6 files/99 tests + mutants M1-M15 identical to B",
+  "C7 GREP+SCANNER+LINT",
+  "C8 DOC 332 + LEDGER (manual)",
+  "C9 CLAIMS (diff equals allowed delta)"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest suite",
+  "build",
+  "Biome-all",
+  "npm run verify",
+  "test:e2e:smoke"
+ ],
+ "manifestPaths": 3,
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": 1,
+ "assertsSpecified": true,
+ "mutantsRecorded": 15,
+ "mutantRedOnSketch": "b-round-513/mut-logs/mutants-summary.json",
+ "mutantRedOnTree": "c-round-514/mut-logs/mutants-summary.json (15/15 red on the same rows as B)",
+ "gateChecksNamed": [
+  "full vitest",
+  "build",
+  "biome-all",
+  "verify",
+  "e2e smoke"
+ ],
+ "gateChecksRunOnSketch": "b-round-513/precheck-tsc-sketch.log",
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "covering 6 files/99 tests",
+  "browser layout+focus+journey"
+ ],
+ "affectedChecksRunOnSketch": "b-round-513/sketch-covering.log; probe/sketch/",
+ "notes": "First banner run showed 8 cold-Vite hydration errors (INFO-C510-COLD-HYDRATION; B's sketch run had 4), re-run on the warm server: 0 errors, layout/focus identical to B's sketch. First journey run timed out because two probes shared a cold server; re-run alone passed."
+}

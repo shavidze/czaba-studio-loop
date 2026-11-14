@@ -1,14 +1,14 @@
-# Active loop summary (2026-11-14T12:10:14.187Z)
+# Active loop summary (2026-11-14T13:15:15.246Z)
 
-- backlog.json 3636 KB -> active view 322 KB
-- status: G_ROOT_GATE round 513
-- servers: `{"checkedUtc":"2026-11-14T12:00:34.3611833Z","round":513,"attempt":1,"store":200}`
-- last publication: 4c8558777f0898da3b1e093ac07a9011fe3270c6 (rounds 513-513)
-- last root gate: round 513 published - commit 4c8558777f0898da3b1e093ac07a9011fe3270c6 pushed
+- backlog.json 3641 KB -> active view 323 KB
+- status: G_ROOT_GATE round 514
+- servers: `{"checkedUtc":"2026-11-14T12:57:57.9319370Z","round":514,"attempt":1,"store":200}`
+- last publication: b7cb61fab51f38dcf0015e1a8ef3cda47a9542fd (rounds 514-514)
+- last root gate: round 514 published - commit b7cb61fab51f38dcf0015e1a8ef3cda47a9542fd pushed
 
 ## Current items: -
 
-## Open findings: 1031 (28 Critical/High/Medium)
+## Open findings: 1032 (28 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / tracked by task SAFARI-CHECKS (D-29z1705) | listed in the Safari list (user-review/questions-retro-465.md Q2, D-29z1638); does not block | environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the c …[see backlog.json] / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
@@ -29,12 +29,12 @@
 - **SABA-DEVICE-CHECKS** / medium / open_tech_lead_manual (D-29z1768; does not block): opened by L46 after two RETROs without an answer (questions-retro-480.md Q1, questions-retro-495.md Q1); blocked on Saba's own device / Saba's-device checks opened as one task by L46
 - **FREE-CHECKOUT-REAL-BACKEND** / medium / blocked_cloud (D-29z1839): backend unavailable in cloud; does not block loop rounds; blocks final COMPLETE together with PURCHASE-REAL-BACKEND / A signed-in 'Get it free' click must complete a real $0 order (Stripe may reject a $0 session; backend may need to skip Stripe) and the prod
 - **B-R509-AUTHMODAL-NOT-A-DIALOG** / medium / open, blocked_root via SYS-R495-SHARED-DIALOG (D-29z1841): AuthModal (root.tsx l.156, app/components/auth/AuthModal.tsx) should move onto the shared dialog primitive; does not block round 509 (its anonymous path matches header Buy Now at HEAD) / Sign-in AuthModal has no role=dialog/aria-modal and does not move or trap focus: after Buy Now -> Enter the trigger behind the modal keeps f
-- **DPG-BUTTON-CLEANUP-2-NONBRAND** / medium / in_progress (D-29z1860, D-29z1862, D-29z1865): N1 (round 508, cf89736) and N2 PurchaseHeader (rounds 511+512, published cbc5709) are C-verified; round 513 = N3 cookie banner; N4-N9 and the StemsPlayerModal pair remain. Old status chain moved to status_history_d29z1865 so the optimizer substring matc …[see backlog.json] / Hand-rolled controls without a brand fill bypass Button.tsx (Saba DPG item 7): whole-tag scan 58 tags / 29 files at 3021b30 + LeadMagnet Clo
-- **B-R512-COOKIE-DISMISS-FOCUS-LOST** / medium / open (D-29z1864, D-29z1865): scheduled round 514 together with B-R512-COOKIE-CLOSE-OVERLAPS-TEXT (same banner); task names the focus target (L47) with product-designer / Cookie banner: after Enter on Decline or Accept (or a tap on Close) the banner unmounts and focus falls to body; the next Tab starts at the 
+- **DPG-BUTTON-CLEANUP-2-NONBRAND** / medium / in_progress (D-29z1866): N1 (round 508), N2 PurchaseHeader (rounds 511+512) and N3 cookie banner (C round 513 PASS, browserVerified true, published 4c85587) are C-verified; N4-N9 and the StemsPlayerModal pair remain; round 514 fixes two pre-existing banner Mediums before N4 / Hand-rolled controls without a brand fill bypass Button.tsx (Saba DPG item 7): whole-tag scan 58 tags / 29 files at 3021b30 + LeadMagnet Clo
+- **B-R512-COOKIE-DISMISS-FOCUS-LOST** / medium / dispatched round 514 (D-29z1868): focus returns to the element focused before the banner (keyboard: focus(), pointer: preventScroll), else header logo, else first header link; product-designer ruling b-round-513/consult-product-designer*.md | open (D-29z1864, D-29z1865): scheduled round 514 together …[see backlog.json] / Cookie banner: after Enter on Decline or Accept (or a tap on Close) the banner unmounts and focus falls to body; the next Tab starts at the 
 - **DPG2-OFF-PALETTE** / medium / open (D-29z1863): DPG-COLOR-CONSOLIDATE / DPG-DECORATIVE-PURGE scope (P1/P2); app/styles/** needs a root grant (global_forbidden_files) / Off-palette colours: pink hsl(340,85%,55%) app.css (artist section), blue hsl(220,…) shimmer app.css and free-downloads.tsx gradient with gr
 - **DPG2-LEGACY-BLUE-TOKENS** / medium / open (D-29z1863): DPG-DECORATIVE-PURGE; app/styles/** root grant / --color-blue-60/50/30 legacy tokens still in @theme (app.css)
 - **DPG2-STUDIOMOCKUP-OFF-PALETTE** / medium / open (D-29z1863): DPG-COLOR-CONSOLIDATE; also STORE-3 (F5 real crop) / Home StudioMockup.tsx uses bg-neutral-800, text-neutral-400, bg-red-500, bg-yellow-500 (off-palette)
 - **DPG2-NATIVE-SELECT-STORE** / medium / open (D-29z1863): DPG P1 after NONBRAND; Studio half stays SABA-B-12 stage 4 / Native <select> without a custom Select component in Store routes/components (hire-us, FilterBar, recordings SfxSceneBuilder/SfxSoundLibrary
 - **DPG2-DOCS-TYPOGRAPHY-STALE** / medium / open (D-29z1863): DPG-FONT-RESOLVE (input D-29z1707); docs grant in that round / DESIGN_SYSTEM.md typography still names Playfair Display/Inter; Saba decision 2026-11-14: Instrument Sans for everything
-- **B-R512-COOKIE-CLOSE-OVERLAPS-TEXT** / medium / open (D-29z1865): round 514 with B-R512-COOKIE-DISMISS-FOCUS-LOST (same banner, same file; at most 3 related bugs); product-designer row "X must not cover the text" is ruled pre-existing for round 513 (C1 records, equal to HEAD) / Cookie banner at 375 px: the mobile Close X (absolute top-2 right-2) sits on the end of the first text line and covers the "Privacy" link gl
-- ... and 1003 Low/info (see backlog.json)
+- **B-R512-COOKIE-CLOSE-OVERLAPS-TEXT** / medium / dispatched round 514 (D-29z1868): Close IconButton md 40 px with X 20, text px-10 below sm; B probe: no overlap at 320/375/639, 1280/1440 boxes equal to HEAD | open (D-29z1865): round 514 with B-R512-COOKIE-DISMISS-FOCUS-LOST (same banner, same file; at most 3 related bugs); product-designer row "X  …[see backlog.json] / Cookie banner at 375 px: the mobile Close X (absolute top-2 right-2) sits on the end of the first text line and covers the "Privacy" link gl
+- ... and 1004 Low/info (see backlog.json)
