@@ -1,0 +1,17 @@
+CR-1 experiment (B, round 506 planning): B2D-7 with Start Chat focused before rerender passes (10/10); mutants M1-M15 outcomes identical to b-round-504/mutants-505.txt. Ruling: Low, deferred.
+M1 rc 1 red B2D-1 expected B2D-1 OK
+M2 rc 1 red B2D-1 expected B2D-1 OK
+M3 rc 1 red B2D-1 expected B2D-1 OK
+M4 rc 1 red B2D-1,B2D-8 expected B2D-1,B2D-8 OK
+M5 rc 1 red B2D-4 expected B2D-4 OK
+M6 rc 1 red B2D-6,B2D-7 expected B2D-6,B2D-7 OK
+M7 rc 1 red B2D-7 expected B2D-7 OK
+M8 rc 1 red B2D-7 expected B2D-7 OK
+M9 rc 1 red B2D-3 expected B2D-3 OK
+M10 rc 1 red B2D-3,B2D-4 expected B2D-3,B2D-4 OK
+M11 rc 1 red B2D-0,B2D-3,B2D-8 expected B2D-0,B2D-3,B2D-8 OK
+M12 rc 1 red B2D-3,B2D-8 expected B2D-3,B2D-8 OK
+M13 rc 1 red B2D-2 expected B2D-2 OK
+M14 rc 1 red B2D-5 expected B2D-5 OK
+M15 rc 1 red B2D-9 expected B2D-9 OK
+restored rc 0

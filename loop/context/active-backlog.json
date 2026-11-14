@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-14T04:45:02.967Z",
-  "current_task": "Round 504: DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader): A applies b-round-503/sketch-504.patch.txt (v3 sha 84cc9df3, tech-lead v1/v2/v3 APPROVE): Go to Downloads -> buildButtonClassName primary lg + min-w-[160px] whitespace-nowrap; Upgrade to Premium and Unlock Premium -> <Button type=button size=lg> (Unlock disabled={isDisabled}, Processing... kept); new store-button-cleanup-2c.test.tsx B2C-0..9; DESIGN_SYSTEM default row + sentence; doc 325. C runs C0-C14 (current-task.md; owner rows -STUBBED, purchase journeys J1-J5)",
+  "_generatedUtc": "2026-11-14T05:50:27.879Z",
+  "current_task": "Round 505: DPG-BUTTON-CLEANUP-2 stage 2d (/support chat): A applies b-round-504/sketch-505.patch.txt (sha 5c0ed195): GuestForm Start Chat -> <Button type=submit size=lg fullWidth>; ChatInput Send -> <IconButton type=submit variant=brand size=md label='Send message'> + focus to the textarea after send and focusOnMount (only from BODY); ChatWindow focusOnMount only when opened with the guest form; IconButton brand drops glow + scale-95; glow/undefined-token allow-lists; new store-button-cleanup-2d.test.tsx B2D-0..9; DESIGN_SYSTEM row + IconButton paragraph; doc 326. C runs C0-C14 (current-task.md; chat rows -STUBBED via page.route, focus targets L47)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6835,7 +6835,8 @@
       "status": "awaiting_user (D-29z1699): user-review/questions-round-478.md Q1 (licence copy is legal content); round 479 keeps the target and only makes the link client-side",
       "title": "Footer \"License\" (every Store page) and terms.tsx \"License page\" link to /license, which has no route and renders the 404 page",
       "evidence": "b-round-478/claims-479-planning-output.txt K4 (routes license:0); curl /license title 404",
-      "added": "2026-11-12 B round 478 -> 479 planning"
+      "added": "2026-11-12 B round 478 -> 479 planning",
+      "note_d29z1819": "support.tsx \"License Info\" card also links to /license (claims-505 planning; same 404); it follows the Footer/terms answer"
     },
     {
       "id": "B-R478-DEAD-MUSIC-LINK",
@@ -7061,17 +7062,33 @@
       "severity": "info",
       "status": "info (D-29z1808): shared focus-ring style; Chromium paints t",
       "title": "Cart Checkout focus ring reads outline solid 1px / offset 2px vs SABA-B-4 text 1.5px"
+    },
+    {
+      "id": "PURCHASE-REAL-BACKEND",
+      "severity": "info",
+      "status": "open_backend (D-29z1817): round 504 owner states (S1P/S1X/S2",
+      "title": "PurchaseHeader owner/upgrade states and upgrade checkout with a real backend"
+    },
+    {
+      "id": "CHAT-REAL-BACKEND",
+      "severity": "info",
+      "status": "open_backend (D-29z1819): round 505 chat rows are -STUBBED (",
+      "title": "/support live chat with a real backend session"
+    },
+    {
+      "id": "B-R505-CHAT-SEND-FOCUS-LOST",
+      "severity": "low",
+      "status": "dispatched round 505 (D-29z1822): fix = focus the textarea i",
+      "title": "Clicking or keyboard-activating /support chat \"Send message\" clears the field, disables the focused "
+    },
+    {
+      "id": "B-R505-GUESTFORM-START-FOCUS-LOST",
+      "severity": "low",
+      "status": "dispatched round 505 (D-29z1822): fix = ChatInput focusOnMou",
+      "title": "After a successful /support \"Start Chat\" the guest form unmounts and focus drops to BODY"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 495,
-      "task": "current-task.md",
-      "decision": "D-29z1770",
-      "type": "RETRO 495 (window 480-494) + whole-screen and journey review; no app code",
-      "status": "C PASS (D-29z1772); gate skipped (no real changes)",
-      "note": "baseline 3bcf8cb clean; frozen manifest b-round-494/r495-tree-sha256.txt (1405); claims b-round-494/claims-495.sh"
-    },
     {
       "round": 496,
       "task": "current-task.md",
@@ -7145,8 +7162,17 @@
       "task": "current-task.md",
       "decision": "D-29z1814",
       "type": "DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader: Go to Downloads, Upgrade to Premium, Unlock Premium)",
+      "status": "C PASS (browserVerified/realVerified true, 0 bugs; owner states -STUBBED, PURCHASE-REAL-BACKEND blocked in cloud); gate 504 published e3e9e49 (both remotes)",
+      "note": "baseline b806cad clean; sketch b-round-503/sketch-504.patch.txt v3 sha 84cc9df3; pre-check b-round-503/precheck-*.log (full 301/4363 rc0, build rc0); mutants M1-M13 OK; probes b-round-503/probe/ (owner states -STUBBED, purchase journeys J1-J5)",
+      "result_note": "C0-C14 PASS (c-round-504.json); review COMMIT OK; D-29z1817/D-29z1818"
+    },
+    {
+      "round": 505,
+      "task": "current-task.md",
+      "decision": "D-29z1819",
+      "type": "DPG-BUTTON-CLEANUP-2 stage 2d (/support chat: Start Chat, Send message, chat focus)",
       "status": "dispatched",
-      "note": "baseline b806cad clean; sketch b-round-503/sketch-504.patch.txt v3 sha 84cc9df3; pre-check b-round-503/precheck-*.log (full 301/4363 rc0, build rc0); mutants M1-M13 OK; probes b-round-503/probe/ (owner states -STUBBED, purchase journeys J1-J5)"
+      "note": "baseline e3e9e49 clean; sketch b-round-504/sketch-505.patch.txt v3 sha 5c0ed195; pre-check b-round-504/precheck-*.log (full 302/4373 rc0, build rc0); mutants M1-M15 OK; probes b-round-504/probe/ (chat rows -STUBBED, focus targets, in-flight guard)"
     }
   ],
   "other_keys": [

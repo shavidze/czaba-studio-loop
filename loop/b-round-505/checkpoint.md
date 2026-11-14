@@ -1,0 +1,18 @@
+# B round 505->506 checkpoint
+- archive tasks/round-505.md done (cmp rc 0)
+- snapshots taken
+- next: CR-1 experiment, product-designer consult 2e, sketch
+- step1 CR-1 experiment done (cr1/): Low deferred
+- step2 product-designer consult saved (consult-product-designer.md): (c) CONTINUE -> primary brass
+- step3 probe head/sketch (probe/lm-506.cjs; head/, sketch/, compare.txt); sketch server :5174 pid /home/runner/b505-dev.pid (stop at end)
+- step4 sketch v1 sha e859573c (sketch-506.patch.txt) on /home/runner/b505-scratch; patchgen /home/runner/b505-pg
+- step5 precheck running in background (precheck.done marker)
+- next: mutants, scanner, tech-lead review, frozen sha lists, claims, task, backlog, feature-status, b-next
+- step6 v2 b52088bd (doc wording), tech-lead review 1+2 (sketch-review.md), mutants run2 14/14 OK, full 303/4379 rc0, build rc0 (v2), covering 5/108; :5174 stopped, :5173 200, store clean
+- next: current-task.md, claims, backlog update, feature-status, b-round-505.md, b-next.json
+- step7 current-task.md written; claims K1-K33 no MISSING (planning/sketch outputs); backlog v507 (update-backlog-506.py, D-29z1823..1826); feature-status header/rows/DPG-FIX; questions-round-506.md
+- next: b-round-505.md, b-next.json, advisor final check
+- step8 b-round-505.md, b-next.json written; task L29 tags fixed, K34 added; claims rerun 0 MISSING; L58 OK
+- next: advisor final check
+- step9 closing check applied (D-29z1827, v508): red history, AX evidence, offset closed on C data, pre-ruled #8-#11, doc-ledger.md; claims K1-K36 0 MISSING; L58 OK; store clean. DONE.
+- step9 closing check applied (D-29z1827, v508): red history, AX evidence, offset closed on C data, pre-ruled #8-#11, doc-ledger.md; claims K1-K36 0 MISSING; L58 OK; store clean. DONE.

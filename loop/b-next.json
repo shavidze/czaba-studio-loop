@@ -1,7 +1,7 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 504 C PASS (browserVerified/realVerified true, 0 bugs, L57 OK), gate 504 published e3e9e49: DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) verified; its stubbed owner/upgrade rows' real-backend half kept as PURCHASE-REAL-BACKEND (D-29z1817, D-29z1818). Round 505 = stage 2d, the live /support chat (D-29z1819..D-29z1822): Start Chat -> Button lg fullWidth, Send -> IconButton brand md (IconButton brand loses the retired glow and scale-95), and keyboard focus returns to the message field after send and after Start Chat (HEAD dropped it to BODY). Product-designer mapping; tech-lead v1 APPROVE WITH CONDITIONS (ruled), v2 APPROVE, v3 5c0ed195 APPROVE (review 4; L47 async-settle guard: mount focus only from BODY); full suite 302/4373 and build rc 0 on the sketch; mutants M1-M15 red; HEAD-vs-sketch browser probes with stubbed chat API. Not COMPLETE: 2e, NONBRAND, rest of DPG P1/P2 and the DP gate (both reviewers 10/10), STORE-2c..5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, STUDIO-PERFORMANCE remainder, T12-ADVANCED, STEM-LANES, phase-2 queue entries, High B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED with root, deferred Lows before final acceptance. Not BLOCKED: round 505 needs no external input (its real-backend chat half is BLOCKED in cloud only).",
- "nextTask": "Round 505: DPG-BUTTON-CLEANUP-2 stage 2d (/support chat). Baseline e3e9e49 (clean). A: frozen checks 1-3, git apply b-round-504/sketch-505.patch.txt (v3 sha 5c0ed195), checks 4 and 1; GuestForm Start Chat -> <Button type=\"submit\" size=\"lg\" fullWidth>; ChatInput Send -> <IconButton type=\"submit\" variant=\"brand\" size=\"md\" label=\"Send message\"> (20px icon), textarea ref, focus after send, focusOnMount only from BODY; ChatWindow focusOnMount only when opened with the guest form; IconButton brand drops hover:shadow-glow and active:scale-95; store-glow-shadow and store-undefined-tokens allow-lists; new store-button-cleanup-2d.test.tsx (B2D-0..9); DESIGN_SYSTEM row + IconButton paragraph; doc 326. A runs typecheck, lint (179), scoped Biome (7 files), covering 6 files/80 (UT2 time recorded), code-reviewer. C runs C0-C14: /support at 1440/1280/375 (support-505.mjs: rest/hover/press/keyboard focus, contrast 8.32/10.28, validation unstubbed, stubbed session + send by click/Enter/double-click/keyboard = 1 POST each, focus targets TEXTAREA, in-flight focus not stolen, signed-in open record-only), scanner 94/33, mutants M1-M15, docs, protection + /studio-lab smoke, claims, L57.",
+ "reason": "Round 505 C PASS (browserVerified/realVerified true, L57 OK), gate 505 published d6903a7: DPG-BUTTON-CLEANUP-2 stage 2d (/support chat) verified; B-R505-CHAT-SEND-FOCUS-LOST and B-R505-GUESTFORM-START-FOCUS-LOST closed on C7. A's STOP CR-1 ruled Low by experiment (b-round-505/cr1: mutant outcomes unchanged) and deferred (D-29z1823); process misses filed for RETRO 510. Round 506 = stage 2e, the LeadMagnet keep-list restyle (D-29z1824..D-29z1826): three actions onto Button lg, CONTINUE red -> brass (product-designer; Saba asked once, default brass), copy/steps/focus unchanged. Sketch v2 b52088bd: tech-lead v1/v2 APPROVE WITH CONDITIONS, all ruled; full suite 303/4379 and build rc 0 on the sketch; mutants M1-M14 red; HEAD-vs-sketch browser probes at 1440/1280/375. Not COMPLETE: NONBRAND, stage-2 close-out, rest of DPG P1/P2 and the DP gate (both reviewers 10/10), STORE-2c..5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, STUDIO-PERFORMANCE remainder, T12-ADVANCED, STEM-LANES, phase-2 queue entries, High B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED with root, deferred Lows before final acceptance. Not BLOCKED: round 506 needs no external input (its real Brevo half is BLOCKED in cloud only).",
+ "nextTask": "Round 506: DPG-BUTTON-CLEANUP-2 stage 2e (LeadMagnet popup). Baseline d6903a7 (clean). A: frozen checks 1-3, git apply b-round-505/sketch-506.patch.txt (v2 sha b52088bd), checks 4 and 1; FREE DOWNLOAD and BACK TO SITE -> <Button type=\"button\" size=\"lg\" fullWidth className=\"max-w-[320px] uppercase tracking-wide\"> (BACK TO SITE keeps its ref); CONTINUE -> <Button type=\"submit\" size=\"lg\" fullWidth disabled={isSubmitting} className=\"uppercase tracking-wide\"> (brass, no isLoading); ST5 LeadMagnet pin -> 0 bg-destructive / 0 bg-brand; new store-button-cleanup-2e.test.tsx (B2E-1..6); DESIGN_SYSTEM row; doc 327. A runs typecheck, lint (179), scoped Biome (3 files), covering 5 files/108, code-reviewer. C runs C0-C14: popup at 1440/1280/375 via exit intent (lm-506.cjs: rest/hover/press/keyboard focus 320x48 brass, contrast 8.32/10.28, empty + unstubbed submit -> alert and focus to the field, stubbed SENDING... disabled no spinner, success focus BACK TO SITE, Esc), C3 also records the /support chat outline offset, scanner 92/31, mutants M1-M14, docs, protection + /studio-lab smoke, claims, L57.",
  "remaining": [
   "CART-REAL-BACKEND",
   "SABA-Q-502-UPGRADE-VARIANT",
@@ -84,8 +84,18 @@
   "B-R505-CHAT-TEXTAREA-NO-LABEL",
   "TL-R505-FOCUS-FLAG-AUTH-CHANGE",
   "A-R504-CR-2-DISABLED-CLICK-NO-MUTANT",
-  "B-R505-CHAT-SEND-FOCUS-LOST",
-  "B-R505-GUESTFORM-START-FOCUS-LOST",
-  "B-R505-UT2-TIMEOUT-HEADROOM"
+  "B-R505-UT2-TIMEOUT-HEADROOM",
+  "SABA-Q-506-LM-CONTINUE-COLOUR",
+  "LEADMAGNET-REAL-SUBSCRIBE",
+  "B-R506-LM-EMAIL-NO-LABEL",
+  "B-R506-LM-NATIVE-VALIDATION",
+  "B-R506-LM-WHITE-FIELD",
+  "B-R506-LM-WORDMARK",
+  "B-R506-LM-EMOJI-ICON",
+  "A-R505-CR-1-B2D7-NO-FOCUSED-BUTTON",
+  "A-R505-CR-3-SEND-LOGIC-DUP",
+  "SIG-R505-CHAT-FOCUS-POINT",
+  "INFO-C505-UNRULED-STOP-PASS",
+  "INFO-B505-SKETCH-REVIEWER-MEDIUM"
  ]
 }

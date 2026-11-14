@@ -1,0 +1,75 @@
+
+ RUN  v4.0.16 /home/runner/b505-scratch
+
+ × app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-0: the IconButton brand variant drops the retired glow and the extra press scale; the other variants keep theirs 104ms
+   → expected [ Array(15) ] to not include 'hover:shadow-glow'
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-1: "Start Chat" is a submit Button, lg and full width, with the default shape 22ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-2: "Start Chat" still validates: an empty submit shows both errors and does not start; a valid one starts once with trimmed values 40ms
+ × app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-3: Send is a 40 px brand IconButton with its name as a tooltip, inert while the field is empty 12ms
+   → expected 'inline-flex items-center justify-cent…' not to match /shadow-glow|active:scale-95|p-2\.5/
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-4: a click on Send sends the trimmed text once, clears the field and puts focus back in the field 16ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-5: Enter in the field sends once with focus unchanged; Shift+Enter and a blank field send nothing 10ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-6: focusOnMount focuses the field on mount; without it focus stays where it was 3ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-7: ChatWindow moves focus to the message field only when the guest form gives way to the chat 17ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-9: when focus moved elsewhere while the session was starting, the chat does not take it back 12ms
+ × app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-8: the chat sources hold no hand-rolled button, IconButton.tsx has no glow, and its brand variant has no scale-95 2ms
+   → expected 1 to be +0 // Object.is equality
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 7 passed (10)
+   Start at  05:53:38
+   Duration  1.23s (transform 319ms, setup 0ms, import 593ms, tests 240ms, environment 294ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-0: the IconButton brand variant drops the retired glow and the extra press scale; the other variants keep theirs
+AssertionError: expected [ Array(15) ] to not include 'hover:shadow-glow'
+ ❯ app/lib/__tests__/store-button-cleanup-2d.test.tsx:90:23
+     88|       expect(brand).toContain(token);
+     89|     }
+     90|     expect(brand).not.toContain('hover:shadow-glow');
+       |                       ^
+     91|     expect(brand).not.toContain('active:scale-95');
+     92|     expect(screen.getByRole('button', { name: 'Ghost' }).className.spl…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-3: Send is a 40 px brand IconButton with its name as a tooltip, inert while the field is empty
+AssertionError: expected 'inline-flex items-center justify-cent…' not to match /shadow-glow|active:scale-95|p-2\.5/
+
+- Expected: 
+/shadow-glow|active:scale-95|p-2\.5/
+
++ Received: 
+"inline-flex items-center justify-center rounded-lg transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:scale-95 shadow-sm hover:shadow-glow w-10 h-10 opacity-50 cursor-not-allowed pointer-events-none"
+
+ ❯ app/lib/__tests__/store-button-cleanup-2d.test.tsx:128:32
+    126|       expect(tokens).toContain(token);
+    127|     }
+    128|     expect(send.className).not.toMatch(/shadow-glow|active:scale-95|p-…
+       |                                ^
+    129|     expect(send.disabled).toBe(true);
+    130|     expect(tokens).toContain('pointer-events-none');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-8: the chat sources hold no hand-rolled button, IconButton.tsx has no glow, and its brand variant has no scale-95
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ app/lib/__tests__/store-button-cleanup-2d.test.tsx:215:49
+    213|     expect(countOf(chatInput, /\bbg-brand\b/g)).toBe(0);
+    214|     const iconButton = readApp(ICON_BUTTON_PATH);
+    215|     expect(countOf(iconButton, /shadow-glow/g)).toBe(0);
+       |                                                 ^
+    216|     const brandVariant = iconButton.match(/brand: \[([^\]]*)\]/)?.[1] …
+    217|     expect(brandVariant).toContain('bg-brand text-background');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+

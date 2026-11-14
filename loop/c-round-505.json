@@ -1,0 +1,78 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-14T05:42:05.9395304Z",
+  "round": 505,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "A-R505-CR-1-B2D7-NO-FOCUSED-BUTTON",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "Read app/lib/__tests__/store-button-cleanup-2d.test.tsx B2D-7 (lines ~177-185)",
+    "Note focus never leaves BODY before guest.rerender(false)"
+   ],
+   "expected": "jsdom test puts focus on 'Start Chat' before the guest form unmounts, as in the real flow",
+   "actual": "B2D-7 would pass even if the browser put focus elsewhere than BODY when the focused button unmounts (confirmed by reading). code-reviewer rated Medium; C rates Low because the real path is browser-verified: activeAfterStart = TEXTAREA at 1440/1280/375, and mutants M6-M8 turn B2D-6/7 red. A STOPped on it; no B ruling existed when C ran.",
+   "evidence": "c-round-505/after.out (activeAfterStart), c-round-505/mutants.out, a-round-505/code-review.md. B must rule: (a) Low deferred, or (b) grant the one-line .focus() edit and re-issue the post-sketch sha."
+  }
+ ],
+ "passed": [
+  "C0-SOURCE-SCOPE (7 modified + 2 untracked; checks 2 and 4 rc 0)",
+  "C1-REST (Start Chat 398x48, radius 8px, bg rgb(201,164,106); Send 40x40 radius 12px, 20px icon, empty disabled opacity 0.5 pe none; form card 337px; all equal to probe/sketch.out)",
+  "C2-HOVER+PRESS (hover rgb(217,184,127); empty Send not hoverable; equal sketch.out)",
+  "C3-KEYBOARD-FOCUS (kbdAfter focusVisible true, source keyboard, at 3 viewports)",
+  "C4-CONTRAST (8.32 rest on both buttons)",
+  "C5-VALIDATION (empty click: Name/Email required, 0 POSTs)",
+  "C6-SEND-STUBBED (one POST per send path; equal sketch.out)",
+  "C7-FOCUS-TARGETS (after Start Chat -> TEXTAREA x3 viewports; in-flight: focus stays on 'Back to support options'; Enter-send keeps field focus; after.out equals sketch.out byte-for-byte except timestamps, differs from head.out)",
+  "C8-GREP (94 hits; 33 solid)",
+  "C9-TESTS (6 files, 80/80, B2D-0..9 present, no test over 2500 ms)",
+  "C10-MUTANTS (M1-M15 RED on expected rows, restored rc 0)",
+  "C11-DOCS-PARTIAL (doc 326 l.4 byte-equal; DESIGN_SYSTEM 3 insertions/1 deletion; 0 'C round N pending')",
+  "C12-PROTECTION+STUDIO (fresh no-credential context: /studio/1 and /account/downloads show 'Sign in required', no owned download link; /studio-lab opens demo at 1440 and 1280, screenshot viewed at 1280)",
+  "C13-CLAIMS (0 MISSING; only K2 differs, as expected: 7/2 vs clean 0/0)",
+  "C14-SOURCE-SCOPE-end"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "biome",
+  "npm run verify"
+ ],
+ "blocked": [
+  "CHAT-REAL-BACKEND-505: real chat session, SignalR, admin replies - backend unavailable in cloud"
+ ],
+ "notes": [
+  "Not a Studio audio/video round: no audio graph, WAV export or video transport was in scope; /studio-lab was smoke-checked only.",
+  "A STOPped on CR-1 with no B ruling; C ran the browser rows anyway (more than the L22 minimum). The verdict covers product behaviour only; B owns the CR-1 ruling.",
+  "Chat rows after Start Chat are -STUBBED (page.route): client path only.",
+  "First warm-up returned live 0 (cold route, L38); second returned 1; measurement run was warm, no invalid runs.",
+  "C3 outline reads 'solid 1px' in kbdAfter, identical to sketch.out; the 2px offset was not separately re-measured by C. Screenshots in c-round-505/after/ were not all visually inspected (only studio-lab-1280.png was viewed).",
+  "C11 DESIGN_SYSTEM paragraph content and doc 326 D1-D4 number tracing were not fully traced by C."
+ ],
+ "manifestPaths": null,
+ "missingPaths": null,
+ "countMismatches": 0,
+ "claimCheckMinutes": null,
+ "assertsSpecified": null,
+ "mutantsRecorded": true,
+ "mutantRedOnSketch": "b-round-504/mutants-505.txt; c-round-505/mutants.out M1-M15 all OK",
+ "gateChecksNamed": [
+  "full vitest",
+  "build",
+  "biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": "B precheck-full.log, precheck-build-sketch.log (not re-run by C)",
+ "chainHeadGateRunGreen": "gate 504 published at e3e9e49",
+ "affectedChecksNamed": [
+  "covering 6 files"
+ ],
+ "affectedChecksRunOnSketch": "c-round-505/covering.log 80/80"
+}

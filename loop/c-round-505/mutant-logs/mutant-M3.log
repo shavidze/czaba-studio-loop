@@ -1,0 +1,42 @@
+
+ RUN  v4.0.16 /home/runner/c505-copy
+
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-0: the IconButton brand variant drops the retired glow and the extra press scale; the other variants keep theirs 108ms
+ × app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-1: "Start Chat" is a submit Button, lg and full width, with the default shape 25ms
+   → expected null to be 'submit' // Object.is equality
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-2: "Start Chat" still validates: an empty submit shows both errors and does not start; a valid one starts once with trimmed values 41ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-3: Send is a 40 px brand IconButton with its name as a tooltip, inert while the field is empty 12ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-4: a click on Send sends the trimmed text once, clears the field and puts focus back in the field 18ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-5: Enter in the field sends once with focus unchanged; Shift+Enter and a blank field send nothing 12ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-6: focusOnMount focuses the field on mount; without it focus stays where it was 4ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-7: ChatWindow moves focus to the message field only when the guest form gives way to the chat 7ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-9: when focus moved elsewhere while the session was starting, the chat does not take it back 13ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-8: the chat sources hold no hand-rolled button, IconButton.tsx has no glow, and its brand variant has no scale-95 1ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  05:44:51
+   Duration  1.25s (transform 320ms, setup 0ms, import 607ms, tests 240ms, environment 292ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-1: "Start Chat" is a submit Button, lg and full width, with the default shape
+AssertionError: expected null to be 'submit' // Object.is equality
+
+- Expected: 
+"submit"
+
++ Received: 
+null
+
+ ❯ app/lib/__tests__/store-button-cleanup-2d.test.tsx:100:40
+     98|     render(<GuestForm onSubmit={noop} />);
+     99|     const start = screen.getByRole('button', { name: 'Start Chat' });
+    100|     expect(start.getAttribute('type')).toBe('submit');
+       |                                        ^
+    101|     expect(start.className).toBe(buildButtonClassName({ size: 'lg', fu…
+    102|     expect(start.className.split(' ')).toContain('rounded-md');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

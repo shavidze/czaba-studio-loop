@@ -1,0 +1,31 @@
+// B round 506 planning: Chromium accessible name of the LeadMagnet email field (CDP AX tree). Usage: BASE=... node ax-email.cjs
+const { createRequire } = require('module');
+const req = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = req('playwright');
+const BASE = process.env.BASE || 'http://127.0.0.1:5173';
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+  const page = await ctx.newPage();
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await page.evaluate(() => { const b = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === 'Decline'); if (b) b.click(); });
+  await page.evaluate(() => window.scrollTo(0, Math.round((document.documentElement.scrollHeight - innerHeight) * 0.55)));
+  await sleep(1500);
+  await page.evaluate(() => document.dispatchEvent(new MouseEvent('mouseleave', { clientY: 0, clientX: 10 })));
+  await page.getByRole('dialog').waitFor({ timeout: 10000 });
+  await sleep(600);
+  await page.getByRole('dialog').getByRole('button', { name: 'FREE DOWNLOAD', exact: true }).click();
+  await sleep(500);
+  const cdp = await ctx.newCDPSession(page);
+  await cdp.send('DOM.enable'); await cdp.send('Accessibility.enable');
+  const { root } = await cdp.send('DOM.getDocument');
+  const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: '[role="dialog"] input[type="email"]' });
+  const { nodes } = await cdp.send('Accessibility.getPartialAXTree', { nodeId, fetchRelatives: false });
+  const n = nodes[0];
+  const src = (n.name && n.name.sources || []).filter((s) => s.value || s.attributeValue).map((s) => ({ type: s.type, attribute: s.attribute, value: s.value && s.value.value, superseded: s.superseded }));
+  console.log(JSON.stringify({ role: n.role && n.role.value, name: n.name && n.name.value, sources: src }));
+  const pw = await page.getByRole('textbox', { name: 'Enter your email address' }).count();
+  console.log(JSON.stringify({ playwrightGetByRoleCount: pw }));
+  await browser.close();
+})().catch((e) => { console.error(e); process.exit(1); });

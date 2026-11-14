@@ -1,0 +1,72 @@
+
+ RUN  v4.0.16 /home/runner/c505-copy
+
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-0: the IconButton brand variant drops the retired glow and the extra press scale; the other variants keep theirs 105ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-1: "Start Chat" is a submit Button, lg and full width, with the default shape 22ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-2: "Start Chat" still validates: an empty submit shows both errors and does not start; a valid one starts once with trimmed values 39ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-3: Send is a 40 px brand IconButton with its name as a tooltip, inert while the field is empty 12ms
+ × app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-4: a click on Send sends the trimmed text once, clears the field and puts focus back in the field 18ms
+   → expected <button …(5)>…(1)</button> to be <textarea …(3)></textarea> // Object.is equality
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-5: Enter in the field sends once with focus unchanged; Shift+Enter and a blank field send nothing 11ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-6: focusOnMount focuses the field on mount; without it focus stays where it was 6ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-7: ChatWindow moves focus to the message field only when the guest form gives way to the chat 7ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-9: when focus moved elsewhere while the session was starting, the chat does not take it back 14ms
+ ✓ app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-8: the chat sources hold no hand-rolled button, IconButton.tsx has no glow, and its brand variant has no scale-95 1ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  05:44:54
+   Duration  1.21s (transform 304ms, setup 0ms, import 580ms, tests 237ms, environment 302ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/store-button-cleanup-2d.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton > B2D-4: a click on Send sends the trimmed text once, clears the field and puts focus back in the field
+AssertionError: expected <button …(5)>…(1)</button> to be <textarea …(3)></textarea> // Object.is equality
+
+- Expected
++ Received
+
+- <textarea
+-   class="flex-1 px-3 py-2 min-h-[40px] max-h-[120px] bg-elevated border border-outline-strong rounded-lg text-foreground text-sm placeholder:text-dim resize-none transition-all duration-150"
+-   placeholder="Type a message..."
+-   rows="1"
++ <button
++   aria-label="Send message"
++   class="inline-flex items-center justify-center rounded-lg transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover shadow-sm w-10 h-10 opacity-50 cursor-not-allowed pointer-events-none"
++   disabled=""
++   title="Send message"
++   type="submit"
++ >
++   <svg
++     aria-hidden="true"
++     class="lucide lucide-send w-5 h-5"
++     fill="none"
++     height="24"
++     stroke="currentColor"
++     stroke-linecap="round"
++     stroke-linejoin="round"
++     stroke-width="2"
++     viewBox="0 0 24 24"
++     width="24"
++     xmlns="http://www.w3.org/2000/svg"
++   >
++     <path
++       d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
++     />
++     <path
++       d="m21.854 2.147-10.94 10.939"
+      />
++   </svg>
++ </button>
+
+ ❯ app/lib/__tests__/store-button-cleanup-2d.test.tsx:147:36
+    145|     expect(onSend).toHaveBeenCalledWith('hi');
+    146|     expect(textarea.value).toBe('');
+    147|     expect(document.activeElement).toBe(textarea);
+       |                                    ^
+    148|     expect(getSendButton().disabled).toBe(true);
+    149|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

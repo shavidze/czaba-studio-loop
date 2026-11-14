@@ -1,0 +1,351 @@
+diff --git a/app/components/marketing/LeadMagnetPopup.tsx b/app/components/marketing/LeadMagnetPopup.tsx
+index 343985d..cb98901 100644
+--- a/app/components/marketing/LeadMagnetPopup.tsx
++++ b/app/components/marketing/LeadMagnetPopup.tsx
+@@ -1,5 +1,6 @@
+ import { X } from 'lucide-react';
+ import { useEffect, useId, useRef, useState } from 'react';
++import { Button } from '~/components/ui';
+ import { useLeadMagnet, useScrollLock } from '~/hooks';
+ 
+ interface LeadMagnetPopupProps {
+@@ -178,21 +179,15 @@ export function LeadMagnetPopup({ isLoggedIn }: LeadMagnetPopupProps) {
+               Tracks, Sound Effects & More
+             </h2>
+ 
+-            <button
++            <Button
+               type="button"
++              size="lg"
++              fullWidth
+               onClick={handleContinueToEmail}
+-              className="
+-                w-full max-w-[320px]
+-                py-4 px-8
+-                bg-brand hover:bg-brand-hover
+-                text-background font-semibold uppercase tracking-wide
+-                rounded-md
+-                transition-colors
+-                cursor-pointer
+-              "
++              className="max-w-[320px] uppercase tracking-wide"
+             >
+               FREE DOWNLOAD
+-            </button>
++            </Button>
+           </div>
+         )}
+ 
+@@ -242,13 +237,15 @@ export function LeadMagnetPopup({ isLoggedIn }: LeadMagnetPopupProps) {
+                 </p>
+               )}
+ 
+-              <button
++              <Button
+                 type="submit"
++                size="lg"
++                fullWidth
+                 disabled={isSubmitting}
+-                className="w-full py-4 px-8 bg-destructive hover:brightness-110 text-brand-foreground font-semibold uppercase tracking-wide rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
++                className="uppercase tracking-wide"
+               >
+                 {isSubmitting ? 'SENDING...' : 'CONTINUE'}
+-              </button>
++              </Button>
+             </form>
+           </div>
+         )}
+@@ -269,22 +266,16 @@ export function LeadMagnetPopup({ isLoggedIn }: LeadMagnetPopupProps) {
+               We've sent your free mystery pack to your email!
+             </h2>
+ 
+-            <button
++            <Button
+               ref={backToSiteButtonRef}
+               type="button"
++              size="lg"
++              fullWidth
+               onClick={handleBackToSite}
+-              className="
+-                w-full max-w-[320px]
+-                py-4 px-8
+-                bg-brand hover:bg-brand-hover
+-                text-background font-semibold uppercase tracking-wide
+-                rounded-md
+-                transition-colors
+-                cursor-pointer
+-              "
++              className="max-w-[320px] uppercase tracking-wide"
+             >
+               BACK TO SITE
+-            </button>
++            </Button>
+           </div>
+         )}
+       </div>
+diff --git a/app/lib/__tests__/store-button-cleanup-2e.test.tsx b/app/lib/__tests__/store-button-cleanup-2e.test.tsx
+new file mode 100644
+index 0000000..dbd39a7
+--- /dev/null
++++ b/app/lib/__tests__/store-button-cleanup-2e.test.tsx
+@@ -0,0 +1,157 @@
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { cleanup, fireEvent, render, screen } from '@testing-library/react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { LeadMagnetPopup } from '~/components/marketing/LeadMagnetPopup';
++import { buildButtonClassName } from '~/components/ui';
++import { APP_ROOT } from './helpers/style-scan';
++
++type LeadMagnetFixtureStep = 'offer' | 'email' | 'success';
++
++interface LeadMagnetFixtureState {
++  shouldShow: boolean;
++  currentStep: LeadMagnetFixtureStep;
++  isSubmitting: boolean;
++  error: string | null;
++}
++
++const leadMagnetMock = vi.hoisted(() => {
++  const state: LeadMagnetFixtureState = {
++    shouldShow: true,
++    currentStep: 'offer',
++    isSubmitting: false,
++    error: null,
++  };
++  return {
++    state,
++    close: vi.fn(() => undefined),
++    setStep: vi.fn((_step: LeadMagnetFixtureStep) => undefined),
++    submitEmail: vi.fn(async (_email: string) => undefined),
++  };
++});
++
++vi.mock('~/hooks', async () => {
++  const actual =
++    await vi.importActual<typeof import('~/hooks/useScrollLock')>('~/hooks/useScrollLock');
++  return {
++    useScrollLock: actual.useScrollLock,
++    useLeadMagnet: () => ({
++      ...leadMagnetMock.state,
++      close: leadMagnetMock.close,
++      setStep: leadMagnetMock.setStep,
++      submitEmail: leadMagnetMock.submitEmail,
++    }),
++  };
++});
++
++const POPUP_PATH = 'components/marketing/LeadMagnetPopup.tsx';
++const NARROW_ACTION_CLASSES = 'max-w-[320px] uppercase tracking-wide';
++
++const popupElement = () => <LeadMagnetPopup isLoggedIn={false} />;
++
++function openPopupAt(step: LeadMagnetFixtureStep) {
++  leadMagnetMock.state.currentStep = step;
++  return render(popupElement());
++}
++
++function actionClass(className: string, isDisabled = false): string {
++  return buildButtonClassName({ size: 'lg', fullWidth: true, isDisabled, className });
++}
++
++describe('DPG-BUTTON-CLEANUP-2 stage 2e: LeadMagnet actions on Button (keep-list restyle)', () => {
++  beforeEach(() => {
++    vi.clearAllMocks();
++    leadMagnetMock.state.shouldShow = true;
++    leadMagnetMock.state.currentStep = 'offer';
++    leadMagnetMock.state.isSubmitting = false;
++    leadMagnetMock.state.error = null;
++    vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
++  });
++
++  afterEach(() => {
++    cleanup();
++    vi.restoreAllMocks();
++  });
++
++  it('B2E-1: FREE DOWNLOAD is a type="button" Button, lg and full width up to 320 px, uppercase copy unchanged, and still moves to the email step', () => {
++    openPopupAt('offer');
++    const freeDownload = screen.getByRole('button', { name: 'FREE DOWNLOAD' });
++    expect(freeDownload.getAttribute('type')).toBe('button');
++    expect(freeDownload.className).toBe(actionClass(NARROW_ACTION_CLASSES));
++    expect(freeDownload.textContent).toBe('FREE DOWNLOAD');
++    fireEvent.click(freeDownload);
++    expect(leadMagnetMock.setStep).toHaveBeenCalledTimes(1);
++    expect(leadMagnetMock.setStep).toHaveBeenCalledWith('email');
++  });
++
++  it('B2E-2: CONTINUE is a submit Button on the brand fill (no destructive red), lg and full width', () => {
++    openPopupAt('email');
++    const submit = screen.getByRole('button', { name: 'CONTINUE' });
++    expect(submit.getAttribute('type')).toBe('submit');
++    expect(submit.className).toBe(actionClass('uppercase tracking-wide'));
++    const tokens = submit.className.split(' ');
++    expect(tokens).toContain('bg-brand');
++    expect(tokens).not.toContain('bg-destructive');
++    expect(submit.hasAttribute('disabled')).toBe(false);
++  });
++
++  it('B2E-3: while submitting, the submit reads SENDING..., is disabled, and shows no spinner or "Loading..." text', () => {
++    leadMagnetMock.state.isSubmitting = true;
++    openPopupAt('email');
++    const submit = screen.getByRole('button', { name: 'SENDING...' });
++    expect(submit.textContent).toBe('SENDING...');
++    expect(submit.hasAttribute('disabled')).toBe(true);
++    expect(submit.className).toBe(actionClass('uppercase tracking-wide', true));
++    expect(submit.querySelector('svg')).toBeNull();
++    expect(screen.queryByText('Loading...')).toBeNull();
++    expect(screen.queryByRole('button', { name: 'CONTINUE' })).toBeNull();
++  });
++
++  it('B2E-4: CONTINUE still validates: an empty email and one without a dotted domain (native-valid) show the alert and do not submit; a valid one submits once', () => {
++    openPopupAt('email');
++    const submit = screen.getByRole('button', { name: 'CONTINUE' });
++    fireEvent.click(submit);
++    expect(screen.getByRole('alert').textContent).toBe('Please enter your email address');
++    const field = screen.getByPlaceholderText('Enter your email address');
++    fireEvent.change(field, { target: { value: 'listener@example' } });
++    fireEvent.click(submit);
++    expect(screen.getByRole('alert').textContent).toBe('Please enter a valid email address');
++    expect(leadMagnetMock.submitEmail).not.toHaveBeenCalled();
++    fireEvent.change(field, { target: { value: 'listener@example.com' } });
++    fireEvent.click(submit);
++    expect(leadMagnetMock.submitEmail).toHaveBeenCalledTimes(1);
++    expect(leadMagnetMock.submitEmail).toHaveBeenCalledWith('listener@example.com');
++  });
++
++  it('B2E-5: BACK TO SITE is a type="button" Button, receives focus when the email step gives way to success, and closes the popup', () => {
++    const view = openPopupAt('email');
++    leadMagnetMock.state.currentStep = 'success';
++    view.rerender(popupElement());
++    const back = screen.getByRole('button', { name: 'BACK TO SITE' });
++    expect(document.activeElement).toBe(back);
++    expect(back.getAttribute('type')).toBe('button');
++    expect(back.className).toBe(actionClass(NARROW_ACTION_CLASSES));
++    fireEvent.click(back);
++    expect(leadMagnetMock.close).toHaveBeenCalledTimes(1);
++  });
++
++  it('B2E-6: source pins: the Close icon is the only hand-rolled <button>, three <Button> actions, no brass or red fill literal, copy kept', () => {
++    const source = readFileSync(join(APP_ROOT, POPUP_PATH), 'utf8');
++    expect((source.match(/<button\b/g) ?? []).length).toBe(1);
++    expect((source.match(/<Button\b/g) ?? []).length).toBe(3);
++    expect(source).toContain("import { Button } from '~/components/ui';");
++    expect(source).not.toMatch(/\bbg-brand\b/);
++    expect(source).not.toMatch(/\bbg-destructive\b/);
++    for (const copy of [
++      'FREE DOWNLOAD',
++      "{isSubmitting ? 'SENDING...' : 'CONTINUE'}",
++      'BACK TO SITE',
++      'Tracks, Sound Effects & More',
++      'CLAIM YOUR OFFER',
++      "We've sent your free mystery pack to your email!",
++    ]) {
++      expect(source).toContain(copy);
++    }
++    expect(source).not.toContain('isLoading');
++  });
++});
+diff --git a/app/lib/__tests__/store-theme-tokens.test.ts b/app/lib/__tests__/store-theme-tokens.test.ts
+index 7ac09dd..29e68fd 100644
+--- a/app/lib/__tests__/store-theme-tokens.test.ts
++++ b/app/lib/__tests__/store-theme-tokens.test.ts
+@@ -700,12 +700,8 @@ describe('Store @theme colour tokens: Obsidian & Brass (STORE-2a)', () => {
+     expectDarkTextOnFill(buyNow[0] ?? '', 'bg-buy');
+ 
+     const leadMagnetSource = readStoreFile('app/components/marketing/LeadMagnetPopup.tsx');
+-    const leadMagnetSubmit = classAttributesWithTokens(leadMagnetSource, [
+-      'bg-destructive',
+-      'uppercase',
+-    ]);
+-    expect(leadMagnetSubmit).toHaveLength(1);
+-    expectDarkTextOnFill(leadMagnetSubmit[0] ?? '', 'bg-destructive');
++    expect(classAttributesWithTokens(leadMagnetSource, ['bg-destructive'])).toHaveLength(0);
++    expect(classAttributesWithTokens(leadMagnetSource, ['bg-brand'])).toHaveLength(0);
+     expect(leadMagnetSource).toContain("{isSubmitting ? 'SENDING...' : 'CONTINUE'}");
+ 
+     const modalBranches = /variant === 'destructive'\s*\?\s*'([^']*)'\s*:\s*'([^']*)'/.exec(
+diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+index 15320e1..4d63cbc 100644
+--- a/docs/design/DESIGN_SYSTEM.md
++++ b/docs/design/DESIGN_SYSTEM.md
+@@ -1153,7 +1153,7 @@ Store-ში ღილაკის სამიზნე წყაროა `But
+ 
+ | Shape | Class | გამოყენება |
+ |-------|-------|------------|
+-| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), შეტყობინების შიგნით მოქმედება (cart-ის „Upgrade“, `sm`, `min-h-11`), product გვერდის purchase card-ის მოქმედებები (`PurchaseHeader`: „Go to Downloads“, „Upgrade to Premium“, „Unlock Premium“, `lg`, `min-w-[160px]`), chat-ის guest form-ის „Start Chat“ (`lg`, `fullWidth`), Studio |
++| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), შეტყობინების შიგნით მოქმედება (cart-ის „Upgrade“, `sm`, `min-h-11`), product გვერდის purchase card-ის მოქმედებები (`PurchaseHeader`: „Go to Downloads“, „Upgrade to Premium“, „Unlock Premium“, `lg`, `min-w-[160px]`), chat-ის guest form-ის „Start Chat“ (`lg`, `fullWidth`), LeadMagnet popup-ის სამი მოქმედება „FREE DOWNLOAD“, „CONTINUE“ და „BACK TO SITE“ (`lg`, `fullWidth`, `max-w-[320px]`, `uppercase tracking-wide`; „CONTINUE“ primary-ა და არა destructive), Studio |
+ | `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“, free downloads-ის „Download“, recordings-ის „Create a scene“ (`md`, `min-h-11`), მთავარი გვერდის Studio showcase-ის „Browse the Collection“) |
+ 
+ `shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებზე, Store-ის ფორმის submit-ზე, შეტყობინების შიგნით მოქმედებაზე (cart-ის „Upgrade“) და purchase card-ის მოქმედებაზე (`PurchaseHeader`) 8px.
+diff --git a/docs/implementation/2026/quarter-IV/327-dpg-button-cleanup-stage-2e.md b/docs/implementation/2026/quarter-IV/327-dpg-button-cleanup-stage-2e.md
+new file mode 100644
+index 0000000..e38dfcd
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/327-dpg-button-cleanup-stage-2e.md
+@@ -0,0 +1,65 @@
++# DPG-BUTTON-CLEANUP, ეტაპი 2e: LeadMagnet popup-ის ღილაკები
++
++**თარიღი:** 2026-11-14
++**სტატუსი:** In Progress (stage 2e of DPG-BUTTON-CLEANUP-2; C round 506 PASS)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++Saba-ს DPG-FIX P1 პუნქტი 7: „Use Button.tsx component only.“ ეტაპებმა 2a–2d (docs 320–322, 324–326) Store-ის brass CTA-ები `Button`-ზე, `buildButtonClassName`-ზე ან `IconButton`-ზე გადაიყვანა. ეტაპი 2e ეხება inventory-ის A5 სტრიქონს (`b-round-497/stage2-inventory.md`), LeadMagnet popup-ს.
++
++LeadMagnet popup Saba-ს keep-list-შია (2026-10-25): ის რჩება და მხოლოდ restyle-ს ექვემდებარება. ტექსტი, ნაბიჯები (offer → email → success), focus-ის გადაცემა და ავტომატური გახსნის წესები არ იცვლება.
++
++## მიდგომა
++
++- **Mapping (product-designer, `b-round-505/consult-product-designer.md`):**
++  - „FREE DOWNLOAD“ და „BACK TO SITE“: `<Button type="button" size="lg" fullWidth className="max-w-[320px] uppercase tracking-wide">`, primary, default ფორმა (8px). ეს stage 2d-ის „Start Chat“-ის იგივე წესია.
++  - „CONTINUE“ (email ფორმის submit): `<Button type="submit" size="lg" fullWidth disabled={isSubmitting} className="uppercase tracking-wide">`, primary. HEAD-ზე ის წითელი (`bg-destructive`) იყო. destructive token შეცდომისთვისაა, ხოლო ველის ზემოთ validation-ის შეტყობინებაც `text-destructive`-ია, ამიტომ წითელი submit შეცდომის ნაწილად იკითხებოდა. ახლა popup-ის სამივე ნაბიჯს ერთი brass მოქმედება აქვს.
++  - `Button`-ის `isLoading` prop არ გამოიყენება: ის ტექსტს spinner-ით და „Loading...“-ით ცვლის, ხოლო „SENDING...“ უცვლელი უნდა დარჩეს.
++  - `uppercase tracking-wide` className-ში რჩება: ღილაკების ტექსტის რეგისტრი Saba-ს ღია კითხვაა (SABA-Q-499-BUTTON-CASE) და ეს ეტაპი მას არ წყვეტს.
++- **უცვლელი:** ტექსტი, validation-ის შეტყობინებები, `/api/subscribe`-ის გამოძახება, Close ღილაკი (X, DPG-BUTTON-CLEANUP-2-NONBRAND), email ველი, სათაურები, focus-ის თანმიმდევრობა (Close → email ველი → „BACK TO SITE“) და focus-ის დაბრუნება ველზე წარუმატებელი გაგზავნის შემდეგ.
++- **Deviation-ები** (ზომები: `b-round-505/probe/head/head.jsonl`, `b-round-505/probe/sketch/sketch.jsonl`):
++  - D1 სამივე ღილაკი: სიმაღლე 57.6-დან 48px-მდე, padding `16px 32px`-დან `12px 24px`-მდე, ემატება `shadow-sm` და დაჭერისას opacity 0.9. სიგანე 320px, radius 8px, ტექსტი 16px / 600, uppercase და letter-spacing 0.4px უცვლელია.
++  - D2 „CONTINUE“: ფონი `rgb(210, 119, 106)`-დან `rgb(201, 164, 106)`-მდე (brass), hover `rgb(217, 184, 127)`. ტექსტის contrast 6.09-დან 8.32-მდე (hover 10.28).
++  - D3 „SENDING...“ მდგომარეობაში ღილაკი `pointer-events: none`-ით inert-ია (opacity 0.5 უცვლელია).
++
++## არქიტექტურა
++
++```mermaid
++flowchart LR
++  T[exit intent / scroll + 8 s] --> LM[LeadMagnetPopup]
++  LM -->|"FREE DOWNLOAD (Button lg fullWidth)"| E[email step]
++  E -->|"CONTINUE (Button submit lg fullWidth)"| S["/api/subscribe"]
++  S -->|ok| OK[success step]
++  S -->|error| E
++  OK -->|"BACK TO SITE (Button lg fullWidth)"| C[close]
++```
++
++## შეცვლილი ფაილები
++
++- `app/components/marketing/LeadMagnetPopup.tsx` — სამი მოქმედება `Button`-ზე.
++- `app/lib/__tests__/store-button-cleanup-2e.test.tsx` — ახალი ტესტები B2E-1…B2E-6.
++- `app/lib/__tests__/store-theme-tokens.test.ts` — ST5-ში LeadMagnet-ის წითელი submit-ის pin შეიცვალა: popup-ში `bg-destructive` და `bg-brand` class აღარ არის, „SENDING...“/„CONTINUE“ ტექსტის pin რჩება.
++- `docs/design/DESIGN_SYSTEM.md` — shape ცხრილის default სტრიქონი.
++
++## პრობლემები და გადაწყვეტები
++
++- **Problem:** `Button`-ის `isLoading` ტექსტს ცვლის, keep-list კი ტექსტის შეცვლას კრძალავს. → **Solution:** გამოიყენება მხოლოდ `disabled={isSubmitting}`, ტექსტის ternary უცვლელია.
++- **Problem:** `buildButtonClassName` class-ებს არ აერთიანებს, ამიტომ className-ში padding ან radius `px-6 py-3`-ს შეეჯახებოდა. → **Solution:** className-ში მხოლოდ `max-w-[320px] uppercase tracking-wide` გადადის.
++- **Problem:** ST5 LeadMagnet-ის წითელ submit-ს ზუსტად ერთ class attribute-ად ამოწმებდა. → **Solution:** pin შეიცვალა ნულოვანი რაოდენობით; primary variant-ის მუქი ტექსტი ST5-ის `primaryTokens` შემოწმებითაა დაცული.
++- **Problem:** cloud-ში `/api/subscribe`-ს Brevo-ს გასაღები არ აქვს. → **Solution:** browser probe წარმატებულ გაგზავნას `page.route`-ით პასუხობს (client path), ერთი გაგზავნა კი stub-ის გარეშე მიდის და „Server configuration error“-ს აჩვენებს.
++
++## ტესტირება
++
++- **A, რაუნდი 506** (logs `a-round-506/`-ში): frozen check-ები, sketch-ის `git apply`, `npm run typecheck`, `npm run lint`, Biome შეცვლილ ფაილებზე და covering set (`b-round-505/covering-files.txt`).
++- **B, sketch-ის pre-check** (scratch ასლზე, `b-round-505/`):
++  - სრული suite და build (`precheck-full.log`, `precheck-build-sketch.log`);
++  - mutant-ები (`mutants-506.txt`);
++  - browser-ში HEAD და sketch შედარდა popup-ის სამივე ნაბიჯზე 1440/1280/375-ზე: ზომა, ფერი, padding, radius, hover, დაჭერა, keyboard focus, contrast, „SENDING...“, ცარიელი და წარუმატებელი გაგზავნა, focus-ის ადგილი, Esc.
++- **Browser-ის მიღება:** C round 506, შედეგი `c-round-506.json`-შია.
++
++## TODO / შემდეგი ნაბიჯები
++
++- **DPG-BUTTON-CLEANUP-2-NONBRAND:** LeadMagnet-ის Close ღილაკი და დანარჩენი არა-brand ხელნაწერი ღილაკები.
++- email ველის accessible name, `aria-invalid` და `aria-describedby` (B-R506-LM-EMAIL-NO-LABEL) და ბრაუზერის საკუთარი email validation (B-R506-LM-NATIVE-VALIDATION).
++- popup-ის ვიზუალი DP gate-ისთვის: თეთრი email ველი (B-R506-LM-WHITE-FIELD), „CZABA“ ნიშანი (B-R506-LM-WORDMARK), emoji icon (B-R506-LM-EMOJI-ICON).
