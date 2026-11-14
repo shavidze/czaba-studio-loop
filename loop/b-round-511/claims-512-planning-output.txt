@@ -1,0 +1,96 @@
+== K1 HEAD
+f5d1b9e87e5cad8880cac874d85ba78086b02d3c
+== K2 changed paths
+ M app/components/product/PurchaseHeader.tsx
+ M app/lib/__tests__/store-button-cleanup-2c.test.tsx
+ M app/lib/__tests__/store-theme-tokens.test.ts
+ M docs/design/DESIGN_SYSTEM.md
+?? app/lib/__tests__/store-button-cleanup-n2.test.tsx
+?? docs/implementation/2026/quarter-IV/330-dpg-nonbrand-stage-n2-purchase-card.md
+== K3 gates 509-511
+509 published commit f5d1b9e87e5cad8880cac874d85ba78086b02d3c pushed
+510 skipped no real changes
+511 skipped C taskStatus FAIL
+== K4 c-round-511
+FAIL True True [('C511-DESIGNSYSTEM-STALE-PRIMARY-EXAMPLES', 'medium', 'B spec')] 17
+== K5 round-511 code/test files unchanged since C 511 (pin) and equal to A's diff.patch
+a511 pin rc 0
+app diff == a-round-511/diff.patch app part
+== K6 stale button lines (DESIGN_SYSTEM + ui-components)
+839:| **Buy/Purchase** | `--color-buy` (#C9A46A) | "Buy Now", checkout buttons |
+893:"ეს action რევენიუ მოაქვს?"
+1117:// Primary - Revenue actions
+1118:<Button variant="primary" size="lg">Add to Cart</Button>
+1139:<PrimaryButton>Buy Now</PrimaryButton>
+1165:#### Primary Button (Revenue Actions)
+86:#### Primary (Revenue Actions)
+88:<Button variant="primary">Add to Cart</Button>
+89:<PrimaryButton>Buy Now</PrimaryButton>
+91:- Background: `--color-brand` (#13D9CC)
+92:- Use for: Add to Cart, Buy Now, Submit, Primary CTAs
+115:- Background: `--color-accent` (#f9a91f)
+146:<PrimaryButton size="lg">Buy Now</PrimaryButton>
+14:| გამოყენება | Add to Cart, Submit, Revenue actions |
+65:| Focus | `ring-2 ring-brand ring-offset-2` |
+67:| Loading | Spinner icon + disabled, ტექსტი "იტვირთება..." |
+75:  variant?: "primary" | "secondary" | "ghost" | "accent";
+121:<Button variant="primary" size="md">Add to Cart</Button>
+0
+== K7 inventory: buy sites and primary revenue sites (non-test app)
+app/components/product/PurchaseHeader.tsx:348:            variant="buy"
+app/routes/cart.tsx:397:        {hasOwnershipIssues ? 'Resolve Issues to Continue' : 'Proceed to Checkout'}
+app/components/product/ProductSidebar.tsx:96:            'Get it free'
+app/components/product/PurchaseHeader.tsx:222:                <span>Upgrade to Premium</span>
+app/components/product/PurchaseHeader.tsx:292:                  <span>Unlock Premium</span>
+84:          variant="primary"
+== K8 Button variants and props
+4:export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'accent' | 'buy' | 'destructive';
+6:export type ButtonShape = 'default' | 'pill';
+46:    'bg-buy text-brand-foreground',
+47:    'hover:bg-buy-hover',
+89:    `font-semibold ${shapeStyles[shape]}`,
+== K9 colour tokens
+63:  --color-brand: #c9a46a;         /* Primary - #C9A46A */
+66:  --color-accent: #c9a46a;                    /* Secondary - Brass */
+86:  --color-buy: #c9a46a;
+== K10 tests/scripts that read the granted docs (expect none)
+none
+== K11 frozen pins
+tree rc 0 (1425 entries)
+protected rc 0
+pre-sha rc 0
+== K12 sketch sha and post-sketch pins of the scratch
+ad47fec454fb51e7bef53c6bdd9ab34fa3261473419a16dfad93e8fee8e25c14
+scratch == post-sketch pin rc 0
+== K13 Added-pulse probe on the round-511 tree
+1440x900 no-preference ['Adding...', 'Added', 'In Cart'] 1.042 8px In Cart 8px ['/api/cart/items'] 0
+1440x900 reduce ['Adding...', 'Added', 'In Cart'] 1.042 8px In Cart 8px ['/api/cart/items'] 0
+1280x720 no-preference ['Adding...', 'Added', 'In Cart'] 1.041 8px In Cart 8px ['/api/cart/items'] 0
+1280x720 reduce ['Adding...', 'Added', 'In Cart'] 1.041 8px In Cart 8px ['/api/cart/items'] 0
+== K14 lessons cited
+5
+== K15 other docs with Buy Now as primary (outside the grants)
+docs/design/components/card.md:126:      <Button variant="primary" size="sm">Add to Cart</Button>
+== K17 stale strings left in the sketch scratch (expect only the count lines)
+docs/design/DESIGN_SYSTEM.md:0
+docs/design/components/button.md:0
+docs/technical/components/ui-components.md:0
+== K16 artifacts
+ok sketch-review.md
+ok doc-ledger.md
+ok docs-grep-buttons.txt
+ok inventory-revenue-variants.txt
+ok sketch-512-docs.patch.txt
+ok edit-docs-512.py
+ok r512-tree-sha256.txt
+ok r512-a511-pin-sha.txt
+ok r512-pre-sha.txt
+ok r512-post-sketch-sha.txt
+ok n2-added.mjs
+ok b-added.json
+ok inventory-revenue.txt
+ok frozen-511-tree.txt
+ok n2-states.mjs
+ok prot.mjs
+ok extra.mjs
+ok dryrun-512.txt

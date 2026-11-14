@@ -1,135 +1,146 @@
-# Round 511: DPG-BUTTON-CLEANUP-2-NONBRAND stage N2, the purchase card. Buy Now, "Open in Studio", "Downloads" onto the Button system; Add to Cart aligned to its shape
+# Round 512: DPG-BUTTON-CLEANUP-2-NONBRAND stage N2, close-out. The Button docs match the code. Re-check in the browser on the round-511 tree.
 
-**Planned by:** B at the round 510 → 511 planning, 2026-11-14 (`b-round-510.md`, `b-round-510/checkpoint.md`). Round 510's task is archived as `tasks/round-510.md` (byte copy).
+**Planned by:** B at the round 511 → 512 planning, 2026-11-14 (`b-round-511.md`, `b-round-511/checkpoint.md`). Round 511's task is archived as `tasks/round-511.md` (byte copy).
 - **Advisor:** available; consulted after orientation and before hand-off.
-- **Consults (run, saved):** `product-designer` (`b-round-510/consult-product-designer.md`), `tech-lead` sketch review (`b-round-510/sketch-review.md`, Verdict: approve).
+- **Consult (run):** `tech-lead` reviewed the doc sketch in two passes and approved both (`b-round-511/sketch-review.md`). Four wording Lows are applied. One Low (a "pending" status line) is rejected because L28 forbids that form, and the reviewer accepted the rejection.
 
 ## Decisions (`backlog.json`, `decisions_log_b`)
-- **D-29z1850:** round 510 (RETRO 510) accepted: C PASS, `browserVerified`/`realVerified` true. Gate 510 is `skipped` ("no real changes"), not published, so the baseline stays `f5d1b9e` [K1] [K3].
-- **D-29z1851:** C's three Lows on the retro (C510-RETRO-MEDIAN-IS-MEAN, C510-LESSON-LINE-UNIT, C510-RETRO-REMAINING-79) are corrected by an errata in `retros/retro-510.md` (before-copy `b-round-510/retro-510-before-errata.md`, diff `retro-510-errata.diff.txt`); C checks it in row C11. INFO-C510-COLD-HYDRATION and C's RT-SABA observation are recorded. The round-382 "no auto-start" ruling (GATE384-L3-PLAY-REFUSE-AUTO-START) goes to Saba once as SABA-Q-511-SPACE-AFTER-ADD (L44).
-- **D-29z1852:** this round = NONBRAND N2 on PurchaseHeader only. **PlayStemsButton leaves N2:** it can never render. No producer sets `DisplayVersion.stems` [K9], and B's browser probe selected Premium on harbour-lights (whose variant already has `includesStems: true`) and counted 0 "Play Stems" at 1440/1280/375 [K18]. The only caller of `openStemsPlayer` is that button [K11]. This confirms the round-474 signal SIG-R473-STEMS-PLAYER-DEAD (`confirmedBy`, no new id, L7); the open decision is the question SABA-Q-511-PLAYSTEMS-WIRE-OR-REMOVE (`user-review/questions-round-511.md` Q1; product-designer's default: remove). The stems half of ROOT-REQ-MOCK-STEMS-AND-FREE-FIXTURE is corrected: a mock fixture cannot help, because the mapper drops `stems`.
-- **D-29z1853:** the NONBRAND scanner misses `motion.*` tags. A widened copy (`b-round-510/scan-nonbrand-motion.py`, proven on a mutant [K8]) finds 54 at HEAD; the only new hit store-wide is CartButton (`motion.button`). N3–N9 counts use the widened scanner from now on.
-- **D-29z1854:** sketch-review follow-up B-R510-BUSY-CURSOR-HIDDEN (Low, deferred): the shared Button adds `pointer-events-none` while disabled [K6], so busy Buy Now no longer shows the not-allowed cursor.
-- **D-29z1855:** advisor closing-check corrections: PlayStems folded into SIG-R473; `docs/design/DESIGN_SYSTEM.md` granted (its l.895 and l.1174 name Add to Cart and Buy Now as `variant="primary"` [K21]); rewrite helpers allowed; post-sketch pin; per-viewport C2 widths; three state rows added; reference search recorded; CartButton joins SIG-R507-NONBRAND-KEEP-PRIMITIVES.
+- **D-29z1856: ruling on A's STOP A-R511-REVIEW-DESIGN-SYSTEM-PRIMARY-EXAMPLES (L10).**
+  - Chosen: option (a), a doc-only follow-up grant. Option (b), Low and deferred, is not chosen, for three reasons:
+    - B's own two-line grant caused the bug: origin B spec, and it repeats L34.
+    - A design doc that tells implementers "Buy Now = `PrimaryButton`" steers N3–N9 wrong (DPG process rule 5).
+    - Round 511 cannot publish without a C PASS in any case.
+  - The finding has one id, C511-DESIGNSYSTEM-STALE-PRIMARY-EXAMPLES (Medium). A's STOP id is its alias (L7).
+  - Round 511's browser, test and mutant rows stand as evidence for the code. The code is unchanged since C checked it [K5].
+- **D-29z1857: scope of the doc grant (L34, L1).** B grepped every Button doc for the same claim [K6] [K15]. The stale claim "Add to Cart / Buy Now = primary" also appears in `docs/design/components/button.md` and in the Button section of `docs/technical/components/ui-components.md`. That section also has teal `#13D9CC` and old accent `#f9a91f`. All three are granted, as whole sections.
+  - `docs/design/components/card.md` l.126 is not granted. It is an illustrative Card composition, not a variant rule; recorded only.
+  - The doc text describes HEAD exactly [K7] [K8] [K9]:
+    - `buy` is used only by Buy Now.
+    - Proceed to Checkout, Get it free, Upgrade to Premium and Unlock Premium are `primary`.
+    - The cart "Upgrade" colour cites SABA-Q-502-UPGRADE-VARIANT and does not invent a rule.
+- **D-29z1858: new Low from B's pre-check: B-R511-CART-PULSE-REDUCED-MOTION.**
+  - B's probe found that the "Added" pulse on Add to Cart scales to 1.04 even under `prefers-reduced-motion: reduce` [K13]. `motion.button` `animate` has no `useReducedMotion` guard; other Store components have one.
+  - The behaviour is older than N2: N2 did not touch the pulse.
+  - It goes to `deferred_low_polish` under the 2026-10-23 bug gate. This round does not own that code for a fix.
+- **D-29z1859: doc 330 l.4 under L28.** This is a re-dispatch, so l.4 is granted implicitly and is rewritten to `Completed (C round 512 PASS)`.
 
 ## Rules
-- **Read `lessons.md` first.** Applies: L1, L4, L10, L11 (strengthen-only), L12, L23, L29, L36, L47, L52, L54, L56, L57, L58, L59, L60.
-- **RC-R510-SKETCH-SCOPE trial.** B wrote a byte sketch for the product hunk only (`PurchaseHeader.tsx`). A writes the tests and the doc against `b-round-510/test-contract-511.md` (v2).
-- **STOP threshold (L10, one clause).** Write "STOP — needs B ruling" and change nothing more if a Medium-or-higher finding needs a change outside the grants, a test outside the grants fails, a covering test takes > 2,500 ms, a frozen check is not rc 0, or a protected file would need to change. Reviewer findings on A's own test lines are fixed in-round under L11 strengthen-only.
-- **Pre-ruled (not STOPs; list under "For B" if raised again):** (1) B-R510-BUSY-CURSOR-HIDDEN; (2) the owned-card links lose the brand/accent outline (SABA-Q-507-OUTLINE-VARIANT, default no); (3) CartButton stays hand-rolled for colour (named exception, product-designer option b); (4) where the row wraps, bordered and borderless buttons differ by 2 px in height (Button system: secondary 50, primary/buy 48); (5) PlayStems untouched (D-29z1852).
-- **Ruling lines (L4):**
-  - Buy Now class: the sketch (byte-equal) wins over B2C-7's HEAD class pin; B2C-7 is granted and rewritten.
-  - PurchaseHeader source counts: the sketch wins over B2C-8's counts and ST5's `bg-buy` count; both are granted and rewritten per the contract.
-  - Owned-card link colour: product-designer's secondary ruling wins over the HEAD brand/accent outline.
-  - Test rewrites vs "nothing else": the rewrite may add imports and small helpers it needs (for example isolating the `variant="buy"` tag for ST5) and must delete `HEAD_BUY_NOW_CLASS` once unused (its only use is B2C-7 [K22]); no other row changes. Lint stays at 174.
-- **Purchase protection.** Protected files stay byte-identical (check 2). Buy Now keeps its handler, `disabled`, `aria-disabled` and `aria-describedby` [K5] [K17]. No new download path.
-- **Persistent screen text (L39):** nothing added or removed; labels unchanged.
-- **Reference-first:** Store, not Ableton. Searched `docs/technical/store-redesign/research/` (competitors, luxury-and-galleries, visual-pass) for "outline button|secondary button|ghost button|add to cart|buy now": three hits — Spitfire's product hero "price £29, Add to cart" (`competitors.md` l.290), a UI sound for "add to cart" (`luxury-and-galleries.md` l.84) and a Spitfire type sample (`visual-pass.md` l.8); none is about button style [K24]. No external page was fetched. The rule is the store's own Button system (one shape and one family per card) and the product-designer consult. Deviations: pre-ruled 2 and 3.
-- **L29:** untagged code text in §1–§4 is the sketch's content (`[K17]`), a row id, a loop-artifact path or a description of what C runs; facts about `store/` carry a tag.
-- **No full suite.** Full vitest, build, Biome-all and `npm run verify` are gate rows.
+- **Read `lessons.md` first.** Applies: L1, L5, L10, L11, L22, L26, L28, L29, L34, L36, L38, L56, L57, L58, L59, L60.
+- **Baseline is HEAD `f5d1b9e` plus A's uncommitted round-511 tree.** Gate 511 was `skipped` (C FAIL), and nothing was published [K3]. **Do not re-apply the round-511 sketch. Do not reset, revert or re-edit any round-511 file.** The four round-511 code and test files stay byte-equal to `b-round-511/r512-a511-pin-sha.txt` [K5].
+- **The round is docs-only.** The only source change is applying B's byte sketch of four Markdown files. No `app/` file changes.
+- **STOP threshold (L10, one clause).** Write "STOP — needs B ruling" and change nothing more in either of these cases:
+  - a frozen check is not rc 0;
+  - a Medium-or-higher finding needs a change outside the grants.
+- **Pre-ruled (not STOPs; list them under "For B" if raised again):**
+  1. `docs/design/components/card.md` l.126 and the ui-components Modal example "Add to Cart" (l.645) are illustrative compositions, not variant rules (D-29z1857).
+  2. Doc 330 l.4 says `Completed (C round 512 PASS)` before C runs (L28).
+  3. Stale content in the three docs outside the variant claim is SIG-R477-DOCS-OUTSIDE-DESIGN, a later DPG docs follow-up. Examples: Sizes table units, the teal hex values elsewhere in `ui-components.md`, the Active row.
+  4. `button.md`'s Primary text row names `--color-brand-foreground`, while `Button.tsx` uses `text-background`. Both are #0e0d0c. This is PD-R496-PRIMARY-TEXT-TOKEN, an input to DPG-COLOR-CONSOLIDATE.
+  5. The `PrimaryButton` example in `.claude/primitives/FORWARDREF_COMPONENT.md` is generic and does not say Buy Now. Primitives are proposals for Saba only.
+- **Edits through `git apply` only.** No shell string-replace in the store tree (L60, A-R511-L60-SHELL-EDITS).
+- **Reference-first:** not applicable. This is a docs-only fix-up with no user-visible change.
+- **Persistent screen text (L39):** nothing changes.
+- **Purchase protection:** protected files stay byte-identical (check 2). No product code changes.
+- **No full suite.** Full vitest, build, Biome-all, `npm run verify` and `test:e2e:smoke` are gate rows.
 - **Paths:** loop `/home/runner/czaba-project/tmp/studio-real-loop`; store `/home/runner/czaba-project/store`.
 
-## Baseline: HEAD `f5d1b9e`, clean tree
-- Gate 509 published `f5d1b9e`; gate 510 skipped at the same head [K3]. At planning `git status` was empty [K2].
-- **Frozen checks** (run from `store/`; all rc 0 at planning [K16]):
-  1. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-510/r511-tree-sha256.txt` — 1,424 tracked files, all except the grants.
-  2. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-318/protected-sha256.txt`.
-  3. Before editing: `sha256sum -c /home/runner/czaba-project/tmp/studio-real-loop/b-round-510/r511-pre-sha.txt` (the four granted tracked files).
-  4. After `git apply`: `sha256sum -c /home/runner/czaba-project/tmp/studio-real-loop/b-round-510/r511-post-sketch-sha.txt` (PurchaseHeader.tsx equals B's scratch file, `90435d96…` [K23]) rc 0.
+## Frozen checks (run from `store/`; all rc 0 at planning [K11] [K5])
+1. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-511/r512-tree-sha256.txt` covers 1,425 tracked files: every tracked file except the three granted tracked docs. It includes the round-511 code and test changes.
+2. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-318/protected-sha256.txt`
+3. `sha256sum -c /home/runner/czaba-project/tmp/studio-real-loop/b-round-511/r512-a511-pin-sha.txt` covers the four round-511 code/test files, including the untracked `store-button-cleanup-n2.test.tsx`.
+4. Before applying: `sha256sum -c /home/runner/czaba-project/tmp/studio-real-loop/b-round-511/r512-pre-sha.txt` (the four granted docs as they are now).
+5. After applying: `sha256sum -c /home/runner/czaba-project/tmp/studio-real-loop/b-round-511/r512-post-sketch-sha.txt` (the four docs equal B's scratch).
 
-## 0. Why this round
-- **No bug outranks it.** No Critical is open; the open High (B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED) needs root (backend + protected `app/lib/auth.ts` [K16]). The other open Mediums are manual, root, Saba or scheduled items. Round 510's three Lows sit in B's own artifacts and are corrected here.
-- **REGRESSION is not due:** `regression-last.json` = 2026-11-13; next on or after 2026-11-16.
-- **Order:** D-29z1848 named NONBRAND N2 next; N2 is the purchase entry (product-designer stage 2).
+## 1. What changes (grants: 4 paths)
+From `store/`: `git apply /home/runner/czaba-project/tmp/studio-real-loop/b-round-511/sketch-512-docs.patch.txt`. The sketch's sha256 is `ad47fec454fb51e7bef53c6bdd9ab34fa3261473419a16dfad93e8fee8e25c14` [K12]. Apply it byte-equal, with no other edit. The generator is `b-round-511/edit-docs-512.py`, and its output is in `b-round-511/scratch/`.
 
-## 1. Reference and product-designer ruling
-| Point | Ruling | C row |
-|---|---|---|
-| Buy Now | `<Button variant="buy" size="lg">` [K17]; no `isLoading` (keeps spinner + "Processing..."); className `min-w-[120px] whitespace-nowrap aria-disabled:opacity-50 aria-disabled:cursor-not-allowed!` | C1, C3, C4 |
-| Open in Studio (owned SFX) | Link with `buildButtonClassName({ variant: 'secondary', size: 'lg', className: 'whitespace-nowrap' })` | C2, C5 |
-| Downloads (owned Standard) | the same secondary lg builder | C2 |
-| Add to Cart (CartButton) | option (b): `rounded-md`, `px-6`, `text-base`, `font-semibold`; colours of all three states unchanged (named exception) | C1, C6 |
-| PlayStems | out of N2 (D-29z1852, SIG-R473-STEMS-PLAYER-DEAD) | C7 |
-
-**States covered:** default; hover on the secondary links; price-unknown (aria-disabled, focusable, reason); busy (native disabled, one line at 1280: `b-round-510/probe/sketch/sketch-A1-1280-busy.png`); Adding / Added / In Cart; reduced motion (record); owned SFX; owned Standard + Upgrade; keyboard focus.
-
-## 2. What changes (grants: `b-round-510/grants-511.txt`, 6 paths)
-| File | Change |
+| File | Sections changed (whole sections, L34) |
 |---|---|
-| `app/components/product/PurchaseHeader.tsx` | From `store/`: `git apply /home/runner/czaba-project/tmp/studio-real-loop/b-round-510/sketch-511-purchaseheader.patch.txt` (sha256 `de636ad4df0686c10264aa57261e5c747a39fede9178b94423f8fef8ae516d91` [K17]). Byte-equal; no other edit. At HEAD the four sites are the brand-outline Link, the accent-outline Link, the hand-rolled Buy Now `<button>` and the CartButton `motion.button` [K5] |
-| `app/lib/__tests__/store-button-cleanup-n2.test.tsx` (**new**) | Rows N2-1…N2-9 exactly as in `b-round-510/test-contract-511.md` |
-| `app/lib/__tests__/store-button-cleanup-2c.test.tsx` | Rewrite B2C-7 and B2C-8 per the contract (no assertion lost; equal or stronger) [K13] [K22]. Nothing else |
-| `app/lib/__tests__/store-theme-tokens.test.ts` | Rewrite ST5's PurchaseHeader part per the contract (including no `text-*`/`bg-*` on the buy tag) [K13]. Nothing else |
-| `docs/implementation/2026/quarter-IV/330-dpg-nonbrand-stage-n2-purchase-card.md` (**new**) | The seven TEMPLATE headings in order (L26); l.4 exactly `**სტატუსი:** Completed (C round 511 PASS)` (L28). Names the four controls, the CartButton exception, D-29z1852 (PlayStems), SABA-Q-511-PLAYSTEMS-WIRE-OR-REMOVE, SABA-Q-507-OUTLINE-VARIANT and only test rows that exist. Write `a-round-511/doc-ledger.md` mapping each behaviour sentence to a row id (L26) |
-| `docs/design/DESIGN_SYSTEM.md` | Exactly two line replacements [K21]. l.895 `    ├── კი → variant="primary" (Add to Cart, Buy Now)` becomes `    ├── კი → variant="buy" (Buy Now); Add to Cart — CartButton, hand-rolled გამონაკლისი (NONBRAND N2)`. l.1174 `**Use for:** Add to Cart, Buy Now, Submit, Primary CTA` becomes `**Use for:** Submit, Primary CTA. Buy Now იყენებს variant="buy"-ს; Add to Cart — CartButton (hand-rolled გამონაკლისი, NONBRAND N2)`. Nothing else in the file |
+| `docs/design/DESIGN_SYSTEM.md` | Colour table, Buy/Purchase row: "Buy Now" (`variant="buy"`, product page). Variant Selection Guide: buy = product-page Buy Now; primary = main action (Submit, Proceed to Checkout, Get it free, Unlock Premium); secondary adds Open in Studio. Buttons: Usage Examples (primary = Proceed to Checkout; new buy example; `PrimaryButton` = Submit); Shape table (the full PurchaseHeader list with variant and min-width per action); "Primary Button (Main Actions)" with its Use-for and the SABA-Q-502 note; new "Buy Button (Direct Purchase)" block |
+| `docs/design/components/button.md` | Primary usage row; new Buy table; Focus row (`:focus-visible` 1.5px brass 80%, offset 2px, the shared `app.css` rule); Loading text "Loading..."; props (`buy`, `destructive`, `shape`); example lines |
+| `docs/technical/components/ui-components.md` | Button section: props (`buy`, `destructive`, `shape`); "Primary (Main Actions)" with brass `#C9A46A`; new "Buy (Direct Purchase)"; accent `#C9A46A`; the Examples line uses `variant="buy"` |
+| `docs/implementation/2026/quarter-IV/330-dpg-nonbrand-stage-n2-purchase-card.md` | l.4 becomes `Completed (C round 512 PASS)` (L28). The approach paragraph now describes the three-doc fix and the finding id. The changed-files list names all three docs. The TODO line about the stale examples is removed |
 
-## 3. A: what to implement
-1. Frozen checks 1–3 rc 0. Read primitives `FORWARDREF_COMPONENT.md`, `DESIGN_TOKENS.md`, `TAILWIND_FIRST.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md` and `.claude/prompts/new-test.md`.
-2. Apply the sketch, then write the tests and the doc. Semicolons, no `any`, no type assertions, no comments.
-3. Run and save under `a-round-511/`:
-   - Frozen check 4 rc 0 right after `git apply`.
-   - `npm run typecheck` rc 0; `npm run lint` rc 0 with **174** warnings (HEAD 174, sketch 174 [K15]); `npx biome check` on the 4 granted code/test files rc 0, no fixes.
-   - **Covering:** `npx vitest run --reporter=verbose $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-510/covering-files-head.txt) app/lib/__tests__/store-button-cleanup-n2.test.tsx` → rc 0, 7 files, every N2 row present, no test > 2,500 ms. HEAD: 6 files / 83 tests [K14]; the new total is record.
-   - **Mutants M1–M23** (contract) on a copy outside `store/` (`node_modules` symlinked); each named row red. Write `a-round-511/mutants.txt` (mutant, edit, red rows). A mutant that stays green on A's own test lines is fixed in-round (L11); one that needs a product-code change is a STOP.
-   - **Scanner:** `python3 -I /home/runner/czaba-project/tmp/studio-real-loop/b-round-510/scan-nonbrand-motion.py . /tmp/n2.json` → **51**: the 3 hand-rolled PurchaseHeader hits leave; CartButton's `motion.button` stays as the named exception. HEAD 54 [K8]; B's sketch run `b-round-510/nonbrand-motion-sketch.json` = 51 [K8].
-   - **code-reviewer** (≥ 3 files) on `git diff f5d1b9e` + untracked files; include its Architecture note.
-4. Write `a-round-511.md`. No full suite, no build.
+## 2. A: what to do
+1. Run frozen checks 1–4 (rc 0). Read `GEORGIAN_DOCS.md`.
+2. Apply the sketch. Run frozen check 5 (rc 0) right after.
+3. Save the following under `a-round-512/`:
+   - `npm run typecheck` rc 0. `npm run lint` rc 0 with **174** warnings, unchanged.
+   - **Covering:** `npx vitest run --reporter=verbose $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-510/covering-files-head.txt) app/lib/__tests__/store-button-cleanup-n2.test.tsx` gives rc 0, 7 files and 92 tests (the same as C round 511 C9). Its only job here is to show the tree is consistent. No mutants: no code or test changed.
+   - **Stale-string scan (K17's command on the live files):** `grep -cE 'Revenue|<PrimaryButton>Buy Now|PrimaryButton size="lg">Buy Now|variant="primary"( size="(md|lg)")?>Add to Cart|13D9CC|f9a91f|ring-2 ring-brand ring-offset-2|"ეს action რევენიუ' docs/design/DESIGN_SYSTEM.md docs/design/components/button.md docs/technical/components/ui-components.md` gives 0 / 0 / 0.
+   - **Doc ledger:** `a-round-512/doc-ledger.md` maps each changed behaviour sentence in the four docs to its code fact (file:line in `Button.tsx`, `PurchaseHeader.tsx`, `cart.tsx`, `ProductSidebar.tsx`, `app.css`) or to a test row that exists (L26).
+   - **code-reviewer** (4 changed files): review `git diff -- docs/design docs/technical` plus doc 330. A Medium+ finding inside the four docs that the sketch got wrong is a STOP (B owns the sketch); A does not hand-edit.
+4. Write `a-round-512.md` with the changed files, the commands and their rc, and the reviewer's notes. No full suite, no build.
 
-## 4. C: what to verify
-Write `c-round-511.md`, `c-round-511.json` and `c-round-511/progress.json` as you go; browser rows first (L59).
+## 3. C: what to verify
+Write `c-round-512.md`, `c-round-512.json` and `c-round-512/progress.json` as you go. Run the browser rows first (L59).
 
-**Environment.** Dev `:5173`; mock API `:5199` (start `node mock-api/server.mjs` from the loop root if `/__mock/health` fails; stop it by PID at the end). Init script: `localStorage czaba_lead_magnet_dismissed=1`, `sessionStorage czaba_entrance_seen=1`. B's harnesses: `b-round-510/probe/n2-states.mjs` (states ANON, UNKNOWN, OWNED_SFX, OWNED_STD, STEMS) and `n2-actions.mjs` (A1 signed-in Buy Now, A2 Add to Cart, A3 keyboard Buy Now, A4 price-unknown click, A5 keyboard Open in Studio). Copy them into `c-round-511/` and run `node n2-states.mjs <dir> c` / `node n2-actions.mjs <dir> c`. Signed-in states are **-STUBBED** (L36). Warm up once (L38). Expected values are B's sketch run (`b-round-510/probe/sketch/`) [K18] [K19]; values the round does not change are compared with B's HEAD run (`b-round-510/probe/head/`).
+**Environment.**
+- Dev server `:5173`. Mock API `:5199`: if `/__mock/health` fails, start `node mock-api/server.mjs` from the loop root, and stop it by PID at the end.
+- Harnesses: copy `b-round-510/probe/n2-states.mjs`, `c-round-511/extra.mjs`, `c-round-511/prot.mjs` and `b-round-511/probe/n2-added.mjs` into `c-round-512/`.
+  - `extra.mjs` is C round 511's script. It writes to `./extra`, so run it with `c-round-512/` as the working directory. It covers C3's mouse-down probe, C6b hover, C8's journey (`c8-1-store.png` … `c8-3-signin.png`) and C13 (`/studio/…`, `/account/downloads`, `/studio-lab`, `/api/studio-token`). This round uses its C8 and C13 parts.
+  - `prot.mjs` re-checks only the two protected pages, with a 7 s wait.
+  - `c-round-511/n2-anon.mjs` is only a copy of `n2-states.mjs`; do not use it.
+- Signed-in states are **-STUBBED** (L36).
+- Warm up once (L38). A cold-Vite hydration error that a warm re-run clears is environment, as in C round 511 C1.
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| C0 | SOURCE-SCOPE (start, end) | `git status --short --untracked-files=all`; frozen checks 1, 2 and 4 | only the 6 grants (4 M + 2 new); rc 0 (check 4 = PurchaseHeader byte-equal to B's sketch file); `git diff f5d1b9e -- docs/design/DESIGN_SYSTEM.md` shows exactly the two §2 line replacements [K21] |
-| C1 | DEFAULT CARD (1440×900, 1280×720, 375×812) | n2-states ANON | Add to Cart and Buy Now: radius 8px, font-weight 600. 1440/1280: both 50 px tall ±0.5 with equal top (same flex line); widths 163 / 139 ±1. 375: 50 / 48, wrapped (pre-ruled 4) [K18]. Buy Now bg rgb(201,164,106), text rgb(14,13,12) |
-| C2 | OWNED CARDS-STUBBED | OWNED_SFX, OWNED_STD, 3 viewports | The card's "Open in Studio" and "Downloads" links (not the hidden 0×0 header nav "Downloads" link [K18]): radius 8px, weight 600, bg rgb(29,26,23), text rgb(236,230,218) (13.94:1, `b-round-510/contrast.txt`); width and height per viewport equal to `b-round-510/probe/sketch/sketch-states.json` ±1 (Open in Studio 187/187/277, Downloads 160/160/160 at 1440/1280/375). "Go to Downloads" width 203 and "Upgrade to Premium" 230×48 equal to B's HEAD run; "Go to Downloads" height equals its same-line sibling (50 at 1440/1280) |
-| C3 | PRICE UNKNOWN-STUBBED | UNKNOWN + A4 [K19] | Buy Now `aria-disabled=true`, not native disabled, opacity 0.5, cursor not-allowed, keeps focus after click; its `aria-describedby` element reads "Price unavailable — contact us to buy it."; 0 POST |
-| C4 | BUY NOW SIGNED-IN-STUBBED | A1 | POSTs exactly `/api/cart/items`, `/api/cart/checkout`, `/api/payments/checkout` (1 each); busy: "Processing...", native disabled, spinner, width 167 (HEAD 167); `pointer-events` none is **record** (pre-ruled 1); lands on `/__stripe-stub` |
-| C5 | KEYBOARD | A3, A5 | Tab reaches Buy Now and Open in Studio; `:focus-visible` true; outline `solid 1px` brass at 0.8, offset 2px (equal to HEAD); crop screenshots. Mouse-press ring is **record** |
-| C6 | ADD TO CART | A2 | "Adding..." then "In Cart", both radius 8px; In Cart text rgb(201,164,106), width 140; 1 POST `/api/cart/items`. **Record:** the "Added" pulse state and the same click under `prefers-reduced-motion: reduce` (framer pulse; N2 does not touch it) |
-| C6b | HOVER (record) | hover "Open in Studio" (OWNED_SFX) and "Add to Cart" (ANON) at 1440 | record computed bg/border at rest and on hover, with a crop; Button secondary hover tokens are `hover:bg-outline hover:border-outline-hover` [K6]; B did not measure hover on the sketch, so this row is record |
-| C6c | BUSY LINE | A1 at 1280 | "Add to Cart" and "Processing..." share one line (equal top ±0.5), as in `b-round-510/probe/sketch/sketch-A1-1280-busy.png` |
-| C7 | PLAYSTEMS UNREACHABLE | STEMS state (Premium selected) | "Play Stems" count 0 at 3 viewports (unchanged; evidence for D-29z1852) |
-| C8 | ANON JOURNEY (L54) | 1440: `/store` → `/products/middle-east` → Buy Now → sign-in modal (email field 0 → 1) | a screenshot per step; 0 page errors except the expected cloud ones |
-| C9 | TESTS + MUTANTS | the §3 covering command; mutants M1–M23 on a copy outside `store/` | rc 0, 7 files, N2-1…N2-9, B2C-7, B2C-8, ST5 present, none > 2,500 ms; each mutant red on its named row; copy removed |
-| C10 | GREP + SCANNER | from `store/` | `grep -c '<button' app/components/product/PurchaseHeader.tsx` = 0; widened scanner 51 with exactly one PurchaseHeader entry (the CartButton `motion.button`); `grep -c stems app/lib/product-utils.ts` = 1 (unchanged [K9]) |
-| C11 | RETRO ERRATA | `diff b-round-510/retro-510-before-errata.md retros/retro-510.md` | only the three corrected sentences and the appended "Errata" section; values: median $15.65 / mean $17.13 (from `b-round-509/data/cost-rows.json`), 4,771 bytes (`LC_ALL=C awk` on `b-round-509/lessons-before-510.md`), 61 = 79 − 18 |
-| C12 | DOCS | doc 330 + `a-round-511/doc-ledger.md` | 7 headings in order; l.4 byte-equal `**სტატუსი:** Completed (C round 511 PASS)`; every cited row exists; the ledger maps each behaviour sentence |
-| C13 | PROTECTION + STUDIO | fresh context, no credentials, 1440 and 1280 | `/studio/middle-east` and `/account/downloads` show "Sign in required" and no download link; `GET /api/studio-token?product=middle-east&file=stem.mp3` without Authorization = 401 with no URL; `/studio-lab` opens the demo; check 2 rc 0 |
-| C14 | CLAIMS + L57 | `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-510/claims-511.sh` vs `b-round-510/claims-511-planning-output.txt`; `python3 -I tools/l57-check.py c-round-511.json c-round-511/l57-check.txt` | no MISSING; only K2 (tree), K5 (sites changed), K8 (scanner), K16 (pre-sha), K21 (doc lines) and K22 (constant removed) differ as A's change implies; L57 rc 0 |
+| C0 | SOURCE-SCOPE (start and end) | `git status --short --untracked-files=all`; frozen checks 1, 2, 3 and 5 | 8 paths: the 6 round-511 paths plus `docs/design/components/button.md` and `docs/technical/components/ui-components.md` (6 `M` + 2 untracked: the n2 test and doc 330); every check rc 0 (check 5: the four docs are byte-equal to the scratch); `git diff f5d1b9e --stat -- app` equals round 511's (3 files) |
+| C1 | DOCS CONTENT | the stale-string scan in §2 step 3 on the live files; read the four changed sections | 0 / 0 / 0 hits. The DESIGN_SYSTEM "Buy Button" block's class list equals `variantStyles.buy` in `app/components/ui/Button.tsx` plus the base `font-semibold` and shape. Every variant named for a store action in the changed text equals the code: Buy Now `buy`; Proceed to Checkout, Get it free, Upgrade to Premium, Unlock Premium `primary`; Open in Studio and Downloads `secondary` [K7]. Hex values in the changed text equal `app.css` [K9] |
+| C2 | DOC 330 + LEDGER | doc 330, `a-round-512/doc-ledger.md` | 7 TEMPLATE headings in order. l.4 byte-equal to `**სტატუსი:** Completed (C round 512 PASS)`. `grep -c 'pending\|C round 511 PASS'` = 0. Every row id cited in the doc exists in the test files. The ledger maps every changed behaviour sentence |
+| C3 | DEFAULT CARD (browser) | `n2-states.mjs` ANON at 1440×900 and 1280×720 | Same values as C round 511 C1: Add to Cart 163×50, Buy Now 139×50, same top, radius 8px, weight 600, Buy Now bg rgb(201,164,106) and text rgb(14,13,12); 0 page errors after warm-up |
+| C4 | ANON JOURNEY (browser, L54) | `extra.mjs`, C8 part (C round 511 C8): `/store` → `/products/middle-east` → Buy Now at 1440 | email field 0 → 1; a screenshot per step; 0 page errors except the expected cloud ones |
+| C5 | ADDED PULSE (browser, record) | `node n2-added.mjs c-round-512/added c` | At both viewports and under both motion settings: labels `Adding...` → `Added` → `In Cart`; radius 8px; In Cart text rgb(201,164,106), width 140; 1 POST `/api/cart/items`. **Record** the max scale under `reduce` (B measured 1.04, filed as B-R511-CART-PULSE-REDUCED-MOTION, Low, deferred). Not a FAIL of this round |
+| C6 | PROTECTION + STUDIO (browser) | `extra.mjs` C13 part plus `prot.mjs` (C round 511 C13), fresh context with no credentials, 1440 and 1280 | `/studio/middle-east` and `/account/downloads` show "Sign in required" with no download link (wait at least 7 s). Unauthenticated `GET /api/studio-token?product=middle-east&file=stem.mp3` = 401 with no URL. `/studio-lab` opens the demo. Check 2 rc 0 |
+| C7 | TESTS | the §2 covering command | rc 0, 7 files, 92 tests; N2-1…N2-9, B2C-7, B2C-8 and ST5 present; no test above 2,500 ms |
+| C8 | CLAIMS + L57 | `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-511/claims-512.sh` compared with `b-round-511/claims-512-planning-output.txt`; `python3 -I tools/l57-check.py c-round-512.json c-round-512/l57-check.txt` | No MISSING. Only K2 (two more `M` docs), K6 (stale lines gone; Buy block count 1), K11 (pre-sha now fails by design: use check 5) differ, as A's change implies. L57 rc 0 |
 
-- **Gate rows** (in `gate`, never `passed`): full vitest suite, build, Biome-all, `npm run verify`.
-- **Blocked:** none expected. A real signed-in purchase needs the backend (FREE-CHECKOUT-REAL-BACKEND and the ownership rows stay open); not part of this round.
-- **L57:** write all L57 fields: `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, an `origin` per finding, `assertsSpecified`, `mutantsRecorded`, `mutantRedOnSketch` (`null`, reason "RC-R510 trial: B did not run mutants; C runs them on A's tree"), `mutantRedOnTree`, `gateChecksNamed`, `gateChecksRunOnSketch` (`b-round-510/precheck-full.log`), `chainHeadGateRunGreen`, `affectedChecksNamed`, `affectedChecksRunOnSketch` (`b-round-510/precheck-full.log`, `b-round-510/probe/sketch/`).
-- **L22:** an A STOP with no diff → C0, C13, C14 only. A STOP naming an unruled Medium+ is a short FAIL.
-- **Neighbours that could break:** round 509's "Get it free" (store-sidebar-free-r509), the price-unavailable rows (product-price-unavailable), the Upgrade/Unlock cards (B2C rows), the product route loader (product-handle-route) — all in the covering set [K14].
-- **On closing:** C PASS with `browserVerified` true closes N2 for PurchaseHeader. PlayStems and StemsPlayerModal stay open under SIG-R473-STEMS-PLAYER-DEAD / SABA-Q-511-PLAYSTEMS-WIRE-OR-REMOVE.
+- **Gate rows** (list them under `gate`, never `passed`): full vitest suite, build, Biome-all, `npm run verify`, `test:e2e:smoke`.
+- **Blocked:** a real signed-in purchase and ownership need the backend (FREE-CHECKOUT-REAL-BACKEND, PURCHASE-REAL-BACKEND). This round does not include them.
+- **L57:** write every field:
+  - `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`;
+  - an `origin` for each finding;
+  - `assertsSpecified`;
+  - `mutantsRecorded`: "none: docs-only round";
+  - `mutantRedOnSketch`: `null`;
+  - `mutantRedOnTree`: `null`, with the reason "no code or test change; round-511 mutants 26/26 in c-round-511/mutants-c.txt";
+  - `gateChecksNamed`, `gateChecksRunOnSketch` (`null`: docs only), `chainHeadGateRunGreen`, `affectedChecksNamed`, `affectedChecksRunOnSketch` (`b-round-511/claims-512-planning-output.txt`).
+- **L22:** if A STOPs with no diff, run C0, C6 and C8 only. A STOP that names an unruled Medium+ is a short FAIL.
+- **Neighbours that could break:** none at runtime, because no code changes. Docs that agents read: N3–N9 tasks will cite the new Buttons sections.
+- **On closing:** a C PASS with `browserVerified` true closes stage N2 (PurchaseHeader) for rounds 511 and 512 together. The gate then publishes the 8 paths. PlayStems and StemsPlayerModal stay open under SIG-R473-STEMS-PLAYER-DEAD / SABA-Q-511-PLAYSTEMS-WIRE-OR-REMOVE.
 
-## 5. B's pre-check (`b-round-510/`)
+## 4. B's pre-check (`b-round-511/`)
 | Check | Result | File |
 |---|---|---|
-| States at HEAD and on the sketch (second dev server :5174 with its own Vite cache, L38) | 5 states × 3 viewports, 0 page errors | `probe/head/head-states.json`, `probe/sketch/sketch-states.json`, PNGs |
-| Actions at HEAD and on the sketch | equal POST sets; busy width 167 both; focus ring identical; price-unknown equal | `probe/head/head-actions.json`, `probe/sketch/sketch-actions.json` |
-| Scratch full suite on the sketch (`/home/runner/b510-scratch`) | 305 files; 3 tests fail, exactly B2C-7, B2C-8, ST5 (granted) | `precheck-full.log` [K13] |
-| tsc on the sketch | rc 0 | `precheck-tsc.log` |
-| Covering at HEAD | 6 files / 83 tests, rc 0, slowest file 2,224 ms | `head-covering.log` [K14] |
-| Lint | HEAD 174, sketch 174 | `head-lint.log` [K15] |
-| Scanner | old 53 / widened 54 at HEAD; mutant proof | `nonbrand-head-511.json`, `nonbrand-motion-head.json`, `scan-motion-mutant.txt` [K8] |
-| Sketch review | tech-lead, approve; Lows folded into contract v2 | `sketch-review.md` |
-| Claims | `claims-511.sh` K1–K20 | `claims-511-planning-output.txt` |
+| Frozen checks on the round-511 tree | tree (old r511 pin), protected and post-sketch 511 all rc 0 | `frozen-511-tree.txt` |
+| A's app diff equals `a-round-511/diff.patch` | equal | [K5] |
+| Inventory: `buy` and primary revenue sites | `buy` only Buy Now; Checkout, Get it free, Upgrade and Unlock are primary | `inventory-revenue.txt`, `inventory-revenue-variants.txt` |
+| Docs grep for the same stale claim | DESIGN_SYSTEM, button.md and ui-components are granted; card.md is recorded | `docs-grep-buttons.txt`, [K15] |
+| Sketch | applies with `git apply --check`; scratch has 0 stale strings [K17]. Dry-run on a copy outside `store/`: checks 4 and 5 OK, stale scan 0/0/0, C2 grep 0, doc 330 l.4 and 7 headings | `sketch-512-docs.patch.txt`, `scratch/`, `dryrun-512.txt` |
+| Tests or scripts that read the granted docs | none [K10] | claims |
+| Added-pulse probe on the round-511 tree | labels correct; scale 1.04 under both motion settings | `probe/run/b-added.json`, PNGs |
+| Sketch review | tech-lead, two passes: approve; 4 Lows applied, 1 rejected (L28) | `sketch-review.md` |
+| Claims | `claims-512.sh` K1–K17; stderr empty | `claims-512-planning-output.txt` |
+| L57 checker with the prescribed null fields | rc 0, L57 OK | dummy JSON, not kept |
 
-## 6. After this round
+## 5. After this round
 1. **REGRESSION** on or after 2026-11-16 (`regression-last.json`).
-2. **NONBRAND N3–N9** (widened scanner), then PD-R498-404-SECONDARY-ALIGN, DPG-BUTTON-CONTRACT-TABLE, the rest of DPG P1, DP gate, P2; STORE-2c…5; ARCH-SPLIT; REVIEW-RECOMMENDATIONS; the rest of the queue.
-3. PlayStems / StemsPlayerModal wait for SABA-Q-511-PLAYSTEMS-WIRE-OR-REMOVE.
+2. **NONBRAND N3–N9** with the widened scanner. Then PD-R498-404-SECONDARY-ALIGN, DPG-BUTTON-CONTRACT-TABLE (it may take the three tag-scanner copies, SIG-R501-SHARED-BUTTON-SCANNER), the rest of DPG P1, the DP gate and P2. Then STORE-2c…5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS and the rest of the queue.
+3. PlayStems and StemsPlayerModal wait for SABA-Q-511-PLAYSTEMS-WIRE-OR-REMOVE.
 
-## Claims (`b-round-510/claims-511.sh`; planning output `b-round-510/claims-511-planning-output.txt`)
-- **K1–K2:** HEAD and changed-path count. **K3:** gates 509/510. **K4:** c-round-510 verdict and bug ids.
-- **K5:** the four PurchaseHeader sites at HEAD. **K6:** Button default `rounded-md`, `buy` variant, disabled classes (`pointer-events-none`), secondary hover tokens. **K7:** radius tokens 8/12 px.
-- **K8:** scanner counts (old 53, widened 54, motion hit = CartButton) and mutant proof.
-- **K21:** DESIGN_SYSTEM.md l.895 and l.1174 at HEAD. **K22:** `HEAD_BUY_NOW_CLASS` uses in the 2c test (definition + B2C-7 only). **K23:** post-sketch pin file. **K24:** research grep for button terms (3 hits, none about button style).
-- **K9:** `stems` producers in non-Studio app code and the PlayStems render condition; K9b: `MOCK_PRODUCT_DETAIL` (whose Premium version has stems) has no value importer outside `app/data/` (only types are imported). **K10:** PlayStems first commit. **K11:** `openStemsPlayer(` callers. **K12:** the hook's price guard.
-- **K13:** scratch full suite. **K14:** covering at HEAD (the 6-file list). **K15:** lint. **K16:** frozen pins. **K17:** sketch sha, l58/ledger checks, `c-round-510/l57-check.txt`.
-- **K18:** state probes HEAD/sketch (incl. the hidden 0×0 header link and the 50/48 heights). **K19:** action probes HEAD/sketch. **K20:** artifacts present.
+## Claims (`b-round-511/claims-512.sh`; planning output `b-round-511/claims-512-planning-output.txt`)
+- **K1–K4:** HEAD, changed paths, gates 509–511, the C round 511 verdict.
+- **K5:** round-511 code/test pin, and the app diff equals A's `diff.patch`.
+- **K6:** stale lines at planning in the three docs.
+- **K7:** inventory of `buy` and primary revenue sites.
+- **K8:** Button variants, shape and the buy styles.
+- **K9:** colour tokens.
+- **K10:** no test or script reads the granted docs.
+- **K11:** frozen pins.
+- **K12:** sketch sha and the scratch post-sketch pin.
+- **K13:** Added-pulse probe.
+- **K14:** lessons cited.
+- **K15:** other docs with the same claim (card.md only).
+- **K16:** artifacts.
+- **K17:** stale strings in the scratch (0/0/0).

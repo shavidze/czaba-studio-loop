@@ -1,0 +1,27 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {"checkedUtc":"2026-11-14T10:29:04.3589708Z","round":511,"attempt":1,"store":200},
+ "bugs": [
+  {"id":"C511-DESIGNSYSTEM-STALE-PRIMARY-EXAMPLES","severity":"medium","origin":"B spec",
+   "steps":["cd store","sed -n '1117,1118p;1139p;1165p' docs/design/DESIGN_SYSTEM.md","grep -n 'variant=\"buy\"' docs/design/DESIGN_SYSTEM.md"],
+   "expected":"After N2 the design-system doc no longer shows Add to Cart / Buy Now as variant=\"primary\" examples and documents the buy variant (A's STOP A-R511-REVIEW-DESIGN-SYSTEM-PRIMARY-EXAMPLES; L22: an A STOP naming an unruled Medium+ is a short FAIL until B rules)",
+   "actual":"l.895/l.1174 now say Buy Now = variant=\"buy\", but l.1117-1118 still shows <Button variant=\"primary\">Add to Cart</Button>, l.1139 <PrimaryButton>Buy Now</PrimaryButton>, l.1165 heading 'Primary Button (Revenue Actions)'; no block documents variant=buy; the l.1156 shape table omits Buy Now/Open in Studio/Downloads. The grant (exactly two lines) forced this, so the contradiction is B's scope, not A's. C rates it Low-to-Medium (docs only, no behaviour); the verdict is FAIL only because A's STOP is unruled",
+   "evidence":"a-round-511.md STOP section; DESIGN_SYSTEM.md lines above; c-round-511.md section 'STOP ruling'. B options: (a) doc-only follow-up grant for the stale lines then C re-checks C0/C12 only, or (b) rule Low and defer to deferred_low_polish; with (b) every other row below already passes"}
+ ],
+ "passed": ["C0-SOURCE-SCOPE","C1-DEFAULT-CARD","C2-OWNED-CARDS-STUBBED","C3-PRICE-UNKNOWN-STUBBED(+A mouse-down opacity 0.5)","C4-BUY-NOW-SIGNED-IN-STUBBED","C5-KEYBOARD","C6-ADD-TO-CART","C6b-HOVER(record)","C6c-BUSY-LINE","C7-PLAYSTEMS-UNREACHABLE","C8-ANON-JOURNEY","C9-TESTS-AND-MUTANTS","C10-GREP-SCANNER","C11-RETRO-ERRATA","C12-DOCS","C13-PROTECTION-STUDIO","C14-CLAIMS-L57"],
+ "gate": ["full vitest suite","build","Biome-all","npm run verify","npm run test:e2e:smoke"],
+ "blocked": ["real signed-in purchase / ownership: backend unavailable in cloud (rows stay -STUBBED, not counted as PASS of real purchase)"],
+ "manifestPaths": "claims-c.txt","missingPaths":0,"countMismatches":0,"claimCheckMinutes":2,
+ "assertsSpecified": "N2-1..N2-9, B2C-7, B2C-8, ST5 all present in covering run (7 files / 92 tests)",
+ "mutantsRecorded": "c-round-511/mutants-c.txt: 26 runs (M1-M23, MA1, MA2) all red on named rows",
+ "mutantRedOnSketch": null,
+ "mutantRedOnTree": "26/26 RED-OK on C's own copy outside store/",
+ "gateChecksNamed": "full vitest, build, Biome-all, npm run verify, test:e2e:smoke",
+ "gateChecksRunOnSketch": "b-round-510/precheck-full.log (B)",
+ "chainHeadGateRunGreen": "gate 509 published f5d1b9e; gate 510 skipped (no real changes)",
+ "affectedChecksNamed": "covering list (7 files), extra-related per A",
+ "affectedChecksRunOnSketch": "b-round-510/precheck-full.log, b-round-510/probe/sketch/",
+ "lessonsChecked": true
+}
