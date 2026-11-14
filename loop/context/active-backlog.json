@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-14T14:15:06.480Z",
-  "current_task": "Round 515: cookie banner follow-up on HEAD b7cb61f: git apply b-round-514/sketch-515.patch.txt (pointer dismissal skips keyboard-opening fields -> header logo, preventScroll; select/checkbox/contenteditable=false returnable; onBlur clears the stored element when focus leaves the banner; rows R515-T1..T7, F8 BODY pin); new doc 333. C verifies on a GA4-env dev server.",
+  "_generatedUtc": "2026-11-14T14:56:00.364Z",
+  "current_task": "Round 516: NONBRAND N4 on HEAD 63c8894: git apply b-round-515/sketch-516.patch.txt (SpecialOffers \"Browse Gift Cards\" and \"View Collection\" -> buildButtonClassName secondary lg + w-fit; LeadMagnet Close X -> IconButton ghost; B2E-6 pin updated; new store-button-cleanup-n4 rows); new doc 334. C verifies Home at 375/1280/1440, LeadMagnet open/close, journey, Studio + protection.",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6924,7 +6924,8 @@
       "note": "members (D-29z1846): TLM-R468-SABA-SCROLL-DEVICE (SABA-B-15), TLM-R485-SR-ROUTE-ANNOUNCE, TLM-R489-SABA-ENTRANCE-FEEL, TLM-R489-TOUCH-SWIPE, TLM-R491-PHONE-NAME-EDITOR; TLM-R492-SR-PASSWORD-DIALOG joins if unanswered at RETRO 525 | TLM-R485-SR-ROUTE-ANNOUNCE, TLM-R489-SABA-ENTRANCE-FEEL, TLM-R489-TO …[see backlog.json]",
       "evidence": "retros/retro-495.md section 8",
       "confirmedBy": [
-        "round 515 adds TLM-R515-PHONE-KEYBOARD: on a real phone, type in the newsletter email field, tap Accept on the cookie banner -> the on-screen keyboard stays closed (D-29z1870)"
+        "round 515 adds TLM-R515-PHONE-KEYBOARD: on a real phone, type in the newsletter email field, tap Accept on the cookie banner -> the on-screen keyboard stays closed (D-29z1870)",
+        "round 515 A note A-R515-VOICEOVER (info): with iOS VoiceOver on, double-tap Accept while a text field was focused before -> record where focus lands (detail may be 1 -> logo); next to TLM-R515-PHONE-KEYBOARD (D-29z1873)"
       ]
     },
     {
@@ -7179,7 +7180,7 @@
       "id": "DPG-BUTTON-CLEANUP-2-NONBRAND",
       "severity": "medium",
       "origin": "B spec",
-      "status": "in_progress (D-29z1871): N1 (round 508), N2 PurchaseHeader (rounds 511+512) and N3 cookie banner (round 513, published 4c85587) are C-verified; rounds 514-515 fix banner focus bugs; next stage N4 Home (SpecialOffers x2 + LeadMagnet Close X) after REGRESSION 2026-11-16 if due; N5-N9 and the StemsPlay …[see backlog.json]",
+      "status": "in_progress (D-29z1874): N1 (round 508), N2 PurchaseHeader (rounds 511+512) and N3 cookie banner (round 513) are C-verified; cookie focus follow-ups rounds 514-515 C PASS (published 63c8894); round 516 = N4 Home (SpecialOffers x2 + LeadMagnet Close X); N5-N9 and the StemsPlayerModal pair remain",
       "title": "Hand-rolled controls without a brand fill bypass Button.tsx (Saba DPG item 7): whole-tag scan 58 tags / 29 files at 3021b30 + LeadMagnet Close X + 3 scanner misses; 29 to Button/IconButton, 28 keep, 2 root",
       "evidence": "b-round-506/scan-nonbrand-head.json (58); b-round-506/consult-product-designer.md (rulings, stages); b-round-497/other-handrolled-count.txt (old record 30/18)",
       "added": "2026-11-13 B round 497 -> 498 planning",
@@ -7192,6 +7193,9 @@
       ],
       "status_history_d29z1871": [
         "in_progress (D-29z1866): N1 (round 508), N2 PurchaseHeader (rounds 511+512) and N3 cookie banner (C round 513 PASS, browserVerified true, published 4c85587) are C-verified; N4-N9 and the StemsPlayerModal pair remain; round 514 fixes two pre-existing banner Mediums before N4"
+      ],
+      "status_history_d29z1874": [
+        "in_progress (D-29z1871): N1 (round 508), N2 PurchaseHeader (rounds 511+512) and N3 cookie banner (round 513, published 4c85587) are C-verified; rounds 514-515 fix banner focus bugs; next stage N4 Home (SpecialOffers x2 + LeadMagnet Close X) after REGRESSION 2026-11-16 if due; N5-N9 and the StemsPlay …[see backlog.json]"
       ]
     },
     {
@@ -7258,25 +7262,13 @@
       "title": "Cookie banner: after a pointer/tap dismissal, focus returns to a previously focused text field, which on iOS/Android reopens the on-screen keyboard although the user only tapped Accept",
       "evidence": "gates/round-514/review.md finding 1; B browser probe b-round-514/probe/head/r515.json P1 (375 and 1280: activeElement = the newsletter email INPUT after a pointer Accept) and P3 (/hire-us textarea)",
       "repro": "Home at 375 or 1280 with a GA4 id: tap/click the newsletter email field, then tap/click Accept -> focus is on the email input (HEAD b7cb61f)",
-      "status": "dispatched round 515 (D-29z1871): pointer branch skips keyboard-opening fields (text-type input, textarea, contenteditable) -> header logo with preventScroll; select/checkbox/radio/range stay returnable (product-designer + tech-lead); the on-screen keyboard half is a real-device manual row TLM-R515- …[see backlog.json]"
+      "status": "browser half verified (D-29z1872): C round 515 C1 P1 (375 tap, 1280 click) and P3 textarea -> header logo, focusVisible false, scrollY unchanged, value kept; select stays SELECT; published 63c8894. Stays open_tech_lead_manual only for the real phone keyboard (TLM-R515-PHONE-KEYBOARD in SABA-DEVICE-C …[see backlog.json]"
     },
     {
       "id": "C-R514-01",
       "severity": "low",
-      "status": "dispatched round 515 (D-29z1871): the round-515 sketch addre",
+      "status": "code fix C-verified by simulation (D-29z1872): C round 515 C",
       "title": "Cookie banner: stale stored element. Enter the banner from A, Tab out to B, click empty space (BODY)"
-    },
-    {
-      "id": "A-R514-R2-HEADER-BUTTON-ROW",
-      "severity": "low",
-      "status": "dispatched round 515 (D-29z1871): row R515-T5 (mutant M5 red",
-      "title": "No test row for the `header button` focus fallback"
-    },
-    {
-      "id": "A-R514-R3-F8-BODY",
-      "severity": "low",
-      "status": "dispatched round 515 (D-29z1871): R514-F8 now asserts docume",
-      "title": "R514-F8 does not pin activeElement = BODY"
     },
     {
       "id": "A-R514-SPEC-STRENGTHEN-ONLY",
@@ -7286,15 +7278,6 @@
     }
   ],
   "recent_rounds": [
-    {
-      "round": 506,
-      "task": "current-task.md",
-      "decision": "D-29z1824",
-      "type": "DPG-BUTTON-CLEANUP-2 stage 2e (LeadMagnet: FREE DOWNLOAD, CONTINUE, BACK TO SITE)",
-      "status": "C PASS (browserVerified/realVerified true; success path -STUBBED, LEADMAGNET-REAL-SUBSCRIBE blocked in cloud); gate 506 published 3021b30 (both remotes)",
-      "note": "baseline d6903a7 clean; sketch b-round-505/sketch-506.patch.txt v2 sha b52088bd; pre-check b-round-505/precheck-*.log (full 303/4379 rc0, build rc0); mutants M1-M14 OK; probes b-round-505/probe/ (success rows -STUBBED, focus targets)",
-      "result_note": "C0-C14 PASS (c-round-506.json), 0 bugs (D-29z1828)"
-    },
     {
       "round": 507,
       "task": "current-task.md",
@@ -7365,8 +7348,16 @@
       "task": "current-task.md",
       "decision": "D-29z1871",
       "type": "Cookie banner follow-up: GATE514-M1-POINTER-FIELD-KEYBOARD (Medium) + C-R514-01 (Low, same code) + A-R514 R2/R3 test rows",
-      "status": "dispatched",
+      "status": "C PASS (browserVerified true), gate 515 published 63c8894 (D-29z1872)",
       "note": "baseline HEAD b7cb61f clean; sketch b-round-514/sketch-515.patch.txt; pins r515-tree-sha256.txt (1430), r515-pre-sha.txt, r515-post-sketch-sha.txt; claims b-round-514/claims-515.sh; new doc 333 (332 untouched)"
+    },
+    {
+      "round": 516,
+      "task": "current-task.md",
+      "decision": "D-29z1874",
+      "type": "DPG-BUTTON-CLEANUP-2-NONBRAND stage N4: Home SpecialOffers x2 (secondary lg via buildButtonClassName) + LeadMagnet Close X (IconButton ghost)",
+      "status": "dispatched",
+      "note": "baseline HEAD 63c8894 clean; sketch b-round-515/sketch-516.patch.txt; pins r516-tree-sha256.txt, r516-pre-sha.txt, r516-post-sketch-sha.txt; claims b-round-515/claims-516.sh; new doc 334"
     }
   ],
   "other_keys": [
