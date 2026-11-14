@@ -1,14 +1,14 @@
-# Active loop summary (2026-11-14T07:15:51.802Z)
+# Active loop summary (2026-11-14T08:00:46.211Z)
 
-- backlog.json 3592 KB -> active view 315 KB
-- status: G_ROOT_GATE round 507
-- servers: `{"checkedUtc":"2026-11-14T07:14:26.8940602Z","round":507,"attempt":1,"store":200}`
-- last publication: 3021b3015c8f14ce5063ab7e9cb3091a3399a87d (rounds 506-506)
-- last root gate: round 507 skipped - C taskStatus FAIL
+- backlog.json 3598 KB -> active view 316 KB
+- status: G_ROOT_GATE round 508
+- servers: `{"checkedUtc":"2026-11-14T07:51:56.7755251Z","round":508,"attempt":1,"store":200}`
+- last publication: cf897367e705df1238341950231b7cd9fe46ff9b (rounds 507-508)
+- last root gate: round 508 published - commit cf897367e705df1238341950231b7cd9fe46ff9b pushed
 
 ## Current items: -
 
-## Open findings: 1019 (20 Critical/High/Medium)
+## Open findings: 1022 (21 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / tracked by task SAFARI-CHECKS (D-29z1705) | listed in the Safari list (user-review/questions-retro-465.md Q2, D-29z1638); does not block | environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the c …[see backlog.json] / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
@@ -27,6 +27,7 @@
 - **HIREUS-EMAIL-CLIENTS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Brevo and a test send to Gmail/Outlook/Apple Mail (Saba); questions-retro-480.md Q4 / Hire-Us internal e-mail in real clients, opened as a task by L46
 - **B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED** / high / open_root (D-29z1757): needs a backend authenticated password-change endpoint and a change in protected app/lib/auth.ts (loop may not edit); question ROOT-REQ-PASSWORD-CHANGE-ENDPOINT; does not block loop rounds, blocks final COMPLETE / Account 'Change password' can never succeed: app/lib/auth.ts updatePassword verifies the current password via login, then always throws 'Pas
 - **SABA-DEVICE-CHECKS** / medium / open_tech_lead_manual (D-29z1768; does not block): opened by L46 after two RETROs without an answer (questions-retro-480.md Q1, questions-retro-495.md Q1); blocked on Saba's own device / Saba's-device checks opened as one task by L46
-- **DPG-BUTTON-CLEANUP-2-NONBRAND** / medium / in_progress (D-29z1829/D-29z1830): round 507 = stage N1 AudioPlayer; stages N2-N9 per b-round-506/consult-product-designer.md | scheduled (D-29z1784): after DPG-BUTTON-CLEANUP-2 2a-2e; record count, needs a mutant-proven scanner at its planning / Hand-rolled controls without a brand fill bypass Button.tsx (Saba DPG item 7): whole-tag scan 58 tags / 29 files at 3021b30 + LeadMagnet Clo
-- **B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD** / medium / scheduled (D-29z1831): round 508 bug-first; needs a target ruling (product-designer at 508 planning) and a free mock product (ROOT-REQ-MOCK-STEMS-AND-FREE-FIXTURE); jsdom half reproducible now / Product page sidebar 'Complimentary Download' (isFree products) is a button with no onClick or link: it does nothing
-- ... and 999 Low/info (see backlog.json)
+- **DPG-BUTTON-CLEANUP-2-NONBRAND** / medium / in_progress (D-29z1833/D-29z1834): round 507 N1 C FAIL (test-strength STOP, browser rows not run); round 508 = N1 re-dispatch with sketch v3 delta | in_progress (D-29z1829/D-29z1830): round 507 = stage N1 AudioPlayer; stages N2-N9 per b-round-506/consult-product-designer.md | scheduled (D-29z1784):  …[see backlog.json] / Hand-rolled controls without a brand fill bypass Button.tsx (Saba DPG item 7): whole-tag scan 58 tags / 29 files at 3021b30 + LeadMagnet Clo
+- **B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD** / medium / scheduled (D-29z1835): round 509 bug-first (moved from 508; N1 must close first) | scheduled (D-29z1831): round 508 bug-first; needs a target ruling (product-designer at 508 planning) and a free mock product (ROOT-REQ-MOCK-STEMS-AND-FREE-FIXTURE); jsdom half reproducible now / Product page sidebar 'Complimentary Download' (isFree products) is a button with no onClick or link: it does nothing
+- **A-R507-CR-1-N1-2-SWAP-MUTANT** / medium / scheduled (D-29z1834): round 508 sketch v3 delta (N1-2 per-click asserts; mutants M7/M8 red on B scratch) / store-button-cleanup-n1.test.tsx N1-2 passes when two controls swap handlers (count-only asserts after all clicks)
+- ... and 1001 Low/info (see backlog.json)

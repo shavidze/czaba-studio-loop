@@ -1,0 +1,298 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/a508-mutant-copy[39m
+
+ [32m✓[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-1: each icon control is one button whose title equals its accessible name[32m 114[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-2: each control calls only its own action, and Mute flips to Unmute at volume 0[32m 44[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-3: the controls carry the IconButton ghost classes at their sizes, and Close keeps its position[32m 24[2mms[22m[39m
+ [31m×[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-7: each control has exactly the ghost IconButton classes plus only its own position classes[32m 36[2mms[22m[39m
+[31m   → expected [ 'active:scale-95', …(14) ] to deeply equal [ 'active:scale-95', …(13) ][39m
+ [31m×[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-4: no icon control keeps a retired hand-rolled token, and each icon keeps its size[32m 13[2mms[22m[39m
+[31m   → expected [ Array(15) ] to not include 'hover:bg-white/10'[39m
+ [32m✓[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-6: the volume icon keeps 20px at volume 0 (Unmute) and at 0.01, which is still labelled Mute[32m 19[2mms[22m[39m
+ [31m×[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-5: AudioPlayer.tsx renders the four icon controls through IconButton and only Play stays a native button[32m 6[2mms[22m[39m
+[31m   → expected 'import { Link } from \'@remix-run/rea…' not to contain 'bg-white/10'[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 07:48:39
+[2m   Duration [22m 1.09s[2m (transform 261ms, setup 0ms, import 492ms, tests 256ms, environment 259ms)[22m
+
+[90mstderr[2m | app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22m[2mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22m[2mN1-1: each icon control is one button whose title equals its accessible name
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-7: each control has exactly the ghost IconButton classes plus only its own position classes
+[31m[1mAssertionError[22m: expected [ 'active:scale-95', …(14) ] to deeply equal [ 'active:scale-95', …(13) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -3,10 +3,11 @@[39m
+[2m    "bg-transparent",[22m
+[2m    "cursor-pointer",[22m
+[2m    "duration-150",[22m
+[2m    "h-10",[22m
+[2m    "hover:bg-elevated",[22m
+[31m+   "hover:bg-white/10",[39m
+[2m    "hover:text-foreground",[22m
+[2m    "inline-flex",[22m
+[2m    "items-center",[22m
+[2m    "justify-center",[22m
+[2m    "rounded-lg",[22m
+
+[36m [2m❯[22m app/lib/__tests__/store-button-cleanup-n1.test.tsx:[2m203:34[22m[39m
+    [90m201| [39m      const tokens = classTokens(screen.getByRole('button', { name: co…
+    [90m202| [39m      const expected = [...ghostReferenceTokens(control.iconButtonSize…
+    [90m203| [39m      [34mexpect[39m([[33m...[39mtokens][33m.[39m[34msort[39m())[33m.[39m[34mtoEqual[39m([[33m...[39mexpected][33m.[39m[34msort[39m())[33m;[39m
+    [90m   | [39m                                 [31m^[39m
+    [90m204| [39m    }
+    [90m205| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-4: no icon control keeps a retired hand-rolled token, and each icon keeps its size
+[31m[1mAssertionError[22m: expected [ Array(15) ] to not include 'hover:bg-white/10'[39m
+[36m [2m❯[22m app/lib/__tests__/store-button-cleanup-n1.test.tsx:[2m213:28[22m[39m
+    [90m211| [39m      [35mconst[39m tokens [33m=[39m [34mclassTokens[39m(button)[33m;[39m
+    [90m212| [39m      [35mfor[39m ([35mconst[39m retired [35mof[39m [33mRETIRED_TOKENS[39m) {
+    [90m213| [39m        [34mexpect[39m(tokens)[33m.[39mnot[33m.[39m[34mtoContain[39m(retired)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m214| [39m      }
+    [90m215| [39m      [35mconst[39m svg [33m=[39m button[33m.[39m[34mquerySelector[39m([32m'svg'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-5: AudioPlayer.tsx renders the four icon controls through IconButton and only Play stays a native button
+[31m[1mAssertionError[22m: expected 'import { Link } from \'@remix-run/rea…' not to contain 'bg-white/10'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- bg-white/10[39m
+[31m+ import { Link } from '@remix-run/react';[39m
+[31m+ import { Loader2, X } from 'lucide-react';[39m
+[31m+ import type { KeyboardEvent } from 'react';[39m
+[31m+ import { IconButton } from '~/components/ui';[39m
+[31m+ import { useAudio } from '~/contexts/AudioContext';[39m
+[31m+[39m
+[31m+ const AUDIO_PLAYER_THUMB_PX = 12;[39m
+[31m+ const AUDIO_PLAYER_KEY_STEP_SECONDS: Readonly<Record<string, number>> = {[39m
+[31m+   ArrowRight: 1,[39m
+[31m+   ArrowUp: 1,[39m
+[31m+   ArrowLeft: -1,[39m
+[31m+   ArrowDown: -1,[39m
+[31m+ };[39m
+[31m+[39m
+[31m+ export function audioPlayerRangeFill(fraction: number): string {[39m
+[31m+   const safeFraction = Number.isFinite(fraction) ? Math.min(Math.max(fraction, 0), 1) : 0;[39m
+[31m+   const edge = `calc(${AUDIO_PLAYER_THUMB_PX / 2}px + ${safeFraction.toFixed(5)} * (100% - ${AUDIO_PLAYER_THUMB_PX}px))`;[39m
+[31m+   return `linear-gradient(to right, var(--color-brand) 0%, var(--color-brand) ${edge}, rgba(255, 255, 255, 0.1) ${edge}, rgba(255, 255, 255, 0.1) 100%)`;[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ export function AudioPlayer() {[39m
+[31m+   const { state, togglePlayPause, seek, setVolume, skipNext, skipPrevious, closePlayer } =[39m
+[31m+     useAudio();[39m
+[31m+[39m
+[31m+   // Don't render if no track is loaded[39m
+[31m+   if (!state.currentTrack) {[39m
+[31m+     return null;[39m
+[31m+   }[39m
+[31m+[39m
+[31m+   const { currentTrack, isPlaying, isLoading, error, volume, currentTime, duration } = state;[39m
+[31m+[39m
+[31m+   const formatTime = (seconds: number) => {[39m
+[31m+     if (!Number.isFinite(seconds)) return '0:00';[39m
+[31m+     const mins = Math.floor(seconds / 60);[39m
+[31m+     const secs = Math.floor(seconds % 60);[39m
+[31m+     return `${mins}:${secs.toString().padStart(2, '0')}`;[39m
+[31m+   };[39m
+[31m+[39m
+[31m+   const progressFraction = duration > 0 ? currentTime / duration : 0;[39m
+[31m+[39m
+[31m+   const handleProgressKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {[39m
+[31m+     const step = AUDIO_PLAYER_KEY_STEP_SECONDS[event.key];[39m
+[31m+     if (step === undefined) return;[39m
+[31m+     event.preventDefault();[39m
+[31m+     seek(Math.min(Math.max(currentTime + step, 0), duration));[39m
+[31m+   };[39m
+[31m+[39m
+[31m+   return ([39m
+[31m+     <div className="audio-player">[39m
+[31m+       <div className="audio-player-container">[39m
+[31m+         {/* Track Info */}[39m
+[31m+         <div className="audio-player-track-info">[39m
+[31m+           <img[39m
+[31m+             src={currentTrack.imageUrl}[39m
+[31m+             alt={currentTrack.title}[39m
+[31m+             className="audio-player-artwork"[39m
+[31m+           />[39m
+[31m+           <div className="min-w-0 flex-1">[39m
+[31m+             <Link to={`/products/${currentTrack.productHandle}`} className="audio-player-title">[39m
+[31m+               {currentTrack.title}[39m
+[31m+             </Link>[39m
+[31m+             <div className="audio-player-artist">{currentTrack.artist}</div>[39m
+[31m+             {isLoading && <output className="block text-xs text-muted">Loading preview…</output>}[39m
+[31m+             {error && ([39m
+[31m+               <p role="alert" className="text-xs text-destructive">[39m
+[31m+                 {error}[39m
+[31m+               </p>[39m
+[31m+             )}[39m
+[31m+           </div>[39m
+[31m+           {/* Close Button */}[39m
+[31m+           <IconButton[39m
+[31m+             variant="ghost"[39m
+[31m+             size="sm"[39m
+[31m+             label="Close player"[39m
+[31m+             onClick={closePlayer}[39m
+[31m+             className="absolute top-1/2 right-0 -translate-y-1/2"[39m
+[31m+           >[39m
+[31m+             <X size={16} />[39m
+[31m+           </IconButton>[39m
+[31m+         </div>[39m
+[31m+[39m
+[31m+         {/* Playback Controls */}[39m
+[31m+         <div className="flex flex-col items-center gap-4">[39m
+[31m+           <div className="flex items-center gap-6">[39m
+[31m+             <IconButton variant="ghost" size="md" label="Previous track" onClick={skipPrevious} className="hover:bg-white/10">[39m
+[31m+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">[39m
+[31m+                 <path[39m
+[31m+                   strokeLinecap="round"[39m
+[31m+                   strokeLinejoin="round"[39m
+[31m+                   strokeWidth={2}[39m
+[31m+                   d="M11 19l-7-7 7-7m8 14l-7-7 7-7"[39m
+[31m+                 />[39m
+[31m+               </svg>[39m
+[31m+             </IconButton>[39m
+[31m+[39m
+[31m+             <button[39m
+[31m+               onClick={togglePlayPause}[39m
+[31m+               className="audio-player-button-play flex items-center justify-center rounded-full cursor-pointer"[39m
+[31m+               aria-busy={isLoading}[39m
+[31m+               aria-label={isLoading ? 'Cancel loading preview' : isPlaying ? 'Pause' : 'Play'}[39m
+[31m+             >[39m
+[31m+               {isLoading ? ([39m
+[31m+                 <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />[39m
+[31m+               ) : isPlaying ? ([39m
+[31m+                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">[39m
+[31m+                   <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />[39m
+[31m+                 </svg>[39m
+[31m+               ) : ([39m
+[31m+                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">[39m
+[31m+                   <path d="M8 5v14l11-7z" />[39m
+[31m+                 </svg>[39m
+[31m+               )}[39m
+[31m+             </button>[39m
+[31m+[39m
+[31m+             <IconButton variant="ghost" size="md" label="Next track" onClick={skipNext}>[39m
+[31m+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">[39m
+[31m+                 <path[39m
+[31m+                   strokeLinecap="round"[39m
+[31m+                   strokeLinejoin="round"[39m
+[31m+                   strokeWidth={2}[39m
+[31m+                   d="M13 5l7 7-7 7M5 5l7 7-7 7"[39m
+[31m+                 />[39m
+[31m+               </svg>[39m
+[31m+             </IconButton>[39m
+[31m+           </div>[39m
+[31m+[39m
+[31m+           {/* Progress Bar */}[39m
+[31m+           <div className="flex items-center gap-4 w-full">[39m
+[31m+             <span className="text-base text-muted tabular-nums min-w-[40px] text-center">[39m
+[31m+               {formatTime(currentTime)}[39m
+[31m+             </span>[39m
+[31m+             <div className="flex-1">[39m
+[31m+               <input[39m
+[31m+                 type="range"[39m
+[31m+                 min="0"[39m
+[31m+                 max={duration || 0}[39m
+[31m+                 step="any"[39m
+[31m+                 value={currentTime}[39m
+[31m+                 onChange={(e) => seek(Number(e.target.value))}[39m
+[31m+                 onKeyDown={handleProgressKeyDown}[39m
+[31m+                 aria-label="Preview position"[39m
+[31m+                 aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}[39m
+[31m+                 disabled={duration <= 0 || isLoading}[39m
+[31m+                 className="audio-player-progress"[39m
+[31m+                 style={{ background: audioPlayerRangeFill(progressFraction) }}[39m
+[31m+               />[39m
+[31m+             </div>[39m
+[31m+             <span className="text-base text-muted tabular-nums min-w-[40px] text-center">[39m
+[31m+               {formatTime(duration)}[39m
+[31m+             </span>[39m
+[31m+           </div>[39m
+[31m+         </div>[39m
+[31m+[39m
+[31m+         {/* Volume Control */}[39m
+[31m+         <div className="flex items-center gap-4 justify-end">[39m
+[31m+           <IconButton[39m
+[31m+             variant="ghost"[39m
+[31m+             size="md"[39m
+[31m+             label={volume === 0 ? 'Unmute' : 'Mute'}[39m
+[31m+             onClick={() => setVolume(volume === 0 ? 0.7 : 0)}[39m
+[31m+           >[39m
+[31m+             {volume === 0 ? ([39m
+[31m+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">[39m
+[31m+                 <path[39m
+[31m+                   strokeLinecap="round"[39m
+[31m+                   strokeLinejoin="round"[39m
+[31m+                   strokeWidth={2}[39m
+[31m+                   d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"[39m
+[31m+                 />[39m
+[31m+                 <path[39m
+[31m+                   strokeLinecap="round"[39m
+[31m+                   strokeLinejoin="round"[39m
+[31m+                   strokeWidth={2}[39m
+[31m+                   d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"[39m
+[31m+                 />[39m
+[31m+               </svg>[39m
+[31m+             ) : volume < 0.5 ? ([39m
+[31m+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">[39m
+[31m+                 <path[39m
+[31m+                   strokeLinecap="round"[39m
+[31m+                   strokeLinejoin="round"[39m
+[31m+                   strokeWidth={2}[39m
+[31m+                   d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"[39m
+[31m+                 />[39m
+[31m+               </svg>[39m
+[31m+             ) : ([39m
+[31m+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">[39m
+[31m+                 <path[39m
+[31m+                   strokeLinecap="round"[39m
+[31m+                   strokeLinejoin="round"[39m
+[31m+                   strokeWidth={2}[39m
+[31m+                   d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"[39m
+[31m+                 />[39m
+[31m+               </svg>[39m
+[31m+             )}[39m
+[31m+           </IconButton>[39m
+[31m+           <input[39m
+[31m+             type="range"[39m
+[31m+             min="0"[39m
+[31m+             max="1"[39m
+[31m+             step="0.01"[39m
+[31m+             value={volume}[39m
+[31m+             onChange={(e) => setVolume(Number(e.target.value))}[39m
+[31m+             aria-label="Preview volume"[39m
+[31m+             className="audio-player-volume-slider"[39m
+[31m+             style={{ background: audioPlayerRangeFill(volume) }}[39m
+[31m+           />[39m
+[31m+         </div>[39m
+[31m+       </div>[39m
+[31m+     </div>[39m
+[31m+   );[39m
+[31m+ }[39m
+[31m+[39m
+
+[36m [2m❯[22m app/lib/__tests__/store-button-cleanup-n1.test.tsx:[2m240:24[22m[39m
+    [90m238| [39m    [34mexpect[39m(source[33m.[39m[34mmatch[39m([36m/<IconButton\b/g[39m) [33m??[39m [])[33m.[39m[34mtoHaveLength[39m([34m4[39m)[33m;[39m
+    [90m239| [39m    expect(source).toContain("import { IconButton } from '~/components…
+    [90m240| [39m    [34mexpect[39m(source)[33m.[39mnot[33m.[39m[34mtoContain[39m([32m'bg-white/10'[39m)[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m241| [39m    [34mexpect[39m(source)[33m.[39mnot[33m.[39m[34mtoContain[39m([32m'hover:text-error'[39m)[33m;[39m
+    [90m242| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+

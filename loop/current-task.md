@@ -1,157 +1,221 @@
-# Round 508: DPG-BUTTON-CLEANUP-2-NONBRAND stage N1, re-dispatch. Fix the N1-2 swap gap (sketch v3 delta on top of the applied v2), then C runs the full N1 browser acceptance
+# Round 509: B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD. The product-page "Complimentary Download" button does nothing. Make it an honest "Get it free" that runs the Buy Now path
 
-**Planned by:** B, at the round 507 → 508 planning on 2026-11-14 (`b-round-507.md`). The round-507 task is archived as `tasks/round-507.md`; every section not restated here (reference table, ruling lines, D1–D5) is unchanged from it.
+**Planned by:** B at the round 508 → 509 planning, 2026-11-14 (`b-round-508.md`). Round 508's task is archived as `tasks/round-508.md`.
 
-## Decisions (`backlog.json` v512, `decisions_log_b`)
-- **D-29z1833, round 507 result (C evidence only):** C FAIL, `browserVerified`/`realVerified` false. A STOPped on **A-R507-CR-1-N1-2-SWAP-MUTANT (Medium)**: N1-2 clicks all four controls before count-only asserts, so a Previous↔Next handler swap stays green (`a-round-507/mutant-swap.log`; C confirmed by reading the source). The product handlers are correct. The gap came from B's mutant matrix, which had no pure-swap mutant. C ran only C0, C11 and C12, so N1 is **not** verified. Gate 507 was skipped: nothing published, baseline stays `3021b30`, and the store worktree keeps sketch v2.
-- **D-29z1834, round 508 = N1 re-dispatch with a v3 delta.** It changes only the n1 test and doc 328. It also takes in two Lows from A's report, both in files this round owns: A-R507-CR-2 (new N1-6) and A-R507-CR-4 (CSS path in doc 328). After B's tech-lead sketch review (`b-round-507/sketch-review.md`), delta v2 also adds N1-7 (exact class set), the icon height in N1-4 and the 0.01 Mute threshold in N1-6. A-R507-CR-3 (ghost press text in DESIGN_SYSTEM) is deferred, to keep the round at three related items.
-- **D-29z1835:** B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD moves to round 509 (bug-first). Retro signal RC-R507-SWAP-MUTANT is recorded for RETRO 510.
-- **D-29z1836, sketch review:** tech-lead read delta v1 (`b-round-507/sketch-review.md`) and found surviving mutants. Delta v2 (`405384eb…`) fixes R1, R2 and R4 with N1-7, the N1-4 height check and the N1-6 0.01 case. R3, R5 and R6 are pre-ruled #11–#13. New deferred Low: B-R508-VOLUME-ICON-LOW-SAME.
+## Decisions (`backlog.json` v513, `decisions_log_b`)
+- **D-29z1837:** round 508 passed C (`c-round-508.json`, `browserVerified` true) and was published as `cf89736`. NONBRAND N1 is verified.
+- **D-29z1838:** follow-ups from round 508 are recorded. All of them are Low or info and deferred.
+- **D-29z1839:** this round. It contains:
+  - the product-designer ruling (a);
+  - B's browser stub proof;
+  - the shared hook;
+  - the NONBRAND `ProductSidebar` l.75 migration in the same edit.
+- **D-29z1840:** three questions for Saba in `user-review/questions-round-509.md`. The defaults below are what ships.
 
 ## Rules
-- **Read `lessons.md` first.** L10 (STOP), L22, L28, L52 (every jsdom row has a mutant; this round adds pure-swap mutants), L57, L58, L59 apply as in round 507.
-- **Do not re-apply v2, and do not revert anything.** The store tree already carries v2 (2 M + 2 untracked). Only the delta is applied.
-- **STOP threshold (L10).** A writes STOP and changes nothing more on any of these:
-  - a Medium-or-higher finding whose fix is outside the grants;
-  - a failing or slow covering test (> 2,500 ms);
-  - a frozen-file check that is not rc 0;
-  - a delta that does not apply cleanly;
-  - a number that differs from B's §3 value.
-- **The sketch writes every granted byte.** A writes no prose in source or docs.
-- **Pre-ruled Lows** (a re-raise goes under "For B", not a STOP):
-  - round 507's #2–#7, unchanged. #1 now reads: doc 328 l.4 says "C round 508 PASS" before C runs (L28 contract);
-  - #8: N1-2 calls `vi.clearAllMocks()` per step. This is intended: each step asserts the full action list from zero;
-  - #9: A-R507-CR-3 is deferred (`deferred_low_polish`);
-  - #10: N1-6 checks the icon's width/height attributes, not the rendered pixels. The rendered size is C1's job;
-  - #11: jsdom does not pin where a control sits in the layout or the Previous/Next order. C1 (per-control boxes ±1 px vs the oracle) and C5 own it (`sketch-review.md` R3);
-  - #12: a `disabled={isLoading}` mutant would survive. No such code exists; recorded only (R5);
-  - #13: icon path shapes are not pinned (R6). The low- and high-volume icons are identical at HEAD: new deferred Low B-R508-VOLUME-ICON-LOW-SAME, pre-existing, not this round;
-  - #14 (L31 ruling): the covering limit is 2,500 ms, i.e. 50 % of vitest's 5 s default. LT7 (753 ms on B's run, 763 ms on A's round-507 run) and PU1 are pre-existing tests in unrelated files, far below it. Round 507's "every covering test < 500 ms" was a B observation, not a limit.
-- **Purchase protection:** no auth, cart, checkout, ownership or download file is touched. Check 2 stays rc 0, and C keeps the anonymous "Sign in required" row.
-- **Persistent screen text (L39):** nothing is added.
-- **Out of scope:** `AudioPlayer.tsx` and `DESIGN_SYSTEM.md` (byte-identical to v2 this round), the Play button, the ranges, `StemsPlayerModal`, `IconButton.tsx`, and Studio (`/studio-lab` is only smoke-checked, C11).
-- **Paths:** loop `/home/runner/czaba-project/tmp/studio-real-loop`, store `/home/runner/czaba-project/store`.
+- **Read `lessons.md` first.** These lessons apply: L4, L10, L12, L23, L29, L36, L47, L50, L52, L54, L57, L58 and L59.
+- **No byte sketch this round.** A writes the code. Any number below that B did not run on a sketch is marked **record**. It is not an assert (L58).
+- **STOP (L10).** Write "STOP — needs B ruling" and change nothing more if any of these happens:
+  - a Medium-or-higher finding needs a change outside the grants;
+  - a test outside the grants fails;
+  - a covering test is slow (> 2,500 ms);
+  - a frozen check is not rc 0;
+  - a protected file would need to change.
+- **Pre-ruled Lows.** If one is raised again, it goes under "For B", not a STOP:
+  - **#1:** the focused button loses focus when it becomes disabled during checkout, as header Buy Now does at HEAD;
+  - **#2:** the header still says "Buy Now" at $0 (D1, SABA-Q-509-BUYNOW-FREE-LABEL);
+  - **#3:** `begin_checkout` and `InitiateCheckout` fire with price 0. This is the unchanged Buy Now analytics;
+  - **#4:** the real $0 order is unverified (D2, FREE-CHECKOUT-REAL-BACKEND);
+  - **#5:** AuthModal has no `role=dialog` and no focus move or trap (B-R509-AUTHMODAL-NOT-A-DIALOG, pre-existing, SYS-R495-SHARED-DIALOG);
+  - **#6:** no hooks barrel export (§2);
+  - **#7:** the store still says "Complimentary" on cards, the badge and `/free-downloads` while the button says "Get it free" (SABA-Q-509-FREE-LABEL-WORDING).
+- **Purchase protection.** Protected files stay byte-identical (check 2). No new download path or URL is created. No file is served without ownership. The preview MP3 is never offered as the product.
+- **Persistent screen text (L39).** Nothing is added. The existing button's label changes: "Complimentary Download" becomes "Get it free". The new toast is transient.
+- **Out of scope:**
+  - the header's Buy Now/Add to Cart labels and markup;
+  - `CartContext.tsx`, `/free-downloads` and Studio;
+  - the other NONBRAND stages.
+- **Paths:**
+  - loop: `/home/runner/czaba-project/tmp/studio-real-loop`;
+  - store: `/home/runner/czaba-project/store`.
 
 ## Baseline
-- **HEAD is `3021b30`** (gate 507 skipped [K20]; gate 506 commit [K10]). The worktree carries v2: 4 changed paths [K2].
-- **Frozen-file checks.** Run every check from `store/`; all were rc 0 at planning.
-  1. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-507/r508-tree-sha256.txt`: every tracked file except the two granted tracked paths. This is a copy of `r507-tree-sha256.txt`.
-  2. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-318/protected-sha256.txt`: the protected files.
-  3. **Before applying:** `b-round-507/r508-pre-sha.txt`, the four granted paths at their v2 bytes (= `b-round-506/r507-post-sketch-sha.txt`).
-  4. **After applying:** `b-round-507/r508-post-sketch-sha.txt`, covering all four paths. `AudioPlayer.tsx` and `DESIGN_SYSTEM.md` keep their v2 sha (`8231a981…`, `0f01b243…`) [K22].
-- **Reproduced by B.** On a fresh `git archive` of `3021b30` plus v2 plus the delta (`/home/runner/b507-fresh`), checks 4 and 1 are rc 0. In `store/` at planning, check 3 and `git apply --check` of the delta were rc 0.
+- **HEAD is `cf89736`** (gate 508 published it on both remotes). The worktree was clean at planning.
+- **Frozen checks.** Run each from `store/`. All were rc 0 at planning.
+  1. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-508/r509-tree-sha256.txt` covers all 1,421 tracked files except the grants.
+  2. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-318/protected-sha256.txt` covers the protected files.
+  3. Before editing: `sha256sum -c b-round-508/r509-pre-sha.txt` covers the four granted tracked files at HEAD.
 
 ## 0. Why this round
-- **Bugs first.** A-R507-CR-1 is a Medium in round-owned code. It blocked N1's verification, so N1's browser half never ran (V2: not done).
-- The fix is small and inside the four granted files. B does not downgrade it to Low: "Low is defensible" in C's report is data, not a ruling.
-- **REGRESSION** is due on or after 2026-11-16 (`regression-last.json`: 2026-11-13). **RETRO** comes at round 510.
+- **Bugs first.** B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD is a Medium. B reproduced it in the real browser at 1440 and 1280 (`b-round-508/probe/free-stub.json`, `free-1440.png`):
+  - the element is a `BUTTON` with no `href` or `type`;
+  - clicking it leaves the URL unchanged, opens 0 dialogs and logs 0 page errors.
+- **The cloud stub works.** The probe uses `page.route` on the client-navigation request `/products/harbour-lights?_data=routes%2Fproducts.%24handle` and rewrites every price to 0. That page then shows "Complimentary Download", and the header shows "$0.00 USD" with Add to Cart and Buy Now.
+  - So the free-fixture half of ROOT-REQ-MOCK-STEMS-AND-FREE-FIXTURE is not needed.
+- **A second defect in the same control.** `ProductSidebar.tsx:35` decides "free" from `resolveCatalogPrice` (the Standard or catalogue price). `PurchaseHeader` charges `resolvePurchasePrice(product, selectedVersion)` (`ProductDetailPage.tsx:68`). With Standard at $0 and Premium at $9, the sidebar still offers "free" while Premium is selected.
+- **Timing:**
+  - REGRESSION is due on or after 2026-11-16, so not yet;
+  - RETRO is round 510, so this is the last normal round before it.
 
-## 1. Reference
-- **Unchanged from `tasks/round-507.md` §1.** The rule is IconButton ghost sm/md. The table rows (sizes, radius 12 px, rest `rgb(163, 155, 142)`, hover `rgb(29, 26, 23)` / `rgb(236, 230, 218)`, layout D5, ring, behaviour) and the deviations D1–D5 stay as written.
-- **Ableton:** does not apply (Store overlay).
-- **This round changes no user-visible behaviour.** It only strengthens the tests.
+## 1. Reference: how established stores do it, and the product-designer ruling
+- **Ableton:** not applicable (Store).
+- **Store practice:** the consult (`b-round-508/consult-product-designer.md`) rules on the store's own rule, "a control does what its label says". On a $0 product the primary action is the normal acquisition flow with the price shown as $0. A separate "download" button that bypasses ownership is not that flow.
+- **No external reference was found.** B grepped `docs/technical/store-redesign/research/` for "free product", "$0" and "complimentary": 0 files. B fetched no competitor page this round. The rule rests on the consult and on the existing Buy Now path, not on a competitor claim.
 
-## 2. What changes: delta `b-round-507/sketch-508-delta.patch.txt`
-Its sha256 is in `b-round-507/sketch-sha.txt` (`405384eb…`, delta v2; v1 `9fb27de4…` is superseded, see `sketch-sha-history.txt`).
+| Point | Ruling (product-designer) | C row |
+|---|---|---|
+| Behaviour | It runs the **same** Buy Now handler, extracted once into a hook. It is not a copy | C2, C6, grep C8 |
+| Visibility | Shown only when `currentPrice === 0` for the **selected** version, the version is sellable (standard/premium/universal), `product.id > 0`, and the user does not own the product | C1, C4, C5, C7 |
+| Element | `<Button type="button" variant="primary" size="lg" fullWidth>` | C1 |
+| Text / name | "Get it free". The Download icon is removed, because nothing downloads on click | C1 |
+| Anonymous | Toast "Sign in to get it free." (info) and the sign-in modal | C2, C3 |
+| Busy | Uses the shared `isBuyingNow`. Both the sidebar button and header Buy Now are disabled. The sidebar shows a spinner and "Processing..." (not Button `isLoading`, which shows "Loading...") | jsdom SF4, C6 |
+| Error | The existing CartContext toast. The button becomes active again | jsdom SF4b |
+| Owned | Hidden. The header shows its owned state | C7 |
+| Signed in, purchases loading | Rendered but disabled, so there is no layout jump | jsdom SF7 |
+
+**Deviations and defaults:**
+- **D1, the header stays unchanged.** A $0 product still says "Buy Now" in the header. Changing it is SABA-Q-509-BUYNOW-FREE-LABEL. This round keeps the smallest change.
+- **D2, delivery = the existing checkout.** The real $0 order needs the backend, and Stripe may refuse a $0 session. This is SABA-Q-509-FREE-DELIVERY and FREE-CHECKOUT-REAL-BACKEND.
+
+## 2. What changes (grants: `b-round-508/grants-509.txt`, 7 paths)
 
 | File | Change |
 |---|---|
-| `app/lib/__tests__/store-button-cleanup-n1.test.tsx` | **N1-2** loops over Close player, Previous, Next and Mute. For each one it clears the mocks and clicks once. It then asserts over all six actions (`closePlayer`, `skipPrevious`, `skipNext`, `setVolume`, `togglePlayPause`, `seek`): the step's own action ran exactly once and the other five ran 0 times. After the loop: `setVolume` was last called with 0. At volume 0, Mute is gone and Unmute (title "Unmute") exists. Unmute is clicked from cleared mocks; only `setVolume` runs, once, with 0.7. **N1-4** also checks the icon `height`. **New N1-6:** at volume 0 (Unmute) and 0.01 (still Mute), the volume SVG has width and height `20`. **New N1-7:** each control's sorted class set equals a rendered `<IconButton variant="ghost">` reference of its size, plus only Close's four position classes |
-| `docs/implementation/2026/quarter-IV/328-dpg-nonbrand-stage-n1-audio-player.md` | l.4 → `**სტატუსი:** In Progress (stage N1 of DPG-BUTTON-CLEANUP-2-NONBRAND; C round 508 PASS)` (L28). l.44 `app.css` → `app/styles/app.css` and `app/styles/base/utilities.css`. N1-2 and N1-4 text rewritten, N1-6 and N1-7 lines added. Mutant line → `M0–M14 (b-round-507/mutants-508.txt)` |
-| `app/components/audio/AudioPlayer.tsx`, `docs/design/DESIGN_SYSTEM.md` | **No change** (v2 bytes) |
+| `app/hooks/useBuyNowAction.ts` (**new**) | `export function useBuyNowAction(options)`. The options are `productId`, `productTitle`, `price: number \| undefined`, `productVariantId: number \| undefined`, `isSupportedVersion: boolean`, `currencyCode: string` and `signInMessage: string`. It returns `{ runBuyNow: () => Promise<void>; isBuyingNow: boolean; isAddingToCart: boolean }`. The same file also exports `isSellableVersionName(name: string): boolean`, the existing `['standard', 'premium', 'universal'].includes(name.toLowerCase())` rule. PurchaseHeader and ProductDetailPage both use this one predicate; no second copy may exist. Its body is `PurchaseHeader`'s current `handleBuyNow`, moved without changes except that the sign-in toast text becomes `signInMessage`. The order stays the same: price guard, sign-in toast and `openModal('signin')`, sellable/valid-id toast, then `trackBeginCheckout`, `trackFBInitiateCheckout` and `buyNow(productId, productVariantId)` inside `try`/`catch`. It imports `useAuth`, `useCart` and `useToast` from `~/hooks/useAuth`, `~/hooks/useCart` and `~/hooks/useToast`, and the trackers from `~/lib/analytics` and `~/lib/facebook-pixel`: the same specifiers the tests mock. Do not use the `~/hooks` barrel (A-R506-CR-1). Read `.claude/prompts/new-hook.md` first. **Pre-ruled deviation:** its checklist item "Added to hooks/index.ts barrel export" is **not** done. `app/hooks/index.ts` is not granted, 5 of the 18 hook files are already outside the barrel, which has 13 exports [K13] (for example `useStableHandler` and `useRelativeFaderDrag`), and barrel imports break partial hook mocks (A-R506-CR-1) |
+| `PurchaseHeader.tsx` | `handleBuyNow` is replaced by the hook, with `signInMessage: 'Please sign in to continue with your purchase'`. The JSX and the Add to Cart handler do not change. Existing source scans must stay green: B2C-8 (two `Button` tags, one builder call, one `bg-buy` tag) and store-theme-tokens (one `bg-buy` class attribute) |
+| `ProductDetailPage.tsx` | Compute `showGetFree` from the rule in §1, using `currentPrice`, `isSellableVersionName(selectedVersion?.name ?? 'Standard')` (the same name the header receives), `product.id`, `isAuthenticated` and `usePurchases().isProductOwnedByHandle(product.handle)`. Then call `useBuyNowAction` with the selected version and `signInMessage: 'Sign in to get it free.'`. Pass `ProductSidebar` an optional prop, for example `getFree?: { onGetFree: () => void; isBusy: boolean; isDisabled: boolean }`. It is `undefined` when `showGetFree` is false. `isDisabled` is `isBuyingNow`, or `isAddingToCart` (as header Buy Now), or (signed in and `usePurchases().isLoading`) |
+| `ProductSidebar.tsx` | Remove the `isFree` / `resolveCatalogPrice` logic and the hand-rolled `<button>` (l.74–79). When `getFree` is set, render `<Button type="button" variant="primary" size="lg" fullWidth onClick=… disabled=…>`. When not busy, its content is the text "Get it free" with no icon. When busy, it shows `Loader2` (`animate-spin`, `aria-hidden`) and "Processing...". The rendered position stays the same: after the title block, before the BPM/Key grid. Do not pass a `className`. Remove any import left unused |
+| `app/lib/__tests__/product-price-unavailable.test.tsx` | Rewrite PU7 to the new contract. No assertion may be lost; equal or stronger replacements are allowed (L4). The old "shows for 0, not for undefined or 9" becomes "Get it free" for `ProductDetailPage` with a $0 price and absent for undefined or 9, and `queryByText('Complimentary Download')` is null in all three. Nothing else in the file changes |
+| `app/lib/__tests__/store-sidebar-free-r509.test.tsx` (**new**) | Rows SF1–SF9 below |
+| `docs/implementation/2026/quarter-IV/329-sidebar-get-it-free.md` (**new**) | The seven TEMPLATE headings, in order (L26). l.4 must be exactly `**სტატუსი:** Completed (C round 509 PASS)` (L28). It names `useBuyNowAction`, the visibility rule, D1, D2, both Saba ids and the test rows. It cites only rows that exist |
+
+**jsdom rows (new file).** Find elements by role and name only (L12). Pass a fresh element on each rerender (L52). Clear mocks before each click and assert every action's count after every click (RC-R507).
+- **SF1:** `ProductDetailPage`, $0 (standard, premium and variants all 0), anonymous.
+  - Exactly 1 `button` named "Get it free", with `type="button"` and no `svg` child.
+  - Its sorted class set equals that of a rendered `<Button variant="primary" size="lg" fullWidth type="button">` reference.
+  - `queryByText('Complimentary Download')` is null.
+- **SF2:** anonymous, click "Get it free". `showToast` is called once with `('Sign in to get it free.', 'info')` and `openModal` once with `'signin'`. `buyNow`, `trackBeginCheckout` and `trackFBInitiateCheckout` are each called 0 times. Then clear the mocks and click the header's "Buy Now": the toast text is `'Please sign in to continue with your purchase'` (this is the swap guard).
+- **SF3:** signed in, not owned. Click "Get it free": `buyNow` is called once with `(product.id, <selected variant id>)`, `trackBeginCheckout` once with `productPrice: 0`, and `openModal` 0 times. Clear the mocks, then click the header's Buy Now: `buyNow` receives the same arguments.
+- **SF4:** `isBuyingNow` is true. The sidebar button is disabled and reads "Processing...", and the header's Buy Now is disabled. With `isAddingToCart` true (`isBuyingNow` false), both are disabled, and the sidebar reads "Get it free".
+  - **SF4b:** `buyNow` rejects. There is no unhandled rejection, and after the rerender with `isBuyingNow` false the button is enabled again.
+- **SF5:** Standard is $0 and Premium is $9. The button is present. Click the Premium version card and it is absent; click Standard and it is present again.
+- **SF6:** a $9 product → absent. An unknown price (L36 shape from PU tests) → absent, and the header shows "Price unavailable".
+- **SF7:**
+  - signed in, `isProductOwnedByHandle` returns true → absent;
+  - signed in, not owned, purchases `isLoading` true → present and disabled;
+  - anonymous, purchases `isLoading` true → enabled.
+- **SF8:**
+  - `<ProductSidebar product={$0 product} />` with no `getFree` prop → no "Get it free" and no "Complimentary Download" (the studio-link-ui render shape);
+  - `product.id` 0 with a $0 price on `ProductDetailPage` → absent.
+- **SF9:** an unsupported version name (for example "Custom") at $0 → absent.
+
+**Mutants.** A runs them on a copy outside `store/`, with `node_modules` symlinked. Each must turn at least the named row red. A writes `a-round-509/mutants.txt` (L52, L58). B did not run these, so the red sets are **record** beyond the named row.
+- **MA:** the sidebar `onClick` is removed → SF2.
+- **MB:** the two `signInMessage` strings are swapped → SF2.
+- **MC:** visibility uses `resolveCatalogPrice(product) === 0` → SF5.
+- **MD:** the owned check is dropped → SF7.
+- **ME:** `disabled` is dropped from the sidebar Button → SF4.
+- **MF:** the hook calls `buyNow(productId)` without the variant → SF3.
+- **MG:** the sidebar uses `isLoading` instead of its own busy content → SF4.
+- **MH:** `type="button"` is dropped → SF1.
+- **MI:** the `isSupportedVersion` term is dropped from `showGetFree` → SF9.
+- **MJ:** `isAddingToCart` is dropped from the sidebar's `isDisabled` → SF4.
 
 ## 3. A: what to implement
-1. **Apply the delta.** From `store/`:
-   - run frozen checks 1, 2 and 3 (rc 0);
-   - check the delta's sha256 against `b-round-507/sketch-sha.txt`;
-   - run `git apply --check /home/runner/czaba-project/tmp/studio-real-loop/b-round-507/sketch-508-delta.patch.txt`, then `git apply` on the same path;
-   - run checks 4 and 1 (rc 0).
-2. **Grants:** the four paths of round 507, exactly as v2 plus the delta writes them. Nothing else changes.
-3. **Run.** Save the logs under `a-round-508/`. A difference from B's value is a STOP.
-   - `npm run typecheck`: rc 0 (B: `b-round-507/precheck-tsc.log`).
-   - `npm run lint`: rc 0, "Found 175 warnings." (B: `precheck-lint.log`).
-   - `npx biome check app/components/audio/AudioPlayer.tsx app/lib/__tests__/store-button-cleanup-n1.test.tsx`: rc 0, "Checked 2 files", no fixes, "Found 1 warning." (pre-ruled #7; B: `precheck-biome.log`).
-   - `npx vitest run --reporter=verbose $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-507/covering-files.txt)`: 8 files, 88/88, the lines N1-1…N1-7 present, and no test above 2,500 ms (#14). On B's run the slowest was LT7 at 753 ms (`precheck-covering.log`).
-   - **Swap proof.** Copy `store/`'s working tree to a folder outside `store/` (no `node_modules`, `.git` or `build`; symlink `node_modules`), as in C9. Then re-apply A's round-507 M7 (Previous `onClick={skipNext}`, Next `onClick={skipPrevious}`) to that copy, or use `python3 -I /home/runner/czaba-project/tmp/studio-real-loop/b-round-507/mutants-508.py <copy outside store/> <abs a-round-508/mutant-logs> /home/runner/czaba-project/tmp/studio-real-loop/b-round-506/head-AudioPlayer.tsx.txt`. M7 and M8 must turn N1-2 red; the whole matrix must match `mutants-508.txt` (M0–M14 OK). `store/` is restored with checks 4 and 1 rc 0. Never run a mutant inside `store/` while C may run.
-   - **Code-reviewer** on the whole change against `3021b30`: give it `git diff 3021b30` plus the two untracked files.
-   - **Not run by A:** the full suite and the build. B ran both on the v3 tree: `precheck-full.log` (304 files / 4,386 tests, rc 0) and `precheck-build-sketch.log` (rc 0).
-4. **Write `a-round-508.md`,** including the code-reviewer's Architecture note for B.
+1. Run frozen checks 1–3 (rc 0). Read `prompts/new-hook.md` and the primitives `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md`, `API_ERROR_HANDLING.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`.
+2. Implement §2. Change only the 7 granted paths. Use semicolons, no `any`, no assertions and no comments (Georgian context comments that already exist may move with the code they describe).
+3. Run the following and save the logs under `a-round-509/`:
+   - `npm run typecheck`: rc 0.
+   - `npm run lint`: rc 0. Record the warning count; HEAD is 175 (`b-round-507/precheck-lint.log`). A higher count is a STOP unless every new warning is in a granted file and listed.
+   - `npx biome check` on the 6 granted code and test files: rc 0, no fixes.
+   - **Covering:** `npx vitest run --reporter=verbose $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-508/covering-files-head.txt) app/lib/__tests__/store-sidebar-free-r509.test.tsx`. Expect rc 0, 9 files, every SF row present, and no test above 2,500 ms. HEAD is 8 files / 112 tests, all < 2,500 ms (`b-round-508/head-covering.log`). The new total is **record**.
+   - **Grep:**
+     - `grep -rn "Complimentary Download" app` → 0;
+     - `grep -rln "trackBeginCheckout(" app/components app/hooks` → only `app/hooks/useBuyNowAction.ts`;
+     - `python3 -I /home/runner/czaba-project/tmp/studio-real-loop/b-round-506/scan-nonbrand.py . /tmp/n.json` → 53 hits, with no `ProductSidebar.tsx` entry. HEAD is 54 with one ProductSidebar l.75 entry, so 53 is **record**. Any other change is a STOP.
+   - **Mutants MA–MI** on a copy outside `store/`. Afterwards, frozen checks 1 and 2 are rc 0 and `git status` shows only the grants.
+   - **code-reviewer** (3 or more files) on `git diff cf89736` plus the 3 untracked files. Include its Architecture note.
+4. Write `a-round-509.md`. Do not run the full suite or the build: they are gate rows.
 
 ## 4. C: what to verify
-C writes `c-round-508.md`, `c-round-508.json` and `c-round-508/progress.json` as it goes, heaviest rows first (L59).
+Write `c-round-509.md`, `c-round-509.json` and `c-round-509/progress.json` as you go, heaviest rows first (L59).
 
 **Environment**
-- Store dev server: `http://127.0.0.1:5173`. Mock API: `:5199`. If `curl -s http://127.0.0.1:5199/__mock/health` fails, start the mock from the loop folder: `node mock-api/server.mjs > c-round-508/mock.log 2>&1 &`.
-- **Opening the player:** on `/`, wait 6 s, press Esc, then `.click()` the first `button[aria-label="Play preview"]` via `page.evaluate`. A real preview (`middle-east.mp3`) plays.
-- **Warm-up (L38):** run `ap-507.cjs` once with `WIDTHS=1440` into `c-round-508/warm`, and discard the result. Do not run vitest while a probe runs.
-
-**Harnesses.** These are the round-507 harnesses and oracles, still valid because `AudioPlayer.tsx` is byte-identical to v2 [K22]. The oracles are in `b-round-506/probe/sketch/{sketch.jsonl,layout.json,behaviour.json}`; HEAD is in `probe/head/`.
-- `BASE=http://127.0.0.1:5173 node /home/runner/czaba-project/tmp/studio-real-loop/b-round-506/probe/ap-507.cjs <abs c-round-508/after> after`
-- `node …/b-round-506/probe/ap-layout-507.cjs <abs c-round-508/after/layout.json>`
-- `node …/b-round-506/probe/ap-behaviour-507.cjs <abs c-round-508/after/behaviour.json>`
-
-**Rows**
+- Dev server: `:5173`. Mock API: `:5199`. Start the mock if `__mock/health` fails: `node mock-api/server.mjs`.
+- Before every product page: `localStorage` `czaba_lead_magnet_dismissed=1` and `sessionStorage` `czaba_entrance_seen=1`. Use an init script, as in `journey-504.mjs`.
+- **Free stub (-STUBBED, L36):** adapt `b-round-508/probe/free-stub.cjs`:
+  1. open `/products/middle-east`;
+  2. `page.route(/\/products\/harbour-lights\?.*_data=/)`, fetch the real response and set `standardPrice`, `premiumPrice`, `minPrice` and every variant's `price` to 0;
+  3. navigate on the client with `window.__remixRouter.navigate('/products/harbour-lights')`.
+  - **Split stub** for C4: Standard variant 0, Premium 9, `standardPrice` 0, `minPrice` 0, `premiumPrice` 9.
+- **Signed-in stub:** take the auth, profile, downloads, cart, `cart/checkout`, `payments/checkout` and `__stripe-stub` routes from `b-round-503/probe/journey-504.mjs`, plus the free `_data` stub.
+- **Warm-up (L38):** one throwaway run; discard it.
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| C0 | SOURCE-SCOPE (start) | `git status --short --untracked-files=all`; frozen checks 1, 2 and 4 | 2 modified (`AudioPlayer.tsx`, `DESIGN_SYSTEM.md`), 2 untracked (the n1 test, doc 328); checks 1, 2 and 4 rc 0 |
-| C1 | REST | `after.jsonl` `rest` | Equal to `sketch.jsonl`, boxes ±1 px. Previous, Next and Mute are 40×40; Close is 32×32, at every viewport. Radius `12px`, colour `rgb(163, 155, 142)`, opacity `1`, `title` = label |
-| C2 | HOVER + PRESS | `hover`; `behaviour.json` `pressed` | Hover: bg `rgb(29, 26, 23)`, text `rgb(236, 230, 218)` on all four, and no white overlay. Close pressed: centre = `restCentre` ±1 px, scale `0.95` |
-| C3 | KEYBOARD FOCUS + POINTER | `kbd`, the `*-focus.png` crops, `afterMute.fv` | `fv` true, offset `2px` on all four at all 3 viewports; view ≥ 4 crops. Previous, Next and Mute show the ring on all four sides. Close shows left, top and bottom; its right side is off-screen, as at HEAD (record: B-R507-PLAYER-CLOSE-RING-CLIPPED). After a mouse click on Mute, `fv` is false |
-| C4 | CONTRAST | `restContrastVsPanel` | 7.2 on all four at every viewport (≥ 3:1). Below 3 is a Medium |
-| C5 | LAYOUT | `layout.json` vs `probe/head/layout.json` | Player height 90 at 1440 and 1280; 243.8 ±1 at 375 (D5). `playCx` 720 / 640 / 187.5. One full-player screenshot per viewport: the title does not overlap Close, and nothing wraps |
-| C6 | BEHAVIOUR (real audio) | `behaviour.json` | At each viewport: the preview plays (`mediaB.t` > `mediaA.t`). Mute → `vol` 0, and an "Unmute" button exists with title "Unmute". Unmute → `vol` 0.7. Close → no Close button, and the media is `paused` at `t` 0. 0 page errors. **Record:** `activeAfterClose` is BODY, as at HEAD (B-R507-PLAYER-CLOSE-FOCUS-LOST); another value is reported, not failed |
-| C7 | GREP | From `store/`: `python3 -I …/b-round-506/scan-nonbrand.py . /tmp/n.json` and `python3 -I …/b-round-497/scan-brand.py . /tmp/s.json`; K3 | `54 hits; files 28`; brand `92 hits; 31 solid`; K3 `<button=1 <IconButton=4 bg-white/10=0 hover:text-error=0` |
-| C8 | TESTS | `npx vitest run --reporter=verbose $(cat …/b-round-507/covering-files.txt)` | 8 files, 88/88; N1-1…N1-7 present; no test above 2,500 ms |
-| C9 | MUTANTS | Copy `store/`'s working tree (no `node_modules`, `.git` or `build`) outside `store/`, and symlink `node_modules`. Run `python3 -I …/b-round-507/mutants-508.py <copy> <abs c-round-508/mutant-logs> …/b-round-506/head-AudioPlayer.tsx.txt` | M0–M14 all `OK` and `restored rc 0`, matching `b-round-507/mutants-508.txt`. Above all: **M7 (Previous↔Next swap) and M8 (Close↔Next swap) are red on N1-2**, and M11/M14 (extra class) are red on N1-7 |
-| C10 | DOCS | `git diff 3021b30 -- docs/design/DESIGN_SYSTEM.md`; doc 328 | DESIGN_SYSTEM: only the one added `ghost` line. Doc 328: the 7 headings (L26 subsequence). l.4 byte-equal to `**სტატუსი:** In Progress (stage N1 of DPG-BUTTON-CLEANUP-2-NONBRAND; C round 508 PASS)` [K23]. l.44 names `app/styles/app.css` and `app/styles/base/utilities.css`. N1-6 and N1-7 lines present; mutant line `M0–M14`. Every number in D1–D5 traces to `sketch.jsonl` / `layout.json` or `after*`. `grep -rn 'C round [0-9]* pending' docs/implementation` finds 0 |
-| C11 | PROTECTION + STUDIO | Fresh no-credential context: `/studio/1`, `/account/downloads`, `/studio-lab` | `/studio/1` and `/account/downloads` show "Sign in required" and no download link. `/studio-lab` opens the demo at 1440 and 1280 (one screenshot each). Check 2 rc 0 |
-| C12 | CLAIMS + SOURCE-SCOPE (end) + L57 | `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-507/claims-508.sh`, compared with `b-round-507/claims-508-sketch-output.txt`; C0 again; `python3 -I tools/l57-check.py c-round-508.json c-round-508/l57-check.txt` | No `MISSING`. Identical except K1 (store HEAD `3021b30`, or the loop-state commit) and K2 (store 4 changed, scratch 2). C0 still holds. L57 rc 0, every `null` naming its reason |
+| C0 | SOURCE-SCOPE (start and end) | `git status --short --untracked-files=all`; frozen checks 1 and 2 | Only the grants changed (4 M + 3 untracked); rc 0 |
+| C1 | RENDER-STUBBED (1440×900, 1280×720, 375×812) | Free stub, anonymous | Exactly 1 `button` named "Get it free", `type=button`, no `svg`; "Complimentary Download" count 0. Width equals the sidebar column ±1 px. Label on one line (the text span's height equals its line-height). The button height is **record**. Computed bg equals the resolved `--color-brand` value (record the rgb). One screenshot per viewport. Header still shows "$0.00 USD", Add to Cart and Buy Now |
+| C2 | ANON CLICK-STUBBED | Click it at 1440 and 1280 | The sign-in modal opens. It has no `role=dialog` at HEAD (B-R509-AUTHMODAL-NOT-A-DIALOG), so detect it by its email field and its "Close" button: each count goes 0 → 1. A toast with the text "Sign in to get it free." is visible; URL unchanged; 0 page errors. Then close the modal and click header Buy Now: its toast reads "Please sign in to continue with your purchase" |
+| C3 | KEYBOARD-STUBBED | Tab from the page top until focus reaches the button; record the previous stop | Focus reaches "Get it free", with `:focus-visible` true and a visible ring (crop). Enter gives the C2 result. After Esc, `document.activeElement` is the "Get it free" button with `:focus-visible` true. This is the HEAD behaviour of header Buy Now (`b-round-508/probe/focus-head.json`: Buy Now keeps focus, `fv` true, at 1440 and 1280) |
+| C4 | VERSION-STUBBED | Split stub | Standard is selected: the button is present. Click the Premium card: absent, and the header shows $9.00. Click Standard: present again |
+| C5 | PAID UNSTUBBED | `/products/middle-east` (real mock, $29) | No "Get it free" and no "Complimentary Download"; header Buy Now and Add to Cart unchanged; anonymous Buy Now still shows its toast and modal |
+| C6 | SIGNED-IN CLICK-STUBBED | Signed-in stub, not owned, free stub | One click: POST `/api/cart/items` ×1 with `productVariantId` = the Standard variant id, `cart/checkout` ×1 and `payments/checkout` ×1. While checkout is held, both the sidebar button ("Processing...") and header Buy Now are disabled. Then the page lands on `/__stripe-stub`. A double-click still sends 1 checkout POST. The counts are the CartContext `buyingRef` contract, measured for the header by the same harness in round 504 (J3/J4). B did not run them on this button, so a different count is reported with its log, not ruled in advance |
+| C7 | OWNED-STUBBED | Signed-in stub, `/api/downloads` lists harbour-lights as available | No "Get it free"; the header shows its owned state |
+| C8 | GREP | From `store/` | `Complimentary Download` 0 in `app/`; `trackBeginCheckout(` only in `useBuyNowAction.ts` among `app/components` and `app/hooks`; nonbrand scan 53, no ProductSidebar entry; `ProductSidebar.tsx` has no `<button` |
+| C9 | REAL $0 ORDER | Backend | **BLOCKED**: backend unavailable in the cloud (FREE-CHECKOUT-REAL-BACKEND). Not PASS, and not A's fail |
+| C10 | TESTS + MUTANTS | The covering command from §3; then mutants MA–MI on a copy outside `store/` | rc 0, 9 files, SF1–SF9 and PU7 present, no test > 2,500 ms. Each mutant turns its named row red. The copy is restored |
+| C11 | DOCS | Doc 329 | 7 headings in order; l.4 byte-equal to `**სტატუსი:** Completed (C round 509 PASS)`; every cited test row exists |
+| C12 | PROTECTION + STUDIO | Fresh context with no credentials | `/studio/1` and `/account/downloads` show "Sign in required" and no download link; `/studio-lab` opens the demo at 1440 and 1280; check 2 rc 0 |
+| C13 | JOURNEY (L54) | 1440 | `/store` → free-stubbed product (screenshot) → "Get it free" → sign-in modal (screenshot). STUBBED |
+| C14 | CLAIMS + L57 | `bash /home/runner/czaba-project/tmp/studio-real-loop/b-round-508/claims-509.sh`, compared with `b-round-508/claims-509-planning-output.txt`; `python3 -I tools/l57-check.py c-round-509.json c-round-509/l57-check.txt` | No MISSING. Only the K1/K2 tree state and the K11 grant files differ, as expected after A. L57 rc 0 |
 
-- **Gate rows** (`gate` in the JSON, never `passed`): the full vitest run, the build, Biome and `npm run verify`.
-- **Blocked:** none expected.
+- **Gate rows** (in `gate`, never in `passed`): the full vitest suite, build, Biome and `npm run verify`.
+- **Blocked:** only C9.
 - **Neighbours that could break:**
-  - the player's progress and volume ranges (`audio-preview-player`, the SABA-B-14 seek thumb): covered by the covering set and C6;
-  - ChatInput "Send message" (the other `IconButton` user): `IconButton.tsx` is unchanged;
-  - `store-focus-ring`: in the covering set.
-- **L22:** if A STOPs, C runs only C0, C12 and C11. A STOP that names an unruled Medium+ is a short FAIL.
-- **Closing:** with C PASS and `browserVerified` true, NONBRAND stage N1 is verified, and A-R507-CR-1, CR-2 and CR-4 close.
+  - the header's Buy Now: SF2, SF3, C2, C5 and C6;
+  - the Studio link in the sidebar: studio-link-ui is in the covering set;
+  - PurchaseHeader source scans: B2C-8 and store-theme-tokens;
+  - the price-unavailable state: SF6 and PU rows.
+- **L22:** if A STOPs with no diff, run only C0, C12 and C14. A STOP that names an unruled Medium or higher is a short FAIL.
+- **On closing:** C PASS with `browserVerified` true closes B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD for the cloud. FREE-CHECKOUT-REAL-BACKEND stays open.
 
-## 5. B's pre-check (`b-round-507/`, on `/home/runner/b507-scratch` = a `git archive` of `3021b30` + v2 + the delta, outside `store/`)
+## 5. B's pre-check (`b-round-508/`)
 
-| Check | Result | Log |
+| Check | Result | File |
 |---|---|---|
-| tsc / lint / Biome (2 files) | rc 0 / rc 0, 175 warnings / rc 0, no fixes, 1 warning | `precheck-tsc.log`, `precheck-lint.log`, `precheck-biome.log` |
-| Covering tests | 8 files, 88/88 (slowest LT7 753 ms) | `precheck-covering.log` |
-| Full suite | 304 files / 4,386 tests, rc 0 | `precheck-full.log` |
-| Build | rc 0 | `precheck-build-sketch.log` |
-| Mutants | M0–M14 OK (M7/M8 → N1-2; M9/M10/M13 → N1-6; M11/M14 → N1-7; M12 → N1-4), `restored rc 0` | `mutants-508.txt`, `mutant-logs/` |
-| Sketch review | tech-lead on delta v1: 3 Medium + 4 Low test-strength findings. R1, R2 and R4 were fixed in v2; R3, R5 and R6 are pre-ruled #11–#13 | `sketch-review.md`, `sketch-sha-history.txt` |
-| Gap proven on v2 | A's M7 on v2: 5/5 green | `a-round-507/mutant-swap.log` [K25] |
-| Delta reproduces the tree | fresh archive + v2 + delta: checks 4 and 1 rc 0; in `store/`, check 3 and `git apply --check` rc 0 | (this table) |
-| Claims | planning and sketch outputs, no MISSING | `claims-508-planning-output.txt`, `claims-508-sketch-output.txt` |
+| Bug in the browser (stub) | 1440 and 1280: BUTTON, no href/type; click changes nothing, 0 dialogs, 0 page errors | `probe/free-stub.json`, `free-1440.png`, `free-1280.png` |
+| Covering at HEAD | 8 files / 112 tests, rc 0, none ≥ 1,000 ms | `head-covering.log`, `covering-files-head.txt` |
+| Frozen pins | tree 1,421 files rc 0; protected rc 0; pre-sha of 4 granted files | `r509-tree-sha256.txt`, `r509-pre-sha.txt` |
+| Nonbrand scan at HEAD | 54 hits; ProductSidebar l.75 is one of them | `b-round-508/nonbrand-head-509.json` |
+| L23 collision grep | `Complimentary Download` in tests: only PU7 (granted). `ProductSidebar` is rendered alone in `studio-link-ui.test.tsx` l.146/153 (the prop is optional, so the file is unchanged). PurchaseHeader is scanned by B2C-8 and store-theme-tokens l.696 (JSX unchanged) | this table |
+| Consult | product-designer ruling (a) | `consult-product-designer.md` |
+| L23 scratch run | Archive `cf89736` + the hook extracted + `PurchaseHeader` on the hook + the sidebar `Button` (at `/home/runner/b508-scratch`): tsc rc 0; full suite 304 files, 1 failed (only PU7, granted), 303 passed | `scratch-full.log` |
+| HEAD focus probe | Header Buy Now → Enter → toast + modal (email field 1, Close 1, `role=dialog` 0) → Esc → focus stays on Buy Now, `fv` true | `probe/focus-head.json`, `probe/focus-head.cjs` |
+| Claims | `claims-509.sh` K1–K14; no MISSING | `claims-509-planning-output.txt` |
 
 ## 6. After this round
-1. **REGRESSION** comes first if the planning happens on or after 2026-11-16.
-2. **Round 509: B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD** (Medium, bug-first). Needs:
-   - a product-designer target ruling;
-   - a jsdom repro;
-   - ROOT-REQ-MOCK-STEMS-AND-FREE-FIXTURE for the browser half. Without it, that half stays a named open row, not a PASS.
-3. **NONBRAND N2–N9**, in the consult's order, then the StemsPlayerModal pair once the fixture exists.
+1. **RETRO at round 510.** It also takes RC-R507-SWAP-MUTANT and the round 509 result.
+2. **REGRESSION** is due on or after 2026-11-16, so it is first if the planning happens then.
+3. **NONBRAND N2–N9** in the consult's order. Stage 2 (product page) now has PurchaseHeader ×3 and PlayStems. The StemsPlayerModal pair waits for the stems fixture.
 4. **Then:**
    - PD-R498-404-SECONDARY-ALIGN;
    - the stage-2 close-out;
    - the rest of DPG P1;
    - the DP gate;
    - P2.
-5. **RETRO** at round 510.
 
-## Claims (`b-round-507/claims-508.sh` = round 507's K1–K18 plus K19–K26)
-- K19: n1 test shape (its=7, clearAllMocks, per-click loop, togglePlayPause in list, N1-6, N1-7, ghost reference)
-- K20: gate 507 skipped
-- K21: c-round-507 FAIL, with its one Medium
-- K22: `AudioPlayer.tsx` sha = v2 pin
-- K23: doc 328 l.4
-- K24: mutants-508 15 OK, 0 MISMATCH
-- K25: A's swap proof on v2
-- K26: artifacts present (incl. `sketch-review.md`)
+## Claims (`b-round-508/claims-509.sh`; planning output `claims-509-planning-output.txt`)
+- **K1–K2:** store HEAD and changed-path count.
+- **K3:** gate 508 published `cf89736`.
+- **K4:** `c-round-508` PASS, browser and real verification true, 0 bugs.
+- **K5:** the free-stub probe (dead button).
+- **K6:** the HEAD focus and modal probe.
+- **K7:** HEAD covering run, 8 files / 112 tests.
+- **K8:** scratch full suite; only PU7 fails.
+- **K9:** nonbrand scan at HEAD, 54 hits including ProductSidebar l.75.
+- **K10:** at HEAD the sidebar has the dead label and the catalogue-price rule.
+- **K11:** grants and tree pins.
+- **K12:** PurchaseHeader at HEAD: sign-in text, sellable list, and `isAddingToCart` in `isDisabled`.
+- **K13:** hooks barrel count.
+- **K14:** artifacts present.

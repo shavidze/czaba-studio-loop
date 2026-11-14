@@ -1,7 +1,7 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 507 C FAIL (browserVerified/realVerified false): A STOPped on the Medium A-R507-CR-1-N1-2-SWAP-MUTANT (the N1-2 test passes when Previous/Next swap handlers; proven by A's M7 on v2). C ran only C0/C11/C12, so NONBRAND N1 is not verified; gate 507 skipped, baseline stays 3021b30 with v2 in the worktree (D-29z1833). B does not downgrade the Medium: round 508 re-dispatches N1 with a sketch v3 delta touching only the n1 test and doc 328 (per-click asserts over six actions, N1-4 height, new N1-6 and N1-7 exact class set, doc 328 l.4/CSS path); a tech-lead sketch review of delta v1 found surviving mutants, fixed in delta v2 405384eb (D-29z1836). Proven on a scratch tree: tsc rc0, lint 175, Biome 1 warning, covering 8/88, full 304/4386, build rc0, mutants M0-M14 OK with M7/M8 swaps red (D-29z1834). AudioPlayer.tsx is byte-identical to v2, so the round-507 browser oracles stay valid. B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD moves to round 509 (D-29z1835). Not COMPLETE: N1 browser half, NONBRAND N2-N9 + Stems modal, stage-2 close-out, rest of DPG P1/P2 and the DP gate, STORE-2c..5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, STUDIO-PERFORMANCE remainder, T12-ADVANCED, STEM-LANES, phase-2 entries, the High B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED with root, deferred Lows before final acceptance. Not BLOCKED: round 508 needs no external input.",
- "nextTask": "Round 508: DPG-BUTTON-CLEANUP-2-NONBRAND stage N1 re-dispatch. Baseline HEAD 3021b30 with sketch v2 already in the worktree (do not re-apply or revert). A: frozen checks 1-3 (b-round-507/r508-tree-sha256.txt, protected, r508-pre-sha.txt), git apply b-round-507/sketch-508-delta.patch.txt (sha 405384eb), checks 4 and 1; runs typecheck, lint (175), Biome (2 files, 1 warning), covering 8 files/88, swap proof (M7/M8 red on N1-2) outside store/, code-reviewer. C runs C0-C12 at 1440/1280/375 with real preview audio using the round-507 harnesses/oracles (b-round-506/probe), C9 mutants-508.py M0-M14, C10 doc 328 l.4 'C round 508 PASS', C12 claims-508.sh.",
+ "reason": "Round 508 C PASS (browserVerified/realVerified true, 0 bugs); gate 508 published cf89736 = baseline. NONBRAND N1 verified; A-R507-CR-1/2/4 closed; round-508 Lows deferred (D-29z1837/D-29z1838). Round 509 = Medium bug B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD, reproduced by B in the real browser via a client-navigation _data stub (b-round-508/probe/free-stub.json); product-designer ruling (a): 'Get it free' runs the Buy Now handler shared through a new useBuyNowAction hook, follows the selected version price, Button primary lg (D-29z1839). Saba asked SABA-Q-509-FREE-DELIVERY / BUYNOW-FREE-LABEL with defaults shipped (D-29z1840). A second advisor pass added the L23 scratch full-suite run (only granted PU7 fails), a shared sellable predicate, isAddingToCart parity, claims K1-K14, and the pre-existing Medium B-R509-AUTHMODAL-NOT-A-DIALOG under SYS-R495-SHARED-DIALOG (D-29z1841). Not COMPLETE: NONBRAND N2-N9 + Stems pair, rest of DPG P1/P2 and the DP gate, STORE-2c..5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS, STUDIO-PERFORMANCE remainder, T12-ADVANCED, STEM-LANES, phase-2 entries, High B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED (root), backend-blocked purchase rows, deferred Lows. Not BLOCKED: round 509 needs no external input.",
+ "nextTask": "Round 509: B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD on baseline cf89736. A (grants b-round-508/grants-509.txt, 7 paths): extract PurchaseHeader handleBuyNow unchanged into app/hooks/useBuyNowAction.ts (signInMessage option); ProductDetailPage computes showGetFree (selected version price 0, sellable, id>0, not owned) and passes an optional getFree prop; ProductSidebar renders <Button type=button variant=primary size=lg fullWidth> 'Get it free' (Processing... when busy), removing the dead 'Complimentary Download' button; PU7 rewritten; new store-sidebar-free-r509.test.tsx SF1-SF9; doc 329; mutants MA-MI; code-reviewer. C: free _data stub (b-round-508/probe/free-stub.cjs) at 1440/1280/375, anon click -> sign-in modal + toast, keyboard, version switch, paid unstubbed, signed-in click and owned STUBBED (journey-504 harness), journey row, grep, protection; real $0 order BLOCKED (backend).",
  "remaining": [
   "CART-REAL-BACKEND",
   "SABA-Q-502-UPGRADE-VARIANT",
@@ -107,10 +107,13 @@
   "SIG-R507-NONBRAND-KEEP-PRIMITIVES",
   "B-R507-PLAYER-CLOSE-FOCUS-LOST",
   "B-R507-PLAYER-CLOSE-RING-CLIPPED",
-  "A-R507-CR-1-N1-2-SWAP-MUTANT",
-  "A-R507-CR-2-N1-4-ICON-STATES",
-  "A-R507-CR-4-DOC328-CSS-PATH",
   "A-R507-CR-3-GHOST-PRESS-DOC",
-  "B-R508-VOLUME-ICON-LOW-SAME"
+  "B-R508-VOLUME-ICON-LOW-SAME",
+  "FREE-CHECKOUT-REAL-BACKEND",
+  "SABA-Q-509-FREE-DELIVERY",
+  "SABA-Q-509-BUYNOW-FREE-LABEL",
+  "SIG-R508-PLAYER-VOLUME-CONTROL",
+  "SABA-Q-509-FREE-LABEL-WORDING",
+  "B-R509-AUTHMODAL-NOT-A-DIALOG"
  ]
 }

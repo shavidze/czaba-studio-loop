@@ -1,0 +1,53 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/c508-mutant-copy[39m
+
+ [32m✓[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-1: each icon control is one button whose title equals its accessible name[32m 116[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-2: each control calls only its own action, and Mute flips to Unmute at volume 0[32m 47[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-3: the controls carry the IconButton ghost classes at their sizes, and Close keeps its position[32m 23[2mms[22m[39m
+ [31m×[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-7: each control has exactly the ghost IconButton classes plus only its own position classes[32m 38[2mms[22m[39m
+[31m   → expected [ 'active:scale-95', …(14) ] to deeply equal [ 'active:scale-95', …(13) ][39m
+ [32m✓[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-4: no icon control keeps a retired hand-rolled token, and each icon keeps its size[32m 17[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-6: the volume icon keeps 20px at volume 0 (Unmute) and at 0.01, which is still labelled Mute[32m 24[2mms[22m[39m
+ [32m✓[39m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-5: AudioPlayer.tsx renders the four icon controls through IconButton and only Play stays a native button[32m 0[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m6 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 07:56:06
+[2m   Duration [22m 1.14s[2m (transform 284ms, setup 0ms, import 519ms, tests 265ms, environment 266ms)[22m
+
+[90mstderr[2m | app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22m[2mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22m[2mN1-1: each icon control is one button whose title equals its accessible name
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-button-cleanup-n1.test.tsx[2m > [22mDPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton[2m > [22mN1-7: each control has exactly the ghost IconButton classes plus only its own position classes
+[31m[1mAssertionError[22m: expected [ 'active:scale-95', …(14) ] to deeply equal [ 'active:scale-95', …(13) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -7,10 +7,11 @@[39m
+[2m    "hover:bg-elevated",[22m
+[2m    "hover:text-foreground",[22m
+[2m    "inline-flex",[22m
+[2m    "items-center",[22m
+[2m    "justify-center",[22m
+[31m+   "opacity-70",[39m
+[2m    "rounded-lg",[22m
+[2m    "text-muted",[22m
+[2m    "transition-all",[22m
+[2m    "w-10",[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/__tests__/store-button-cleanup-n1.test.tsx:[2m203:34[22m[39m
+    [90m201| [39m      const tokens = classTokens(screen.getByRole('button', { name: co…
+    [90m202| [39m      const expected = [...ghostReferenceTokens(control.iconButtonSize…
+    [90m203| [39m      [34mexpect[39m([[33m...[39mtokens][33m.[39m[34msort[39m())[33m.[39m[34mtoEqual[39m([[33m...[39mexpected][33m.[39m[34msort[39m())[33m;[39m
+    [90m   | [39m                                 [31m^[39m
+    [90m204| [39m    }
+    [90m205| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
