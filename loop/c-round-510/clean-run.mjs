@@ -1,0 +1,23 @@
+import { createRequire } from 'node:module';import fs from 'node:fs';
+const require=createRequire('/home/runner/czaba-project/store/package.json');const {chromium}=require('@playwright/test');
+const D=process.argv[2];const br=await chromium.launch({args:['--autoplay-policy=no-user-gesture-required']});const res={};
+for(const [w,h] of [[1440,900],[1280,720]]){const k=`${w}x${h}`;
+ const c=await br.newContext({viewport:{width:w,height:h},acceptDownloads:true});const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(String(e).slice(0,160)));
+ await p.addInitScript(()=>{window.__a={starts:[],ctx:[]};const S=AudioBufferSourceNode.prototype,o=S.start;S.start=function(...a){window.__a.starts.push({when:a[0]??0,dur:this.buffer?.duration,ch:this.buffer?.numberOfChannels});return o.apply(this,a)};const AC=window.AudioContext;window.AudioContext=class extends AC{constructor(...a){super(...a);window.__a.ctx.push(this)}}});
+ await p.goto('http://127.0.0.1:5173/studio-lab',{waitUntil:'domcontentloaded'});
+ await p.waitForSelector('[data-testid="arrangement-timeline-scroller"]');await p.getByText('Demo collection ready').first().waitFor({timeout:120000});await p.waitForTimeout(1200);
+ const st=()=>p.evaluate(()=>document.querySelector('[data-testid="arrangement-playback-state"]')?.textContent.trim());
+ const clk=()=>p.evaluate(()=>{const e=[...document.querySelectorAll('*')].find(x=>x.children.length===0&&/^\d+:\d{2}\.\d+$/.test(x.textContent.trim()));return e&&e.textContent.trim()});
+ const clips=()=>p.evaluate(()=>new Set([...document.querySelectorAll('[data-clip-id]')].map(e=>e.getAttribute('data-clip-id'))).size);
+ const r={clips0:await clips()};
+ await p.getByTestId('arrangement-library-list').getByRole('option').first().click();await p.keyboard.press('Enter');
+ await p.waitForSelector('[data-clip-id]');r.clips1=await clips();await p.waitForTimeout(3000);
+ r.stateBefore=await st();await p.keyboard.press('Space');await p.waitForTimeout(1500);r.statePlaying=await st();r.clkPlaying=await clk();
+ await p.keyboard.press('Space');await p.waitForTimeout(500);r.stateStopped=await st();r.clkStopped=await clk();
+ r.audio=await p.evaluate(()=>({ctx:window.__a.ctx.map(c=>c.state),starts:window.__a.starts}));
+ await p.getByRole('button',{name:/^Export/}).first().click();await p.getByRole('dialog').waitFor();
+ await p.getByRole('dialog').getByText(/WAV · 24-bit/).first().click().catch(()=>{});
+ await p.waitForFunction(()=>{const b=[...document.querySelectorAll('[role="dialog"] div.justify-end > button')].at(-1);return b&&!b.disabled},null,{timeout:60000});
+ const btn=p.getByRole('dialog').locator('div.justify-end > button').last();r.btn=await btn.textContent();
+ const dl=p.waitForEvent('download',{timeout:120000});await btn.click();const d=await dl;const f=`${D}/clean-${k}.wav`;await d.saveAs(f);r.file=d.suggestedFilename();r.bytes=fs.statSync(f).size;r.errs=errs;res[k]=r;await c.close();}
+fs.writeFileSync(D+'/clean-run.json',JSON.stringify(res,null,1));console.log(JSON.stringify(res));await br.close();

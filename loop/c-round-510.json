@@ -1,0 +1,119 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-14T09:13:08.4445339Z",
+  "round": 510,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C510-RETRO-MEDIAN-IS-MEAN",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "Open b-round-509/consult-tech-lead.md l.22 and retros/retro-510.md §7 ('sketch-იანი — მედიანა ≈ $17')",
+    "Take the B cost of the 11 full-sketch rounds (496, 498–507) from b-round-509/data/cost-rows.json: 11.13, 13.20, 14.35, 14.71, 15.16, 15.65, 17.14, 18.51, 20.02, 23.74, 24.80"
+   ],
+   "expected": "A stated median equals the median of the cited rounds.",
+   "actual": "The median is $15.65; $17.13 is the mean. The range $11.13–24.80 is right. The counter target 'round median ≤ $17' for RETRO 525 sits next to the same figure.",
+   "evidence": "c-round-510.md section 'Retro traceability'; recomputed from cost-rows.json"
+  },
+  {
+   "id": "C510-LESSON-LINE-UNIT",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "Read retro §9 row 'lessons.md …' and current-task.md K7 line ('longest 4,753 B')",
+    "LC_ALL=C awk length on b-round-509/lessons-before-510.md"
+   ],
+   "expected": "'4,753 B' is a byte count.",
+   "actual": "4,753 is the character count; the longest line is 4,771 bytes before and after. The ≤ 4,800 B counter still holds, so the verdict is unchanged.",
+   "evidence": "c-round-510.md; python measurement in this round (4771 bytes / 4753 chars for both files)"
+  },
+  {
+   "id": "C510-RETRO-REMAINING-79",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "Read retro §4 first bullet: '18 deferred Low' and 'დანარჩენი 79 deferred-ის root cause კლასიფიცირებული არ არის'",
+    "Compare with data/deferred-added.txt (79 new in total) and consult-tech-lead.md l.28 ('classified the 78 ids')"
+   ],
+   "expected": "The unclassified remainder is the 79 minus the 18 classified, and the id count agrees between retro and consult.",
+   "actual": "The wording gives 79 as the remainder (61 if the 18 are among the 79); the consult speaks of 78 ids and the retro of 79.",
+   "evidence": "retros/retro-510.md §4; b-round-509/data/deferred-added.txt"
+  }
+ ],
+ "passed": [
+  "G510-AUTH (row 2): anonymous 1440 and 1280, localStorage.auth_user null, /studio-lab opens demo ('no sign-in required'), /studio/middle-east and /account/downloads show 'Sign in required' with no stem or download URL, GET /api/studio-token without Authorization = 401 'Please sign in to access Studio.' with no URL; 4 further runs: 0 page errors",
+  "STUDIO-SMOKE-510 (row 3): clips 0→1, playback-state Stopped→Playing→Stopped, clock 00:01.471 while playing, AudioContext running, 1 AudioBufferSource started (when 0.05, 101.352 s, 2 ch); exported WAV (both viewports, byte-identical sha256 5fadd97a…): RIFF/WAVE PCM 24-bit 48 kHz stereo, 101.352 s, 4,864,896 frames, riff size consistent, peak 1.0, RMS 0.172, 0 bad samples, non-zero fraction 0.9977 ; one clean run per viewport (c-round-510/clean-run.json: add, wait 3 s, Space → Playing 00:01.471, Space → Stopped, Export WAV → clean-*.wav) gave the same WAV, sha256 5fadd97a…",
+  "RT-SCREEN (row 4): counts 138/168/118/144 and outside 97/124/86/101 equal B at both viewports; journey equal to B (3 clips left 512/1152/1792, status names Melody at 00:48.000 nearest free spot); only delta: 1440 positionAfterPlay 00:01.462 vs 00:01.471 (status timing)",
+  "CLAIMS (row 5): claims-510.sh output identical to B's planning output, no MISSING, stderr empty",
+  "RT-NUM (row 6): B's 13 scripts re-run into c-round-510/data, every .txt output byte-identical to B's; cost totals independently recomputed from *-result.json ($230.77 B vs 230.74 rounding, A 52.68, C 10.61, total 294.06, B share 78.5 %, median 19.40 vs 19.39, top five equal); verdicts PASS 12/FAIL 2/BLOCKED 1, browserVerified 12/15, published 11 and STOP rounds 496/499/505/507 recomputed from c-round JSON, gates and a-round headers. Deferred 79/3 and category counts rely on B's scripts (reproduced, not independently derived)",
+  "RT-CAUSE (row 7): spot-checked a-round-496 l.27-37, 499/505/507 headers, a-round-509 deviations 0-2, useAnalytics.ts:77 at f5d1b9e, mutants/sketch-review lines of 495/498/504/506/507, a-round-502/504 'A wrote no code' lines; facts present in sources; opinions labelled tech-lead/product-designer",
+  "RT-IDS (row 8): retro_runs has 510; next_due names round 525; DPG-BUTTON-CONTRACT-TABLE closes 18/18 with the required status; three RC ids 'adopted (D-29z1847)'; four TLM ids 'joined task SABA-DEVICE-CHECKS (D-29z1846)' (found under tech_lead_manual_checks, not by find-ids)",
+  "RT-LESSONS (row 9): 59 lines, 57,494 B, longest line 4,771 B, 3 parts; diff hunks 3,6,36,43-44,49 = K8; changes map to E1-E7/T1; E1 and E2 verbatim from consult §5 A/B, E3/E7 with B's disclosed additions",
+  "RT-CHECKERS (row 10): L57 15/15; L58 13/15 (507, 508 INCOMPLETE); ledger-check rc 1 on 498,499,500,502,503,504,507,508 and 0 elsewhere; both checkers rc 0 on current-task.md; fixture no ledger rc 1, ledger without ZZ9 rc 1, with ZZ9 rc 0 (all inside c-round-510/ledger-test)",
+  "RT-SABA (row 11): §12 and Q6 are proposals/information; SR-510-1 awaiting_user, moves no position (ruler '0:00' half hidden at x≈517 confirmed in screen510-full-S0-1440x900.png); Q1-Q3, Q5, Q6 carry defaults; nothing presented as Saba's decision. Observation: Q4 (root requests) lists no defaults",
+  "RT-PRIMITIVES (row 12): K21 counts and lines equal; primitives-commits-since-3bcf8cb=0",
+  "SOURCE-SCOPE (rows 1 and 13): git status 0 lines at start and end, HEAD f5d1b9e, r510 manifest rc 0 (1,428 entries), protected manifest rc 0"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest suite",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "info": [
+  "INFO-C510-COLD-HYDRATION: first anonymous load of /studio-lab in a new context at 1440 hit 'Invalid hook call / Cannot read properties of null (reading useState)' (cold Vite dev dependency hydration, same as round 509); 4 later runs 0 errors; environment, not a Studio bug",
+  "INFO-C510-FINDIDS-GAP: tools/find-ids.py does not search tech_lead_manual_checks, so the four TLM ids of Q1 report NOT-FOUND although they are in backlog.json",
+  "INFO-C510-Q4-NO-DEFAULT: Q4 in questions-retro-510.md is a list of root requests with no default",
+  "INFO-C510-JOURNEY: stems still land one after another and Export reads 00:00.000-01:04.000 (STEM-LANES, not built); matches B's journey [K6]",
+  "INFO-C510-SPACE-AFTER-ADD: the first Space within about 3 s of adding a clip does not start playback (Stopped, no source, status says the source 'is ready'); the second Space plays. This is pre-ruled: round 391 task (PERF-13b-ii, D-29z1322..D-29z1329) 'Play still does not start (the round-382 ruling: no auto-start)', test EV3 in decoded-buffer-eviction-ui.test.tsx ('Play again → plays'). B's own dry run (b-round-509/probe/play-wav.json c1 = 00:00.000) shows the same. Evidence c-round-510/space-probe.json, smoke2.json. Ableton conformance unconfirmed; not a bug of this round."
+ ],
+ "manifestPaths": [
+  "c-round-510/rows23.json",
+  "c-round-510/wav-decode.json",
+  "c-round-510/clean-run.json",
+  "c-round-510/clean-wav-decode.json",
+  "c-round-510/smoke2.json",
+  "c-round-510/space-probe.json",
+  "c-round-510/screens/screen510.json",
+  "c-round-510/claims-C.txt",
+  "c-round-510/checkers-window.txt",
+  "c-round-510/ledger-test/",
+  "c-round-510/data/",
+  "c-round-510/progress.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": 0,
+ "claimCheckMinutes": 1,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": null,
+ "gateChecksNamed": [
+  "full vitest",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null,
+ "notes": {
+  "not_covered": [
+   "Studio 'fit video' not exercised: no owned video loaded; RETRO round, no Studio change; no video claim made",
+   "Ableton conformance, reference-first and screen budget do not apply to a RETRO round"
+  ],
+  "l57": "fields without a value are null as in c-round-495.json: RETRO has no assert, mutant or sketch row",
+  "limits": [
+   "deferred-Low counts (79/3) and category splits are reproduced from B's scripts, not derived independently",
+   "RT-CAUSE spot-checked, not every quoted line read"
+  ],
+  "cleanup": "temporary files created outside c-round-510/ (/tmp/c510-*, /tmp/ledger-orig.md, /tmp/l58-*, /tmp/led-*) were removed; the mock API started for RT-SCREEN was stopped by PID (0 mock processes remain)"
+ }
+}

@@ -1,14 +1,14 @@
-# Active loop summary (2026-11-14T08:46:52.118Z)
+# Active loop summary (2026-11-14T09:26:28.948Z)
 
-- backlog.json 3607 KB -> active view 318 KB
-- status: G_ROOT_GATE round 509
-- servers: `{"checkedUtc":"2026-11-14T08:35:19.4112089Z","round":509,"attempt":1,"store":200}`
+- backlog.json 3618 KB -> active view 317 KB
+- status: G_ROOT_GATE round 510
+- servers: `{"checkedUtc":"2026-11-14T09:13:08.4445339Z","round":510,"attempt":1,"store":200}`
 - last publication: f5d1b9e87e5cad8880cac874d85ba78086b02d3c (rounds 509-509)
-- last root gate: round 509 published - commit f5d1b9e87e5cad8880cac874d85ba78086b02d3c pushed
+- last root gate: round 510 skipped - no real changes
 
 ## Current items: -
 
-## Open findings: 1025 (22 Critical/High/Medium)
+## Open findings: 1023 (21 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / tracked by task SAFARI-CHECKS (D-29z1705) | listed in the Safari list (user-review/questions-retro-465.md Q2, D-29z1638); does not block | environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the c …[see backlog.json] / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
@@ -27,8 +27,7 @@
 - **HIREUS-EMAIL-CLIENTS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Brevo and a test send to Gmail/Outlook/Apple Mail (Saba); questions-retro-480.md Q4 / Hire-Us internal e-mail in real clients, opened as a task by L46
 - **B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED** / high / open_root (D-29z1757): needs a backend authenticated password-change endpoint and a change in protected app/lib/auth.ts (loop may not edit); question ROOT-REQ-PASSWORD-CHANGE-ENDPOINT; does not block loop rounds, blocks final COMPLETE / Account 'Change password' can never succeed: app/lib/auth.ts updatePassword verifies the current password via login, then always throws 'Pas
 - **SABA-DEVICE-CHECKS** / medium / open_tech_lead_manual (D-29z1768; does not block): opened by L46 after two RETROs without an answer (questions-retro-480.md Q1, questions-retro-495.md Q1); blocked on Saba's own device / Saba's-device checks opened as one task by L46
-- **DPG-BUTTON-CLEANUP-2-NONBRAND** / medium / in_progress (D-29z1837/D-29z1839): stage N1 verified (C round 508 PASS, published cf89736); round 509 migrates scanner hit ProductSidebar l.75 onto Button primary lg fullWidth together with the B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD fix; N2-N9 (consult order, sidebar removed from stage 2) and the StemsPl …[see backlog.json] / Hand-rolled controls without a brand fill bypass Button.tsx (Saba DPG item 7): whole-tag scan 58 tags / 29 files at 3021b30 + LeadMagnet Clo
-- **B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD** / medium / dispatched round 509 (D-29z1839): product-designer ruling (a) "Get it free" = Buy Now handler shared via app/hooks/useBuyNowAction.ts, visibility from the selected version price; browser repro b-round-508/probe/free-stub.json (client-nav _data stub, click: URL unchanged, 0 dialogs) | scheduled (D-29 …[see backlog.json] / Product page sidebar 'Complimentary Download' (isFree products) is a button with no onClick or link: it does nothing
+- **DPG-BUTTON-CLEANUP-2-NONBRAND** / medium / in_progress (D-29z1842): ProductSidebar l.75 migrated and verified (C round 509 C1/C8: nonbrand scan 53, 0 in ProductSidebar; published f5d1b9e); N2-N9 and the StemsPlayerModal pair remain | in_progress (D-29z1837/D-29z1839): stage N1 verified (C round 508 PASS, published cf89736); round 509 migrate …[see backlog.json] / Hand-rolled controls without a brand fill bypass Button.tsx (Saba DPG item 7): whole-tag scan 58 tags / 29 files at 3021b30 + LeadMagnet Clo
 - **FREE-CHECKOUT-REAL-BACKEND** / medium / blocked_cloud (D-29z1839): backend unavailable in cloud; does not block loop rounds; blocks final COMPLETE together with PURCHASE-REAL-BACKEND / A signed-in 'Get it free' click must complete a real $0 order (Stripe may reject a $0 session; backend may need to skip Stripe) and the prod
 - **B-R509-AUTHMODAL-NOT-A-DIALOG** / medium / open, blocked_root via SYS-R495-SHARED-DIALOG (D-29z1841): AuthModal (root.tsx l.156, app/components/auth/AuthModal.tsx) should move onto the shared dialog primitive; does not block round 509 (its anonymous path matches header Buy Now at HEAD) / Sign-in AuthModal has no role=dialog/aria-modal and does not move or trap focus: after Buy Now -> Enter the trigger behind the modal keeps f
-- ... and 1003 Low/info (see backlog.json)
+- ... and 1002 Low/info (see backlog.json)

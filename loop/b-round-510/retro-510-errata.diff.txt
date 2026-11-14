@@ -1,0 +1,20 @@
+45c45
+< - **root cause-ის მიხედვით (მხოლოდ მტკიცებულებით):** ტესტის სიძლიერე B-ის sketch-ზე — 4 STOP + 18 deferred Low (§11, `tech-lead` §4); L58-ის განმეორება (B-მ გაუზომავი რიცხვი assert-ად დაწერა) — 1 (INFO-B497-C15-UNMEASURED-ASSERT: header-ის სიმაღლე 75 vs 81, `c-round-497.json`); task-ის ტექსტის შეცდომა — 2 (round 509 A dev 1, dev 2); C-ის პროცესი — 1 (INFO-C505-UNRULED-STOP-PASS). დანარჩენი 79 deferred-ის root cause კლასიფიცირებული არ არის.
+---
+> - **root cause-ის მიხედვით (მხოლოდ მტკიცებულებით):** ტესტის სიძლიერე B-ის sketch-ზე — 4 STOP + 18 deferred Low (§11, `tech-lead` §4); L58-ის განმეორება (B-მ გაუზომავი რიცხვი assert-ად დაწერა) — 1 (INFO-B497-C15-UNMEASURED-ASSERT: header-ის სიმაღლე 75 vs 81, `c-round-497.json`); task-ის ტექსტის შეცდომა — 2 (round 509 A dev 1, dev 2); C-ის პროცესი — 1 (INFO-C505-UNRULED-STOP-PASS). `data/deferred-added.txt`-ის 79 ახალი deferred-იდან 18 კლასიფიცირებულია (ტესტის სიძლიერე); დანარჩენი 61-ის root cause კლასიფიცირებული არ არის. `tech-lead`-მა ტექსტით 78 id წაიკითხა — ერთი id-ის სხვაობა ახსნილი არ არის (errata E-510-3).
+69c69
+< - **ღირებულება (დასკვნა):** მთავარი მიზეზი სრული byte sketch-ებია; რაუნდები sketch-ის გარეშე ან delta-თი B-ს $6.74 (497), $8.95 (508), $8.63 (509) დაუჯდა, sketch-იანი — მედიანა ≈ $17. ყველა STOP sketch-იან რაუნდზე მოხდა.
+---
+> - **ღირებულება (დასკვნა):** მთავარი მიზეზი სრული byte sketch-ებია; რაუნდები sketch-ის გარეშე ან delta-თი B-ს $6.74 (497), $8.95 (508), $8.63 (509) დაუჯდა, sketch-იანი — მედიანა $15.65, საშუალო $17.13 (11 რაუნდი, `b-round-509/data/cost-rows.json`; errata E-510-1). ყველა STOP sketch-იან რაუნდზე მოხდა.
+99c99
+< | `lessons.md` ≤ 57,500 B, ≤ 60 ხაზი, ხაზი ≤ 4,800 B | 57,164 B, 60, max 4,753 — **მიღწეულია** | `b-round-509/lessons-before-510.md` |
+---
+> | `lessons.md` ≤ 57,500 B, ≤ 60 ხაზი, ხაზი ≤ 4,800 B | 57,164 B, 60, max 4,771 B (4,753 სიმბოლო; errata E-510-2) — **მიღწეულია** | `b-round-509/lessons-before-510.md` |
+140a141,147
+> 
+> ## Errata (B, round 510 → 511 planning, 2026-11-14; D-29z1851)
+> C round 510-მა სამი Low იპოვა (`c-round-510.json`, origin `B spec`). ძველი ტექსტი: `b-round-510/retro-510-before-errata.md`.
+> - **E-510-1 (C510-RETRO-MEDIAN-IS-MEAN):** §7 „მედიანა ≈ $17“ საშუალო იყო; მედიანა $15.65 (საშუალო $17.13). `tech-lead`-ის consult-ის იგივე ფრაზა (`b-round-509/consult-tech-lead.md` l.22) consult-ის ჩანაწერია და არ იცვლება. RETRO 525-ის counter „round median ≤ $17“ უცვლელია — ის რაუნდის მედიანას ეხება, არა sketch-იანი B-ის ხარჯს.
+> - **E-510-2 (C510-LESSON-LINE-UNIT):** §9 „4,753“ სიმბოლოა; ბაიტებში 4,771. counter ≤ 4,800 B მაინც მიღწეულია.
+> - **E-510-3 (C510-RETRO-REMAINING-79):** §4 — 79-დან 18 კლასიფიცირებულია, დარჩენილი 61-ია; consult 78 id-ს ასახელებს.
+> 

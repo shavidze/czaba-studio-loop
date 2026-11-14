@@ -42,7 +42,7 @@
 - **L58 sketch review 507/508-ში არასრული იყო** (`data/l58-check-window.txt`): 507-ის review v1-ს ეხება, dispatch-ილი v2-ის sha (`65ee9231…`) მასში არ წერია; 508-ის review-ში მხოლოდ მოკლე sha-ებია და verdict ხაზი არ არის. 507-ის STOP სწორედ ამ რაუნდშია.
 
 ## 4. Findings (`data/fails-detail.txt`, `data/classify.txt`, `data/deferred-added.txt`, `data/deferred-closed.txt`, `data/gate-reviews.txt`)
-- **root cause-ის მიხედვით (მხოლოდ მტკიცებულებით):** ტესტის სიძლიერე B-ის sketch-ზე — 4 STOP + 18 deferred Low (§11, `tech-lead` §4); L58-ის განმეორება (B-მ გაუზომავი რიცხვი assert-ად დაწერა) — 1 (INFO-B497-C15-UNMEASURED-ASSERT: header-ის სიმაღლე 75 vs 81, `c-round-497.json`); task-ის ტექსტის შეცდომა — 2 (round 509 A dev 1, dev 2); C-ის პროცესი — 1 (INFO-C505-UNRULED-STOP-PASS). დანარჩენი 79 deferred-ის root cause კლასიფიცირებული არ არის.
+- **root cause-ის მიხედვით (მხოლოდ მტკიცებულებით):** ტესტის სიძლიერე B-ის sketch-ზე — 4 STOP + 18 deferred Low (§11, `tech-lead` §4); L58-ის განმეორება (B-მ გაუზომავი რიცხვი assert-ად დაწერა) — 1 (INFO-B497-C15-UNMEASURED-ASSERT: header-ის სიმაღლე 75 vs 81, `c-round-497.json`); task-ის ტექსტის შეცდომა — 2 (round 509 A dev 1, dev 2); C-ის პროცესი — 1 (INFO-C505-UNRULED-STOP-PASS). `data/deferred-added.txt`-ის 79 ახალი deferred-იდან 18 კლასიფიცირებულია (ტესტის სიძლიერე); დანარჩენი 61-ის root cause კლასიფიცირებული არ არის. `tech-lead`-მა ტექსტით 78 id წაიკითხა — ერთი id-ის სხვაობა ახსნილი არ არის (errata E-510-3).
 - **C-ის ბაგები:** 4 (497 Low C497-HDR-HEIGHT-SIGNED-IN; 499 Medium A-R499-CR-STORE-TRY-UNPINNED; 505 Low A-R505-CR-1; 507 Medium A-R507-CR-1). ყველას აქვს `origin` (`data/l57-coverage.txt`).
 - **ფანჯრის Medium+ (classify window ids):** B-R496-404-BROWSE-STORE-UNSTYLED, A-R496-CR-GS3-GUARD, A-R496-CR-BC1-PIN, A-R499-CR-STORE-TRY-UNPINNED, B-R502-CART-MOBILE-ITEMS-HIDDEN (High), B-R502-CART-LG-SUMMARY-CLIPPED, B-R502-CART-WHEEL-NESTED-SCROLL, A-R507-CR-1 — ყველა დახურულია C-ის მტკიცებულებით; ღიაა B-R509-AUTHMODAL-NOT-A-DIALOG (root grant-ს ელოდება) და B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD-ის backend ნაწილი (FREE-CHECKOUT-REAL-BACKEND).
 - **ახალი deferred Low: 79**, ფანჯარაში დახურული deferred: **3** (A-R496-CR-BC3-SELF-DERIVED, A-R496-CR-BC4-NEAR-VACUOUS, B-R502-DOC323-L28-STATUS). პრეფიქსით: A 36, B 21, gate 9, TL 8, C 2, სხვა 3. კატეგორია (68 classify-ით): uncategorised 16, focus 11, timing/audio 11, tests/harness 7, layout/visual 6, a11y 5, copy 4, keyboard 4, docs 4.
@@ -66,7 +66,7 @@
 - **STOP-ები:** 496, 499 და 507-ში B-ის matrix ამოწმებდა „დააბრუნე ან წაშალე“-ს, მაგრამ არასდროს „შეცვალე assert-ილი attribute სხვა ვალიდურ მნიშვნელობაზე“ ან „გაცვალე მეზობლები“ (`b-round-495/mutants.txt:1-8`, `b-round-498/sketch-review.md:10`, `a-round-507.md`). 505 — precondition-ის ხარვეზი (L47), კლასს ნაწილობრივ ეკუთვნის. ოთხივე Medium byte-pinned ტესტის ხაზზე იყო, A ვერ ასწორებდა და STOP გახდა (L10/L11, check 4).
 - **L58-ის როლი:** `tech-lead`-ის თქმით, არ ყოფილა მიზეზი — 507-ის v1→v2 delta მხოლოდ mock-სა და ტიპებს ეხება (`b-round-506/sketch-delta-v1-v2.diff.txt:17-42`), ხარვეზი უკვე v1-ში იყო, review-მ კი „რა გადარჩება?“ არ იკითხა. 508-ის review-მ ეს კითხვა დასვა და სამი Medium იპოვა. sha/verdict-ის ნაკლი ფორმის ხარვეზია.
 - **doc ledger:** lesson რეალისტური იყო და გამოტოვდა (500, 501, 503, 505, 506-ს აქვს; 507–509-ის task-ები ledger-ს არ ახსენებს). `b-round-506`-ს ledger არ ჰქონდა და review-მ ოთხი ცრუ doc-ის წინადადება იპოვა (`b-round-506/sketch-review.md:10-13`).
-- **ღირებულება (დასკვნა):** მთავარი მიზეზი სრული byte sketch-ებია; რაუნდები sketch-ის გარეშე ან delta-თი B-ს $6.74 (497), $8.95 (508), $8.63 (509) დაუჯდა, sketch-იანი — მედიანა ≈ $17. ყველა STOP sketch-იან რაუნდზე მოხდა.
+- **ღირებულება (დასკვნა):** მთავარი მიზეზი სრული byte sketch-ებია; რაუნდები sketch-ის გარეშე ან delta-თი B-ს $6.74 (497), $8.95 (508), $8.63 (509) დაუჯდა, sketch-იანი — მედიანა $15.65, საშუალო $17.13 (11 რაუნდი, `b-round-509/data/cost-rows.json`; errata E-510-1). ყველა STOP sketch-იან რაუნდზე მოხდა.
 - **deferred Low-ები:** 18 — ტესტის სიძლიერის Low DPG-ის per-stage ტესტ-ფაილებზე → ერთი სისტემური ამოცანა (§11).
 
 **`product-designer`** (`b-round-509/consult-product-designer.md`): ერთი ახალი Low (SR-510-1); ძველი SR-480-1/2/3, SR-290-1 და სხვები კვლავ ჩანს; გზის სამი ხახუნი (ჩასვლისას სიჩუმე SR-305-3, stem-ები მიყოლებით — STEM-LANES, export 64 წამი — SR-321-6); Medium+ ბაგი არ ჩანს. capture-მა $0 პროდუქტი და `/cart` არ გადაიღო → INFO-B510-CAPTURE-GAP.
@@ -96,7 +96,7 @@
 | STOP origin B spec ≤ 1 და 0 doc-ის წინადადებაზე | 4 B-spec — **ვერ მიღწეულია**; doc 0 — **მიღწეულია** | `data/stops-true.txt` |
 | `c-round-N/l57-check.txt` L57 OK 15/15 | 15/15 — **მიღწეულია** | `c-round-N/l57-check.txt`, `data/l57-coverage.txt` |
 | doc-ledger 100 % იმ რაუნდებში, რომლებიც impl doc-ს აქვეყნებს | 5/11 (500, 501, 503, 505, 506; აკლია 497, 498, 502, 504, 508, 509) — **ვერ მიღწეულია**; `tools/ledger-check.py`-ით 3/11 doc-sketch task (§10) | `gates/gate-round-N.json` paths, `ls b-round-(N-1)/doc-ledger.md`, `data/ledger-check-window.txt` |
-| `lessons.md` ≤ 57,500 B, ≤ 60 ხაზი, ხაზი ≤ 4,800 B | 57,164 B, 60, max 4,753 — **მიღწეულია** | `b-round-509/lessons-before-510.md` |
+| `lessons.md` ≤ 57,500 B, ≤ 60 ხაზი, ხაზი ≤ 4,800 B | 57,164 B, 60, max 4,771 B (4,753 სიმბოლო; errata E-510-2) — **მიღწეულია** | `b-round-509/lessons-before-510.md` |
 | fix-up ჯაჭვი ≤ 1 | 496→497, 499→500, 507→508 (თითო 1) — **მიღწეულია** | `data/task-titles.txt` |
 | ახალი deferred ≤ 35 და ≥ 12 დახურული | 79 / 3 — **ვერ მიღწეულია** | `data/deferred-added.txt`, `data/deferred-closed.txt` |
 | რაუნდის მედიანა ≤ $18 | $19.39 — **ვერ მიღწეულია** | `data/cost.txt` |
@@ -138,3 +138,10 @@
 - **round 511:** REGRESSION, თუ დაგეგმვა 2026-11-16-ზე ან მის შემდეგაა; თორემ NONBRAND N2 (პროდუქტის გვერდი: PurchaseHeader-ის in-card ღილაკები + PlayStems; sidebar 509-ში დასრულდა) RC-R510-SKETCH-SCOPE-ით.
 - შემდეგ: N3–N9, StemsPlayerModal-ის წყვილი (ROOT-REQ-MOCK-STEMS-AND-FREE-FIXTURE-ის stems ნაწილი), PD-R498-404-SECONDARY-ALIGN, DPG-BUTTON-CONTRACT-TABLE, DPG P1-ის დანარჩენი, DP gate, P2; შემდეგ STORE-2c…5, ARCH-SPLIT, REVIEW-RECOMMENDATIONS და დანარჩენი რიგი.
 - **RETRO 525** — counter-ები `retro_policy.signals_for_next_retro[0]`-ში.
+
+## Errata (B, round 510 → 511 planning, 2026-11-14; D-29z1851)
+C round 510-მა სამი Low იპოვა (`c-round-510.json`, origin `B spec`). ძველი ტექსტი: `b-round-510/retro-510-before-errata.md`.
+- **E-510-1 (C510-RETRO-MEDIAN-IS-MEAN):** §7 „მედიანა ≈ $17“ საშუალო იყო; მედიანა $15.65 (საშუალო $17.13). `tech-lead`-ის consult-ის იგივე ფრაზა (`b-round-509/consult-tech-lead.md` l.22) consult-ის ჩანაწერია და არ იცვლება. RETRO 525-ის counter „round median ≤ $17“ უცვლელია — ის რაუნდის მედიანას ეხება, არა sketch-იანი B-ის ხარჯს.
+- **E-510-2 (C510-LESSON-LINE-UNIT):** §9 „4,753“ სიმბოლოა; ბაიტებში 4,771. counter ≤ 4,800 B მაინც მიღწეულია.
+- **E-510-3 (C510-RETRO-REMAINING-79):** §4 — 79-დან 18 კლასიფიცირებულია, დარჩენილი 61-ია; consult 78 id-ს ასახელებს.
+

@@ -1,0 +1,64 @@
+--- a/app/components/product/PurchaseHeader.tsx	2026-11-14 09:11:46.940673839 +0000
++++ b/app/components/product/PurchaseHeader.tsx	2026-11-14 09:36:26.371999434 +0000
+@@ -156,7 +156,11 @@
+             {recordingsHref && (
+               <Link
+                 to={recordingsHref}
+-                className="group px-5 py-3 border border-brand/30 text-brand font-medium rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 hover:bg-brand/10"
++                className={buildButtonClassName({
++                  variant: 'secondary',
++                  size: 'lg',
++                  className: 'whitespace-nowrap',
++                })}
+               >
+                 <AudioLines size={16} />
+                 <span>Open in Studio</span>
+@@ -198,7 +202,11 @@
+           <div className="flex flex-wrap gap-3">
+             <Link
+               to="/account/downloads"
+-              className="group px-5 py-3 border border-accent/30 text-accent font-medium rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 hover:bg-accent/10"
++              className={buildButtonClassName({
++                variant: 'secondary',
++                size: 'lg',
++                className: 'whitespace-nowrap',
++              })}
+             >
+               <Download size={16} />
+               <span>Downloads</span>
+@@ -335,13 +343,15 @@
+           />
+ 
+           {/* Buy Now - Commerce Blue */}
+-          <button
++          <Button
+             type="button"
++            variant="buy"
++            size="lg"
+             onClick={handleBuyNow}
+             disabled={isDisabled}
+             aria-disabled={isPriceUnknown || undefined}
+             aria-describedby={isPriceUnknown ? priceReasonId : undefined}
+-            className="group px-6 py-3 bg-buy text-brand-foreground font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:cursor-not-allowed! flex items-center justify-center gap-2 min-w-[120px] hover:bg-buy-hover"
++            className="min-w-[120px] whitespace-nowrap aria-disabled:opacity-50 aria-disabled:cursor-not-allowed!"
+           >
+             {isBuyingNow ? (
+               <>
+@@ -354,7 +364,7 @@
+                 <span>Buy Now</span>
+               </>
+             )}
+-          </button>
++          </Button>
+         </div>
+       </div>
+       {isPriceUnknown && (
+@@ -400,7 +410,7 @@
+       aria-describedby={isPurchaseBlocked ? priceReasonId : undefined}
+       animate={justAdded ? { scale: [1, 1.05, 1] } : undefined}
+       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+-      className={`group px-5 py-3 border rounded-lg font-medium transition-all whitespace-nowrap cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px] ${
++      className={`group px-6 py-3 text-base border rounded-md font-semibold transition-all whitespace-nowrap cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px] ${
+         alreadyInCart
+           ? 'bg-brand/10 text-brand border-brand/30 hover:bg-brand/20'
+           : 'bg-transparent text-foreground border-outline hover:border-outline-hover hover:bg-elevated disabled:opacity-50 aria-disabled:opacity-50 aria-disabled:cursor-not-allowed!'

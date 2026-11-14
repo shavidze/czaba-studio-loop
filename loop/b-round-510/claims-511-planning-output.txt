@@ -1,0 +1,168 @@
+== K1 HEAD
+f5d1b9e87e5cad8880cac874d85ba78086b02d3c
+== K2 changed paths (git status --short --untracked-files=all | wc -l)
+0
+== K3 gates
+509 published f5d1b9e87e5cad8880cac874d85ba78086b02d3c
+510 skipped f5d1b9e87e5cad8880cac874d85ba78086b02d3c
+== K4 c-round-510
+PASS True True ['C510-RETRO-MEDIAN-IS-MEAN', 'C510-LESSON-LINE-UNIT', 'C510-RETRO-REMAINING-79']
+== K5 PurchaseHeader N2 sites at HEAD
+159:                className="group px-5 py-3 border border-brand/30 text-brand font-medium rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 hover:bg-brand/10"
+201:              className="group px-5 py-3 border border-accent/30 text-accent font-medium rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 hover:bg-accent/10"
+338:          <button
+344:            className="group px-6 py-3 bg-buy text-brand-foreground font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:cursor-not-allowed! flex items-center justify-center gap-2 min-w-[120px] hover:bg-buy-hover"
+396:    <motion.button
+403:      className={`group px-5 py-3 border rounded-lg font-medium transition-all whitespace-nowrap cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px] ${
+== K6 Button default shape and buy variant
+28:    'hover:bg-outline hover:border-outline-hover',
+46:    'bg-buy text-brand-foreground',
+66:  default: 'rounded-md',
+95:    isDisabled && 'opacity-50 cursor-not-allowed pointer-events-none',
+== K7 radius tokens
+122:  --radius-md: 0.5rem;     /* 8px - buttons, inputs */
+124:  --radius-lg: 0.75rem;    /* 12px - cards */
+== K8 nonbrand scan at HEAD (old and motion-widened) + scanner mutant
+53 hits; files 27
+app/components/product/PlayStemsButton.tsx 18
+app/components/product/ProductAccordion.tsx 19
+app/components/product/PurchaseHeader.tsx 157
+app/components/product/PurchaseHeader.tsx 199
+app/components/product/PurchaseHeader.tsx 338
+app/components/product/VersionSelector.tsx 59
+app/components/product/fx/FXSoundPreviewGrid.tsx 70
+54 hits; files 27
+app/components/product/PurchaseHeader.tsx 396 motion.button
+1 hits; files 1
+0 hits; files 0
+== K9 stems producers (app, non-test) and the PlayStems render condition
+app/contexts/StemsContext.tsx:17:  stems: StemState[];
+app/contexts/StemsContext.tsx:41:  stems: [],
+app/contexts/StemsContext.tsx:74:      stems: track.stems!.map((stem) => ({
+app/contexts/StemsContext.tsx:123:        stems: prev.stems.map((stem) => ({ ...stem, isLoaded: true })),
+app/contexts/StemsContext.tsx:129:      console.error('Failed to load stems:', error);
+app/contexts/StemsContext.tsx:220:      return { ...prev, stems: newStems };
+app/contexts/StemsContext.tsx:245:      return { ...prev, stems: newStems };
+app/data/mockProductDetail.ts:105:      stems: [
+app/components/product/ProductDetailPage.tsx:112:      stems: selectedVersion?.stems,
+app/utils/ableton-export.ts:29:  stems: StemForExport[];
+app/types/studio.ts:32:  stems: {
+app/types/studio.ts:73:  stems: AudioStem[];
+178:            {selectedVersion?.stems && selectedVersion.stems.length > 0 && (
+1
+-- K9b MOCK_PRODUCT_DETAIL (has version stems) value importers outside app/data (expect none)
+none
+== K10 PlayStems history
+3927eda 2025-12-21 Add multi-track stems player and My Downloads page
+== K11 openStemsPlayer callers (non-test)
+app/components/product/PlayStemsButton.tsx:19:      onClick={() => openStemsPlayer(track)}
+== K12 price guard in the shared hook
+45:    if (price === undefined) return;
+== K13 scratch full suite on the sketch
+      Tests  3 failed | 4393 passed (4396)
+ FAIL  app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-7: anonymous "Buy Now" keeps its HEAD class and asks to sign in without buying
+ FAIL  app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-8: PurchaseHeader has no hand-rolled solid brass action, one builder call, two Button elements and one bg-buy button
+ FAIL  app/lib/__tests__/store-theme-tokens.test.ts > Store @theme colour tokens: Obsidian & Brass (STORE-2a) > ST5: all nine brass and destructive fills carry dark text (brand-foreground or the equal background token)
+ Test Files  2 failed | 303 passed (305)
+rc 1
+== K14 covering at HEAD
+ ✓ app/lib/__tests__/store-theme-tokens.test.ts (40 tests) 192ms
+ ✓ app/lib/__tests__/store-glow-shadow.test.ts (4 tests) 135ms
+ ✓ app/lib/__tests__/store-button-cleanup-2c.test.tsx (10 tests) 593ms
+ ✓ app/lib/__tests__/product-price-unavailable.test.tsx (7 tests) 1500ms
+ ✓ app/lib/__tests__/product-handle-route.test.tsx (12 tests) 21ms
+ ✓ app/lib/__tests__/store-sidebar-free-r509.test.tsx (10 tests) 2224ms
+ Test Files  6 passed (6)
+      Tests  83 passed (83)
+== K15 lint at HEAD
+Found 174 warnings.
+== K16 frozen pins
+tree rc 0 (1424 entries)
+protected rc 0
+pre-sha rc 0
+== K17 sketch sha and checkers
+de636ad4df0686c10264aa57261e5c747a39fede9178b94423f8fef8ae516d91
+L58 OK
+LEDGER OK
+1
+== K18 probes (HEAD and sketch): STEMS Play Stems count, radius, same-row heights
+head ANON 1440x900 playStems 0 hidden0x0 0 Add to Cart 152x51.6 r12px fw500 | Buy Now 139x51.6 r12px fw600
+head ANON 1280x720 playStems 0 hidden0x0 0 Add to Cart 152x51.6 r12px fw500 | Buy Now 139x51.6 r12px fw600
+head ANON 375x812 playStems 0 hidden0x0 0 Add to Cart 152x51.6 r12px fw500 | Buy Now 139x49.6 r12px fw600
+head UNKNOWN 1440x900 playStems 0 hidden0x0 0 Add to Cart 152x51.6 r12px fw500 | Buy Now 139x51.6 r12px fw600
+head UNKNOWN 1280x720 playStems 0 hidden0x0 0 Add to Cart 152x51.6 r12px fw500 | Buy Now 139x51.6 r12px fw600
+head UNKNOWN 375x812 playStems 0 hidden0x0 0 Add to Cart 152x51.6 r12px fw500 | Buy Now 139x49.6 r12px fw600
+head OWNED_SFX 1440x900 playStems 0 hidden0x0 0 Open in Studio 177x51.6 r12px fw500 | Go to Downloads 203x51.6 r8px fw600
+head OWNED_SFX 1280x720 playStems 0 hidden0x0 0 Open in Studio 177x51.6 r12px fw500 | Go to Downloads 203x51.6 r8px fw600
+head OWNED_SFX 375x812 playStems 0 hidden0x0 0 Open in Studio 277x51.6 r12px fw500 | Go to Downloads 277x48 r8px fw600
+head OWNED_STD 1440x900 playStems 0 hidden0x0 1 Downloads 150x51.6 r12px fw500 | Upgrade to Premium 230x48 r8px fw600
+head OWNED_STD 1280x720 playStems 0 hidden0x0 1 Downloads 150x51.6 r12px fw500 | Upgrade to Premium 230x48 r8px fw600
+head OWNED_STD 375x812 playStems 0 hidden0x0 1 Downloads 150x51.6 r12px fw500 | Upgrade to Premium 230x48 r8px fw600
+head STEMS 1440x900 playStems 0 hidden0x0 0 Add to Cart 152x51.6 r12px fw500 | Buy Now 139x51.6 r12px fw600
+head STEMS 1280x720 playStems 0 hidden0x0 0 Add to Cart 152x51.6 r12px fw500 | Buy Now 139x51.6 r12px fw600
+head STEMS 375x812 playStems 0 hidden0x0 0 Add to Cart 152x51.6 r12px fw500 | Buy Now 139x49.6 r12px fw600
+sketch ANON 1440x900 playStems 0 hidden0x0 0 Add to Cart 163x50 r8px fw600 | Buy Now 139x50 r8px fw600
+sketch ANON 1280x720 playStems 0 hidden0x0 0 Add to Cart 163x50 r8px fw600 | Buy Now 139x50 r8px fw600
+sketch ANON 375x812 playStems 0 hidden0x0 0 Add to Cart 163x50 r8px fw600 | Buy Now 139x48 r8px fw600
+sketch UNKNOWN 1440x900 playStems 0 hidden0x0 0 Add to Cart 163x50 r8px fw600 | Buy Now 139x50 r8px fw600
+sketch UNKNOWN 1280x720 playStems 0 hidden0x0 0 Add to Cart 163x50 r8px fw600 | Buy Now 139x50 r8px fw600
+sketch UNKNOWN 375x812 playStems 0 hidden0x0 0 Add to Cart 163x50 r8px fw600 | Buy Now 139x48 r8px fw600
+sketch OWNED_SFX 1440x900 playStems 0 hidden0x0 0 Open in Studio 187x50 r8px fw600 | Go to Downloads 203x50 r8px fw600
+sketch OWNED_SFX 1280x720 playStems 0 hidden0x0 0 Open in Studio 187x50 r8px fw600 | Go to Downloads 203x50 r8px fw600
+sketch OWNED_SFX 375x812 playStems 0 hidden0x0 0 Open in Studio 277x50 r8px fw600 | Go to Downloads 277x48 r8px fw600
+sketch OWNED_STD 1440x900 playStems 0 hidden0x0 1 Downloads 160x50 r8px fw600 | Upgrade to Premium 230x48 r8px fw600
+sketch OWNED_STD 1280x720 playStems 0 hidden0x0 1 Downloads 160x50 r8px fw600 | Upgrade to Premium 230x48 r8px fw600
+sketch OWNED_STD 375x812 playStems 0 hidden0x0 1 Downloads 160x50 r8px fw600 | Upgrade to Premium 230x48 r8px fw600
+sketch STEMS 1440x900 playStems 0 hidden0x0 0 Add to Cart 163x50 r8px fw600 | Buy Now 139x50 r8px fw600
+sketch STEMS 1280x720 playStems 0 hidden0x0 0 Add to Cart 163x50 r8px fw600 | Buy Now 139x50 r8px fw600
+sketch STEMS 375x812 playStems 0 hidden0x0 0 Add to Cart 163x50 r8px fw600 | Buy Now 139x48 r8px fw600
+== K19 action probes (HEAD and sketch)
+head A1 1440x900 posts 3 busy Processing... True 167 auto inCart None None kbd None None None unknown None None None err 0
+head A2 1440x900 posts 1 busy None None None None inCart 12px rgb(201, 164, 106) kbd None None None unknown None None None err 0
+head A3 1440x900 posts 0 busy None None None None inCart None None kbd True True solid 1px color(srgb 0.788235 0.643137 0.415686 / 0.8) off 2px unknown None None None err 0
+head A4 1440x900 posts 0 busy None None None None inCart None None kbd None None None unknown True 0.5 not-allowed err 0
+head A5 1440x900 posts 0 busy None None None None inCart None None kbd True True solid 1px color(srgb 0.788235 0.643137 0.415686 / 0.8) off 2px unknown None None None err 0
+head A1 1280x720 posts 3 busy Processing... True 167 auto inCart None None kbd None None None unknown None None None err 0
+head A2 1280x720 posts 1 busy None None None None inCart 12px rgb(201, 164, 106) kbd None None None unknown None None None err 0
+head A3 1280x720 posts 0 busy None None None None inCart None None kbd True True solid 1px color(srgb 0.788235 0.643137 0.415686 / 0.8) off 2px unknown None None None err 0
+head A4 1280x720 posts 0 busy None None None None inCart None None kbd None None None unknown True 0.5 not-allowed err 0
+head A5 1280x720 posts 0 busy None None None None inCart None None kbd True True solid 1px color(srgb 0.788235 0.643137 0.415686 / 0.8) off 2px unknown None None None err 0
+sketch A1 1440x900 posts 3 busy Processing... True 167 none inCart None None kbd None None None unknown None None None err 0
+sketch A2 1440x900 posts 1 busy None None None None inCart 8px rgb(201, 164, 106) kbd None None None unknown None None None err 0
+sketch A3 1440x900 posts 0 busy None None None None inCart None None kbd True True solid 1px color(srgb 0.788235 0.643137 0.415686 / 0.8) off 2px unknown None None None err 0
+sketch A4 1440x900 posts 0 busy None None None None inCart None None kbd None None None unknown True 0.5 not-allowed err 0
+sketch A5 1440x900 posts 0 busy None None None None inCart None None kbd True True solid 1px color(srgb 0.788235 0.643137 0.415686 / 0.8) off 2px unknown None None None err 0
+sketch A1 1280x720 posts 3 busy Processing... True 167 none inCart None None kbd None None None unknown None None None err 0
+sketch A2 1280x720 posts 1 busy None None None None inCart 8px rgb(201, 164, 106) kbd None None None unknown None None None err 0
+sketch A3 1280x720 posts 0 busy None None None None inCart None None kbd True True solid 1px color(srgb 0.788235 0.643137 0.415686 / 0.8) off 2px unknown None None None err 0
+sketch A4 1280x720 posts 0 busy None None None None inCart None None kbd None None None unknown True 0.5 not-allowed err 0
+sketch A5 1280x720 posts 0 busy None None None None inCart None None kbd True True solid 1px color(srgb 0.788235 0.643137 0.415686 / 0.8) off 2px unknown None None None err 0
+== K20 artifacts
+ok r511-post-sketch-sha.txt
+ok nonbrand-motion-sketch.json
+ok probe/sketch/sketch-A1-1280-busy.png
+ok contrast.txt
+ok sketch-511-purchaseheader.patch.txt
+ok sketch-review.md
+ok test-contract-511.md
+ok test-contract-511-v1.md
+ok grants-511.txt
+ok covering-files-head.txt
+ok consult-product-designer.md
+ok probe/n2-states.mjs
+ok probe/n2-actions.mjs
+ok retro-510-before-errata.md
+ok retro-510-errata.diff.txt
+== K21 DESIGN_SYSTEM.md lines naming Add to Cart / Buy Now as primary
+895:    ├── კი → variant="primary" (Add to Cart, Buy Now)
+1174:**Use for:** Add to Cart, Buy Now, Submit, Primary CTA
+== K22 HEAD_BUY_NOW_CLASS uses
+76:const HEAD_BUY_NOW_CLASS =
+263:    expect(buyNow.className).toBe(HEAD_BUY_NOW_CLASS);
+== K23 post-sketch pin
+90435d964ccb916048f261eebdf9e500eaefcc2d546bed0a7049750d7854fdca  app/components/product/PurchaseHeader.tsx
+scratch matches
+== K24 research grep (button terms)
+/home/runner/czaba-project/docs/technical/store-redesign/research/luxury-and-galleries.md:84:- Transfer: a CZABA UI-sound palette needs fewe
+/home/runner/czaba-project/docs/technical/store-redesign/research/competitors.md:290:1. Hero: title, one-line promise ("A 60-strong symphoni
+/home/runner/czaba-project/docs/technical/store-redesign/research/visual-pass.md:8:| spitfireaudio.com | #232323 dark | GT Flaire Basic VF (

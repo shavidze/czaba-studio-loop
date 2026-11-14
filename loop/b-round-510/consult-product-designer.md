@@ -1,0 +1,15 @@
+# product-designer consult: NONBRAND N2 (B round 510 → 511, 2026-11-14)
+
+Read-only consult; B's transcription of the final answer. The consultant read `Button.tsx` and `PurchaseHeader.tsx` at HEAD; it ran no browser (its heights were computed; B's probes `probe/head|sketch/*` are the measurements).
+
+1. **CartButton → option (b).** `rounded-md`, `px-6 py-3 text-base font-semibold gap-2`, keep `min-w-[140px]` and the hand-rolled colours of all three states. Not (a): "In Cart" `bg-brand/10 text-brand border-brand/30` conflicts with secondary's `bg-elevated text-foreground border-outline`; no class merging, so the winner is unpredictable, and a new "in cart" variant needs a design-auditor review outside N2. Not (c): the card would keep two radii (round-504 note). Cost: CartButton stays hand-rolled → a named exception. It stays transparent (no grey fill); fine because this card and the owned cards never show together.
+2. **Confirmed:** Open in Studio and Downloads → secondary lg. A filled primary next to a grey secondary reads more clearly than outline-on-tint. Label contrast (foreground on elevated) passes; the fill edge vs the tint may be < 3:1, but 1.4.11 does not apply because the text marks the button. Lost: brand/accent colour on the link; the tint and check icon still mark ownership.
+3. **Confirmed:** Buy Now → `Button variant="buy" size="lg"`. No `isLoading` (it shows "Loading..."). Drop the old `disabled:` classes (builder adds `opacity-50 cursor-not-allowed pointer-events-none` while busy). Keep `!` on `aria-disabled:cursor-not-allowed!` (builder adds `cursor-pointer`). Keep the click guard and `aria-describedby`. Hover colour under aria-disabled matches HEAD. Height: check in browser.
+4. **PlayStems: agreed, out of N2.** Ask Saba "wire Play Stems for Premium, or remove PlayStemsButton and StemsPlayerModal?" Recommended default: remove (nothing produces `stems`).
+5. **States:** default, hover, focus-visible, Adding..., Added (pulse), In Cart, price-unknown (aria-disabled, focusable, reason announced); Buy Now busy; owned SFX, owned Standard and Upgrade cards; reduced motion; 1280×720 and < 640 px.
+   Rows proposed: A1 radius 8 / weight 600 everywhere in the card; A2 Add to Cart and Buy Now equal height ±0.5 and same top; A3 owned rows radius 8, elevated bg; A4 price-unknown focusable, opacity .5, not-allowed, description = reason, no request on click; A5 busy: native disabled, "Processing..." + spinner, width not shrinking; A6 Adding → Added → In Cart, brand text, no wrap; A7 reduced motion: no pulse; A8 Premium → 0 "Play Stems".
+
+## B's rulings
+- Adopted 1–4. A2 holds only where both buttons share a flex line (1440/1280 default card: 50/50 on the sketch); where the row wraps (375, and the owned-Standard card at every width) heights follow the Button system (bordered secondary 50, borderless 48), measured, not equalised.
+- A7 (reduced-motion pulse) is pre-existing framer behaviour not touched by N2 → `record` row only.
+- The mouse-press "no ring" half of focus is the shared focus style (SABA-B-4), unchanged → `record`.
