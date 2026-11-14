@@ -1,0 +1,87 @@
+--- /tmp/b502-v2/app/routes/cart.tsx	2026-11-14 02:04:13.374619134 +0000
++++ /tmp/b502-apply2/app/routes/cart.tsx	2026-11-14 02:03:54.032020966 +0000
+@@ -595,7 +595,7 @@
+           <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[minmax(0,1fr)] gap-8 flex-1 min-h-0">
+             {/* Cart Items - scrollable */}
+             <div
+-              className="lg:col-span-2 overflow-y-auto overscroll-contain styled-scrollbar pr-2"
++              className="lg:col-span-2 lg:overflow-y-auto lg:overscroll-contain styled-scrollbar pr-2"
+               data-lenis-prevent-wheel
+             >
+               <div className="space-y-6 pb-4">
+--- /tmp/b502-v2/app/lib/__tests__/cart-mobile-layout.test.ts	2026-11-14 02:04:13.374144812 +0000
++++ /tmp/b502-apply2/app/lib/__tests__/cart-mobile-layout.test.ts	2026-11-14 02:03:54.030773355 +0000
+@@ -7,7 +7,7 @@
+ const READER_HINT =
+   'cart.tsx keeps a plain className="..." here; update the reader if it moves to cn()';
+ const BELOW_LG_HEIGHT_OR_CLIP =
+-  /^(?:(?:sm|md):)?(?:h|max-h)-|^(?:(?:sm|md):)?overflow(?:-[xy])?-(?:hidden|clip)$/;
++  /^(?:(?:sm|md|max-sm|max-md|max-lg|max-xl|max-2xl):)?(?:h|max-h)-|^(?:(?:sm|md|max-sm|max-md|max-lg|max-xl|max-2xl):)?overflow(?:-[xy])?-(?:hidden|clip)$/;
+ 
+ function classTokensOfTags(source: string, tagName: string): string[][] {
+   const pattern = new RegExp(`<${tagName}\\s+className="([^"]*)"`, 'g');
+@@ -36,7 +36,10 @@
+     );
+     const items = divs.filter((tokens) => tokens.includes('lg:col-span-2'));
+     expect(items, READER_HINT).toHaveLength(1);
+-    expect(items[0]).toEqual(expect.arrayContaining(['overflow-y-auto', 'overscroll-contain']));
++    expect(items[0]).toEqual(
++      expect.arrayContaining(['lg:overflow-y-auto', 'lg:overscroll-contain']),
++    );
++    expect(items[0].filter((token) => /^overflow|^overscroll/.test(token))).toEqual([]);
+     const summary = divs.filter((tokens) => tokens.includes('lg:col-span-1'));
+     expect(summary, READER_HINT).toHaveLength(1);
+     expect(summary[0]).toEqual(
+@@ -73,6 +76,7 @@
+       'h-screen',
+       'max-h-screen',
+       'overflow-y-clip',
++      'max-lg:overflow-hidden',
+     ];
+     expect(banned.filter((token) => BELOW_LG_HEIGHT_OR_CLIP.test(token))).toEqual(banned);
+   });
+--- /tmp/b502-v2/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md	2026-11-14 02:04:13.374619134 +0000
++++ /tmp/b502-apply2/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md	2026-11-14 02:03:54.032020966 +0000
+@@ -12,7 +12,7 @@
+    - 375×812-ზე და 390×844-ზე ერთი პროდუქტის სვეტი 47 და 79px-ია (შიგნით 155px-ია).
+    - ownership warning-ით ან კუპონითა და gift card-ით სვეტი 0px-ია. პროდუქტი არ ჩანს და „Remove item“ ვერ ხერხდება (`head-actions.json`). Order Summary კი წერს „Please resolve ownership issues above before checkout“.
+ 2. **დაბალ desktop ეკრანზე Order Summary იჭრება (Medium).** როცა Summary მაღალია (კუპონი და gift card, ან ownership warning), checkout ღილაკი `main`-ის ქვედა კიდეს სცდება: 1366×657-ზე 7px-ით, 1280×600-ზე მთლიანად (`head-wheel.json`). `overflow-hidden`-ის გამო მაუსით მასთან მისვლა შეუძლებელია.
+-3. **wheel scroll სვეტებში არ მუშაობს (Medium).** Lenis (`useSmoothScroll`) wheel-ს თავად იჭერს და window-ს ატრიალებს, ამიტომ პროდუქტების სვეტის საკუთარი scroll wheel-ზე არ მოძრაობს. 1280×720-ზე ხუთი პროდუქტიდან მეოთხე და მეხუთე wheel-ით არ ჩანს (`head-items-wheel.json`).
++3. **wheel scroll სვეტებში არ მუშაობს (Medium).** Lenis (`useSmoothScroll`) wheel-ს თავად იჭერს და window-ს ატრიალებს, ამიტომ პროდუქტების სვეტის საკუთარი scroll wheel-ზე არ მოძრაობს. 1280×720-ზე ხუთი პროდუქტიდან მეხუთე wheel-ით არ ჩანს (`head-items-wheel.json`).
+ 
+ ## მიდგომა
+ 
+@@ -20,12 +20,14 @@
+ - **`lg`-დან (product-designer, ვარიანტი (a), `b-round-501/consult-product-designer-2.md`):**
+   - grid-ს ემატება `lg:grid-rows-[minmax(0,1fr)]`, რომ მწკრივი `main`-ზე მაღალი არ გახდეს;
+   - Summary-ის სვეტს ემატება `lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain styled-scrollbar`. ძალიან მაღალი Summary საკუთარ სვეტში scroll-დება, ისევე როგორც პროდუქტების სვეტი;
++  - პროდუქტების სვეტის `overflow-y-auto overscroll-contain` ახლა მხოლოდ `lg`-დან მოქმედებს (`lg:overflow-y-auto lg:overscroll-contain`). 1024px-ზე ვიწრო ეკრანზე სვეტი scroll container აღარ არის;
+   - Summary-ის ბარათს `sticky top-24` მოეხსნა. HEAD-ზე ის არსად მოქმედებდა, scroll-იან სვეტში კი ბარათს 96px-ით ქვემოთ წევდა.
+ - **wheel:** ორივე სვეტს აქვს `data-lenis-prevent-wheel` (Lenis 1.3-ის ატრიბუტი; `Modal.tsx` ანალოგიურად იყენებს `data-lenis-prevent`-ს). wheel სვეტზე ბრაუზერის ჩვეულებრივ scroll-ს იწვევს.
+ - **რა არ შეიცვალა:** ტექსტი, ღილაკები, checkout, Remove, ownership-ის ლოგიკა, `useSmoothScroll` და სვეტების რიგი. კალათის „Upgrade“ ღილაკის `Button`-ზე გადაყვანა DPG-BUTTON-CLEANUP-2-ის ეტაპ 2b-3-ს ეკუთვნის.
+ - **Deviation-ები:**
+-  - D1: 1024px-ზე ვიწრო ეკრანზე, თუ კურსორი პროდუქტების ან Summary-ის სვეტზეა, wheel window-ს Lenis-ის smoothing-ის გარეშე ატრიალებს. ატრიბუტი CSS breakpoint-ს ვერ მისდევს. ტელეფონზე (touch) Lenis ისედაც ბრაუზერის scroll-ს ტოვებს.
++  - D1: თუ კურსორი პროდუქტების ან Summary-ის სვეტზეა და სვეტი თავად ვეღარ scroll-დება (1024px-ზე ვიწრო ეკრანი, `lg`-ზე მოკლე სვეტი ან სვეტის ბოლო), wheel window-ს Lenis-ის smoothing-ის გარეშე ატრიალებს. ატრიბუტი CSS breakpoint-ს ვერ მისდევს; ამისთვის JS ან `useSmoothScroll`-ის `prevent` option იქნებოდა საჭირო. ტელეფონზე (touch) Lenis ისედაც ბრაუზერის scroll-ს ტოვებს.
+   - D2: `lg`-ზე, როცა HEAD-ზე Summary `main`-ს სცდებოდა, პროდუქტების სვეტი ახლა grid-ის მწკრივის სიმაღლეზეა და არა Summary-ის სიმაღლეზე (მაგ. 1280×720-ზე ownership warning-ით 501-დან 442px).
++  - D3: როცა Summary საკუთარ სვეტში scroll-დება (მხოლოდ დაბალ ეკრანზე), scrollbar სვეტის შიგნით ჩნდება და ბარათს ავიწროებს. `lg:pr-2` `lg`-ის ზომებს HEAD-ისგან განასხვავებდა, ამიტომ არ დაემატა.
+ - **უარყოფილი ალტერნატივები:** (b) desktop-ზე ჩვეულებრივი page scroll და sticky Summary — desktop-ის ქცევას ყველა კალათისთვის ცვლის და Saba-ს თანხმობას საჭიროებს; (c) checkout ბლოკის Summary-ის ბოლოში მიმაგრება — ღილაკის პოზიციას ცვლის. `useSmoothScroll`-ში `allowNestedScroll: true` მთელ Store-ს შეეხებოდა, ამიტომ ამ რაუნდში არ გამოიყენება.
+ 
+ ## არქიტექტურა
+@@ -47,7 +49,7 @@
+ 
+ ## პრობლემები და გადაწყვეტები
+ 
+-- **Problem:** jsdom layout-ს და wheel-ს ვერ ზომავს. **Solution:** CML1–CML4 class-ებსა და ატრიბუტებს ამოწმებს, 13 mutant-ი (`b-round-501/mutants-502.py`) კი აჩვენებს, რომ თითოეული ნაწილის მოხსნა ტესტს წითლად აქცევს. ნამდვილი შემოწმება ბრაუზერშია (C round 502).
++- **Problem:** jsdom layout-ს და wheel-ს ვერ ზომავს. **Solution:** CML1–CML4 class-ებსა და ატრიბუტებს ამოწმებს, 15 mutant-ი (`b-round-501/mutants-502.py`) კი აჩვენებს, რომ თითოეული ნაწილის მოხსნა ტესტს წითლად აქცევს. ნამდვილი შემოწმება ბრაუზერშია (C round 502).
+ - **Problem:** `scrollIntoView` `overflow-hidden` ელემენტსაც ატრიალებს, ამიტომ hit-test-მა HEAD-ზე checkout შეიძლება „ხელმისაწვდომად“ აჩვენოს. **Solution:** დაბალი ეკრანის სტრიქონი მომხმარებლის გზას იმეორებს: მაუსის wheel Summary-ზე `scrollIntoView`-ის გარეშე (`probe/cart-wheel.mjs`).
+ - **Problem:** შევსებული კალათა cloud-ში backend-ის გარეშე არ ჩანს. **Solution:** სტრიქონები `-STUBBED`-ია (Playwright `page.route` `/api/cart`-ზე, `/api/downloads`-ზე და `/api/auth/profile`-ზე). ისინი მხოლოდ client path-ს ამტკიცებს; ნამდვილი backend-ით შემოწმება ცალკე ღიაა.
+ 
+@@ -57,7 +59,7 @@
+ - ბრაუზერი, HEAD-ი და sketch-ი (`probe/head/`, `probe/sketch/`, შედარება `probe/compare-sketch.txt`):
+   - 375×812-ზე ownership warning-ით პროდუქტების სვეტი 0px-დან ხდება 339px; „Remove item“ იხსნება და იხურება; checkout ანონიმურს sign-in-ს უხსნის, შესულ მომხმარებელს `POST /api/cart/checkout`-ს უგზავნის, როგორც HEAD-ზე.
+   - 1024, 1280 და 1440px-ზე ზომები HEAD-ს უდრის ±1px-ით, გარდა D2-ისა.
+-  - 1366×600-ზე, 1366×657-ზე და 1280×600-ზე wheel Summary-ს ატრიალებს და checkout ეკრანზე ჩანს; Tab coupon-იდან checkout-მდე მას ეკრანზე აჩენს.
++  - 1366×600-ზე, 1366×657-ზე და 1280×600-ზე wheel Summary-ს ატრიალებს და checkout ეკრანზე ჩანს; Tab Summary-ის პირველი ელემენტიდან checkout-მდე მას ეკრანზე აჩენს (EXTRAS მდგომარეობა, `tab` ველი).
+   - 1280×720-ზე ხუთი პროდუქტიდან მეხუთე wheel-ით ჩანს.
+   - ცარიელი კალათა HEAD-ს უდრის.
+ - C round 502: ბრაუზერის სტრიქონები, mutant-ები და დაცული ფაილების შემოწმება.

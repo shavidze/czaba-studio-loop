@@ -1,0 +1,17 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const BASE='http://127.0.0.1:5173'; const out=process.argv[2];
+const AUTH = { id: 7, email: 'buyer@example.invalid', firstName: 'Test', accessToken: 'stub-token', refreshToken: 'stub-refresh' };
+const CORS = { 'access-control-allow-origin': BASE, 'access-control-allow-credentials': 'true', 'access-control-allow-headers': 'authorization, content-type, x-session-id', 'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS' };
+const ok = (r, b) => r.request().method() === 'OPTIONS' ? r.fulfill({ status: 204, headers: CORS }) : r.fulfill({ status: 200, headers: CORS, contentType: 'application/json', body: JSON.stringify({ success: true, data: b }) });
+const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 375, height: 812 } });
+await ctx.addInitScript((a) => { localStorage.setItem('czaba_lead_magnet_dismissed', '1'); sessionStorage.setItem('czaba_entrance_seen','1'); localStorage.setItem('auth_user', JSON.stringify(a)); }, AUTH);
+const p = await ctx.newPage();
+await p.route(/\/api\/auth\/profile/, (r) => ok(r, { id: 7, email: 'b@x.invalid', firstName: 'T', lastName: 'B', authProvider: 'Email', emailVerified: true }));
+await p.route(/\/api\/cart(\?|$)/, (r) => ok(r, { id: 1, items: [{ id: 11, productId: 1, productTitle: 'Stub Track', productHandle: 'stub-track', variantName: 'Standard', unitPrice: 29, quantity: 1, total: 29 }], itemCount: 1, subtotal: 29, discountAmount: 0, giftCardAmount: 0, total: 29 }));
+await p.route(/\/api\/downloads(\?|$)/, (r) => ok(r, { products: [{ isAvailable: true, productId: 1, productTitle: 'Stub Track', handle: 'stub-track', category: 'music', licenseType: 'Universal', purchasedAt: '2026-01-01T00:00:00Z', orderNumber: 'O-1' }] }));
+await p.goto(BASE + '/cart', { waitUntil: 'load' }); await p.waitForTimeout(4000);
+const info = await p.evaluate(() => { const a = [...document.querySelectorAll('a')].find((e) => e.innerText.trim() === 'Upgrade'); const r = a.getBoundingClientRect(); const chain = []; let e = a; while (e && chain.length < 9) { const cs = getComputedStyle(e); chain.push(e.tagName + ' ' + String(e.className).slice(0, 60) + ' | ov ' + cs.overflow + ' h ' + Math.round(e.getBoundingClientRect().height) + ' top ' + Math.round(e.getBoundingClientRect().top)); e = e.parentElement; } return { r: [r.x, r.y + scrollY, r.width, r.height], scrollH: document.documentElement.scrollHeight, chain }; });
+console.log(JSON.stringify(info, null, 1));
+await p.screenshot({ path: out, fullPage: true }); await b.close();

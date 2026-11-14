@@ -1,0 +1,124 @@
+diff --git a/app/lib/__tests__/cart-mobile-layout.test.ts b/app/lib/__tests__/cart-mobile-layout.test.ts
+new file mode 100644
+index 0000000..1a85869
+--- /dev/null
++++ b/app/lib/__tests__/cart-mobile-layout.test.ts
+@@ -0,0 +1,45 @@
++// @vitest-environment node
++import { describe, expect, it } from 'vitest';
++import { readApp } from './helpers/style-scan';
++
++const CART_PATH = 'routes/cart.tsx';
++const PAGE_HEIGHT = 'h-[calc(100vh-80px)]';
++
++function classTokensOfTags(source: string, tagName: string): string[][] {
++  const pattern = new RegExp(`<${tagName}\\s+className="([^"]*)"`, 'g');
++  return [...source.matchAll(pattern)].map((match) => match[1].split(/\s+/).filter(Boolean));
++}
++
++describe('cart page layout below lg (B-R502-CART-MOBILE-ITEMS-HIDDEN)', () => {
++  const source = readApp(CART_PATH);
++
++  it('CML1: below lg the page grows with its content; the fixed height and the clipping are lg-only', () => {
++    const mains = classTokensOfTags(source, 'main');
++    expect(mains).toHaveLength(1);
++    const [tokens] = mains;
++    expect(tokens).toContain(`min-${PAGE_HEIGHT}`);
++    expect(tokens).toContain(`lg:${PAGE_HEIGHT}`);
++    expect(tokens).toContain('lg:overflow-hidden');
++    expect(tokens).not.toContain(PAGE_HEIGHT);
++    expect(tokens.filter((token) => /^overflow(-y)?-(hidden|clip)$/.test(token))).toEqual([]);
++  });
++
++  it('CML2: at lg the items column keeps its own scroll beside the summary', () => {
++    const divs = classTokensOfTags(source, 'div');
++    const grids = divs.filter((tokens) => tokens.includes('lg:grid-cols-3'));
++    expect(grids).toHaveLength(1);
++    expect(grids[0]).toEqual(expect.arrayContaining(['grid', 'grid-cols-1', 'flex-1', 'min-h-0']));
++    const columns = divs.filter((tokens) => tokens.includes('lg:col-span-2'));
++    expect(columns).toHaveLength(1);
++    expect(columns[0]).toEqual(expect.arrayContaining(['overflow-y-auto', 'overscroll-contain']));
++  });
++
++  it('CML3: the self-test reads a multi-token main and rejects the HEAD layout', () => {
++    const head = '<main className="h-[calc(100vh-80px)] bg-background overflow-hidden">';
++    const [headTokens] = classTokensOfTags(head, 'main');
++    expect(headTokens).toEqual([PAGE_HEIGHT, 'bg-background', 'overflow-hidden']);
++    expect(headTokens.filter((token) => /^overflow(-y)?-(hidden|clip)$/.test(token))).toEqual([
++      'overflow-hidden',
++    ]);
++  });
++});
+diff --git a/app/routes/cart.tsx b/app/routes/cart.tsx
+index 913816f..84fcc3e 100644
+--- a/app/routes/cart.tsx
++++ b/app/routes/cart.tsx
+@@ -564,7 +564,7 @@ export default function CartPage() {
+   };
+ 
+   return (
+-    <main className="h-[calc(100vh-80px)] bg-background overflow-hidden">
++    <main className="min-h-[calc(100vh-80px)] bg-background lg:h-[calc(100vh-80px)] lg:overflow-hidden">
+       <div className="h-full max-w-7xl mx-auto px-8 py-12 flex flex-col">
+         {/* Header */}
+         <div className="flex items-center justify-between mb-8 shrink-0">
+diff --git a/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md b/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md
+new file mode 100644
+index 0000000..0e04d88
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md
+@@ -0,0 +1,54 @@
++# კალათა ტელეფონზე: პროდუქტების სია აღარ იმალება
++
++**თარიღი:** 2026-11-14
++**სტატუსი:** In Progress (B-R502-CART-MOBILE-ITEMS-HIDDEN; C round 502 PASS)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++B-მ round 502-ის დაგეგმვისას `/cart` გვერდი ბრაუზერში გაზომა (`b-round-501/probe/head/head-cart.json`). `main`-ს ყველა ეკრანზე ჰქონდა ფიქსირებული სიმაღლე (`h-[calc(100vh-80px)]`) და `overflow-hidden`. 1024px-ზე ვიწრო ეკრანზე სვეტები ერთმანეთის ქვეშ ლაგდება. ამ დროს Order Summary ადგილს იკავებს, პროდუქტების სვეტს კი 0–79px რჩება:
++- 375×812-ზე და 390×844-ზე ერთი პროდუქტის სვეტი 47 და 79px-ია (შიგნით 155px-ია).
++- თუ მყიდველს პროდუქტი უკვე აქვს (ownership warning) ან კუპონი და gift card აქვს, სვეტი 0px-ია. პროდუქტი არ ჩანს და „Remove item“ ვერ ხერხდება. Order Summary კი წერს „Please resolve ownership issues above before checkout“.
++
++ხარვეზი 2026-01-08-ის commit `7052f82`-დან მოდის, loop-მდე. Severity: High (ტელეფონზე კალათის მართვა არ მუშაობს, მონაცემები უსაფრთხოა).
++
++## მიდგომა
++
++- **ერთი class-ის ცვლილება `main`-ზე:** `h-[calc(100vh-80px)] bg-background overflow-hidden` → `min-h-[calc(100vh-80px)] bg-background lg:h-[calc(100vh-80px)] lg:overflow-hidden`.
++  - 1024px-ზე ვიწრო ეკრანზე გვერდი ჩვეულებრივად scroll-დება. პროდუქტები სრულ სიმაღლეზე ჩანს, Order Summary მათ ქვემოთაა (DOM-ის რიგი უცვლელია).
++  - `lg`-დან (≥1024px) ყველაფერი ისეა, როგორც იყო: ფიქსირებული სიმაღლე, პროდუქტების სვეტის საკუთარი scroll და Summary გვერდით.
++- **რა არ შეიცვალა:** პროდუქტების სვეტისა და grid-ის class-ები, ტექსტი, checkout, Remove, ownership-ის ლოგიკა და ღილაკები. კალათაში „Upgrade“ ღილაკის `Button`-ზე გადაყვანა DPG-BUTTON-CLEANUP-2-ის ეტაპ 2b-3-ს ეკუთვნის, შემდეგ რაუნდში.
++- **უარყოფილი ალტერნატივა:** პროდუქტების სვეტისთვის მინიმალური სიმაღლის მიცემა ტელეფონზე. ასეთ შემთხვევაში scroll-ის ორი არე (გვერდი და სვეტი) რჩება, Summary კი ისევ შეიძლება მოიჭრას.
++
++## არქიტექტურა
++
++```mermaid
++flowchart TD
++  M["main: min-h (ყველა ეკრანი), h + overflow-hidden მხოლოდ lg-დან"] --> G["grid: 1 სვეტი, lg-დან 3"]
++  G --> I["პროდუქტების სვეტი: lg-დან საკუთარი scroll"]
++  G --> S["Order Summary"]
++```
++
++## შეცვლილი ფაილები
++
++| ფაილი | ცვლილება |
++|---|---|
++| `app/routes/cart.tsx` | `main`-ის className |
++| `app/lib/__tests__/cart-mobile-layout.test.ts` (ახალი) | CML1–CML3 |
++| `docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md` (ახალი) | ეს დოკუმენტი |
++
++## პრობლემები და გადაწყვეტები
++
++- **Problem:** jsdom layout-ს ვერ ზომავს, ამიტომ unit ტესტი ხარვეზს პირდაპირ ვერ დაიჭერს. **Solution:** CML1 ამოწმებს `main`-ის class-ებს, CML2 ამოწმებს `lg`-ის სვეტის scroll-ს, CML3 კი scanner-ის self-test-ია HEAD-ის class-ზე. ნამდვილი შემოწმება ბრაუზერშია: C round 502-ის კალათის სტრიქონები 375, 390, 768, 1024, 1280 და 1440px-ზე (`b-round-501/probe/cart-states.mjs`).
++- **Problem:** კალათის შევსებული მდგომარეობა cloud-ში backend-ის გარეშე არ ჩანს. **Solution:** სტრიქონები `-STUBBED`-ია (Playwright `page.route` `/api/cart`-ზე, `/api/downloads`-ზე და `/api/auth/profile`-ზე). ისინი მხოლოდ client path-ს ამტკიცებს. ნამდვილი backend-ით შემოწმება ცალკე ღიაა.
++
++## ტესტირება
++
++- B-ის pre-check (scratch copy, `b-round-501/`): typecheck rc 0; lint rc 0 და 179 warning; Biome ორ ფაილზე rc 0 და 5 warning (ხუთივე `cart.tsx`-ში HEAD-ზეც არის); CML1–CML3 PASS; სრული suite (`precheck-full.log`).
++- ბრაუზერი, HEAD-ი და sketch-ი (`probe/head/head-cart.json`, `probe/sketch/sketch-cart.json`): 375×812-ზე ownership warning-ით პროდუქტების სვეტი 0px-დან ხდება 339px. „Remove item“-ზე hit-test HEAD-ზე false-ია, sketch-ზე true. 1024, 1280 და 1440px-ზე სვეტის, Summary-ისა და checkout-ის ზომები HEAD-ს უდრის.
++- C round 502: ბრაუზერის სტრიქონები, mutant-ები და დაცული ფაილების შემოწმება.
++
++## TODO / შემდეგი ნაბიჯები
++
++- DPG-BUTTON-CLEANUP-2 ეტაპი 2b-3: კალათის „Upgrade“, recordings-ის „Create a scene“ და StudioShowcase-ის „Browse the Collection“.
++- backend-ით შემოწმება (ნამდვილი კალათა და შესყიდვები) ცალკე რჩება.

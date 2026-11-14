@@ -1,0 +1,215 @@
+diff --git a/app/lib/__tests__/cart-mobile-layout.test.ts b/app/lib/__tests__/cart-mobile-layout.test.ts
+new file mode 100644
+index 0000000..61852a8
+--- /dev/null
++++ b/app/lib/__tests__/cart-mobile-layout.test.ts
+@@ -0,0 +1,83 @@
++// @vitest-environment node
++import { describe, expect, it } from 'vitest';
++import { readApp } from './helpers/style-scan';
++
++const CART_PATH = 'routes/cart.tsx';
++const PAGE_HEIGHT = 'h-[calc(100vh-80px)]';
++const READER_HINT =
++  'cart.tsx keeps a plain className="..." here; update the reader if it moves to cn()';
++const BELOW_LG_HEIGHT_OR_CLIP =
++  /^(?:(?:sm|md|max-sm|max-md|max-lg|max-xl|max-2xl):)?(?:h|max-h)-|^(?:(?:sm|md|max-sm|max-md|max-lg|max-xl|max-2xl):)?overflow(?:-[xy])?-(?:hidden|clip)$/;
++
++function classTokensOfTags(source: string, tagName: string): string[][] {
++  const pattern = new RegExp(`<${tagName}\\s+className="([^"]*)"`, 'g');
++  return [...source.matchAll(pattern)].map((match) => match[1].split(/\s+/).filter(Boolean));
++}
++
++describe('cart page layout below lg (B-R502-CART-MOBILE-ITEMS-HIDDEN)', () => {
++  const source = readApp(CART_PATH);
++
++  it('CML1: below lg the page grows with its content; the fixed height and the clipping are lg-only', () => {
++    const mains = classTokensOfTags(source, 'main');
++    expect(mains, READER_HINT).toHaveLength(1);
++    const [tokens] = mains;
++    expect(tokens).toContain(`min-${PAGE_HEIGHT}`);
++    expect(tokens).toContain(`lg:${PAGE_HEIGHT}`);
++    expect(tokens).toContain('lg:overflow-hidden');
++    expect(tokens.filter((token) => BELOW_LG_HEIGHT_OR_CLIP.test(token))).toEqual([]);
++  });
++
++  it('CML2: at lg the grid row is bounded and each column scrolls on its own under the mouse wheel', () => {
++    const divs = classTokensOfTags(source, 'div');
++    const grids = divs.filter((tokens) => tokens.includes('lg:grid-cols-3'));
++    expect(grids, READER_HINT).toHaveLength(1);
++    expect(grids[0]).toEqual(
++      expect.arrayContaining(['grid', 'grid-cols-1', 'lg:grid-rows-[minmax(0,1fr)]', 'min-h-0']),
++    );
++    const items = divs.filter((tokens) => tokens.includes('lg:col-span-2'));
++    expect(items, READER_HINT).toHaveLength(1);
++    expect(items[0]).toEqual(
++      expect.arrayContaining(['lg:overflow-y-auto', 'lg:overscroll-contain']),
++    );
++    expect(items[0].filter((token) => /^overflow|^overscroll/.test(token))).toEqual([]);
++    const summary = divs.filter((tokens) => tokens.includes('lg:col-span-1'));
++    expect(summary, READER_HINT).toHaveLength(1);
++    expect(summary[0]).toEqual(
++      expect.arrayContaining(['lg:min-h-0', 'lg:overflow-y-auto', 'lg:overscroll-contain']),
++    );
++    expect(summary[0].filter((token) => BELOW_LG_HEIGHT_OR_CLIP.test(token))).toEqual([]);
++    const wheelColumns = [
++      ...source.matchAll(/<div\s+className="([^"]*)"\s+data-lenis-prevent-wheel\s*>/g),
++    ].map((match) => match[1].split(/\s+/)[0]);
++    expect(wheelColumns).toEqual(['lg:col-span-2', 'lg:col-span-1']);
++  });
++
++  it('CML4: the summary card is not sticky inside its scrolling column', () => {
++    const cards = classTokensOfTags(source, 'div').filter(
++      (tokens) => tokens.includes('bg-surface') && tokens.includes('p-8'),
++    );
++    expect(cards, READER_HINT).toHaveLength(1);
++    expect(cards[0].filter((token) => /(^|:)(sticky|top-\d+)$/.test(token))).toEqual([]);
++  });
++
++  it('CML3: the self-test reads a multi-token main and rejects the HEAD layout', () => {
++    const head = '<main className="h-[calc(100vh-80px)] bg-background overflow-hidden">';
++    const [headTokens] = classTokensOfTags(head, 'main');
++    expect(headTokens).toEqual([PAGE_HEIGHT, 'bg-background', 'overflow-hidden']);
++    expect(headTokens.filter((token) => BELOW_LG_HEIGHT_OR_CLIP.test(token))).toEqual([
++      PAGE_HEIGHT,
++      'overflow-hidden',
++    ]);
++    const allowed = ['min-h-[calc(100vh-80px)]', 'lg:h-[calc(100vh-80px)]', 'lg:overflow-hidden'];
++    expect(allowed.filter((token) => BELOW_LG_HEIGHT_OR_CLIP.test(token))).toEqual([]);
++    const banned = [
++      'md:h-[calc(100vh-80px)]',
++      'md:overflow-hidden',
++      'h-screen',
++      'max-h-screen',
++      'overflow-y-clip',
++      'max-lg:overflow-hidden',
++    ];
++    expect(banned.filter((token) => BELOW_LG_HEIGHT_OR_CLIP.test(token))).toEqual(banned);
++  });
++});
+diff --git a/app/routes/cart.tsx b/app/routes/cart.tsx
+index 913816f..5467e60 100644
+--- a/app/routes/cart.tsx
++++ b/app/routes/cart.tsx
+@@ -305,7 +305,7 @@ function OrderSummary({
+   hasOwnershipIssues?: boolean;
+ }) {
+   return (
+-    <div className="bg-surface border border-outline rounded-lg p-8 sticky top-24">
++    <div className="bg-surface border border-outline rounded-lg p-8">
+       <h2 className="text-lg font-semibold text-foreground mb-6">Order Summary</h2>
+ 
+       <div className="space-y-4">
+@@ -564,7 +564,7 @@ export default function CartPage() {
+   };
+ 
+   return (
+-    <main className="h-[calc(100vh-80px)] bg-background overflow-hidden">
++    <main className="min-h-[calc(100vh-80px)] bg-background lg:h-[calc(100vh-80px)] lg:overflow-hidden">
+       <div className="h-full max-w-7xl mx-auto px-8 py-12 flex flex-col">
+         {/* Header */}
+         <div className="flex items-center justify-between mb-8 shrink-0">
+@@ -592,9 +592,12 @@ export default function CartPage() {
+         ) : isEmpty ? (
+           <EmptyCart />
+         ) : (
+-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1 min-h-0">
++          <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[minmax(0,1fr)] gap-8 flex-1 min-h-0">
+             {/* Cart Items - scrollable */}
+-            <div className="lg:col-span-2 overflow-y-auto overscroll-contain styled-scrollbar pr-2">
++            <div
++              className="lg:col-span-2 lg:overflow-y-auto lg:overscroll-contain styled-scrollbar pr-2"
++              data-lenis-prevent-wheel
++            >
+               <div className="space-y-6 pb-4">
+                 {cartItems.map((item, index) => (
+                   <CartItemRow
+@@ -611,7 +614,10 @@ export default function CartPage() {
+             </div>
+ 
+             {/* Order Summary */}
+-            <div className="lg:col-span-1">
++            <div
++              className="lg:col-span-1 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain styled-scrollbar"
++              data-lenis-prevent-wheel
++            >
+               <OrderSummary
+                 subtotal={subtotal}
+                 discountAmount={discountAmount}
+diff --git a/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md b/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md
+new file mode 100644
+index 0000000..af27ff5
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md
+@@ -0,0 +1,71 @@
++# კალათის layout: სია ტელეფონზე, Order Summary დაბალ ეკრანზე და wheel scroll
++
++**თარიღი:** 2026-11-14
++**სტატუსი:** In Progress (B-R502-CART-MOBILE-ITEMS-HIDDEN, B-R502-CART-LG-SUMMARY-CLIPPED, B-R502-CART-WHEEL-NESTED-SCROLL; C round 502 PASS)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++B-მ round 502-ის დაგეგმვისას `/cart` გვერდი ბრაუზერში გაზომა (`b-round-501/probe/head/`). სამივე ხარვეზს ერთი მიზეზი აქვს: `main`-ს ყველა ეკრანზე ჰქონდა ფიქსირებული სიმაღლე (`h-[calc(100vh-80px)]`) და `overflow-hidden`. ხარვეზი 2026-01-08-ის commit `7052f82`-დან მოდის, loop-მდე.
++
++1. **ტელეფონზე სია არ ჩანს (High).** 1024px-ზე ვიწრო ეკრანზე სვეტები ერთმანეთის ქვეშ ლაგდება და პროდუქტების სვეტს მხოლოდ ის ადგილი რჩება, რასაც Order Summary არ იკავებს (`head-cart.json`).
++   - 375×812-ზე და 390×844-ზე ერთი პროდუქტის სვეტი 47 და 79px-ია (შიგნით 155px-ია).
++   - ownership warning-ით ან კუპონითა და gift card-ით სვეტი 0px-ია. პროდუქტი არ ჩანს და „Remove item“ ვერ ხერხდება (`head-actions.json`). Order Summary კი წერს „Please resolve ownership issues above before checkout“.
++2. **დაბალ desktop ეკრანზე Order Summary იჭრება (Medium).** როცა Summary მაღალია (კუპონი და gift card, ან ownership warning), checkout ღილაკი `main`-ის ქვედა კიდეს სცდება: 1366×657-ზე 7px-ით, 1280×600-ზე მთლიანად (`head-wheel.json`). `overflow-hidden`-ის გამო მაუსით მასთან მისვლა შეუძლებელია.
++3. **wheel scroll სვეტებში არ მუშაობს (Medium).** Lenis (`useSmoothScroll`) wheel-ს თავად იჭერს და window-ს ატრიალებს, ამიტომ პროდუქტების სვეტის საკუთარი scroll wheel-ზე არ მოძრაობს. 1280×720-ზე ხუთი პროდუქტიდან მეოთხე და მეხუთე wheel-ით არ ჩანს (`head-items-wheel.json`).
++
++## მიდგომა
++
++- **`main`:** `min-h-[calc(100vh-80px)] bg-background lg:h-[calc(100vh-80px)] lg:overflow-hidden`. 1024px-ზე ვიწრო ეკრანზე გვერდი ჩვეულებრივად scroll-დება, პროდუქტები სრულ სიმაღლეზე ჩანს და Summary მათ ქვემოთაა (DOM-ის რიგი უცვლელია).
++- **`lg`-დან (product-designer, ვარიანტი (a), `b-round-501/consult-product-designer-2.md`):**
++  - grid-ს ემატება `lg:grid-rows-[minmax(0,1fr)]`, რომ მწკრივი `main`-ზე მაღალი არ გახდეს;
++  - Summary-ის სვეტს ემატება `lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain styled-scrollbar`. ძალიან მაღალი Summary საკუთარ სვეტში scroll-დება, ისევე როგორც პროდუქტების სვეტი;
++  - პროდუქტების სვეტის `overflow-y-auto overscroll-contain` ახლა მხოლოდ `lg`-დან მოქმედებს (`lg:overflow-y-auto lg:overscroll-contain`). 1024px-ზე ვიწრო ეკრანზე სვეტი scroll container აღარ არის;
++  - Summary-ის ბარათს `sticky top-24` მოეხსნა. HEAD-ზე ის არსად მოქმედებდა, scroll-იან სვეტში კი ბარათს 96px-ით ქვემოთ წევდა.
++- **wheel:** ორივე სვეტს აქვს `data-lenis-prevent-wheel` (Lenis 1.3-ის ატრიბუტი; `Modal.tsx` ანალოგიურად იყენებს `data-lenis-prevent`-ს). wheel სვეტზე ბრაუზერის ჩვეულებრივ scroll-ს იწვევს.
++- **რა არ შეიცვალა:** ტექსტი, ღილაკები, checkout, Remove, ownership-ის ლოგიკა, `useSmoothScroll` და სვეტების რიგი. კალათის „Upgrade“ ღილაკის `Button`-ზე გადაყვანა DPG-BUTTON-CLEANUP-2-ის ეტაპ 2b-3-ს ეკუთვნის.
++- **Deviation-ები:**
++  - D1: თუ კურსორი პროდუქტების ან Summary-ის სვეტზეა და სვეტი თავად ვეღარ scroll-დება (1024px-ზე ვიწრო ეკრანი, `lg`-ზე მოკლე სვეტი ან სვეტის ბოლო), wheel window-ს Lenis-ის smoothing-ის გარეშე ატრიალებს. ატრიბუტი CSS breakpoint-ს ვერ მისდევს; ამისთვის JS ან `useSmoothScroll`-ის `prevent` option იქნებოდა საჭირო. ტელეფონზე (touch) Lenis ისედაც ბრაუზერის scroll-ს ტოვებს.
++  - D2: `lg`-ზე, როცა HEAD-ზე Summary `main`-ს სცდებოდა, პროდუქტების სვეტი ახლა grid-ის მწკრივის სიმაღლეზეა და არა Summary-ის სიმაღლეზე (მაგ. 1280×720-ზე ownership warning-ით 501-დან 442px).
++  - D3: როცა Summary საკუთარ სვეტში scroll-დება (მხოლოდ დაბალ ეკრანზე), scrollbar სვეტის შიგნით ჩნდება და ბარათს ავიწროებს. `lg:pr-2` `lg`-ის ზომებს HEAD-ისგან განასხვავებდა, ამიტომ არ დაემატა.
++- **უარყოფილი ალტერნატივები:** (b) desktop-ზე ჩვეულებრივი page scroll და sticky Summary — desktop-ის ქცევას ყველა კალათისთვის ცვლის და Saba-ს თანხმობას საჭიროებს; (c) checkout ბლოკის Summary-ის ბოლოში მიმაგრება — ღილაკის პოზიციას ცვლის. `useSmoothScroll`-ში `allowNestedScroll: true` მთელ Store-ს შეეხებოდა, ამიტომ ამ რაუნდში არ გამოიყენება.
++
++## არქიტექტურა
++
++```mermaid
++flowchart TD
++  M["main: min-h ყველა ეკრანზე; h + overflow-hidden მხოლოდ lg-დან"] --> G["grid: 1 სვეტი; lg-დან 3 სვეტი და ერთი შეზღუდული მწკრივი"]
++  G --> I["პროდუქტები: lg-დან საკუთარი scroll, data-lenis-prevent-wheel"]
++  G --> S["Order Summary: lg-დან საკუთარი scroll, data-lenis-prevent-wheel"]
++```
++
++## შეცვლილი ფაილები
++
++| ფაილი | ცვლილება |
++|---|---|
++| `app/routes/cart.tsx` | `main`, grid, ორი სვეტი და Summary-ის ბარათი: მხოლოდ className და `data-lenis-prevent-wheel` |
++| `app/lib/__tests__/cart-mobile-layout.test.ts` (ახალი) | CML1–CML4 |
++| `docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md` (ახალი) | ეს დოკუმენტი |
++
++## პრობლემები და გადაწყვეტები
++
++- **Problem:** jsdom layout-ს და wheel-ს ვერ ზომავს. **Solution:** CML1–CML4 class-ებსა და ატრიბუტებს ამოწმებს, 15 mutant-ი (`b-round-501/mutants-502.py`) კი აჩვენებს, რომ თითოეული ნაწილის მოხსნა ტესტს წითლად აქცევს. ნამდვილი შემოწმება ბრაუზერშია (C round 502).
++- **Problem:** `scrollIntoView` `overflow-hidden` ელემენტსაც ატრიალებს, ამიტომ hit-test-მა HEAD-ზე checkout შეიძლება „ხელმისაწვდომად“ აჩვენოს. **Solution:** დაბალი ეკრანის სტრიქონი მომხმარებლის გზას იმეორებს: მაუსის wheel Summary-ზე `scrollIntoView`-ის გარეშე (`probe/cart-wheel.mjs`).
++- **Problem:** შევსებული კალათა cloud-ში backend-ის გარეშე არ ჩანს. **Solution:** სტრიქონები `-STUBBED`-ია (Playwright `page.route` `/api/cart`-ზე, `/api/downloads`-ზე და `/api/auth/profile`-ზე). ისინი მხოლოდ client path-ს ამტკიცებს; ნამდვილი backend-ით შემოწმება ცალკე ღიაა.
++
++## ტესტირება
++
++- B-ის pre-check (scratch copy, `b-round-501/`): typecheck rc 0; lint rc 0 და 179 warning; Biome ორ ფაილზე rc 0 და 5 warning (ხუთივე `cart.tsx`-ში HEAD-ზეც არის); სრული suite და build (`precheck-full.log`, `precheck-build-sketch.log`).
++- ბრაუზერი, HEAD-ი და sketch-ი (`probe/head/`, `probe/sketch/`, შედარება `probe/compare-sketch.txt`):
++  - 375×812-ზე ownership warning-ით პროდუქტების სვეტი 0px-დან ხდება 339px; „Remove item“ იხსნება და იხურება; checkout ანონიმურს sign-in-ს უხსნის, შესულ მომხმარებელს `POST /api/cart/checkout`-ს უგზავნის, როგორც HEAD-ზე.
++  - 1024, 1280 და 1440px-ზე ზომები HEAD-ს უდრის ±1px-ით, გარდა D2-ისა.
++  - 1366×600-ზე, 1366×657-ზე და 1280×600-ზე wheel Summary-ს ატრიალებს და checkout ეკრანზე ჩანს; Tab Summary-ის პირველი ელემენტიდან checkout-მდე მას ეკრანზე აჩენს (EXTRAS მდგომარეობა, `tab` ველი).
++  - 1280×720-ზე ხუთი პროდუქტიდან მეხუთე wheel-ით ჩანს.
++  - ცარიელი კალათა HEAD-ს უდრის.
++- C round 502: ბრაუზერის სტრიქონები, mutant-ები და დაცული ფაილების შემოწმება.
++
++## TODO / შემდეგი ნაბიჯები
++
++- DPG-BUTTON-CLEANUP-2 ეტაპი 2b-3: კალათის „Upgrade“, recordings-ის „Create a scene“ და StudioShowcase-ის „Browse the Collection“.
++- სხვა nested scroll არეები Store-ში (Lenis wheel) და `allowNestedScroll` — ცალკე შესამოწმებელი სიგნალი.
++- backend-ით შემოწმება (ნამდვილი კალათა და შესყიდვები) ცალკე რჩება.

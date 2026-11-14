@@ -1,14 +1,14 @@
-# Active loop summary (2026-11-13T23:41:38.313Z)
+# Active loop summary (2026-11-14T01:01:06.741Z)
 
-- backlog.json 3540 KB -> active view 310 KB
-- status: G_ROOT_GATE round 500
-- servers: `{"checkedUtc":"2026-11-13T23:26:14.0255073Z","round":500,"attempt":1,"store":200}`
-- last publication: 462570e518c389ac089e518d6938905225c1fa58 (rounds 499-500)
-- last root gate: round 500 published - commit 462570e518c389ac089e518d6938905225c1fa58 pushed
+- backlog.json 3542 KB -> active view 309 KB
+- status: G_ROOT_GATE round 501
+- servers: `{"checkedUtc":"2026-11-14T00:38:11.8195640Z","round":501,"attempt":1,"store":200}`
+- last publication: 3bb55d45ce43eaac4e24d42ec29611fd2b9cb832 (rounds 501-501)
+- last root gate: round 501 published - commit 3bb55d45ce43eaac4e24d42ec29611fd2b9cb832 pushed
 
 ## Current items: -
 
-## Open findings: 1002 (21 Critical/High/Medium)
+## Open findings: 999 (20 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / tracked by task SAFARI-CHECKS (D-29z1705) | listed in the Safari list (user-review/questions-retro-465.md Q2, D-29z1638); does not block | environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the c …[see backlog.json] / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
@@ -27,7 +27,6 @@
 - **HIREUS-EMAIL-CLIENTS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Brevo and a test send to Gmail/Outlook/Apple Mail (Saba); questions-retro-480.md Q4 / Hire-Us internal e-mail in real clients, opened as a task by L46
 - **B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED** / high / open_root (D-29z1757): needs a backend authenticated password-change endpoint and a change in protected app/lib/auth.ts (loop may not edit); question ROOT-REQ-PASSWORD-CHANGE-ENDPOINT; does not block loop rounds, blocks final COMPLETE / Account 'Change password' can never succeed: app/lib/auth.ts updatePassword verifies the current password via login, then always throws 'Pas
 - **SABA-DEVICE-CHECKS** / medium / open_tech_lead_manual (D-29z1768; does not block): opened by L46 after two RETROs without an answer (questions-retro-480.md Q1, questions-retro-495.md Q1); blocked on Saba's own device / Saba's-device checks opened as one task by L46
-- **DPG-BUTTON-CLEANUP-2** / medium / in_progress (D-29z1792, D-29z1793): 2b-1 C FAIL round 499 (unpinned /store link, A STOP), re-dispatched as round 500 delta; 2b-2, 2b-3, 2c-2e, NONBRAND remain | in_progress (D-29z1787, D-29z1789): 2a C-verified (C round 498 PASS, published 82e118a); 2b split into 2b-1 (round 499: EmptyState, ErrorDi …[see backlog.json] / Hand-rolled brand buttons outside Button.tsx (Saba DPG item 7 "Use Button.tsx component only")
+- **DPG-BUTTON-CLEANUP-2** / medium / in_progress (D-29z1799): 2b-2 dispatched round 501 (sketch-501 sha acb11d51); then 2b-3, 2c-2e, NONBRAND | in_progress (D-29z1797): 2b-1 C-verified (C round 500 PASS, published 462570e); next 2b-2 (round 501), then 2b-3, 2c-2e, NONBRAND | in_progress (D-29z1792, D-29z1793): 2b-1 C FAIL round 499 (un …[see backlog.json] / Hand-rolled brand buttons outside Button.tsx (Saba DPG item 7 "Use Button.tsx component only")
 - **DPG-BUTTON-CLEANUP-2-NONBRAND** / medium / scheduled (D-29z1784): after DPG-BUTTON-CLEANUP-2 2a-2e; record count, needs a mutant-proven scanner at its planning / Hand-rolled buttons without a brand fill (30 <button|Link|a> with padding+rounded literal classes in 18 Store files) also bypass Button.tsx 
-- **A-R499-CR-STORE-TRY-UNPINNED** / medium / open (D-29z1793): ruled option (a); fixed in b-round-499/sketch-500.patch.txt (SE1 + mutants N10-N13, N17); closes with C round 500 C9/C10 PASS / No test pinned the /store error 'Try again' link's builder args or `to` (B2B-5 checked only a source substring)
-- ... and 981 Low/info (see backlog.json)
+- ... and 979 Low/info (see backlog.json)

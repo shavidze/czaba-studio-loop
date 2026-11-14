@@ -1,9 +1,9 @@
 {
-  "version": 495,
+  "version": 497,
   "updated": "2026-11-14",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 501: DPG-BUTTON-CLEANUP-2 stage 2b-2: A applies b-round-500/sketch-501.patch.txt (sha acb11d51, tech-lead v4 APPROVE): free-downloads Download -> Button primary lg pill type=button aria-expanded; NewsletterSection Subscribe -> Button primary lg h-14 submit disabled while busy; hire-us Send Message -> Button primary lg fullWidth submit, Loader2 spinner; ST5 hire-us pin; new store-button-cleanup-2b2.test.tsx B2B2-0..7; DESIGN_SYSTEM shape rows; doc 322. C runs C0-C14 in the browser (current-task.md)",
+  "current_task": "Round 502: cart layout, three related bugs (B-R502-CART-MOBILE-ITEMS-HIDDEN High, B-R502-CART-LG-SUMMARY-CLIPPED Medium, B-R502-CART-WHEEL-NESTED-SCROLL Medium): A applies b-round-501/sketch-502.patch.txt (v5 sha 7d14eae2; code = v3, tech-lead v1 APPROVE, v2 APPROVE with conditions fixed in v3): cart.tsx main min-h + lg-only fixed height/overflow-hidden, grid lg:grid-rows-[minmax(0,1fr)], items column lg-only scroll, summary column lg scroll, data-lenis-prevent-wheel on both columns, dead sticky top-24 removed; new cart-mobile-layout.test.ts CML1-CML4; doc 323. C runs C0-C13 (stubbed cart rows, current-task.md)",
   "advisor_used_by_B": {
     "previous": "available; consulted after orientation (round 495 -> 496 planning) and before hand-off",
     "round_497_planning": "available; used after orientation and at the closing check (2026-11-13)",
@@ -12869,8 +12869,17 @@
       "task": "current-task.md",
       "decision": "D-29z1799",
       "type": "DPG-BUTTON-CLEANUP-2 stage 2b-2 (free-downloads Download, newsletter Subscribe, hire-us Send Message)",
+      "status": "C PASS (browserVerified/realVerified true, 0 bugs); gate 501 published 3bb55d4 (both remotes)",
+      "note": "baseline 462570e clean; sketch b-round-500/sketch-501.patch.txt sha acb11d51; pre-check full 298/4337 rc0, build rc0, mutants M1-M20,M26-M28,M30 RED; mutant M31 (ST5 isolation) RED",
+      "result_note": "C0-C14 PASS (c-round-501.json); C11 full doc-ledger trace for doc 322 (after-state numbers C-measured; HEAD-side numbers from B head.out only); C10 25 mutants RED"
+    },
+    {
+      "round": 502,
+      "task": "current-task.md",
+      "decision": "D-29z1805",
+      "type": "cart layout: three related bugs (mobile items hidden, lg short-screen summary clipped, Lenis wheel on nested columns)",
       "status": "dispatched",
-      "note": "baseline 462570e clean; sketch b-round-500/sketch-501.patch.txt sha acb11d51; pre-check full 298/4337 rc0, build rc0, mutants M1-M20,M26-M28,M30 RED; mutant M31 (ST5 isolation) RED"
+      "note": "baseline 3bb55d4 clean; sketch b-round-501/sketch-502.patch.txt v5 sha 7d14eae2 (code = v3; two doc sentences); pre-check in b-round-501/precheck-*.log; mutants M1-M15; probes b-round-501/probe/"
     }
   ],
   "post_current_stage_queue": [
@@ -17060,7 +17069,7 @@
     },
     {
       "id": "DPG-FIX",
-      "status": "in_progress (D-29z1784): DPG-BUTTON-CLEANUP stage 1 C PASS round 497 (published 5d12c75, awaits DP gate); round 498 = DPG-BUTTON-CLEANUP-2 stage 2a; then 2b-2e, NONBRAND, PD-R498-404-SECONDARY-ALIGN, rest of DPG P1; REGRESSION first when planned on/after 2026-11-16; RETRO 510 | in_progress (D-29z1773): round 495 RETRO C PASS; round 496 = DPG-BUTTON-CLEANUP stage 1 (retired CSS classes + consumers; account.tsx 0 hits, so the two L8 rows stay deferred per D-29z1771); next DPG-BUTTON-CLEANUP-2 (hand-rolled brand buttons; may carry the L8 rows) | in_progress (D-29z1770): round 495 = RETRO 495; round 496 = DPG-BUTTON-CLEANUP (absorbs rows for B-R492-PASSWORD-SUBMIT-FOCUS-LOST and GATE488-L3-SAVE-CANCEL-FOCUS-DISABLED per L8); then SYS-R495-SHARED-DIALOG when root grants | in_progress (D-29z1766): password dialog Mediums done (round 494, published 3bcf8cb); round 495 = RETRO 495; next DPG-BUTTON-CLEANUP | in_progress (D-29z1761): 493 C FAIL on a doc line (C-R493-01); 494 re-dispatch docs-only v6; then RETRO 495 (if 494 PASS) and DPG-BUTTON-CLEANUP; REGRESSION on/after 2026-11-16 | in_progress (D-29z1758): 492 C FAIL on a doc line (C-R492-01); 493 re-dispatch docs-only v5; then DPG-BUTTON-CLEANUP (REGRESSION first when due on/after 2026-11-16; RETRO 495) | in_progress (D-29z1756): 491 B-R487 narrow overflow done (published e4e1d1c); 492 B-R488-PASSWORD-MODAL-DIALOG (+2 Mediums); then DPG-BUTTON-CLEANUP (REGRESSION first when due on/after 2026-11-16; RETRO 495) | in_progress (D-29z1754): 489-490 SABA-B-17 done (published 53ff249); 491 B-R487-PROFILE-EDITOR-NARROW-OVERFLOW, 492 B-R488-PASSWORD-MODAL-DIALOG, then DPG-BUTTON-CLEANUP (REGRESSION first when due on/after 2026-11-16; RETRO 495) | in_progress (D-29z1720): 483 REGRESSION part 2 C PASS but browserVerified false; 484 = its C-only remainder; 485 CLIENT-NAV-CONTRACT, 486 ORDER-CARD-KEYBOARD, then DPG-BUTTON-CLEANUP | in_progress (D-29z1718): 482 REGRESSION part 1 C PASS; 483 REGRESSION part 2; 484 CLIENT-NAV-CONTRACT (GATE479-M1), 485 B-R480-ORDER-CARD-KEYBOARD, then DPG-BUTTON-CLEANUP | in_progress (D-29z1715): 481 B-R478-DEAD-MUSIC-LINK C PASS published 751e30e; 482-483 REGRESSION-2026-11-13 parts 1-2, 484 CLIENT-NAV-CONTRACT (GATE479-M1), 485 B-R480-ORDER-CARD-KEYBOARD, then DPG-BUTTON-CLEANUP | in_progress (D-29z1709): round 480 RETRO C PASS; 481 B-R478-DEAD-MUSIC-LINK, 482 REGRESSION-2026-11-13, 483 CLIENT-NAV-CONTRACT (GATE479-M1), 484 B-R480-ORDER-CARD-KEYBOARD, then DPG-BUTTON-CLEANUP | in_progress (D-29z1704): round 480 RETRO, 481 REGRESSION, 482 CLIENT-NAV-CONTRACT (GATE479-M1), 483 B-R478-DEAD-MUSIC-LINK, then DPG-BUTTON-CLEANUP | in_progress (D-29z1700): DPG-FOOTER-LINKS C-verified round 479, published bbb3193, awaits the DP gate; next after RETRO 480 and REGRESSION-2026-11-13: DPG-BUTTON-CLEANUP | in_progress (D-29z1697): P0 complete on C evidence (P0-1 r474, P0-2 r475, P0-3a r477, P0-3b r478 published 75a6028), all awaiting the DP-gate re-run by root (not done until 10/10); P1 started: round 479 = DPG-FOOTER-LINKS; next DPG-BUTTON-CLEANUP; REGRESSION-2026-11-13 and RETRO 480 first when due | in_progress (D-29z1692): P0-3a C PASS round 477 (published 10791ac, awaiting DP gate); P0-3b docs dispatched round 478 = last P0 stage; after it root re-runs the DP gate; next planning REGRESSION-2026-11-13 then RETRO 480 then P1 | in_progress (D-29z1690): P0-3a round 476 C short FAIL on unruled reviewer Medium R1 (ruled D-29z1688, accepted); re-dispatched as round 477 with full C1-C12; P0-3b docs next (after REGRESSION-2026-11-13 if due) | in_progress (D-29z1686): P0-1 C PASS r474 (297f5ae) and P0-2 C PASS r475 (edeba5a), both awaiting DP-gate re-review; P0-3a loader+header logo dispatched round 476; P0-3b docs next (after REGRESSION-2026-11-13 if due); after P0 root re-runs the DP gate | in_progress (D-29z1681): P0-1 C PASS round 474 (published 297f5ae, awaiting DP-gate re-review); P0-2 dispatched round 475; P0-3 SpotlightLoader+docs next (EntranceCover failsafe uses Tailwind-default --color-black #000 - input to P0-3); after P0 root re-runs the DP gate | in_progress (D-29z1677): P0-1 dispatched round 474 (teal purge, gradient/glow tokens, decorative token deletion); P0-2 undefined tokens and P0-3 SpotlightLoader+docs next; after each P level root re-runs the DP gate; C-verified DPG ids are awaiting DP-gate re-review | queued, next feature block after STORE-2c-1 closes (D-29z1669); not dispatched in round 473 because P0 rewrites app.css, which carries the unpublished 2c-1 change",
+      "status": "in_progress (D-29z1805): round 501 2b-2 C PASS (published 3bb55d4); round 502 = three cart layout bugs (B-R502-CART-*); round 503 = DPG-BUTTON-CLEANUP-2 2b-3; REGRESSION first when planned on/after 2026-11-16; RETRO 510 | in_progress (D-29z1784): DPG-BUTTON-CLEANUP stage 1 C PASS round 497 (published 5d12c75, awaits DP gate); round 498 = DPG-BUTTON-CLEANUP-2 stage 2a; then 2b-2e, NONBRAND, PD-R498-404-SECONDARY-ALIGN, rest of DPG P1; REGRESSION first when planned on/after 2026-11-16; RETRO 510 | in_progress (D-29z1773): round 495 RETRO C PASS; round 496 = DPG-BUTTON-CLEANUP stage 1 (retired CSS classes + consumers; account.tsx 0 hits, so the two L8 rows stay deferred per D-29z1771); next DPG-BUTTON-CLEANUP-2 (hand-rolled brand buttons; may carry the L8 rows) | in_progress (D-29z1770): round 495 = RETRO 495; round 496 = DPG-BUTTON-CLEANUP (absorbs rows for B-R492-PASSWORD-SUBMIT-FOCUS-LOST and GATE488-L3-SAVE-CANCEL-FOCUS-DISABLED per L8); then SYS-R495-SHARED-DIALOG when root grants | in_progress (D-29z1766): password dialog Mediums done (round 494, published 3bcf8cb); round 495 = RETRO 495; next DPG-BUTTON-CLEANUP | in_progress (D-29z1761): 493 C FAIL on a doc line (C-R493-01); 494 re-dispatch docs-only v6; then RETRO 495 (if 494 PASS) and DPG-BUTTON-CLEANUP; REGRESSION on/after 2026-11-16 | in_progress (D-29z1758): 492 C FAIL on a doc line (C-R492-01); 493 re-dispatch docs-only v5; then DPG-BUTTON-CLEANUP (REGRESSION first when due on/after 2026-11-16; RETRO 495) | in_progress (D-29z1756): 491 B-R487 narrow overflow done (published e4e1d1c); 492 B-R488-PASSWORD-MODAL-DIALOG (+2 Mediums); then DPG-BUTTON-CLEANUP (REGRESSION first when due on/after 2026-11-16; RETRO 495) | in_progress (D-29z1754): 489-490 SABA-B-17 done (published 53ff249); 491 B-R487-PROFILE-EDITOR-NARROW-OVERFLOW, 492 B-R488-PASSWORD-MODAL-DIALOG, then DPG-BUTTON-CLEANUP (REGRESSION first when due on/after 2026-11-16; RETRO 495) | in_progress (D-29z1720): 483 REGRESSION part 2 C PASS but browserVerified false; 484 = its C-only remainder; 485 CLIENT-NAV-CONTRACT, 486 ORDER-CARD-KEYBOARD, then DPG-BUTTON-CLEANUP | in_progress (D-29z1718): 482 REGRESSION part 1 C PASS; 483 REGRESSION part 2; 484 CLIENT-NAV-CONTRACT (GATE479-M1), 485 B-R480-ORDER-CARD-KEYBOARD, then DPG-BUTTON-CLEANUP | in_progress (D-29z1715): 481 B-R478-DEAD-MUSIC-LINK C PASS published 751e30e; 482-483 REGRESSION-2026-11-13 parts 1-2, 484 CLIENT-NAV-CONTRACT (GATE479-M1), 485 B-R480-ORDER-CARD-KEYBOARD, then DPG-BUTTON-CLEANUP | in_progress (D-29z1709): round 480 RETRO C PASS; 481 B-R478-DEAD-MUSIC-LINK, 482 REGRESSION-2026-11-13, 483 CLIENT-NAV-CONTRACT (GATE479-M1), 484 B-R480-ORDER-CARD-KEYBOARD, then DPG-BUTTON-CLEANUP | in_progress (D-29z1704): round 480 RETRO, 481 REGRESSION, 482 CLIENT-NAV-CONTRACT (GATE479-M1), 483 B-R478-DEAD-MUSIC-LINK, then DPG-BUTTON-CLEANUP | in_progress (D-29z1700): DPG-FOOTER-LINKS C-verified round 479, published bbb3193, awaits the DP gate; next after RETRO 480 and REGRESSION-2026-11-13: DPG-BUTTON-CLEANUP | in_progress (D-29z1697): P0 complete on C evidence (P0-1 r474, P0-2 r475, P0-3a r477, P0-3b r478 published 75a6028), all awaiting the DP-gate re-run by root (not done until 10/10); P1 started: round 479 = DPG-FOOTER-LINKS; next DPG-BUTTON-CLEANUP; REGRESSION-2026-11-13 and RETRO 480 first when due | in_progress (D-29z1692): P0-3a C PASS round 477 (published 10791ac, awaiting DP gate); P0-3b docs dispatched round 478 = last P0 stage; after it root re-runs the DP gate; next planning REGRESSION-2026-11-13 then RETRO 480 then P1 | in_progress (D-29z1690): P0-3a round 476 C short FAIL on unruled reviewer Medium R1 (ruled D-29z1688, accepted); re-dispatched as round 477 with full C1-C12; P0-3b docs next (after REGRESSION-2026-11-13 if due) | in_progress (D-29z1686): P0-1 C PASS r474 (297f5ae) and P0-2 C PASS r475 (edeba5a), both awaiting DP-gate re-review; P0-3a loader+header logo dispatched round 476; P0-3b docs next (after REGRESSION-2026-11-13 if due); after P0 root re-runs the DP gate | in_progress (D-29z1681): P0-1 C PASS round 474 (published 297f5ae, awaiting DP-gate re-review); P0-2 dispatched round 475; P0-3 SpotlightLoader+docs next (EntranceCover failsafe uses Tailwind-default --color-black #000 - input to P0-3); after P0 root re-runs the DP gate | in_progress (D-29z1677): P0-1 dispatched round 474 (teal purge, gradient/glow tokens, decorative token deletion); P0-2 undefined tokens and P0-3 SpotlightLoader+docs next; after each P level root re-runs the DP gate; C-verified DPG ids are awaiting DP-gate re-review | queued, next feature block after STORE-2c-1 closes (D-29z1669); not dispatched in round 473 because P0 rewrites app.css, which carries the unpublished 2c-1 change",
       "source": "Saba 2026-11-12 policy section 'Design philosophy acceptance gate' / 'DPG-FIX block - IMMEDIATE PRIORITY (before STORE-3)'; first gate 3.5/10 (design-philosopher), 4/10 (product-designer)",
       "priority": "Saba: takes priority over STORE-2c/3/4/5 and all other work; loop does not advance to STORE-3 until both agents score 10/10",
       "order": {
@@ -28965,7 +28974,8 @@
       "evidence": "a-round-447.md process disclosure",
       "added": "2026-11-11 B round 447 -> 448 planning",
       "confirmedBy": [
-        "A round-453 code-reviewer (A-R453-REVIEW-L-DESIGN-DOCS-STALE, D-29z1614)"
+        "A round-453 code-reviewer (A-R453-REVIEW-L-DESIGN-DOCS-STALE, D-29z1614)",
+        "a-round-501.md: .claude/primitives/DESIGN_TOKENS.md l.9 brand #13D9CC (Teal), l.108 Teal + Orange (D-29z1803)"
       ]
     },
     {
@@ -29465,7 +29475,7 @@
       "id": "DPG-BUTTON-CLEANUP-2",
       "severity": "medium",
       "origin": "B spec",
-      "status": "in_progress (D-29z1799): 2b-2 dispatched round 501 (sketch-501 sha acb11d51); then 2b-3, 2c-2e, NONBRAND | in_progress (D-29z1797): 2b-1 C-verified (C round 500 PASS, published 462570e); next 2b-2 (round 501), then 2b-3, 2c-2e, NONBRAND | in_progress (D-29z1792, D-29z1793): 2b-1 C FAIL round 499 (unpinned /store link, A STOP), re-dispatched as round 500 delta; 2b-2, 2b-3, 2c-2e, NONBRAND remain | in_progress (D-29z1787, D-29z1789): 2a C-verified (C round 498 PASS, published 82e118a); 2b split into 2b-1 (round 499: EmptyState, ErrorDisplay Try Again/Go Home, /store error Try again), 2b-2 (<button>/submit: free-downloads Download, NewsletterSection submit, hire-us submit + ST5 pin), 2b-3 (recordings 'Create a scene', cart sm, StudioShowcase); then 2c PurchaseHeader, 2d chat, 2e LeadMagnet; NONBRAND follow-up | in_progress (D-29z1784): split into 2a (round 498, status-page CTA links: checkout.cancel, checkout.success, faq, account.orders), 2b route/section CTAs, 2c PurchaseHeader purchase path, 2d chat, 2e LeadMagnet keep-list restyle; NONBRAND follow-up; inventory b-round-497/stage2-inventory.md (121 hits / 52 solid at 5d12c75) | scheduled (D-29z1780): after round 497 closes stage 1 | scheduled (D-29z1773): next DPG P1 round after round 496",
+      "status": "in_progress (D-29z1804, D-29z1805): 2b-3 mapping ruled (b-round-501/consult-product-designer.md), dispatched next as round 503 after the round-502 cart layout bugs; then 2c-2e, NONBRAND | in_progress (D-29z1802): 2b-2 C-verified (C round 501 PASS, published 3bb55d4); next 2b-3 (round 502), then 2c-2e, NONBRAND | in_progress (D-29z1799): 2b-2 dispatched round 501 (sketch-501 sha acb11d51); then 2b-3, 2c-2e, NONBRAND | in_progress (D-29z1797): 2b-1 C-verified (C round 500 PASS, published 462570e); next 2b-2 (round 501), then 2b-3, 2c-2e, NONBRAND | in_progress (D-29z1792, D-29z1793): 2b-1 C FAIL round 499 (unpinned /store link, A STOP), re-dispatched as round 500 delta; 2b-2, 2b-3, 2c-2e, NONBRAND remain | in_progress (D-29z1787, D-29z1789): 2a C-verified (C round 498 PASS, published 82e118a); 2b split into 2b-1 (round 499: EmptyState, ErrorDisplay Try Again/Go Home, /store error Try again), 2b-2 (<button>/submit: free-downloads Download, NewsletterSection submit, hire-us submit + ST5 pin), 2b-3 (recordings 'Create a scene', cart sm, StudioShowcase); then 2c PurchaseHeader, 2d chat, 2e LeadMagnet; NONBRAND follow-up | in_progress (D-29z1784): split into 2a (round 498, status-page CTA links: checkout.cancel, checkout.success, faq, account.orders), 2b route/section CTAs, 2c PurchaseHeader purchase path, 2d chat, 2e LeadMagnet keep-list restyle; NONBRAND follow-up; inventory b-round-497/stage2-inventory.md (121 hits / 52 solid at 5d12c75) | scheduled (D-29z1780): after round 497 closes stage 1 | scheduled (D-29z1773): next DPG P1 round after round 496",
       "title": "Hand-rolled brand buttons outside Button.tsx (Saba DPG item 7 \"Use Button.tsx component only\")",
       "evidence": "b-round-497/stage2-inventory.md, b-round-497/scan-head.json (supersedes b-round-495/stage2-bg-brand-hits.txt)",
       "added": "2026-11-13 B round 495 -> 496 planning",
@@ -29482,7 +29492,7 @@
       "substages_d29z1789": {
         "2a": "C round 498 PASS, published 82e118a",
         "2b-1": "C round 500 PASS (browserVerified true), published 462570e; scanner 109/44",
-        "2b-2": "round 501 dispatched: FD Download primary lg pill + aria-expanded; NL Subscribe primary lg h-14; HU Send Message primary lg fullWidth + Loader2; ST5 rewritten; scanner 104/41",
+        "2b-2": "C round 501 PASS (browserVerified true), published 3bb55d4; scanner 104/41",
         "2b-3": "recordings.$productId 190, cart 162, StudioShowcase 155"
       }
     },
@@ -29555,7 +29565,8 @@
         "A round-499 code-reviewer Architecture note ('no signal; the ButtonLink wrapper is pre-ruled #2') (D-29z1796)",
         "gate 500 review architecture note + a-round-500.md Architecture note (D-29z1798)"
       ],
-      "note_d29z1788": "gate 498 reviewer: re-evaluate after 2b at ~15 builder call sites; scope app/components/ui only; Link vs <a> DOM and data-discover unchanged; keep B2-x asserts. Signal only; no checkpoint request (small change, one owner)."
+      "note_d29z1788": "gate 498 reviewer: re-evaluate after 2b at ~15 builder call sites; scope app/components/ui only; Link vs <a> DOM and data-discover unchanged; keep B2-x asserts. Signal only; no checkpoint request (small change, one owner).",
+      "note_d29z1806": "re-evaluated at 2b-3 planning: keep inline; decide at stage-2 close-out with SIG-R501-SHARED-BUTTON-SCANNER (D-29z1806)"
     },
     {
       "id": "INFO-B497-C15-UNMEASURED-ASSERT",
@@ -29565,15 +29576,6 @@
       "title": "Task 497 C15 asserted signed-in header height = signed-out +-1 px without B running it on the sketch (75 vs 81 measured by C)",
       "evidence": "c-round-497.json rowsNotPassed",
       "added": "2026-11-13 B round 497 -> 498 planning"
-    },
-    {
-      "id": "B-R498-DOC320-L28",
-      "severity": "low",
-      "origin": "B spec",
-      "status": "closed (D-29z1797): C round 500 C11; published 462570e | open (D-29z1792): round 499 C11 not run (short route); fix stays in the tree; closes with C round 500 C11 | open (D-29z1788): fixed in sketch-499 (doc 320 l.4 -> 'In Progress (stage 2a of DPG-BUTTON-CLEANUP-2; C round 498 PASS)'); closes with C round 499 C11; second occurrence after B-R455-DOC298-STATUS-LINE (RETRO 510 counter)",
-      "title": "Task 498 pinned doc 320 l.4 without the L28 'C round N PASS' form",
-      "evidence": "a-round-498.md For B #1; c-round-498.json notes C11",
-      "added": "2026-11-13 B round 498 -> 499 planning"
     },
     {
       "id": "SABA-Q-499-BUTTON-CASE",
@@ -29606,58 +29608,10 @@
       ]
     },
     {
-      "id": "A-R499-CR-STORE-TRY-UNPINNED",
-      "severity": "medium",
-      "origin": "B spec",
-      "status": "closed (D-29z1797): C round 500 C9 SE1 + C10 N10-N13, N17 RED; published 462570e | open (D-29z1793): ruled option (a); fixed in b-round-499/sketch-500.patch.txt (SE1 + mutants N10-N13, N17); closes with C round 500 C9/C10 PASS",
-      "title": "No test pinned the /store error 'Try again' link's builder args or `to` (B2B-5 checked only a source substring)",
-      "evidence": "a-round-499.md STOP; c-round-499.json bugs[0]",
-      "added": "2026-11-13 B round 499 -> 500 planning",
-      "confirmedBy": [
-        "C round 499 (c-round-499.json bugs[0])"
-      ]
-    },
-    {
-      "id": "A-R499-CR-PAIR-ORDER",
-      "severity": "low",
-      "origin": "B spec",
-      "status": "closed (D-29z1797): C round 500 C10 N16, N18 RED; published 462570e | open (D-29z1794): fixed in sketch-500 (isBefore B2B-1..3; N16, N18); closes with C round 500 PASS",
-      "title": "No row asserted the order of the EmptyState and error-page button pairs",
-      "evidence": "a-round-499.md reviewer Lows",
-      "added": "2026-11-13 B round 499 -> 500 planning"
-    },
-    {
-      "id": "A-R499-CR-TRYAGAIN-TYPE",
-      "severity": "low",
-      "origin": "pre-existing",
-      "status": "closed (D-29z1797): C round 500 C1 rest.type + C10 N15 RED; published 462570e | open (D-29z1794): fixed in sketch-500 (type=button; B2B-3/4; N15); closes with C round 500 PASS",
-      "title": "ErrorDisplay Try Again <Button> had no type=\"button\"",
-      "evidence": "a-round-499.md reviewer Lows",
-      "added": "2026-11-13 B round 499 -> 500 planning"
-    },
-    {
-      "id": "A-R499-CR-DS-SAME-RULE",
-      "severity": "low",
-      "origin": "B spec",
-      "status": "closed (D-29z1797): C round 500 C11; published 462570e | open (D-29z1794): fixed in sketch-500 (DESIGN_SYSTEM l.1193 explicit rule phrase); closes with C round 500 C11",
-      "title": "DESIGN_SYSTEM Ghost \"Use for\": \u201e\u10d8\u10d2\u10d8\u10d5\u10d4 \u10ec\u10d4\u10e1\u10d8\u201c read ambiguously after the 404 text-link sentence",
-      "evidence": "a-round-499.md reviewer Lows",
-      "added": "2026-11-13 B round 499 -> 500 planning"
-    },
-    {
-      "id": "A-R499-CR-DOC321-WORDING",
-      "severity": "low",
-      "origin": "B spec",
-      "status": "closed (D-29z1797): C round 500 C11 (core); published 462570e | open (D-29z1794): fixed in sketch-500 (doc 321 D1 heights, build line, coverage sentence); closes with C round 500 C11 | origin B spec (D-29z1796): D1 wording from task 499 \u00a71; A copied it",
-      "title": "Doc 321 l.30 D1 height cause, build line rc wording and l.83 coverage sentence overstated or imprecise",
-      "evidence": "a-round-499.md Doc 321 Lows; b-round-498/measure/summary.txt",
-      "added": "2026-11-13 B round 499 -> 500 planning"
-    },
-    {
       "id": "INFO-C500-DOC321-LEDGER-TRACE",
       "severity": "info",
       "origin": "environment",
-      "status": "info (D-29z1797): no action; L26 ledger rows stay a C11 requirement in round 501",
+      "status": "closed (D-29z1802): round 501 C11 ran the full ledger trace (doc 322) | info (D-29z1797): no action; L26 ledger rows stay a C11 requirement in round 501",
       "title": "C round 500 C11 passed the doc 321 headings, l.4 bytes and tokens but did not redo the doc-ledger number trace line by line",
       "evidence": "c-round-500.md C11; c-round-500.json passed C11-core",
       "added": "2026-11-13 B round 500 -> 501 planning"
@@ -29679,6 +29633,106 @@
       "title": "Should NONBRAND turn free-downloads 'Send Download Link' (white bg-foreground pill) into Button secondary? (default yes)",
       "evidence": "user-review/questions-round-501.md Q2",
       "added": "2026-11-14 B round 500 -> 501 planning"
+    },
+    {
+      "id": "INFO-C501-MUTANT-HARNESS-RELPATH",
+      "severity": "info",
+      "origin": "C",
+      "status": "info (D-29z1803): B harness usage; round-502 mutant script resolves the logdir to an absolute path",
+      "title": "b-round-500/mutants-501.py takes a relative logdir but runs with cwd=tree, so a relative logdir loses the evidence",
+      "evidence": "c-round-501.json forB, notes",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "SIG-R501-SHARED-BUTTON-SCANNER",
+      "severity": "info",
+      "origin": "gate reviewer",
+      "status": "signal (D-29z1803): architecture note, not scheduled; decide at DPG-BUTTON-CLEANUP-2 close-out together with SIG-R498-BUTTONLINK-WRAPPER",
+      "title": "Per-stage tests carry copies of a brace-aware tag scanner (openingTags/hasSolidBrass; IL3 in store-internal-links.test.ts); one shared test helper or lint rule would stop the growth",
+      "evidence": "gates/round-501/review.md Architecture note; task 501 pre-ruled Low #4",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "B-R502-CART-MOBILE-ITEMS-HIDDEN",
+      "severity": "high",
+      "origin": "B pre-check",
+      "status": "scheduled round 502 (D-29z1805)",
+      "title": "Below 1024 px the /cart items column collapses (cart.tsx main h-[calc(100vh-80px)] overflow-hidden): 47/79 px at 375/390 with one item, 0 px with an ownership warning or coupon + gift card; items invisible and Remove cannot be clicked",
+      "evidence": "b-round-501/probe/head/head-cart.json, head-actions.json, cart375-full.png; compare b-round-501/probe/compare-sketch.txt",
+      "repro": "375x812, stub /api/cart with one item and /api/downloads with the same handle as Universal (b-round-501/probe/cart-states.mjs OWNED-1); open /cart",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "B-R502-CART-LG-SUMMARY-CLIPPED",
+      "severity": "medium",
+      "origin": "B pre-check",
+      "status": "scheduled round 502 (D-29z1805)",
+      "title": "At lg on short screens (1366x657, 1366x600, 1280x600) a tall Order Summary (coupon + gift card, or ownership warning) puts Checkout below main's clipped bottom; the mouse wheel cannot reach it",
+      "evidence": "b-round-501/probe/head/head-wheel.json (afterWheel.inView false in 10 of 18 states)",
+      "repro": "b-round-501/probe/cart-wheel.mjs EXTRAS at 1280x600",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "B-R502-CART-WHEEL-NESTED-SCROLL",
+      "severity": "medium",
+      "origin": "B pre-check",
+      "status": "scheduled round 502 (D-29z1805)",
+      "title": "Lenis (useSmoothScroll, no allowNestedScroll) takes wheel events over the /cart items column; the column never wheel-scrolls, so with 5 items item 5 is never visible at 1280x720 (scrollbar drag or keyboard only)",
+      "evidence": "b-round-501/probe/head/head-items-wheel.json (st 0, lastVisible false)",
+      "repro": "b-round-501/probe/items-wheel.mjs",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "CART-REAL-BACKEND",
+      "severity": "info",
+      "origin": "B spec",
+      "status": "open_backend (D-29z1805): round 502 rows are -STUBBED (client path only); a real cart/purchases/ownership check needs the .NET backend (BLOCKED in cloud)",
+      "title": "Round-502 cart layout with a real backend cart and real purchases",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "SIG-R502-LENIS-NESTED-SCROLL-SITEWIDE",
+      "severity": "info",
+      "origin": "B pre-check",
+      "status": "signal (D-29z1806): not scheduled; candidate sweep after DPG P1 (or a useSmoothScroll allowNestedScroll decision, which touches every Store page and SABA-B-15)",
+      "title": "Other Store nested scroll areas (overflow-y-auto without data-lenis-prevent) may not wheel-scroll under Lenis, as the /cart columns did",
+      "evidence": "node_modules/lenis/dist/lenis.mjs l.627-629; app/hooks/useSmoothScroll.ts; Modal.tsx uses data-lenis-prevent",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "SIG-R502-CART-EXTRA-DOC-HEIGHT",
+      "severity": "info",
+      "origin": "B pre-check",
+      "status": "info (D-29z1806): no action",
+      "title": "/cart at lg lets the window scroll ~170 px even at HEAD (header + page-transition wrapper taller than the viewport)",
+      "evidence": "b-round-501/probe/head/head-items-wheel.json win 171; probe/wheel-debug.mjs",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "SIG-R502-AUDIOPLAYER-BOTTOM-OVERLAP",
+      "severity": "info",
+      "origin": "B consult (tech-lead sketch review)",
+      "status": "hypothesis (D-29z1806): unverified; tech-lead v1 Low 4; probe with the global player open on a long mobile page",
+      "title": "The fixed global AudioPlayer bar (root.tsx) may cover the last control at the bottom of long Store pages (e.g. /cart Checkout on phones after round 502)",
+      "evidence": "b-round-501/sketch-review.md review 1 Low 4",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "SABA-Q-502-UPGRADE-VARIANT",
+      "severity": "info",
+      "origin": "B spec",
+      "status": "awaiting_user (D-29z1804): user-review/questions-round-502.md Q1; default brass primary; non-blocking",
+      "title": "Cart Upgrade inside the accent ownership notice: stay brass primary or switch to accent?",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "PD-R502-SHOWCASE-ARROW-NUDGE",
+      "severity": "info",
+      "origin": "B spec",
+      "status": "signal (D-29z1804): input to DPG-INTERACTION-FIX",
+      "title": "product-designer optional: StudioShowcase arrow group-hover:translate-x-1 motion-reduce:transition-none to match Hero (Hero arrow lacks motion-reduce)",
+      "evidence": "b-round-501/consult-product-designer.md",
+      "added": "2026-11-14 B round 501 -> 502 planning"
     }
   ],
   "tech_lead_notes": [
@@ -45133,7 +45187,64 @@
       "status": "deferred_low_polish (D-29z1800): pre-ruled Low #1 of task 501",
       "title": "free-downloads 'Download' gets aria-expanded but no aria-controls pointing at the revealed email form (optional in the disclosure pattern; useId later)",
       "evidence": "b-round-500/sketch-review.md review 1 item 5",
-      "added": "2026-11-14 B round 500 -> 501 planning"
+      "added": "2026-11-14 B round 500 -> 501 planning",
+      "confirmedBy": [
+        "gate 501 review info #3 (D-29z1803)"
+      ]
+    },
+    {
+      "id": "A-R501-CR-ST5-STRING-PIN",
+      "severity": "low",
+      "origin": "A",
+      "status": "deferred_low_polish (D-29z1803)",
+      "title": "ST5 (store-theme-tokens.test.ts:676-680) pins the exact <Button ...> source line of hire-us; a Biome reflow or prop reorder turns it red with no visual change; ST5 title \"all nine fills\" wording",
+      "evidence": "a-round-501.md code-reviewer Low",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "A-R501-CR-B2B2-6-ONE-BUTTON",
+      "severity": "low",
+      "origin": "A",
+      "status": "deferred_low_polish (D-29z1803): owner = NONBRAND stage that moves free-downloads \"Send Download Link\" onto Button; that sketch updates the B2B2-6 count (L8)",
+      "title": "store-button-cleanup-2b2.test.tsx:293 asserts openingTags(free-downloads,'Button') length 1; it goes red when NONBRAND migrates 'Send Download Link'",
+      "evidence": "a-round-501.md code-reviewer Low",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "A-R501-CR-LUCIDE-CLASS",
+      "severity": "low",
+      "origin": "A",
+      "status": "deferred_low_polish (D-29z1803)",
+      "title": "B2B2 spinner asserts use the lucide-loader-circle class (:252, :280); a lucide upgrade that renames it turns them red",
+      "evidence": "a-round-501.md code-reviewer Low",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "A-R501-CR-FORM-METHOD",
+      "severity": "low",
+      "origin": "A",
+      "status": "deferred_low_polish (D-29z1803): pre-existing",
+      "title": "Form/FetcherForm mocks in the 2b-2 test drop method=\"post\"; no test checks the POST wiring of newsletter / hire-us",
+      "evidence": "a-round-501.md code-reviewer Low",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "GATE501-L2-BUTTON-ISLOADING-MOTION-REDUCE",
+      "severity": "low",
+      "origin": "gate reviewer",
+      "status": "deferred_low_polish (D-29z1803): fix in a stage that owns Button.tsx (shared owner)",
+      "title": "Button.tsx:135 isLoading Loader2 has animate-spin without motion-reduce:animate-none (the 2b-2 call-site spinners have it)",
+      "evidence": "gates/round-501/review.md Low #2",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "B-R502-CART-SUMMARY-SCROLLBAR-GUTTER",
+      "severity": "low",
+      "origin": "B pre-check",
+      "status": "deferred_low_polish (D-29z1806): doc 323 D3",
+      "title": "When the /cart summary column scrolls (short lg screens only) its scrollbar sits against the card and narrows it; lg:pr-2 would break the lg equality rows",
+      "evidence": "b-round-501/sketch-review.md review 2 Low 2",
+      "added": "2026-11-14 B round 501 -> 502 planning"
     }
   ],
   "regression_rounds": [
@@ -47800,36 +47911,6 @@
   },
   "decisions_log_b": [
     {
-      "id": "D-29z1747",
-      "date": "2026-11-13",
-      "by": "2026-11-13 B round 489 -> 490 planning",
-      "decision": "Round 489 C FAIL ruled (L10): the only blocker A-R489-REVIEW-NONZOOM-CLASSIFY (Medium, A code-reviewer; confirmedBy C-R489-A-STOP-NONZOOM-TEST-GAP per L7) is fixed by a test-only delta v3->v4 (b-round-489/sketch-490-v3-to-v4.patch.txt, sha in sketch-490.sha256): dispatchScrollGesture sends a real WheelEvent (deltaY 100) and a one-touch TouchEvent. Round 490 = this fix-up plus C browser re-verification; SABA-B-17 and the two B-R489 Mediums stay open (V2: no C PASS yet, though every 489 browser row was green). C15 playback half (not exercised in 489) is a 490 row."
-    },
-    {
-      "id": "D-29z1748",
-      "date": "2026-11-13",
-      "by": "2026-11-13 B round 489 -> 490 planning",
-      "decision": "Round 489 Lows and tech-lead delta review: A-R489-REVIEW-E8D-LITERAL fixed in v4 (ENTRANCE_FAILSAFE_MS + ENTRANCE_EXIT_MS); A-R489-REVIEW-L3-CLASS -> deferred_low_polish (needs a component change); A-R489-REVIEW-DOC-STATUS closed (L28). tech-lead review of 6b8f5f36: APPROVE WITH CHANGES; F1 Medium sign-keyed zoom survivor fixed (zoom fixture deltaY +100; mutants ME/MF red); re-review of 6541b85b APPROVE with Low F1b (mirror survivor ctrlKey && deltaY > 0) fixed (S3/E8e over deltaY 100 and -100; MG/MH red; covering 94), F3 doc lines fixed, F2 kept by L28, F7 added to TLM-R489-TOUCH-SWIPE. Final delta re-reviewed (b-round-489/sketch-review.md)."
-    },
-    {
-      "id": "D-29z1749",
-      "date": "2026-11-13",
-      "by": "2026-11-13 B round 489 -> 490 planning",
-      "decision": "C-R489-ENV-K17-WEBM-GITIGNORED closed as environment (loop .gitignore:3 *.webm); round-490 claims cite no .webm; root request ROOT-REQ-LOOP-WEBM-EVIDENCE; C13 re-records until root answers."
-    },
-    {
-      "id": "D-29z1750",
-      "date": "2026-11-13",
-      "by": "2026-11-13 B round 489 -> 490 planning",
-      "decision": "Architecture: A-R489 note recorded as SIG-R489-ENTRANCE-ZOOM-RULE-TWICE (signal only, not a task); ARCH-CHECKPOINT-ENTRANCE-LOADING to root after round 490 C PASS (feature boundary), b-round-489/checkpoint-request-entrance.md."
-    },
-    {
-      "id": "D-29z1751",
-      "date": "2026-11-13",
-      "by": "2026-11-13 B round 489 -> 490 planning",
-      "decision": "Order: 490 fix-up, 491 B-R487-PROFILE-EDITOR-NARROW-OVERFLOW, 492 B-R488-PASSWORD-MODAL-DIALOG (REGRESSION first when due on/after 2026-11-16; RETRO 495). ARCH-CHECKPOINT-ACCOUNT-PROFILE deadline -> before round 492 planning. Lesson: L52 gains 'classifier rows dispatch the real event' (lessons.md stays 60 lines; before: b-round-489/lessons-before-490.md)."
-    },
-    {
       "id": "D-29z1752",
       "date": "2026-11-13",
       "by": "2026-11-13 B round 490 -> 491 planning",
@@ -48128,6 +48209,36 @@
       "date": "2026-11-14",
       "by": "2026-11-14 B round 500 -> 501 planning",
       "decision": "Two product-designer questions to Saba (user-review/questions-round-501.md), awaiting_user, non-blocking: SABA-Q-501-INPUT-RADIUS (newsletter + Hire Us fields to rounded-md; default yes in a later inputs stage) and SABA-Q-501-SEND-LINK-VARIANT ('Send Download Link' -> secondary in NONBRAND; default yes)."
+    },
+    {
+      "id": "D-29z1802",
+      "date": "2026-11-14",
+      "by": "2026-11-14 B round 501 -> 502 planning",
+      "decision": "Round 501 accepted from C evidence only: c-round-501.json taskStatus PASS, browserVerified/realVerified true, bugs []; gate-round-501.json status published, commit 3bb55d4 (both remotes). DPG-BUTTON-CLEANUP-2 stage 2b-2 is verified (C round 501): free-downloads Download, newsletter Subscribe, Hire Us Send Message on Button. INFO-C500-DOC321-LEDGER-TRACE closed: its requirement carried into round 501 C11, which ran the full ledger trace for doc 322 (doc 321 numbers stay not C-traced; history doc, no action). C11 note: doc 322 HEAD-side numbers (150x50, 140x56, 58px) rest on B's probe/head.out, not re-measured by C; info only."
+    },
+    {
+      "id": "D-29z1803",
+      "date": "2026-11-14",
+      "by": "2026-11-14 B round 501 -> 502 planning",
+      "decision": "Round 501 A reviewer Lows, C forB and gate 501 review mapped (L7): new deferred Lows A-R501-CR-ST5-STRING-PIN, A-R501-CR-B2B2-6-ONE-BUTTON (L8: owner = the NONBRAND stage that moves 'Send Download Link'; that stage updates the B2B2-6 count pin), A-R501-CR-LUCIDE-CLASS, A-R501-CR-FORM-METHOD; INFO-C501-MUTANT-HARNESS-RELPATH (info, B harness usage: logdir must be absolute; round-502 mutant script resolves it). Gate 501 Low #1 (visual changes of hire-us/newsletter) = the task-501 listed deviations D2/D3/D5, C1/C4 measured them: no id. Gate Low #2 (Button.tsx isLoading Loader2 lacks motion-reduce:animate-none) -> new deferred Low GATE501-L2-BUTTON-ISLOADING-MOTION-REDUCE (Button.tsx is the shared owner; fix in a stage that owns Button.tsx). Gate info #3 -> confirmedBy TL-R501-FD-ARIA-CONTROLS; its 'Send Download Link' half is NONBRAND (SABA-Q-501-SEND-LINK-VARIANT). Gate architecture note (shared tag-scanner helper for the per-stage tests) -> new signal SIG-R501-SHARED-BUTTON-SCANNER, decide at stage-2 close-out (not scheduled). A's DESIGN_TOKENS.md stale note -> confirmedBy SABA-PROP-DESIGN-TOKENS-PRIMITIVE-STALE (.claude/** root-only via ROOT-REQ-DPG-PRIMITIVES-PATCH)."
+    },
+    {
+      "id": "D-29z1804",
+      "date": "2026-11-14",
+      "by": "2026-11-14 B round 501 -> 502 planning",
+      "decision": "Stage 2b-3 mapping ruled by product-designer (b-round-501/consult-product-designer.md), not dispatched this round: cart Upgrade -> buildButtonClassName primary sm default + min-h-11 shrink-0; recordings 'Create a scene' -> primary md pill + mb-6 min-h-11; StudioShowcase 'Browse the Collection' -> primary lg pill (scale hover/press dropped, serves DPG-INTERACTION-FIX). The optional arrow nudge (group-hover:translate-x-1) is NOT adopted: a new hover motion, and the Hero copy lacks motion-reduce -> PD-R502-SHOWCASE-ARROW-NUDGE (info, input to DPG-INTERACTION-FIX); no 'group' class. Saba question SABA-Q-502-UPGRADE-VARIANT (user-review/questions-round-502.md), default brass primary, awaiting_user, non-blocking. Prepared harness b-round-501/probe/measure-502.mjs (showcase target must be scoped to the section: two links share the name)."
+    },
+    {
+      "id": "D-29z1805",
+      "date": "2026-11-14",
+      "by": "2026-11-14 B round 501 -> 502 planning",
+      "decision": "Round 502 = three tightly related pre-existing cart layout bugs, before 2b-3 (High/Medium bugs before features; 2b-3's 375 Upgrade row needs the fix). Found by B's browser probe while measuring 2b-3 (b-round-501/probe/head/): B-R502-CART-MOBILE-ITEMS-HIDDEN (High: below lg the items column is 0-79 px; with an ownership warning or discounts 0 px and Remove cannot be clicked), B-R502-CART-LG-SUMMARY-CLIPPED (Medium: at lg on short screens a tall summary puts Checkout below main's clipped bottom; 10 of 18 wheel states), B-R502-CART-WHEEL-NESTED-SCROLL (Medium: Lenis takes wheel events from the nested scroll columns; with 5 items item 5 never visible at 1280x720). Root cause: cart.tsx main fixed height + overflow-hidden since 7052f82 (2026-01-08, pre-loop) and Lenis without nested-scroll opt-out. Fix is class/attribute only in cart.tsx; purchase protection unchanged (actions probe: anonymous Checkout opens Sign in, signed-in Checkout POSTs once, same as HEAD)."
+    },
+    {
+      "id": "D-29z1806",
+      "date": "2026-11-14",
+      "by": "2026-11-14 B round 501 -> 502 planning",
+      "decision": "Round 502 consults and rulings: product-designer consult 2 chose option (a) summary column scrolls at lg (no Saba approval: repairs a broken state, no position move; options (b) sticky page scroll and (c) pinned checkout need Saba and are not taken). tech-lead v1 APPROVE (Medium: CML1 missed md:/h-screen -> fixed v2); v2 APPROVE with conditions (Medium: items column an empty scroll container below lg -> lg-only in v3; Low 3 max-* variants -> fixed v3; Low 2 summary scrollbar gutter -> deferred Low B-R502-CART-SUMMARY-SCROLLBAR-GUTTER + doc 323 D3; conditions: full suite green (met) and below-lg wheel/touch rows (C5)). No architecture checkpoint: one file, class-level. SIG-R498-BUTTONLINK-WRAPPER re-evaluated as promised for 2b-3 planning: keep inline (the 2b-3 sites follow the existing Link + buildButtonClassName pattern); decide together with SIG-R501-SHARED-BUTTON-SCANNER at DPG-BUTTON-CLEANUP-2 close-out; a bounded frontend-architect checkpoint is requested from root only if that decision proposes a new ui primitive. Dispatched sketch v5 sha 7d14eae2 (code = v3; v4/v5 two doc sentences): tech-lead delta review v2 -> v5 APPROVE (b-round-501/sketch-review.md Review 3); its Low A (styled-scrollbar overscroll at every width) and Low B (stacked/arbitrary variants) are pre-ruled Lows #9/#10 of task 502. Advisor closing check: C7 journey made discriminating (centre hit-test, wheel only; HEAD seen all false), mock API restored for C7/C12, C5 touch bound > HEAD 171, L29 tags K29-K36, mutant logs mutant-<id>.log."
     }
   ],
   "retro_candidates": [
