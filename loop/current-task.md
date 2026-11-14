@@ -1,28 +1,34 @@
-# Round 502: the cart page layout. Three related bugs: items hidden on phones, Order Summary clipped on short screens, mouse wheel dead in the cart columns
+# Round 503: DPG-BUTTON-CLEANUP-2 stage 2b-3. Move the cart "Upgrade", recordings "Create a scene" and Studio showcase "Browse the Collection" links onto `buildButtonClassName`
 
-**Planned by:** B, at the round 501 → 502 planning on 2026-11-14 (`b-round-501.md`).
-- **Advisor:** available; consulted after orientation, after the bug was found, and at the closing check.
-- **Archive:** the round-501 task is archived as `tasks/round-501.md`, a byte-identical copy (`cmp` rc 0).
+**Planned by:** B, at the round 502 → 503 planning on 2026-11-14 (`b-round-502.md`).
+- **Advisor:** available; consulted after orientation and at the closing check.
+- **Archive:** the round-502 task is archived as `tasks/round-502.md`, a byte-identical copy (`cmp` rc 0).
 
-## Decisions (`backlog.json` v497, `decisions_log_b`)
-- **D-29z1802: round 501 is accepted, from C's evidence only.**
-  - `c-round-501.json` is PASS with `browserVerified` and `realVerified` true and 0 bugs. Gate 501 is `published` at `3bb55d4` [K9, K10].
-  - DPG-BUTTON-CLEANUP-2 stage 2b-2 is verified.
-- **D-29z1803:** A's four reviewer Lows, gate 501's Low #2 and C's harness note are recorded as deferred Lows and info (see `b-round-501.md`).
-- **D-29z1804: stage 2b-3 mapping is ready but not dispatched.** product-designer ruled the three sites (`b-round-501/consult-product-designer.md`). One Saba question is filed (SABA-Q-502-UPGRADE-VARIANT, `awaiting_user`, non-blocking).
-- **D-29z1805: round 502 fixes three cart bugs before 2b-3.**
-  - While measuring the cart's "Upgrade" link for 2b-3, B found that below 1024 px the cart's items column collapses to 0–79 px [K16]. That is **B-R502-CART-MOBILE-ITEMS-HIDDEN**, High.
-  - The same root cause hides the checkout button on short desktop screens (**B-R502-CART-LG-SUMMARY-CLIPPED**, Medium) [K24].
-  - Separately, Lenis takes the mouse wheel away from both cart columns (**B-R502-CART-WHEEL-NESTED-SCROLL**, Medium) [K25].
-  - All three live in the layout of `app/routes/cart.tsx` [K3, K6] and share one fix, so they count as tightly related bugs in one round.
-  - High and Medium bugs go before features, and 2b-3's 375 px "Upgrade" row cannot run until the first bug is fixed. Stage 2b-3 is round 503.
-- **D-29z1806: consults.**
-  - product-designer ruled the short-screen behaviour (option (a), `b-round-501/consult-product-designer-2.md`). It needs no Saba approval: it repairs a broken state and moves nothing.
-  - tech-lead reviewed v1 (APPROVE, with a Medium on the test) and v2 (APPROVE with conditions: a Medium, the items column was an empty scroll container below `lg`, plus three Lows). v3 fixes the Medium and Low 3; v4 and v5 correct two doc sentences. A delta review of v2 → v5 (APPROVE, two Lows pre-ruled as #9 and #10) is in the same file and names the dispatched sha. The full suite condition is met. Both reviews and B's rulings are in `b-round-501/sketch-review.md`.
-  - **No architecture checkpoint:** one file, class-level change. SIG-R498-BUTTONLINK-WRAPPER stays a signal until stage 2 closes.
+## Decisions (`backlog.json` v500, `decisions_log_b`)
+- **D-29z1807: round 502 is accepted, from C's evidence only.**
+  - `c-round-502.json` is PASS with `browserVerified` and `realVerified` true and 0 bugs. `c-round-502/l57-check.txt` says `L57 OK`. Gate 502 is `published` at `882854e` [K21, K22].
+  - B-R502-CART-MOBILE-ITEMS-HIDDEN, B-R502-CART-LG-SUMMARY-CLIPPED and B-R502-CART-WHEEL-NESTED-SCROLL are closed for the client path. Their rows were stubbed (L36), so CART-REAL-BACKEND stays open.
+- **D-29z1808: round-502 follow-ups (L7).**
+  - A's reviewer Lows A-R502-CR-1…5 go to `deferred_low_polish`. CR-2 and CR-5 are `confirmedBy` gate 502's Lows 1 and 2.
+  - Gate 502 Info 5 (the `useSmoothScroll` rAF loop is never cancelled) becomes GATE502-I5-LENIS-RAF-LEAK and joins the SIG-R502-LENIS-NESTED-SCROLL-SITEWIDE sweep.
+  - C's two infos: INFO-C502-CHECKOUT-RING-1PX (info) and C-R502-SUMMARY-CARD-WIDTH-375 (deferred Low).
+  - Doc 323's l.4 was dispatched as `In Progress (…; C round 502 PASS)` for a one-round fix. L28 requires `Completed (C round 502 PASS)`. That is B-R502-DOC323-L28-STATUS (Low, origin B spec), fixed by a one-line grant in this round [K16].
+- **D-29z1809: stage 2b-3 scope, mapping and sketch.**
+  - **Scope:** the last three sites of inventory row A2 (`b-round-497/stage2-inventory.md`), plus the doc 323 status line.
+  - **Mapping:** product-designer's ruling, unchanged (`b-round-501/consult-product-designer.md`, D-29z1804).
+  - **Not adopted:** the arrow nudge (PD-R502-SHOWCASE-ARROW-NUDGE).
+  - **Open question:** SABA-Q-502-UPGRADE-VARIANT stays `awaiting_user`; its default is brass primary, and it does not block.
+- **D-29z1810: consults and review.** See `b-round-502/sketch-review.md`.
+  - tech-lead reviewed v1 (`1a716032…`): **APPROVE WITH CONDITIONS**. There was one Medium: three `as Element` casts in the test broke "no type assertions". There were three Lows: a brittle builder count, the DESIGN_SYSTEM two-shapes sentence, and doc 324 missing the card growth. v2 fixes all four and also replaces `as const` with typed tables.
+  - The delta review of v2 (`210ee872…`, the dispatched sha) is **APPROVE**, with no new findings.
+  - The reviewer's Info 8 (at 375 px the notice text column is squeezed to 79 px, pre-existing) becomes the deferred Low TL-R503-CART-NOTICE-375-SQUEEZE.
+  - **Covering-set ruling:** `store-button-cleanup.test.tsx` (BC1b) tests `Button.tsx`, which this round does not change, so it is not in the covering set. The gate still runs it.
+    - BC1b declares `BC1B_TIMEOUT_MS = 20_000` [K20]. It took 2,562 ms inside the parallel covering run (13 %) and 1,037–1,102 ms alone (`bc1b-alone.log`), so there is no L31 issue.
+    - The "5 s default" in task 501 was a misreading; it is corrected in D-29z1811.
+  - **No architecture checkpoint:** three one-line class swaps in three owners. SIG-R498-BUTTONLINK-WRAPPER and SIG-R501-SHARED-BUTTON-SCANNER are decided at the close of stage 2 (after 2e). The 2b-3 sites follow the existing `<Link>` + `buildButtonClassName` pattern (HeroSection [K8]).
 
 ## Rules
-- **Read `lessons.md` first.** Applied here: L1, L4, L10, L22, L23, L26, L28, L31, L36, L47, L52, L54, L56 and L58.
+- **Read `lessons.md` first.** Applied here: L1, L4, L7, L10, L12, L22, L23, L26, L28, L29, L31, L39, L47, L52, L54, L56, L57 and L58.
 - **STOP threshold (L10):** A writes STOP and changes nothing more on any of these:
   - a Medium-or-higher finding whose fix is outside the grants;
   - a failing covering test;
@@ -30,152 +36,152 @@
   - a sketch that does not apply cleanly;
   - a granted file that would need a change beyond the sketch;
   - one of A's numbers differing from B's expected value in §3.
-- **The sketch writes every granted byte, doc 323 included.** A writes no prose this round.
+- **The sketch writes every granted byte**, docs 323 and 324 included. A writes no prose this round.
 - **Ruling lines (L4):**
-  - `lg` sizes: "equal to HEAD ±1 px" wins, except that the items column may be **shorter** where HEAD let it run past `main`'s padded bottom (deviation D2). `compare-502.py` encodes this rule.
-  - Wheel where a column cannot scroll: `data-lenis-prevent-wheel` cannot follow a breakpoint or a scroll state. Below 1024 px, and at `lg` when a column is short or at its end, the wheel over that column scrolls the window natively, without Lenis smoothing (deviation D1, doc 323). The window must still scroll; smoothness there is not a row.
-  - The OrderSummary card's `sticky top-24` is removed. It never took effect at HEAD, and inside the new scroll column it pushed the card 96 px down. C3 proves the card does not move at `lg`.
+  - "Upgrade" height: `min-h-11` (44 px) wins over `sm`'s 32 px. The notice grows 64 → 70 px at 1440 and 1280, and stays 168 px at 375 [K29]. product-designer accepted this. Round 502's `lg` equality rows (`compare-502.py`) are not re-run here, because the owned-item states change by design. The cart neighbours are re-checked by C6.
+  - Showcase hover and press: the builder (no transform) wins over HEAD's `scale(1.05)`/`scale(0.98)`. Links get no `:active` scale [K9]. Deviation D3.
+  - "Create a scene" size: `min-h-11` keeps it 44 px tall, and `md`'s `py-2.5` changes its padding from `0 16px` to `10px 16px`. The box stays 131×44 [K29].
 - **Pre-ruled Lows** (a re-raise is listed "For B", not a STOP):
-  - #1 the test reads plain `className="..."` only. Its failure message says so.
-  - #2 CML3 self-tests the helper; M1 proves CML1 rejects HEAD.
-  - #3 doc 323 l.4 states "C round 502 PASS" before C runs (L28 form) [K32].
-  - #4 the 5 Biome warnings in `cart.tsx` are pre-existing and untouched.
-  - #7 the summary column has no scrollbar gutter. When it scrolls (short screens only), the scrollbar narrows the card (doc 323 D3, deferred Low B-R502-CART-SUMMARY-SCROLLBAR-GUTTER). `lg:pr-2` would break the `lg` equality rows.
-  - #8 the focus ring inside the scroll column is checked by geometry and by C3's screenshot, not by a pixel measure.
-  - #9 doc 323 says the items column's overscroll applies only from `lg`, but `.styled-scrollbar` also sets `overscroll-behavior-y: contain` at every width [K30]. It has no effect on a column that does not scroll (tech-lead review 3, Low A).
-  - #10 CML1 does not catch stacked or arbitrary variants such as `md:max-lg:` or `max-[1023px]:` (review 3, Low B).
-  - #5 other nested scroll areas in the Store may have the same Lenis wheel problem. They are signal SIG-R502-LENIS-NESTED-SCROLL-SITEWIDE, not this round.
-  - #6 the `/cart` window can scroll about 170 px at `lg` even at HEAD (header plus page wrapper taller than the viewport). Info only (SIG-R502-CART-EXTRA-DOC-HEIGHT).
-- **Purchase protection:** no auth, cart logic, checkout, ownership or download code changes. Only `className` values and one HTML data attribute change. Check 2 stays rc 0, and C keeps the anonymous "Sign in required" row.
-- **Out of scope:** Studio (`/studio-lab` is only smoke-checked in C12), the 2b-3 button migration, and `useSmoothScroll`.
-- **Persistent screen text (L39):** nothing is added or removed.
+  - #1 the three literal oracles duplicate the builder on purpose; B2B3-0 proves they are equal.
+  - #2 `openingTags` is a third copy of the brace-aware scanner (also in the 2b-2 test and `store-internal-links.test.ts`). Sharing it is SIG-R501-SHARED-BUTTON-SCANNER at the stage-2 close.
+  - #3 the cart and recordings render rows mock hooks and the API client. The browser rows (C1–C5) carry the real rendering.
+  - #4 the builder adds `transition-all duration-150`. On all three links the computed `transitionProperty`/`transitionDuration` read in the browser equal HEAD's [K29]. B did not probe which rule sets them.
+  - #5 the 6 Biome warnings in the three code files are pre-existing and untouched [K26].
+  - #6 `store-button-cleanup.test.tsx` (BC1b) is not in the covering set (see the ruling above). A does not run it.
+  - #7 TL-R503-CART-NOTICE-375-SQUEEZE: at 375 px the notice text wraps to 3 lines beside the 104 px button, as at HEAD. A stacked layout is a separate layout decision.
+- **Purchase protection:** no auth, cart, checkout, ownership or download logic changes. Only three `className` values and three import lines change. Check 2 stays rc 0, and C keeps the anonymous "Sign in required" row.
+- **Persistent screen text (L39):** nothing is added or removed. Labels and icons are unchanged.
+- **Out of scope:** Studio (`/studio-lab` is only smoke-checked in C12), the 2c–2e sites and NONBRAND.
 - **Paths:** loop `/home/runner/czaba-project/tmp/studio-real-loop`, store `/home/runner/czaba-project/store`.
 
 ## Baseline
-HEAD is `3bb55d4` [K1] (gate 501 `commit`). The worktree is clean [K2]. Frozen-file checks, all run from `store/`, all rc 0 at planning:
-1. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-501/r502-tree-sha256.txt`: every tracked file except `app/routes/cart.tsx` (1,412 files) [K36].
-2. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-318/protected-sha256.txt`: the protected files. `cart.tsx` is not one of them [K19].
-3. Before applying: `b-round-501/r502-pre-sha.txt` (`cart.tsx` at HEAD).
-4. After applying: `b-round-501/r502-post-sketch-sha.txt`, covering the three paths.
+HEAD is `882854e` [K1] (gate 502 `commit`). The worktree is clean [K2]. Frozen-file checks, all run from `store/`, all rc 0 at planning:
+1. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-502/r503-tree-sha256.txt`: every tracked file except the five granted tracked paths (1,410 of 1,415 files [K23]).
+2. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-318/protected-sha256.txt`: the protected files. No granted path is protected [K24].
+3. Before applying: `b-round-502/r503-pre-sha.txt` (the five granted tracked paths at HEAD).
+4. After applying: `b-round-502/r503-post-sketch-sha.txt`, covering all seven paths.
 
-B applied the patch to a `git archive` copy of HEAD; check 4 matched and check 1 stayed rc 0.
+B applied the patch to a `git archive` copy of HEAD. Check 4 matched, and check 1 stayed rc 0.
 
 ## 0. Why this round
-- **Promise (L55):** "A buyer can see, change and pay for their cart on any screen." At HEAD that fails on phones, on short laptop screens with a discount, and for any cart longer than the visible column.
-- The fixed-height `main` came from commit `7052f82` on 2026-01-08, before the loop [K4]. Only `cart.tsx` uses it [K5], and no test pins it [K7].
-- **REGRESSION is not due:** the last one was 2026-11-13 [K17], and the next is due on or after 2026-11-16. The next RETRO is round 510.
+- Saba's DPG item 7 says "Use Button.tsx component only". Stages 1, 2a, 2b-1 and 2b-2 are done. Stage 2b-3 moves the last three hand-rolled brass `<Link>` sites of inventory row A2 onto the shared builder. The scanner count drops from 104 hits / 41 solid to 100 / 38 [K11].
+- **Bugs first:** no Critical, High or Medium finding is open on these files. The round-502 cart bugs are closed, and the new Lows are deferred under the 2026-10-23 rule.
+- **REGRESSION is not due:** the last one was 2026-11-13, and the next is due on or after 2026-11-16. The next RETRO is round 510.
 
-## 1. Reference and measured behaviour
-- **Reference:** none was fetched for this bug fix. The kept reference is the HEAD desktop design: a fixed-height page whose items column scrolls on its own. Below `lg`, the behaviour is the browser's default document scroll. product-designer's options and trade-offs are in `consult-product-designer-2.md`.
-- **Lenis:** version `^1.3.17` [K26]. `useSmoothScroll` sets no `allowNestedScroll` [K26]. Lenis skips wheel events whose target has `data-lenis-prevent` or `data-lenis-prevent-wheel` (`node_modules/lenis/dist/lenis.mjs` l.627–629) [K29]. `Modal.tsx` already uses `data-lenis-prevent` [K27].
+## 1. Reference
+- **Carried** from `tasks/round-501.md` §1:
+  - direction A, "a brass pill";
+  - the Artlist and Epidemic pill CTAs;
+  - DESIGN_SYSTEM's radius rule "Store CTAs use pill".
+- **Store rule:** standalone CTAs are pills. An action inside a notice row uses the default shape, as dialog actions do (product-designer).
+- **Ableton:** does not apply (Store pages).
 
-| Behaviour | HEAD (measured, `probe/head/`) | After (sketch, `probe/sketch/`) |
-|---|---|---|
-| 375×812, one item, ownership warning | items column 0 px; "Remove item" cannot be clicked | 339 px; Remove opens and closes its dialog |
-| 375×812 / 390×844, one item | 47 / 79 px column (content 155) | 155 / 155 |
-| 768×1024, three items | 295 px scroll box (content 482) | 482, in page flow |
-| 1366×600, 1366×657, 1280×600, tall summary | Checkout below `main`'s clipped bottom; the wheel cannot reach it (10 of 18 states) | the wheel scrolls the summary column; Checkout in view in all 18 states |
-| 1280×720, five items | wheel scrolls the window only; item 5 never visible | items column scrolls (366 px); item 5 visible |
-| 1024 / 1280 / 1440, summary fits | — | every box equal ±1 px |
-| Empty cart, 4 viewports | — | identical |
+| Point | Reference / rule | CZABA after this round | Deviation (reason) |
+|---|---|---|---|
+| Action inside a notice (cart "Upgrade") | default shape; touch target ≥ 44 px | primary `sm`, 8 px, `min-h-11`, `shrink-0` | D1: 104×32 → 104×44; black text → `text-background`; 500 → 600; 4 → 8 px; hover `brand/90` → `brand-hover`; the notice grows 64 → 70 px at `lg` |
+| Standalone page action ("Create a scene") | brass pill | primary `md` pill, `mb-6 min-h-11` | D2: 12 px → pill; padding `0 16px` → `10px 16px`; the box stays 131×44 |
+| Section CTA ("Browse the Collection") | brass pill, same as the Hero CTA [K8] | primary `lg` pill | D3: 257×58 → 241×48; the hover/press scale is removed; the section is 9–10 px shorter |
+| Press / shadow | — | `active:opacity-90`, `shadow-sm` | all three: new |
+| Keyboard focus | the shared ring (SABA-B-4) | unchanged: `:focus-visible`, solid, offset 2 px | none |
 
-## 2. What changes: sketch `b-round-501/sketch-502.patch.txt`
-sha256 `7d14eae235a5b35caa8943ae4cb50c7a9f024a06e635f92a7e92b7b04a5667c0` (`b-round-501/sketch-sha.txt`; v1–v4 superseded, `sketch-sha-history.txt`). v4 and v5 differ from v3 only in two doc 323 sentences (the Tab start; "the fifth of five items"). Code and test bytes equal v3's. The mutants ran on that code; the full suite and the build were re-run on the v5 tree.
+## 2. What changes: sketch `b-round-502/sketch-503.patch.txt`
+sha256 `210ee87281cb09de3720c125b9eb55ae94cd6b8e11bce92468b1090c0271aed9` (`b-round-502/sketch-sha.txt`; v1 `1a716032…` is superseded, see `sketch-sha-history.txt`).
 
 | File | Change |
 |---|---|
-| `app/routes/cart.tsx` | `main`: `h-[calc(100vh-80px)] bg-background overflow-hidden` [K3] → `min-h-[calc(100vh-80px)] bg-background lg:h-[calc(100vh-80px)] lg:overflow-hidden`. Grid: adds `lg:grid-rows-[minmax(0,1fr)]`. Items column: `overflow-y-auto overscroll-contain` → `lg:overflow-y-auto lg:overscroll-contain`, plus `data-lenis-prevent-wheel`. Summary column: `lg:col-span-1` → `lg:col-span-1 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain styled-scrollbar` plus `data-lenis-prevent-wheel`. OrderSummary card (l.308): `sticky top-24` removed [K27] |
-| `app/lib/__tests__/cart-mobile-layout.test.ts` (new) | CML1: `main` has `min-h-…`, `lg:h-…` and `lg:overflow-hidden`, and no height or clipping class that applies below `lg` (unprefixed, `sm:`, `md:` or any `max-*:`). CML2: grid row bound; both columns scroll at `lg` only (no unprefixed `overflow*`/`overscroll*` on the items column); both carry `data-lenis-prevent-wheel`, in order. CML3: the reader's self-test against the HEAD string and a banned list. CML4: the summary card has no `sticky` or `top-*` [K13, K34] |
-| `docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md` (new) | l.4 `**სტატუსი:** In Progress (B-R502-CART-MOBILE-ITEMS-HIDDEN, B-R502-CART-LG-SUMMARY-CLIPPED, B-R502-CART-WHEEL-NESTED-SCROLL; C round 502 PASS)` (the whole line) [K32]; the 7 TEMPLATE headings; D1–D3 deviations |
+| `app/routes/cart.tsx` | "Upgrade" `<Link>` [K3]: the HEAD class string → `className={buildButtonClassName({ size: 'sm', className: 'min-h-11 shrink-0' })}`. `buildButtonClassName` is added to the `~/components/ui` import. Children, `to` and the `owns_same` branch [K6] are unchanged |
+| `app/routes/recordings.$productId.tsx` | "Create a scene" `<Link>` [K4]: → `className={buildButtonClassName({ shape: 'pill', className: 'mb-6 min-h-11' })}`. Import as above. The render condition [K7] is unchanged |
+| `app/components/home/StudioShowcase.tsx` | "Browse the Collection" [K5]: → `<Link to="/store" className={buildButtonClassName({ size: 'lg', shape: 'pill' })}>` (Biome joins it onto one line). `import { buildButtonClassName } from '~/components/ui';`. The motion wrapper, span and arrow are unchanged |
+| `app/lib/__tests__/store-button-cleanup-2b3.test.tsx` (new) | B2B3-0 to B2B3-7 (12 tests) [K25]: 0 = three literal oracles equal the builder; 1 = cart Upgrade rendered for owned Universal and owned Standard (class, `href`, svg then label, no `text-black`); 2 = no Upgrade for owned Premium, not owned, or buying Premium over Standard; 3 = Create a scene rendered for a Universal catalogue (class, `href`, text); 4 = none for Standard, or for Universal with 0 recordings; 5 = showcase link in its section (class, `href`, no `scale` token, span then svg); 6 = brace-aware scan of the three files (0 hand-rolled solid brass Link/a/button, at least 1 builder call each); 7 = the scanner's self-test on the three HEAD shapes, the builder form and an `onClick={() => …}` tag |
+| `docs/design/DESIGN_SYSTEM.md` | shape table: the default row adds "an action inside a notice (cart "Upgrade", `sm`, `min-h-11`)"; the pill row adds recordings "Create a scene" (`md`, `min-h-11`) and the home Studio showcase "Browse the Collection". The two-shapes sentence below the table names the notice action at 8 px [K18] |
+| `docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md` | l.4 → `**სტატუსი:** Completed (C round 502 PASS)` [K16] (B-R502-DOC323-L28-STATUS) |
+| `docs/implementation/2026/quarter-IV/324-dpg-button-cleanup-stage-2b-3.md` (new) | l.4 `**სტატუსი:** In Progress (stage 2b-3 of DPG-BUTTON-CLEANUP-2; C round 503 PASS)` [K15]; the 7 TEMPLATE headings; deviations D1–D3; ledger `b-round-502/doc-ledger.md` |
 
-**Sweep (L23):** the changed class strings appear in no test or e2e file [K7]. `store-focus-ring.test.ts` and `store-theme-tokens.test.ts` read `cart.tsx` [K31] and stay green (covering set). The 2b-3 labels are untouched.
+**Sweep (L23)** [K13]:
+- The labels, removed tokens and module paths hit test-root files. Each one is in the covering set and green on the sketch. `product-price-cards` has "Upgrade" (another component); `store-button-cleanup-2b`'s `text-black` pin covers its own sites.
+- The e2e homepage locator is `a[href="/store"]` with the text [K14], and both are kept.
+- K19: no `C round N pending` line exists. The `In Progress (stage` hits for DPG-BUTTON-CLEANUP are docs 319–322 (open stages of this feature) and doc 324 itself. The other hits belong to other open multi-stage items and are not touched.
 
-**L31 timeout headroom:** the slowest covering test takes 54 ms against the 5 s default (`precheck-covering.log`).
+**L31 timeout headroom** [K20]: the slowest covering test takes 541 ms against the 5 s default (11 %). BC1b is not in the covering set (see D-29z1810); its own timeout is 20 s.
 
 ## 3. A: what to implement
 1. From `store/`:
    - run frozen checks 1, 2 and 3 (rc 0);
-   - run `git apply --check /home/runner/czaba-project/tmp/studio-real-loop/b-round-501/sketch-502.patch.txt`, then `git apply` on the same path;
+   - run `git apply --check /home/runner/czaba-project/tmp/studio-real-loop/b-round-502/sketch-503.patch.txt`, then `git apply` on the same path;
    - run check 4 and check 1 again (rc 0).
-2. **Grants:** the 3 files in the §2 table, exactly as the sketch writes them. Nothing else changes.
-3. **Run.** Save the logs under `a-round-502/`. Each expected value is B's sketch output, and a difference is a STOP:
-   - `npm run typecheck`: rc 0 (`typecheck.log`).
-   - `npm run lint`: rc 0, "Found 179 warnings." (`lint.log`) [K23].
-   - `npx biome check app/routes/cart.tsx app/lib/__tests__/cart-mobile-layout.test.ts`: rc 0, "Found 5 warnings." (`biome-scoped.log`) [K23].
-   - `npx vitest run --reporter=verbose $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-501/covering-files.txt)`: 3 files, 54/54, with CML1–CML4 present (`covering.log`) [K13].
-   - The code-reviewer on the whole change against `3bb55d4` (3 files). Give it `git diff 3bb55d4` and the two untracked files.
-   - Not run by A: the full suite and the build. B ran both on the patched tree (`precheck-full.log`, `precheck-build-sketch.log`) [K14, K22].
-4. Write `a-round-502.md` with the code-reviewer's Architecture note for B.
+2. **Grants:** the 7 files in the §2 table, exactly as the sketch writes them. Nothing else changes.
+3. **Run.** Save the logs under `a-round-503/`. Each expected value is B's sketch output, and a difference is a STOP:
+   - `npm run typecheck`: rc 0 (`typecheck.log`; B: `b-round-502/precheck-tsc.log`).
+   - `npm run lint`: rc 0, "Found 179 warnings." (`lint.log`; B: `precheck-lint.log`) [K26].
+   - `npx biome check app/routes/cart.tsx 'app/routes/recordings.$productId.tsx' app/components/home/StudioShowcase.tsx app/lib/__tests__/store-button-cleanup-2b3.test.tsx`: rc 0, "Found 6 warnings." (`biome-scoped.log`; B: `precheck-biome.log`).
+   - `npx vitest run --reporter=verbose $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-502/covering-files.txt)`: 12 files, 115/115, with the B2B3-0…B2B3-7 lines present, and no test above 2,500 ms (`covering.log`; B: `precheck-covering.log`).
+   - The code-reviewer on the whole change against `882854e`. The 3+ file rule applies; give it `git diff 882854e` and the two untracked files.
+   - Not run by A: the full suite and the build. B ran both on the sketch tree: `precheck-full.log` (300 files / 4,353 tests, rc 0) and `precheck-build-sketch.log` (rc 0) [K27].
+4. Write `a-round-503.md` with the code-reviewer's Architecture note for B.
 
 ## 4. C: what to verify
-C writes `c-round-502.md`, `c-round-502.json` and `c-round-502/progress.json` as it goes, heaviest rows first (L59). All cart rows are **-STUBBED** (L36): Playwright `page.route` on `/api/cart`, `/api/downloads` and `/api/auth/profile`, and on `POST /api/cart/checkout` (answered 500 so nothing navigates). They prove the client path only. The real-backend half is **BLOCKED: backend unavailable in cloud**, listed under `blocked`. That does not make `browserVerified` false.
+C writes `c-round-503.md`, `c-round-503.json` and `c-round-503/progress.json` as it goes, heaviest rows first (L59). CART-UPGRADE and REC-SCENE rows are **-STUBBED** (L36): Playwright `page.route` on `/api/auth/profile`, `/api/cart`, `/api/downloads` and `/api/products/1/recordings`, with `localStorage.auth_user` set. They prove the client path only. The real-backend half is **BLOCKED: backend unavailable in cloud** and goes under `blocked`. That does not make `browserVerified` false.
 
 **Environment:**
 - The store dev server at `http://127.0.0.1:5173`.
-- The loop mock API: `node mock-api/server.mjs` from the loop folder. C7 starts on `/store`, which needs it, and C12 runs with it. Stop it by exact PID with `ps -eo pid,args | awk '$2=="node" && $3=="mock-api/server.mjs"{print $1}'`, never `pkill -f`. Every cart call is still stubbed with `page.route`, which takes precedence over the mock.
-- Warm `/cart` once in a browser before measuring (L38). A first cold run that finds no "Order Summary" is env-invalid and is replaced.
+- **Mock API** (the home page needs it): start `node mock-api/server.mjs` from the loop folder. Stop it by exact PID with `ps -eo pid,args | awk '$2=="node" && $3=="mock-api/server.mjs"{print $1}'`, never `pkill -f`.
+- **Warm up (L38):** load `/`, `/cart` and `/recordings/1` once in a browser before measuring. A cold first run that crashes or finds 0 targets is environment-invalid and is replaced.
 
-**Harness** (all under `b-round-501/probe/`, `BASE=http://127.0.0.1:5173`):
-- `node cart-states.mjs <c-round-502/after> after`, then `python3 -I compare-502.py b-round-501/probe/head/head-cart.json <c-round-502/after>/after-cart.json`;
-- `node cart-wheel.mjs <dir> after`;
-- `node items-wheel.mjs > <dir>/after-items-wheel.json`;
-- `node cart-actions.mjs <dir> after`;
-- `node cart-empty.mjs <dir> after`;
-- `node below-lg-wheel.mjs <dir> after`;
-- `node c7-journey.mjs <dir> after` (mock API running).
+**Harness** (all under `b-round-502/probe/`, `BASE=http://127.0.0.1:5173`):
+- `node measure-503.mjs <c-round-503/after> after`. It covers 3 targets × 1440×900, 1280×720 and 375×812: rest, hover, mouse press, keyboard focus (Escape, then focus) and the neighbour boxes.
+- `node journey-503.mjs <c-round-503/after> after`. These are real mouse clicks at the element centre, at 1440 and 375.
+- `node ../../b-round-501/probe/cart-actions.mjs <dir> after` and `node ../../b-round-501/probe/c7-journey.mjs <dir> after`, as neighbours.
 
-The oracles are the files in `probe/sketch/`, and the HEAD values are in `probe/head/`.
+The oracles are `probe/sketch/sketch.json`, `probe/sketch/sketch-journey.json`, `probe/nb-sketch/sketch-actions.json` and `probe/nb-sketch/sketch-c7.json`. The HEAD values are in `probe/head/` and `probe/nb-head/`.
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| C0 | SOURCE-SCOPE (start) | `git status --short --untracked-files=all`; frozen checks 1, 2 and 4 | 1 modified (`cart.tsx`) and 2 untracked (the test, doc 323). Checks 1, 2 and 4 rc 0 |
-| C1 | LAYOUT-STUBBED (4 states × 6 viewports) | `cart-states.mjs` + `compare-502.py` | `RESULT PASS`. Every row below 1024 px is `SMALL-OK` (column height = content height, title and Remove hit-test true, `main` overflow visible). Every `lg` row is `LG-EQUAL`, and the 4 rows marked "HEAD column ran past main; bounded now" match `probe/compare-sketch.txt`. One full-page screenshot per state at 375 and 1280 viewed |
-| C2 | PHONE ACTIONS-STUBBED (375×812, 1280×720; anonymous and signed in; coupon + gift card) | `cart-actions.mjs` | Each row: `titleHit` true, `removeClicked` true, `dialog` true, `dialogClosed` true. Anonymous: Checkout opens "Sign in" and sends 0 POSTs. Signed in: 1 `POST /api/cart/checkout`. Equal to `sketch-actions.json`. The HEAD 375 rows (`head-actions.json`) have `removeClicked` false |
-| C3 | SHORT-SCREEN WHEEL-STUBBED (3 states × 6 viewports) | `cart-wheel.mjs` | `afterWheel.inView` and `afterWheel.hit` true in all 18 rows. At 1366×600, 1366×657 and 1280×600, the summary column's `st` > 0 with `ovY` `auto`. At 1366×900 and 1440×900, `col.h` = `col.sh` (no inner scroll). In the 900-high rows, `before.top`, `before.bottom` and `before.mainBottom` equal `head-wheel.json` (the card did not move; `before.col` differs by design: `ovY` `auto`). `tab.reached` and `tab.state.inView` true in the 6 EXTRAS rows, with the outline `solid`. One screenshot each at 1366×600, viewed: Checkout fully visible and its focus ring not cut |
-| C4 | ITEMS WHEEL-STUBBED (5 items; 1280×720, 1440×900) | `items-wheel.mjs` | `st` > 0, `lastVisible` true, `lenisPrevent` true at both. HEAD: `st` 0, `lastVisible` false |
-| C5 | BELOW-LG WHEEL + TOUCH (375×812, 768×1024; 3 items) | `node below-lg-wheel.mjs <dir> after` (wheel 3×300, then a raw 400 px touch swipe over the first item) | Each of the 4 rows equals `probe/sketch/sketch-below-lg.json`: the items column has `ovY` `visible` and `h` = `sh` (482), and `scrollY` is above HEAD's 171 (`probe/head/head-below-lg.json`). For the wheel rows the value equals the sketch's (525 at 375, 277 at 768: the page bottom). For the touch rows it only has to exceed 171, because a fling's distance depends on timing (sketch: 525 and 277). D1: smoothness is not judged. `overscrollBehaviorY` `contain` comes from the pre-existing `.styled-scrollbar` rule [K30] and has no effect on a non-scrolling element |
-| C6 | EMPTY CART-STUBBED (4 viewports) | `cart-empty.mjs` | JSON equal to `probe/head/head-empty.json` |
-| C7 | JOURNEY (L54, 375×812, stubbed cart with 3 items plus coupon and gift card) | `c7-journey.mjs` with the mock API running: `/store` → header "Cart" → `/cart`, then mouse wheel and mouse clicks at element centres only (no `scrollIntoView`, no Playwright auto-scroll); visibility is a centre hit-test | Equal to `probe/sketch/sketch-c7.json`: `seen` `[true,true,true]`, `removeSeen` true, `dialog` true, `closed` true, `titles` 3, `reachedByWheel` true, `signIn` true, `errors` `[]`. One screenshot per step viewed. HEAD (`probe/head/head-c7.json`): `seen` all false, `removeSeen` false |
-| C8 | TESTS | `npx vitest run --reporter=verbose $(cat …/b-round-501/covering-files.txt)` | 3 files, 54/54, with CML1–CML4 lines |
-| C9 | MUTANTS | Copy `store/`'s working tree (excluding `node_modules`, `.git` and `build`) to a folder outside `store/`, symlink `node_modules`, then run `python3 -I b-round-501/mutants-502.py <copy> <absolute c-round-502/mutant-logs>` | M1–M15 all RED, each on its expected row (`summary.txt` lines end `OK`), and `restored rc 0` |
-| C10 | DOCS | doc 323 | 7 headings (L26 subsequence). l.4 byte-equal to the §2 value [K32]. **Full trace:** every number in doc 323 found in its cited probe file (47/79/155, 0→339, 7 px at 1366×657, 1280×600, 501→442, the fifth of five items, 15 mutants, 179 / 5 warnings). `grep -rn 'C round [0-9]* pending' docs/implementation` finds 0 |
-| C11 | CLAIMS | `bash b-round-501/claims-502.sh` (default tree), compared with `b-round-501/claims-502-sketch-output.txt` | No `MISSING`. Output identical except K1 (HEAD may move to the loop-state commit) and K2 (the sketch output read the clean store; C reads the applied tree: 3) |
+| C0 | SOURCE-SCOPE (start) | `git status --short --untracked-files=all`; frozen checks 1, 2 and 4 | 5 modified (`cart.tsx`, `recordings.$productId.tsx`, `StudioShowcase.tsx`, `DESIGN_SYSTEM.md`, doc 323) and 2 untracked (the 2b-3 test, doc 324). Checks 1, 2 and 4 rc 0 |
+| C1 | REST-STUBBED (3 targets × 3 viewports) | `measure-503.mjs` | `count` 1 in every row. Each `rest` field equals `sketch.json`, with boxes ±1 px. All: bg `rgb(201, 164, 106)`, color `rgb(14, 13, 12)`, weight 600, `boxShadow` ending `rgba(4, 5, 6, 0.3) 0px 1px 2px 0px` (HEAD `none`). Upgrade: 104×44, radius `8px`, 14px, padding `6px 12px`, `flexShrink` `0`, svg colour `rgb(14, 13, 12)` (HEAD 104×32, black text, 4px, 500). Scene: 131×44, radius `9999px`, padding `10px 16px`. Browse: 241×48, radius `9999px`, 16px, padding `12px 24px` (HEAD 257×58, `16px 32px`) |
+| C2 | HOVER + PRESS | the `hover` and `press` fields | Hover bg `rgb(217, 184, 127)` on all three, and `hover.transform` `none` on Browse (HEAD `matrix(1.05, …)`). Press: opacity `0.9` and `transform` `none` on all three (HEAD Browse `matrix(0.98, …)`, HEAD opacity 1). `press.focusVisible` false |
+| C3 | KEYBOARD FOCUS | the `focus` fields, plus the `*-focus-crop.png` crops | `source` `keyboard`, `focusVisible` true, outline `solid` with offset `2px` in all 9 rows (equal to HEAD). At least 3 crops viewed (one per target) with the ring visible |
+| C4 | CONTRAST | `restContrast` / `hoverContrast` | 8.32 / 10.28 in all 9 rows. A failure is a Medium |
+| C5 | NEIGHBOURS | `context` fields | Upgrade notice: `h` 70 at 1440 and 1280, 168 at 375 (HEAD 64 / 64 / 168); `ownLines` 1 / 1 / 3; card 225 / 225 / 323 (HEAD 219 / 219 / 323); `remove` box equal to `sketch.json`. Scene: `header` and `next` (`UL`) boxes equal to HEAD. Browse: `section.h` 1445 / 1445 / 1703, `wrap.h` 48, `grid` equal to HEAD. Full-page screenshots `after-CART-UPGRADE-375.png` and `after-SHOWCASE-BROWSE-1440.png` viewed: the label stays on one line, and nothing overlaps |
+| C6 | CART NEIGHBOURS-STUBBED | `cart-actions.mjs` and `c7-journey.mjs` | JSON equal to `probe/nb-sketch/sketch-actions.json` and `sketch-c7.json` (both are equal to HEAD). Anonymous Checkout opens Sign in with 0 POSTs; signed-in sends 1 POST; the Remove dialog opens and closes |
+| C7 | JOURNEY (L54) | `journey-503.mjs` | 6 rows: `count` 1, `hit` true, `ok` true, and `arrived` `/store`, `/products/stub-track?upgrade=premium` and `/scenes/1`. Equal to `sketch-journey.json` without `errors`. One before and one after screenshot per row viewed |
+| C8 | GREP | from `store/`: `python3 -I /home/runner/czaba-project/tmp/studio-real-loop/b-round-497/scan-brand.py . /tmp/s.json`; `grep -c 'buildButtonClassName(' <3 files>` | `100 hits; 38 solid` (HEAD 104 / 41) [K11]; 1, 1, 1 [K35] |
+| C9 | TESTS | `npx vitest run --reporter=verbose $(cat …/b-round-502/covering-files.txt)` | 12 files, 115/115; the B2B3-0…B2B3-7 lines present; no test above 2,500 ms |
+| C10 | MUTANTS | Copy `store/`'s working tree (excluding `node_modules`, `.git` and `build`) to a folder outside `store/`, symlink `node_modules`, then run `python3 -I b-round-502/mutants-503.py <copy> <absolute c-round-503/mutant-logs>` | M1–M16 all RED, each on the rows in `b-round-502/mutants-503.txt` (`summary.txt` lines end `OK`), and `restored rc 0` |
+| C11 | DOCS | `git diff 882854e -- docs/design/DESIGN_SYSTEM.md docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md`; doc 324 | DESIGN_SYSTEM: exactly 3 changed lines (the default and pill rows of the shape table, and the two-shapes sentence). Doc 323: only l.4, byte-equal to `**სტატუსი:** Completed (C round 502 PASS)`. Doc 324: the 7 headings (L26 subsequence) and l.4 byte-equal to `**სტატუსი:** In Progress (stage 2b-3 of DPG-BUTTON-CLEANUP-2; C round 503 PASS)`. **Full trace:** every row of `b-round-502/doc-ledger.md` checked against its source. `grep -rn 'C round [0-9]* pending' docs/implementation` finds 0 |
 | C12 | PROTECTION + STUDIO | Fresh no-credential context: `/studio/1`, `/account/downloads`, `/studio-lab` | `/studio/1` and `/account/downloads` show "Sign in required" and no download link. `/studio-lab` opens the demo at 1440 and 1280 (one screenshot each). Check 2 rc 0 |
-| C13 | SOURCE-SCOPE (end) + L57 | As C0, then `python3 -I tools/l57-check.py c-round-502.json c-round-502/l57-check.txt` | As C0; rc 0. The JSON carries all L57 fields. `mutantRedOnSketch` names `b-round-501/mutant-logs/summary.txt` |
+| C13 | CLAIMS | `bash b-round-502/claims-503.sh` (default tree), compared with `b-round-502/claims-503-sketch-output.txt` | No `MISSING`. Output identical except K1 (HEAD may move to the loop-state commit), K2 (the sketch output read the clean store) and K33 locations (archive moves) |
+| C14 | SOURCE-SCOPE (end) + L57 | As C0, then `python3 -I tools/l57-check.py c-round-503.json c-round-503/l57-check.txt` | As C0; rc 0. The JSON carries all L57 fields. `mutantRedOnSketch` names `b-round-502/mutants-503.txt` |
 
 - **Gate rows** (`gate` in the JSON, never `passed`): the full vitest run, the build, Biome and `npm run verify`.
-- **Blocked:** CART-REAL-BACKEND, a real cart, purchases and ownership from the .NET backend ("backend unavailable in cloud").
+- **Blocked:** CART-REAL-BACKEND-503, the Upgrade notice and the recordings catalogue with a real backend ("backend unavailable in cloud").
 - **Neighbours that could break:**
-  - the empty cart (C6);
-  - the remove dialog (C2);
-  - the sign-in modal from Checkout (C2, C7);
-  - page scroll on `/cart` below `lg` (C5);
-  - focus ring visibility inside the scroll column (C3).
-- **L22:** if A STOPs, C runs C0, C11 and C13 only.
-- **Closing:** with C PASS and `browserVerified` true, the three bugs are fixed for the client path.
+  - the cart notice layout at 375 (C5);
+  - Remove and Checkout on `/cart` (C6);
+  - the recordings header and list (C5);
+  - the home showcase section height and the next section (C5);
+  - the e2e homepage locator (K14).
+- **L22:** if A STOPs, C runs C0, C13 and C14 only.
+- **Closing:** with C PASS and `browserVerified` true, stage 2b-3 is verified and doc 323 is complete.
 
-## 5. B's pre-check (`b-round-501/`, on a `git archive` copy of HEAD plus the patch, outside `store/`)
+## 5. B's pre-check (`b-round-502/`, on `/home/runner/b502-scratch` = a `git archive` of HEAD plus the sketch, outside `store/`)
 | Check | Result | Log |
 |---|---|---|
-| tsc / lint / Biome | rc 0 / rc 0, 179 warnings / rc 0, 5 warnings (all pre-existing in `cart.tsx`) | `precheck-tsc.log`, `precheck-lint.log`, `precheck-biome.log` |
-| Covering tests | 3 files, 54/54 | `precheck-covering.log` |
-| Full suite | see [K14] | `precheck-full.log` |
-| Build | see [K22] | `precheck-build-sketch.log` |
-| Browser, HEAD (:5173) vs sketch (a second dev server on :5174 with its own `cacheDir`) | §1 table | `probe/head/`, `probe/sketch/`, `probe/compare-sketch.txt` |
-| Mutants | M1–M15 RED on expected rows | `mutant-logs/summary.txt` |
-| Patch reproduces the tree | check 4 equal, check 1 rc 0 | (this table) |
-| Consults | product-designer ×2; tech-lead v1 APPROVE (Medium fixed in v2), v2 APPROVE with conditions (Medium and Low 3 fixed in v3) | `consult-product-designer*.md`, `sketch-review.md` |
-| Claims | no MISSING | `claims-502-planning-output.txt`, `claims-502-sketch-output.txt` |
+| tsc / lint / Biome (4 code and test files) | rc 0 / rc 0, 179 warnings (= HEAD) / rc 0, 6 warnings (= HEAD) | `precheck-tsc.log`, `precheck-lint.log`, `precheck-biome.log` |
+| Covering tests | 12 files, 115/115 (slowest 541 ms) | `precheck-covering.log`, `bc1b-alone.log` |
+| Full suite on the sketch tree | 300 files / 4,353 tests, rc 0 | `precheck-full.log` |
+| Build on the sketch tree (docs included) | rc 0 | `precheck-build-sketch.log` |
+| Browser, HEAD (:5173) vs sketch (a second dev server on :5174 with its own `cacheDir`) | §1 table, C1–C7 | `probe/head.out`, `probe/sketch.out`, `probe/*-journey.out`, `probe/nb-head/`, `probe/nb-sketch/` |
+| Mutants (on a separate copy) | M1–M16 RED on their expected rows; `restored rc 0` | `mutants-503.txt`, `mutant-logs/` |
+| Scanner | 104/41 → 100/38 | `scan-head.json`, `scan-sketch.json`, `scan-sketch.txt` |
+| Patch reproduces the tree | `git apply` on a fresh `git archive` of HEAD: all 7 files `cmp`-equal to the scratch; check 4 rc 0 there; check 1 rc 0 on `store/` | (this table) |
+| Sketch review | tech-lead v1 APPROVE WITH CONDITIONS (Medium and 3 Lows fixed in v2); **v2 APPROVE** on the dispatched sha | `sketch-review.md`, `sketch-delta-v1-v2.diff.txt` |
+| Claims | HEAD and sketch outputs, no MISSING | `claims-503-planning-output.txt`, `claims-503-sketch-output.txt` |
 
 ## 6. After this round
 1. **REGRESSION** comes first if planning happens on or after 2026-11-16.
-2. **Round 503: DPG-BUTTON-CLEANUP-2 stage 2b-3**, with the mapping already ruled (`b-round-501/consult-product-designer.md`):
-   - cart "Upgrade": primary sm default, `min-h-11 shrink-0`;
-   - recordings "Create a scene": primary md pill, `mb-6 min-h-11`;
-   - StudioShowcase "Browse the Collection": primary lg pill.
+2. **2c PurchaseHeader** (inventory A3; purchase protection: a click-still-works row against the mock API, buy/add-to-cart handlers unchanged, `bg-buy` untouched). Then **2d** chat, **2e** LeadMagnet (keep-list restyle), **NONBRAND** and PD-R498-404-SECONDARY-ALIGN.
+3. At the stage-2 close: decide SIG-R498-BUTTONLINK-WRAPPER and SIG-R501-SHARED-BUTTON-SCANNER. A bounded frontend-architect checkpoint goes to root only if that proposes a new ui primitive.
+4. Then the rest of DPG P1 (CSS-DEDUP, COLOR-CONSOLIDATE, FONT-RESOLVE), the DP-gate re-run with root, and P2. RETRO at round 510.
 
-   Prepared harness: `probe/measure-502.mjs`. Its showcase target must be scoped to the showcase section, because two links share the name. Re-evaluate SIG-R498-BUTTONLINK-WRAPPER and SIG-R501-SHARED-BUTTON-SCANNER at stage-2 close.
-3. Then 2c PurchaseHeader, 2d chat, 2e LeadMagnet, NONBRAND, then the rest of DPG P1, the DP-gate re-run with root, and P2. RETRO at round 510.
-
-## Claims (`b-round-501/claims-502.sh`; planning output `claims-502-planning-output.txt` on HEAD, sketch output `claims-502-sketch-output.txt` on the patched copy)
-K1 HEAD · K2 worktree count · K3 the `main` line · K4 origin commit · K5 the only file with the fixed height · K6 grid/column class strings · K7 no test or e2e pins · K8 Remove label and the sign-in branch · K9 gate 501 · K10 c-round-501 · K11 artifacts exist · K12 sketch sha · K13 covering · K14 full suite · K15 mutants · K16 compare result and HEAD column heights · K17 regression date · K18 doc numbers · K19 `cart.tsx` not protected · K20 empty equal · K21 actions HEAD vs sketch · K22 build · K23 lint / Biome warnings · K24 wheel `inView` HEAD vs sketch · K25 items wheel · K26 Lenis version and no `allowNestedScroll` · K27 Modal's `data-lenis-prevent` and the sticky card line · K28 below-`lg` wheel and touch, HEAD vs sketch · K29 Lenis's prevent attributes · K30 `.styled-scrollbar` overscroll rule · K31 the two covering tests read `cart.tsx` · K32 doc 323 l.4 on the applied tree · K33 L58 check · K34 each mutant log's red row · K35 C7 journey, HEAD vs sketch · K36 tracked-file count.
+## Claims (`b-round-502/claims-503.sh`; planning output `claims-503-planning-output.txt` on HEAD, sketch output `claims-503-sketch-output.txt` on `/home/runner/b502-verify`)
+K1 HEAD · K2 worktree counts · K3 cart Upgrade old/new class · K4 scene old/new class · K5 showcase old/new class · K6 owns_same branch and returns · K7 scene condition · K8 HeroSection precedent · K9 `:active` scale selectors and DESIGN_SYSTEM sentence · K10 `_index` renders StudioShowcase · K11 scanner · K12 same-name view-all link · K13 SWEEP · K14 e2e locator · K15 doc 324 l.4 and headings · K16 doc 323 l.4 · K17 docs 320–322 · K18 DESIGN_SYSTEM phrases · K19 pending / In Progress (stage grep · K20 L31 timings · K21 gate 502 and c-round-502 · K22 c-round-502 L57 · K23 frozen list sizes · K24 granted paths not protected · K25 new rows · K26 lint/Biome counts · K27 full suite/build · K28 mutants · K29 probe key values · K30 journeys · K31 cart neighbours · K32 artifacts · K33 ids · K34 L58 check · K35 builder calls per file.

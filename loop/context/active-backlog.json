@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-14T01:01:06.741Z",
-  "current_task": "Round 501: DPG-BUTTON-CLEANUP-2 stage 2b-2: A applies b-round-500/sketch-501.patch.txt (sha acb11d51, tech-lead v4 APPROVE): free-downloads Download -> Button primary lg pill type=button aria-expanded; NewsletterSection Subscribe -> Button primary lg h-14 submit disabled while busy; hire-us Send Message -> Button primary lg fullWidth submit, Loader2 spinner; ST5 hire-us pin; new store-button-cleanup-2b2.test.tsx B2B2-0..7; DESIGN_SYSTEM shape rows; doc 322. C runs C0-C14 in the browser (current-task.md)",
+  "_generatedUtc": "2026-11-14T02:29:09.808Z",
+  "current_task": "Round 502: cart layout, three related bugs (B-R502-CART-MOBILE-ITEMS-HIDDEN High, B-R502-CART-LG-SUMMARY-CLIPPED Medium, B-R502-CART-WHEEL-NESTED-SCROLL Medium): A applies b-round-501/sketch-502.patch.txt (v5 sha 7d14eae2; code = v3, tech-lead v1 APPROVE, v2 APPROVE with conditions fixed in v3): cart.tsx main min-h + lg-only fixed height/overflow-hidden, grid lg:grid-rows-[minmax(0,1fr)], items column lg-only scroll, summary column lg scroll, data-lenis-prevent-wheel on both columns, dead sticky top-24 removed; new cart-mobile-layout.test.ts CML1-CML4; doc 323. C runs C0-C13 (stubbed cart rows, current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6930,7 +6930,7 @@
       "id": "DPG-BUTTON-CLEANUP-2",
       "severity": "medium",
       "origin": "B spec",
-      "status": "in_progress (D-29z1799): 2b-2 dispatched round 501 (sketch-501 sha acb11d51); then 2b-3, 2c-2e, NONBRAND | in_progress (D-29z1797): 2b-1 C-verified (C round 500 PASS, published 462570e); next 2b-2 (round 501), then 2b-3, 2c-2e, NONBRAND | in_progress (D-29z1792, D-29z1793): 2b-1 C FAIL round 499 (un …[see backlog.json]",
+      "status": "in_progress (D-29z1804, D-29z1805): 2b-3 mapping ruled (b-round-501/consult-product-designer.md), dispatched next as round 503 after the round-502 cart layout bugs; then 2c-2e, NONBRAND | in_progress (D-29z1802): 2b-2 C-verified (C round 501 PASS, published 3bb55d4); next 2b-3 (round 502), then 2c-2 …[see backlog.json]",
       "title": "Hand-rolled brand buttons outside Button.tsx (Saba DPG item 7 \"Use Button.tsx component only\")",
       "evidence": "b-round-497/stage2-inventory.md, b-round-497/scan-head.json (supersedes b-round-495/stage2-bg-brand-hits.txt)",
       "added": "2026-11-13 B round 495 -> 496 planning",
@@ -6947,7 +6947,7 @@
       "substages_d29z1789": {
         "2a": "C round 498 PASS, published 82e118a",
         "2b-1": "C round 500 PASS (browserVerified true), published 462570e; scanner 109/44",
-        "2b-2": "round 501 dispatched: FD Download primary lg pill + aria-expanded; NL Subscribe primary lg h-14; HU Send Message primary lg fullWidth + Loader2; ST5 rewritten; scanner 104/41",
+        "2b-2": "C round 501 PASS (browserVerified true), published 3bb55d4; scanner 104/41",
         "2b-3": "recordings.$productId 190, cart 162, StudioShowcase 155"
       }
     },
@@ -7015,12 +7015,6 @@
       "title": "Ghost button hover fill (bg-elevated) is 1.12:1 against the page background; text contrast 13.94 hol"
     },
     {
-      "id": "INFO-C500-DOC321-LEDGER-TRACE",
-      "severity": "info",
-      "status": "info (D-29z1797): no action; L26 ledger rows stay a C11 requ",
-      "title": "C round 500 C11 passed the doc 321 headings, l.4 bytes and tokens but did not redo the doc-ledger nu"
-    },
-    {
       "id": "SABA-Q-501-INPUT-RADIUS",
       "severity": "info",
       "status": "awaiting_user (D-29z1801); non-blocking",
@@ -7031,17 +7025,87 @@
       "severity": "info",
       "status": "awaiting_user (D-29z1801); non-blocking",
       "title": "Should NONBRAND turn free-downloads 'Send Download Link' (white bg-foreground pill) into Button seco"
+    },
+    {
+      "id": "INFO-C501-MUTANT-HARNESS-RELPATH",
+      "severity": "info",
+      "status": "info (D-29z1803): B harness usage; round-502 mutant script r",
+      "title": "b-round-500/mutants-501.py takes a relative logdir but runs with cwd=tree, so a relative logdir lose"
+    },
+    {
+      "id": "SIG-R501-SHARED-BUTTON-SCANNER",
+      "severity": "info",
+      "status": "signal (D-29z1803): architecture note, not scheduled; decide",
+      "title": "Per-stage tests carry copies of a brace-aware tag scanner (openingTags/hasSolidBrass; IL3 in store-i"
+    },
+    {
+      "id": "B-R502-CART-MOBILE-ITEMS-HIDDEN",
+      "severity": "high",
+      "origin": "B pre-check",
+      "status": "scheduled round 502 (D-29z1805)",
+      "title": "Below 1024 px the /cart items column collapses (cart.tsx main h-[calc(100vh-80px)] overflow-hidden): 47/79 px at 375/390 with one item, 0 px with an ownership warning or coupon + gift card; items invisible and Remove cannot be clicked",
+      "evidence": "b-round-501/probe/head/head-cart.json, head-actions.json, cart375-full.png; compare b-round-501/probe/compare-sketch.txt",
+      "repro": "375x812, stub /api/cart with one item and /api/downloads with the same handle as Universal (b-round-501/probe/cart-states.mjs OWNED-1); open /cart",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "B-R502-CART-LG-SUMMARY-CLIPPED",
+      "severity": "medium",
+      "origin": "B pre-check",
+      "status": "scheduled round 502 (D-29z1805)",
+      "title": "At lg on short screens (1366x657, 1366x600, 1280x600) a tall Order Summary (coupon + gift card, or ownership warning) puts Checkout below main's clipped bottom; the mouse wheel cannot reach it",
+      "evidence": "b-round-501/probe/head/head-wheel.json (afterWheel.inView false in 10 of 18 states)",
+      "repro": "b-round-501/probe/cart-wheel.mjs EXTRAS at 1280x600",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "B-R502-CART-WHEEL-NESTED-SCROLL",
+      "severity": "medium",
+      "origin": "B pre-check",
+      "status": "scheduled round 502 (D-29z1805)",
+      "title": "Lenis (useSmoothScroll, no allowNestedScroll) takes wheel events over the /cart items column; the column never wheel-scrolls, so with 5 items item 5 is never visible at 1280x720 (scrollbar drag or keyboard only)",
+      "evidence": "b-round-501/probe/head/head-items-wheel.json (st 0, lastVisible false)",
+      "repro": "b-round-501/probe/items-wheel.mjs",
+      "added": "2026-11-14 B round 501 -> 502 planning"
+    },
+    {
+      "id": "CART-REAL-BACKEND",
+      "severity": "info",
+      "status": "open_backend (D-29z1805): round 502 rows are -STUBBED (clien",
+      "title": "Round-502 cart layout with a real backend cart and real purchases"
+    },
+    {
+      "id": "SIG-R502-LENIS-NESTED-SCROLL-SITEWIDE",
+      "severity": "info",
+      "status": "signal (D-29z1806): not scheduled; candidate sweep after DPG",
+      "title": "Other Store nested scroll areas (overflow-y-auto without data-lenis-prevent) may not wheel-scroll un"
+    },
+    {
+      "id": "SIG-R502-CART-EXTRA-DOC-HEIGHT",
+      "severity": "info",
+      "status": "info (D-29z1806): no action",
+      "title": "/cart at lg lets the window scroll ~170 px even at HEAD (header + page-transition wrapper taller tha"
+    },
+    {
+      "id": "SIG-R502-AUDIOPLAYER-BOTTOM-OVERLAP",
+      "severity": "info",
+      "status": "hypothesis (D-29z1806): unverified; tech-lead v1 Low 4; prob",
+      "title": "The fixed global AudioPlayer bar (root.tsx) may cover the last control at the bottom of long Store p"
+    },
+    {
+      "id": "SABA-Q-502-UPGRADE-VARIANT",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1804): user-review/questions-round-502.m",
+      "title": "Cart Upgrade inside the accent ownership notice: stay brass primary or switch to accent?"
+    },
+    {
+      "id": "PD-R502-SHOWCASE-ARROW-NUDGE",
+      "severity": "info",
+      "status": "signal (D-29z1804): input to DPG-INTERACTION-FIX",
+      "title": "product-designer optional: StudioShowcase arrow group-hover:translate-x-1 motion-reduce:transition-n"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 492,
-      "task": "current-task.md",
-      "decision": "D-29z1756",
-      "type": "B-R488-PASSWORD-MODAL-DIALOG + B-R492-PASSWORD-FIELDS-UNNAMED + B-R492-PASSWORD-ERROR-NOT-ANNOUNCED (Medium x3)",
-      "status": "c_fail_stopped_routed_to_b (D-29z1758): C round 492 FAIL (browserVerified/realVerified true; C5 PW-CHECK PASS 54 rows on v3; bug C-R492-01 Low origin B spec: doc 318 l.22 ring claim false for a mouse open); A STOP correct; gate 492 skipped (C taskStatus FAIL); nothing published",
-      "note": "baseline HEAD e4e1d1c clean; sketch b-round-491/sketch-492.patch.txt (v3 f530e0f3); claims b-round-491/claims-492.sh; probe b-round-491/probe/pw-492.mjs + pw-check.py; mutants b-round-491/mutants/run-mutants.py"
-    },
     {
       "round": 493,
       "task": "current-task.md",
@@ -7114,8 +7178,17 @@
       "task": "current-task.md",
       "decision": "D-29z1799",
       "type": "DPG-BUTTON-CLEANUP-2 stage 2b-2 (free-downloads Download, newsletter Subscribe, hire-us Send Message)",
+      "status": "C PASS (browserVerified/realVerified true, 0 bugs); gate 501 published 3bb55d4 (both remotes)",
+      "note": "baseline 462570e clean; sketch b-round-500/sketch-501.patch.txt sha acb11d51; pre-check full 298/4337 rc0, build rc0, mutants M1-M20,M26-M28,M30 RED; mutant M31 (ST5 isolation) RED",
+      "result_note": "C0-C14 PASS (c-round-501.json); C11 full doc-ledger trace for doc 322 (after-state numbers C-measured; HEAD-side numbers from B head.out only); C10 25 mutants RED"
+    },
+    {
+      "round": 502,
+      "task": "current-task.md",
+      "decision": "D-29z1805",
+      "type": "cart layout: three related bugs (mobile items hidden, lg short-screen summary clipped, Lenis wheel on nested columns)",
       "status": "dispatched",
-      "note": "baseline 462570e clean; sketch b-round-500/sketch-501.patch.txt sha acb11d51; pre-check full 298/4337 rc0, build rc0, mutants M1-M20,M26-M28,M30 RED; mutant M31 (ST5 isolation) RED"
+      "note": "baseline 3bb55d4 clean; sketch b-round-501/sketch-502.patch.txt v5 sha 7d14eae2 (code = v3; two doc sentences); pre-check in b-round-501/precheck-*.log; mutants M1-M15; probes b-round-501/probe/"
     }
   ],
   "other_keys": [

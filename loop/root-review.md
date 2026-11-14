@@ -1258,3 +1258,7 @@ COMMIT OK. Findings for B: gates/round-500/review.md
 ## Round 501 (2026-11-14)
 COMMIT OK. Findings for B: gates/round-501/review.md
 
+
+## Round 502 (2026-11-14)
+COMMIT OK. Findings for B: gates/round-502/review.md
+

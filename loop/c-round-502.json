@@ -1,0 +1,73 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-14T02:15:34.7955605Z",
+  "round": 502,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "C0-SOURCE-SCOPE-start",
+  "C1-LAYOUT-STUBBED (24 states, RESULT PASS, identical to compare-sketch.txt)",
+  "C2-PHONE-ACTIONS-STUBBED (equal sketch-actions.json)",
+  "C3-SHORT-SCREEN-WHEEL-STUBBED (18/18 inView+hit, equals sketch-wheel.json afterWheel+tab)",
+  "C4-ITEMS-WHEEL-STUBBED (st 366/186, lastVisible true, lenisPrevent true)",
+  "C5-BELOW-LG-WHEEL+TOUCH (equals sketch-below-lg.json; HEAD 171 -> 525/277)",
+  "C6-EMPTY-CART-STUBBED (equal head-empty.json)",
+  "C7-JOURNEY-375 (equal sketch-c7.json, errors [])",
+  "C8-TESTS (covering 3 files, 54/54, CML1-CML4 present)",
+  "C9-MUTANTS (M1-M15 RED on expected rows, restored rc 0)",
+  "C10-DOCS (7 headings, l.4 byte-equal, numbers traced, 0 'C round N pending')",
+  "C11-CLAIMS (0 MISSING; only K2 differs = 3 on applied tree)",
+  "C12-PROTECTION+STUDIO (/studio/1 and /account/downloads Sign in required, no download link; /studio-lab demo opens at 1440 and 1280 without credentials)",
+  "C13-SOURCE-SCOPE-end"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "biome",
+  "npm run verify (root gate gates/gate-round-502.json)"
+ ],
+ "blocked": [
+  "CART-REAL-BACKEND: real cart, purchases, ownership from the .NET backend \u2014 backend unavailable in cloud"
+ ],
+ "notes": [
+  "Studio audio flow (find sound/add/fit video/export) is not in scope of round 502 (cart layout); /studio-lab only checked for demo opening + premium non-bypass (C12). Ableton conformance: not applicable (Store cart page).",
+  "All cart rows are -STUBBED (page.route): client path only.",
+  "First run of cart-states.mjs and of c12.mjs crashed on a cold route (Vite reload); both replaced by a warm second run (L38), crash kept in c-round-502/*.out, not counted.",
+  "Info (not a bug, not this round's): focus ring on Checkout measures outline solid 1px / offset 2px (pre-existing shared style, vs Saba SABA-B-4 text of 1.5px) \u2014 check in focus-ring work.",
+  "Info: at 375 px the Order Summary card is 8 px wider than the item cards (343 vs 335 px in the screenshot); not pinned by any row, B-measured sketch identical; cosmetic Low candidate.",
+  "Info: checkoutHit false at OWNED-1 states is expected (ownership warning disables Checkout); equal to sketch."
+ ],
+ "forB": [
+  "A's Lows A-R502-CR-1..5 and B's pre-ruled #1-#10 stand as deferred Lows; none reproduced as a failure.",
+  "Consider a Low: summary card width vs item cards at <1024 px (info above).",
+  "Doc 323 l.4 now true (C PASS) \u2014 gate may publish."
+ ],
+ "manifestPaths": 14,
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": 1,
+ "assertsSpecified": true,
+ "mutantsRecorded": true,
+ "mutantRedOnSketch": "b-round-501/mutant-logs/summary.txt (C re-ran: c-round-502/mutant-logs/summary.txt)",
+ "gateChecksNamed": [
+  "full vitest",
+  "build",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": [
+  "B precheck-full.log",
+  "B precheck-build-sketch.log"
+ ],
+ "chainHeadGateRunGreen": true,
+ "affectedChecksNamed": [
+  "covering 3 files/54 tests"
+ ],
+ "affectedChecksRunOnSketch": [
+  "C re-ran covering: 3 files 54/54 (c-round-502/covering.log)"
+ ]
+}

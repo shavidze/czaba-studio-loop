@@ -1,0 +1,517 @@
+diff --git a/app/components/home/StudioShowcase.tsx b/app/components/home/StudioShowcase.tsx
+index 50387ec..5a5d7a6 100644
+--- a/app/components/home/StudioShowcase.tsx
++++ b/app/components/home/StudioShowcase.tsx
+@@ -8,6 +8,7 @@ import { Link } from '@remix-run/react';
+ import { motion } from 'framer-motion';
+ import { ArrowRight, Download, Layers, Wand2 } from 'lucide-react';
+ import { useEffect, useRef, useState } from 'react';
++import { buildButtonClassName } from '~/components/ui';
+ import { PageContainer } from '../layout';
+ import { StudioMockup } from './StudioMockup';
+ 
+@@ -150,10 +151,7 @@ export function StudioShowcase() {
+           transition={{ ...springConfig, delay: 0.7 }}
+           className="text-center"
+         >
+-          <Link
+-            to="/store"
+-            className="inline-flex items-center gap-2 rounded-full bg-brand px-8 py-4 font-semibold text-background transition-[background-color,transform] duration-200 hover:bg-brand-hover hover:[transform:scale(1.05)] active:[transform:scale(0.98)]"
+-          >
++          <Link to="/store" className={buildButtonClassName({ size: 'lg', shape: 'pill' })}>
+             <span>Browse the Collection</span>
+             <ArrowRight size={18} />
+           </Link>
+diff --git a/app/lib/__tests__/store-button-cleanup-2b3.test.tsx b/app/lib/__tests__/store-button-cleanup-2b3.test.tsx
+new file mode 100644
+index 0000000..e117cb2
+--- /dev/null
++++ b/app/lib/__tests__/store-button-cleanup-2b3.test.tsx
+@@ -0,0 +1,334 @@
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { cleanup, render, screen, within } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { buildButtonClassName } from '~/components/ui';
++import type { Cart } from '~/types/cart';
++import { APP_ROOT } from './helpers/style-scan';
++
++type PurchasedVersion = 'premium' | 'standard' | 'universal' | null;
++type StubCatalog = {
++  productId: number;
++  productTitle: string;
++  licenseType: string;
++  recordings: unknown[];
++};
++
++const state = vi.hoisted(
++  (): {
++    cart: Cart | null;
++    purchased: Array<{ handle: string; versionType: PurchasedVersion }>;
++    catalog: StubCatalog | null;
++  } => ({ cart: null, purchased: [], catalog: null }),
++);
++
++vi.mock('@remix-run/react', () => ({
++  Link: ({ children, to, className }: { children: ReactNode; to: string; className?: string }) => (
++    <a href={to} className={className}>
++      {children}
++    </a>
++  ),
++  useParams: () => ({ productId: '1' }),
++}));
++
++vi.mock('~/hooks', async (importOriginal) => ({
++  ...(await importOriginal<typeof import('~/hooks')>()),
++  useCart: () => ({
++    cart: state.cart,
++    isLoading: false,
++    isRemovingFromCart: false,
++    updatingItemId: null,
++    isBuyingNow: false,
++    isApplyingDiscount: false,
++    removeFromCart: vi.fn(),
++    updateQuantity: vi.fn(),
++    checkout: vi.fn(),
++    applyCoupon: vi.fn(),
++    removeCoupon: vi.fn(),
++    applyGiftCard: vi.fn(),
++    removeGiftCard: vi.fn(),
++  }),
++  useAuth: () => ({ isAuthenticated: true, openModal: vi.fn() }),
++  usePurchases: () => ({ purchasedProducts: state.purchased }),
++}));
++
++vi.mock('~/hooks/useAuth', () => ({
++  useAuth: () => ({ user: { id: 7, accessToken: 'stub-token' } }),
++}));
++
++vi.mock('~/contexts/AudioContext', () => ({
++  useAudio: () => ({ closePlayer: vi.fn() }),
++}));
++
++vi.mock('~/hooks/useRecordingPlayer', () => ({
++  useRecordingPlayer: () => ({
++    state: {
++      activeRecordingId: null,
++      status: 'idle',
++      currentTime: 0,
++      duration: 0,
++      errorMessage: null,
++    },
++    toggleRecordingPlayback: vi.fn(),
++    seekRecording: vi.fn(),
++  }),
++}));
++
++vi.mock('~/components/auth', () => ({
++  RequireAuth: ({ children }: { children: ReactNode }) => <>{children}</>,
++}));
++
++vi.mock('~/services/api/client', () => ({
++  ApiError: class ApiError extends Error {
++    status = 500;
++  },
++  apiClient: {
++    setAccessToken: vi.fn(),
++    getAccessToken: () => 'stub-token',
++    getProductRecordingCatalog: () => Promise.resolve(state.catalog),
++  },
++}));
++
++import { StudioShowcase } from '~/components/home/StudioShowcase';
++import CartPage from '~/routes/cart';
++import RecordingCatalogRoute from '~/routes/recordings.$productId';
++
++const PRIMARY_SM_UPGRADE =
++  'inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-3 py-1.5 text-sm gap-1.5 min-h-11 shrink-0';
++const PRIMARY_MD_PILL_SCENE =
++  'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-4 py-2.5 text-sm gap-2 mb-6 min-h-11';
++const PRIMARY_LG_PILL =
++  'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-6 py-3 text-base gap-2';
++
++const STAGE_2B3_FILES = [
++  'routes/cart.tsx',
++  'routes/recordings.$productId.tsx',
++  'components/home/StudioShowcase.tsx',
++];
++
++const DOLLAR = '$';
++const HEAD_UPGRADE_TAG = `<Link\n  to={\`/products/${DOLLAR}{item.productHandle}?upgrade=premium\`}\n  className="px-3 py-1.5 bg-brand text-black text-sm font-medium rounded hover:bg-brand/90 transition-colors flex items-center gap-1.5"\n>`;
++const HEAD_SCENE_TAG = `<Link\n  to={\`/scenes/${DOLLAR}{catalog.productId}\`}\n  className="mb-6 inline-flex min-h-11 items-center rounded-lg bg-brand px-4 text-sm font-semibold text-background hover:bg-brand-hover"\n>`;
++const HEAD_SHOWCASE_TAG =
++  '<Link\n  to="/store"\n  className="inline-flex items-center gap-2 rounded-full bg-brand px-8 py-4 font-semibold text-background transition-[background-color,transform] duration-200 hover:bg-brand-hover hover:[transform:scale(1.05)] active:[transform:scale(0.98)]"\n>';
++
++function cartWith(variantTitle: string): Cart {
++  return {
++    id: 1,
++    items: [
++      {
++        id: 11,
++        productId: 1,
++        productTitle: 'Stub Track',
++        productHandle: 'stub-track',
++        variantTitle,
++        unitPrice: 29,
++        quantity: 1,
++        total: 29,
++      },
++    ],
++    itemCount: 1,
++    subtotal: 29,
++    discountAmount: 0,
++    giftCardAmount: 0,
++    total: 29,
++  };
++}
++
++function openingTags(source: string, tagName: string): string[] {
++  const tags: string[] = [];
++  const pattern = new RegExp(`<${tagName}(?=[\\s>])`, 'g');
++  for (let match = pattern.exec(source); match; match = pattern.exec(source)) {
++    let depth = 0;
++    let quote = '';
++    let end = match.index + match[0].length;
++    for (; end < source.length; end++) {
++      const char = source[end];
++      if (quote) {
++        if (char === quote) quote = '';
++      } else if (char === '"' || char === "'" || char === '`') {
++        quote = char;
++      } else if (char === '{') {
++        depth++;
++      } else if (char === '}') {
++        depth--;
++      } else if (char === '>' && depth === 0) {
++        break;
++      }
++    }
++    tags.push(source.slice(match.index, end + 1));
++  }
++  return tags;
++}
++
++function hasSolidBrass(tag: string): boolean {
++  return /(?:^|[\s"'`])bg-brand(?:[\s"'`]|$)/.test(tag);
++}
++
++function handRolledBrassActions(source: string): string[] {
++  return ['Link', 'a', 'button'].flatMap((tagName) =>
++    openingTags(source, tagName).filter(hasSolidBrass),
++  );
++}
++
++function classTokens(element: Element): string[] {
++  return (element.getAttribute('class') ?? '').split(/\s+/).filter(Boolean);
++}
++
++class FakeIntersectionObserver {
++  observe = vi.fn();
++  disconnect = vi.fn();
++  unobserve = vi.fn();
++  takeRecords = vi.fn(() => []);
++  root = null;
++  rootMargin = '';
++  thresholds = [];
++}
++
++beforeEach(() => {
++  vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver);
++});
++
++afterEach(() => {
++  cleanup();
++  vi.unstubAllGlobals();
++  state.cart = null;
++  state.purchased = [];
++  state.catalog = null;
++});
++
++describe('DPG-BUTTON-CLEANUP-2 stage 2b-3', () => {
++  it('B2B3-0: the literal oracles equal the builder output for the three sites', () => {
++    expect(buildButtonClassName({ size: 'sm', className: 'min-h-11 shrink-0' })).toBe(
++      PRIMARY_SM_UPGRADE,
++    );
++    expect(buildButtonClassName({ shape: 'pill', className: 'mb-6 min-h-11' })).toBe(
++      PRIMARY_MD_PILL_SCENE,
++    );
++    expect(buildButtonClassName({ size: 'lg', shape: 'pill' })).toBe(PRIMARY_LG_PILL);
++  });
++
++  it.each([
++    ['universal', 'Standard'],
++    ['standard', 'Standard'],
++  ] as const)('B2B3-1: cart Upgrade is a primary sm 44 px link when the buyer owns %s', (owned, variant) => {
++    state.cart = cartWith(variant);
++    state.purchased = [{ handle: 'stub-track', versionType: owned }];
++    render(<CartPage />);
++    const links = screen.getAllByRole('link', { name: 'Upgrade' });
++    expect(links).toHaveLength(1);
++    const upgrade = links[0];
++    expect(upgrade?.getAttribute('href')).toBe('/products/stub-track?upgrade=premium');
++    expect(upgrade?.className).toBe(PRIMARY_SM_UPGRADE);
++    expect(classTokens(upgrade as Element)).not.toContain('text-black');
++    const nodes = [...(upgrade?.childNodes ?? [])].filter(
++      (node) => node.nodeType !== Node.TEXT_NODE || node.textContent?.trim(),
++    );
++    expect(nodes).toHaveLength(2);
++    expect(nodes[0]?.nodeName.toLowerCase()).toBe('svg');
++    expect(classTokens(nodes[0] as Element)).toEqual(expect.arrayContaining(['w-4', 'h-4']));
++    expect(nodes[1]?.textContent?.trim()).toBe('Upgrade');
++  });
++
++  it.each([
++    ['premium', 'Standard'],
++    [null, 'Standard'],
++    ['standard', 'Premium'],
++  ] as const)('B2B3-2: cart shows no Upgrade link when the buyer owns %s and buys %s', (owned, variant) => {
++    state.cart = cartWith(variant);
++    state.purchased = [{ handle: 'stub-track', versionType: owned }];
++    render(<CartPage />);
++    expect(screen.getByText('Stub Track')).toBeTruthy();
++    expect(screen.queryAllByRole('link', { name: 'Upgrade' })).toHaveLength(0);
++  });
++
++  it('B2B3-3: recordings "Create a scene" is a primary md pill with mb-6 and min-h-11 for a Universal catalogue', async () => {
++    state.catalog = {
++      productId: 1,
++      productTitle: 'Stub Catalogue',
++      licenseType: 'Universal',
++      recordings: [
++        {
++          id: 5,
++          title: 'Door slam',
++          durationMs: 2000,
++          sampleRateHz: 48000,
++          bitDepth: 24,
++          channels: 2,
++          position: 1,
++        },
++      ],
++    };
++    render(<RecordingCatalogRoute />);
++    const scene = await screen.findByRole('link', { name: 'Create a scene' });
++    expect(scene.getAttribute('href')).toBe('/scenes/1');
++    expect(scene.className).toBe(PRIMARY_MD_PILL_SCENE);
++    expect(scene.textContent).toBe('Create a scene');
++    expect(scene.children).toHaveLength(0);
++  });
++
++  it.each([
++    ['Standard', 1],
++    ['Universal', 0],
++  ] as const)('B2B3-4: recordings shows no "Create a scene" for a %s catalogue with %i recordings', async (licenseType, count) => {
++    state.catalog = {
++      productId: 1,
++      productTitle: 'Stub Catalogue',
++      licenseType,
++      recordings: Array.from({ length: count }, (_, index) => ({
++        id: index + 5,
++        title: 'Door slam',
++        durationMs: 2000,
++        sampleRateHz: 48000,
++        bitDepth: 24,
++        channels: 2,
++        position: index + 1,
++      })),
++    };
++    render(<RecordingCatalogRoute />);
++    await screen.findByRole('heading', { name: 'Stub Catalogue' });
++    expect(screen.queryAllByRole('link', { name: 'Create a scene' })).toHaveLength(0);
++  });
++
++  it('B2B3-5: StudioShowcase "Browse the Collection" is a primary lg pill with the label before the arrow', () => {
++    const { container } = render(<StudioShowcase />);
++    const section = container.querySelector('section');
++    if (!section) throw new Error('showcase section missing');
++    const links = within(section).getAllByRole('link', { name: 'Browse the Collection' });
++    expect(links).toHaveLength(1);
++    const browse = links[0] as Element;
++    expect(browse.getAttribute('href')).toBe('/store');
++    expect(browse.className).toBe(PRIMARY_LG_PILL);
++    expect(classTokens(browse).filter((token) => token.includes('scale'))).toEqual([]);
++    const children = [...browse.children];
++    expect(children).toHaveLength(2);
++    expect(children[0]?.tagName).toBe('SPAN');
++    expect(children[0]?.textContent).toBe('Browse the Collection');
++    expect(children[1]?.tagName.toLowerCase()).toBe('svg');
++  });
++
++  it('B2B3-6: the three stage-2b-3 files keep no hand-rolled solid brass Link, a or button', () => {
++    for (const file of STAGE_2B3_FILES) {
++      const source = readFileSync(join(APP_ROOT, file), 'utf8');
++      expect(handRolledBrassActions(source), file).toEqual([]);
++      expect(source.split('buildButtonClassName(').length - 1, file).toBe(1);
++    }
++  });
++
++  it('B2B3-7: the scanner sees each HEAD shape and passes the builder form', () => {
++    for (const tag of [HEAD_UPGRADE_TAG, HEAD_SCENE_TAG, HEAD_SHOWCASE_TAG]) {
++      expect(handRolledBrassActions(`<div>${tag}x</Link></div>`)).toEqual([tag]);
++    }
++    expect(
++      handRolledBrassActions(
++        "<Link to=\"/store\" className={buildButtonClassName({ size: 'lg', shape: 'pill' })}>",
++      ),
++    ).toEqual([]);
++    expect(
++      handRolledBrassActions('<div className="bg-brand/10"><a className="bg-brand/90">'),
++    ).toEqual([]);
++    const arrowFirst = '<button type="button" onClick={() => go()} className="bg-brand px-4">';
++    expect(handRolledBrassActions(`${arrowFirst}Go</button>`)).toEqual([arrowFirst]);
++  });
++});
+diff --git a/app/routes/cart.tsx b/app/routes/cart.tsx
+index 5467e60..1675345 100644
+--- a/app/routes/cart.tsx
++++ b/app/routes/cart.tsx
+@@ -14,7 +14,7 @@ import {
+   X,
+ } from 'lucide-react';
+ import { useMemo, useState } from 'react';
+-import { Button, ConfirmDialog, EmptyState } from '~/components/ui';
++import { Button, buildButtonClassName, ConfirmDialog, EmptyState } from '~/components/ui';
+ import { useAuth, useCart, usePurchases } from '~/hooks';
+ import { formatPrice } from '~/lib/cart-utils';
+ import type { AppliedDiscount, AppliedGiftCard, CartItem } from '~/types/cart';
+@@ -159,7 +159,7 @@ function CartItemRow({
+           </div>
+           <Link
+             to={`/products/${item.productHandle}?upgrade=premium`}
+-            className="px-3 py-1.5 bg-brand text-black text-sm font-medium rounded hover:bg-brand/90 transition-colors flex items-center gap-1.5"
++            className={buildButtonClassName({ size: 'sm', className: 'min-h-11 shrink-0' })}
+           >
+             <ArrowUp className="w-4 h-4" />
+             Upgrade
+diff --git a/app/routes/recordings.$productId.tsx b/app/routes/recordings.$productId.tsx
+index cee7b0b..d1d38b7 100644
+--- a/app/routes/recordings.$productId.tsx
++++ b/app/routes/recordings.$productId.tsx
+@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
+ import { RequireAuth } from '~/components/auth';
+ import { RecordingCatalogRow } from '~/components/recordings/RecordingCatalogRow';
+ import { SfxQuickEdit } from '~/components/recordings/SfxQuickEdit';
+-import { Button, EmptyState } from '~/components/ui';
++import { Button, buildButtonClassName, EmptyState } from '~/components/ui';
+ import { useAudio } from '~/contexts/AudioContext';
+ import { useAuth } from '~/hooks/useAuth';
+ import { type RecordingStreamGrant, useRecordingPlayer } from '~/hooks/useRecordingPlayer';
+@@ -187,7 +187,7 @@ function RecordingCatalogContent() {
+       {catalog.licenseType.toLowerCase() === 'universal' && catalog.recordings.length > 0 && (
+         <Link
+           to={`/scenes/${catalog.productId}`}
+-          className="mb-6 inline-flex min-h-11 items-center rounded-lg bg-brand px-4 text-sm font-semibold text-background hover:bg-brand-hover"
++          className={buildButtonClassName({ shape: 'pill', className: 'mb-6 min-h-11' })}
+         >
+           Create a scene
+         </Link>
+diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+index b087f69..73d5e1a 100644
+--- a/docs/design/DESIGN_SYSTEM.md
++++ b/docs/design/DESIGN_SYSTEM.md
+@@ -1153,8 +1153,8 @@ Store-ში ღილაკის სამიზნე წყაროა `But
+ 
+ | Shape | Class | გამოყენება |
+ |-------|-------|------------|
+-| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), Studio |
+-| `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“, free downloads-ის „Download“) |
++| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), შეტყობინების შიგნით მოქმედება (cart-ის „Upgrade“, `sm`, `min-h-11`), Studio |
++| `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“, free downloads-ის „Download“, recordings-ის „Create a scene“ (`md`, `min-h-11`), მთავარი გვერდის Studio showcase-ის „Browse the Collection“) |
+ 
+ `shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებსა და Store-ის ფორმის submit-ზე 8px.
+ 
+diff --git a/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md b/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md
+index 03c9dd0..4c76152 100644
+--- a/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md
++++ b/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md
+@@ -1,7 +1,7 @@
+ # კალათის layout: სია ტელეფონზე, Order Summary დაბალ ეკრანზე და wheel scroll
+ 
+ **თარიღი:** 2026-11-14
+-**სტატუსი:** In Progress (B-R502-CART-MOBILE-ITEMS-HIDDEN, B-R502-CART-LG-SUMMARY-CLIPPED, B-R502-CART-WHEEL-NESTED-SCROLL; C round 502 PASS)
++**სტატუსი:** Completed (C round 502 PASS)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+diff --git a/docs/implementation/2026/quarter-IV/324-dpg-button-cleanup-stage-2b-3.md b/docs/implementation/2026/quarter-IV/324-dpg-button-cleanup-stage-2b-3.md
+new file mode 100644
+index 0000000..68b2d09
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/324-dpg-button-cleanup-stage-2b-3.md
+@@ -0,0 +1,75 @@
++# DPG-BUTTON-CLEANUP, ეტაპი 2b-3: cart-ის „Upgrade“, recordings-ის „Create a scene“ და Studio showcase-ის „Browse the Collection“
++
++**თარიღი:** 2026-11-14
++**სტატუსი:** In Progress (stage 2b-3 of DPG-BUTTON-CLEANUP-2; C round 503 PASS)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++Saba-ს DPG-FIX P1 პუნქტი 7: „Use Button.tsx component only.“ ეტაპებმა 2a (doc 320), 2b-1 (doc 321) და 2b-2 (doc 322) Store-ის brass CTA-ები `Button`-ზე ან `buildButtonClassName`-ზე გადაიყვანა. ეტაპი 2b-3 ხურავს inventory-ის A2 სტრიქონის (`b-round-497/stage2-inventory.md`) ბოლო სამ ხელით აწყობილ brass `<Link>`-ს:
++- cart-ის ownership შეტყობინების „Upgrade“ (ჩანს, როცა მყიდველს იგივე ვერსია უკვე აქვს);
++- recordings კატალოგის „Create a scene“ (Universal კოლექცია, მინიმუმ ერთი ჩანაწერით);
++- მთავარი გვერდის Studio showcase-ის „Browse the Collection“.
++
++სამივე ნავიგაციაა, ამიტომ `<Link>` რჩება და class-ი `buildButtonClassName`-ით აიგება.
++
++## მიდგომა
++
++- **Mapping (product-designer, `b-round-501/consult-product-designer.md`):**
++  - „Upgrade“: primary `sm` default ფორმით, `className: 'min-h-11 shrink-0'`. შეტყობინების შიგნითაა და დამოუკიდებელი CTA არ არის, ამიტომ pill არ არის. `min-h-11` touch target-ს 44px-მდე ზრდის, `shrink-0` ტექსტს ვიწრო ეკრანზე არ აჭყლეტს.
++  - „Create a scene“: primary `md` `pill`, `className: 'mb-6 min-h-11'`. დამოუკიდებელი მოქმედებაა გვერდზე; ზომა (44px სიმაღლე, 16px გვერდითი padding) უცვლელია.
++  - „Browse the Collection“: primary `lg` `pill`, Hero-ს CTA-ის მსგავსად. framer-motion wrapper უცვლელია.
++- **ისრის მოძრაობა:** product-designer-ის არჩევითი `group-hover:translate-x-1` არ დაემატა. ის ახალი hover მოძრაობაა და ამ ეტაპის საჭიროება არ არის (PD-R502-SHOWCASE-ARROW-NUDGE).
++- **Deviation-ები** (ზომები: `b-round-502/probe/head.out`, `b-round-502/probe/sketch.out`):
++  - D1 „Upgrade“: სიმაღლე 32-დან 44px, ტექსტი შავიდან `text-background`-ზე (`rgb(14, 13, 12)`), weight 500-დან 600, radius 4-დან 8px, hover `bg-brand/90`-დან `bg-brand-hover`. ემატება `shadow-sm` და დაჭერისას opacity 0.9. 1440 და 1280 სიგანეზე შეტყობინების ბლოკი 64-დან 70px-მდე იზრდება, 375-ზე სიმაღლე (168px) უცვლელია. contrast: 9 იყო, ახლა 8.32 (hover 10.28).
++  - D2 „Create a scene“: radius 12px-დან pill-მდე, padding `0 16px`-დან `10px 16px`-მდე. ზომა 131×44 უცვლელია. ემატება `shadow-sm` და დაჭერისას opacity 0.9.
++  - D3 „Browse the Collection“: 257×58-დან 241×48-მდე, padding `16px 32px`-დან `12px 24px`-მდე. hover-ის `scale(1.05)` და დაჭერის `scale(0.98)` აღარ არის, რადგან `<Link>`-ს `<button>`-ის `:active` scale არ აქვს (SIG-R496-LINK-NO-PRESS-SCALE). ეს DPG-INTERACTION-FIX-საც ემსახურება. ემატება `shadow-sm` და დაჭერისას opacity 0.9. showcase სექცია 1440-ზე 1454-დან 1445px-მდე მცირდება, 375-ზე 1713-დან 1703px-მდე.
++- **უცვლელი:** ტექსტი, icon-ები, `href`, tab-ის რიგი და keyboard focus ring (`:focus-visible`, solid, offset 2px), როგორც HEAD-ზე.
++- **Saba-სთვის კითხვა** (SABA-Q-502-UPGRADE-VARIANT): „Upgrade“ accent შეტყობინებაში brass primary რჩება თუ `accent` ხდება. პასუხამდე default brass primary-ა.
++
++## არქიტექტურა
++
++```mermaid
++flowchart LR
++  BB[buildButtonClassName] -->|primary sm, min-h-11 shrink-0| UP["cart.tsx: Upgrade"]
++  BB -->|primary md pill, mb-6 min-h-11| SC["recordings.$productId.tsx: Create a scene"]
++  BB -->|primary lg pill| BR["StudioShowcase.tsx: Browse the Collection"]
++  BR --> HOME["_index.tsx (home)"]
++```
++
++## შეცვლილი ფაილები
++
++- `app/routes/cart.tsx` — „Upgrade“-ის `<Link>`-ის class-ი `buildButtonClassName`-ით აიგება. იმპორტი `~/components/ui`-იდან.
++- `app/routes/recordings.$productId.tsx` — „Create a scene“-ის `<Link>`-ის class-ი `buildButtonClassName`-ით აიგება. იმპორტი `~/components/ui`-იდან.
++- `app/components/home/StudioShowcase.tsx` — „Browse the Collection“-ის `<Link>`-ის class-ი `buildButtonClassName`-ით აიგება. ემატება იმპორტი `~/components/ui`-იდან.
++- `app/lib/__tests__/store-button-cleanup-2b3.test.tsx` — ახალი ტესტები B2B3-0…B2B3-7.
++- `docs/design/DESIGN_SYSTEM.md` — `### Buttons`-ის shape ცხრილის default და pill სტრიქონები.
++- `docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md` — სტატუსის სტრიქონი: `Completed (C round 502 PASS)`.
++
++## პრობლემები და გადაწყვეტები
++
++- **Problem:** `buildButtonClassName` class-ებს არ აერთიანებს, ამიტომ `className`-ით radius-ის ან padding-ის გადაფარვა stylesheet-ის რიგზეა დამოკიდებული. → **Solution:** `className` ამატებს მხოლოდ იმას, რასაც builder არ აყენებს (`min-h-11`, `shrink-0`, `mb-6`).
++- **Problem:** მთავარ გვერდზე „Browse the Collection“ ორჯერ ჩანს (ProductSection-ის „view all“ ლინკიც ასე ჰქვია). → **Solution:** ტესტი და browser probe ლინკს showcase სექციაში ეძებს („Only at CZABA“).
++- **Problem:** cart-ისა და recordings-ის ღილაკი მხოლოდ შესული მომხმარებლისთვის და backend-ის მონაცემით ჩანს, cloud-ში კი backend არ არის. → **Solution:** jsdom-ში hook-ები და API client mock-ით არის ჩანაცვლებული, browser probe კი `page.route`-ით მონაცემს აბრუნებს (client path).
++- **Problem:** class string-ის ტესტები შეიძლება builder-ს დაეყრდნოს და ვერაფერი დაიჭიროს. → **Solution:** B2B3-0 ამოწმებს, რომ სამი literal oracle builder-ის output-ს უდრის. B2B3-1…B2B3-5 სამ ადგილს DOM-ში რენდერავს და class-ს, `href`-ს, ტექსტს და icon-ის რიგს ამოწმებს; B2B3-2 და B2B3-4 იმ მდგომარეობებს, სადაც ლინკი არ უნდა ჩანდეს. B2B3-6 სამ ფაილს brace-aware tag scanner-ით კითხულობს, B2B3-7 კი scanner-ს HEAD-ის სამ ფორმაზე ამოწმებს. B-ის mutant-ები `b-round-502/mutants-503.txt`-შია.
++
++## ტესტირება
++
++- **A, რაუნდი 503** (logs `a-round-503/`-ში): frozen check-ები, sketch-ის `git apply`, `npm run typecheck`, `npm run lint`, Biome შეცვლილ ფაილებზე და covering set (`b-round-502/covering-files.txt`).
++- **B, sketch-ის pre-check** (scratch ასლზე, `b-round-502/`):
++  - სრული suite და build (`precheck-full.log`, `precheck-build-sketch.log`);
++  - mutant-ები (`mutants-503.txt`);
++  - browser-ში HEAD და sketch შედარდა (`probe/head.out`, `probe/sketch.out`): ფერი, radius, ზომა, hover, დაჭერა და keyboard focus 1440/1280/375-ზე; მეზობელი ბლოკები (cart-ის შეტყობინება, recordings-ის header, showcase სექცია);
++  - journey (`probe/head-journey.out`, `probe/sketch-journey.out`): მაუსის click სამივე ლინკზე იმავე მისამართზე მიდის, რაც HEAD-ზე;
++  - cart-ის მეზობელი მოქმედებები (`probe/nb-head/`, `probe/nb-sketch/`): Remove, sign-in modal და checkout HEAD-ის ტოლია.
++- **Browser-ის მიღება:** C round 503, შედეგი `c-round-503.json`-შია.
++
++## TODO / შემდეგი ნაბიჯები
++
++- **2c:** purchase path (PurchaseHeader).
++- **2d:** chat.
++- **2e:** LeadMagnet, keep-list-ის მხოლოდ restyle.
++- **DPG-BUTTON-CLEANUP-2-NONBRAND:** ხელით აწყობილი ღილაკები `bg-brand`-ის გარეშე.
++- `ButtonLink` wrapper-ისა და საერთო scanner-ის გადაწყვეტა ეტაპი 2-ის დასრულებისას (SIG-R498-BUTTONLINK-WRAPPER, SIG-R501-SHARED-BUTTON-SCANNER).
++- Saba-ს პასუხი „Upgrade“-ის variant-ზე (SABA-Q-502-UPGRADE-VARIANT).
++- DP gate-ის ხელახალი გაშვება root-თან, ყველა ქვე-ეტაპის შემდეგ.

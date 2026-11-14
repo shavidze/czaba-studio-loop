@@ -1,0 +1,104 @@
+app/routes/cart.tsx:77:49 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    75 │     >
+    76 │       <div className="flex gap-6">
+  > 77 │         <ImageWrapper {...(imageWrapperProps as any)}>
+       │                                                 ^^^
+    78 │           {imageUrl ? (
+    79 │             <img src={imageUrl} alt={productTitle} className="w-full h-full object-cover" />
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/routes/cart.tsx:114:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    112 │             {canChangeQuantity && (
+    113 │               <div className="flex items-center gap-2">
+  > 114 │                 <button
+        │                 ^^^^^^^
+  > 115 │                   onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+  > 116 │                   disabled={isUpdating || item.quantity <= 1}
+  > 117 │                   className="p-1.5 rounded-md bg-elevated border border-outline hover:border-brand hover:text-brand transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+  > 118 │                   aria-label="Decrease quantity"
+  > 119 │                 >
+        │                 ^
+    120 │                   <Minus className="w-4 h-4" />
+    121 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/cart.tsx:123:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    121 │                 </button>
+    122 │                 <span className="w-8 text-center text-foreground font-medium">{item.quantity}</span>
+  > 123 │                 <button
+        │                 ^^^^^^^
+  > 124 │                   onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+  > 125 │                   disabled={isUpdating}
+  > 126 │                   className="p-1.5 rounded-md bg-elevated border border-outline hover:border-brand hover:text-brand transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+  > 127 │                   aria-label="Increase quantity"
+  > 128 │                 >
+        │                 ^
+    129 │                   <Plus className="w-4 h-4" />
+    130 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/cart.tsx:136:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    134 │         </div>
+    135 │ 
+  > 136 │         <button
+        │         ^^^^^^^
+  > 137 │           onClick={() => onRemove(item.id)}
+  > 138 │           disabled={isRemoving}
+  > 139 │           className="shrink-0 p-2 h-fit text-muted hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+  > 140 │           aria-label="Remove item"
+  > 141 │         >
+        │         ^
+    142 │           {isRemoving ? (
+    143 │             <Loader2 className="w-5 h-5 animate-spin" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/cart.tsx:263:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    261 │       <div className="flex items-center gap-2">
+    262 │         <span className="text-sm font-medium text-brand">{value}</span>
+  > 263 │         <button
+        │         ^^^^^^^
+  > 264 │           onClick={onRemove}
+  > 265 │           disabled={isLoading}
+  > 266 │           className="p-1 text-muted hover:text-foreground transition-colors disabled:opacity-50"
+  > 267 │         >
+        │         ^
+    268 │           {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+    269 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+Checked 2 files in 11ms. No fixes applied.
+Found 5 warnings.
+biome rc 0

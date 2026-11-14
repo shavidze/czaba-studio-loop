@@ -1,0 +1,176 @@
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-502/sketch-503-v1.patch.txt	2026-11-14 02:56:46.208151400 +0000
++++ /home/runner/czaba-project/tmp/studio-real-loop/b-round-502/sketch-503-v2.patch.txt	2026-11-14 03:07:11.787948118 +0000
+@@ -24,10 +24,10 @@
+            </Link>
+ diff --git a/app/lib/__tests__/store-button-cleanup-2b3.test.tsx b/app/lib/__tests__/store-button-cleanup-2b3.test.tsx
+ new file mode 100644
+-index 0000000..e117cb2
++index 0000000..a17e8bf
+ --- /dev/null
+ +++ b/app/lib/__tests__/store-button-cleanup-2b3.test.tsx
+-@@ -0,0 +1,334 @@
++@@ -0,0 +1,349 @@
+ +import { readFileSync } from 'node:fs';
+ +import { join } from 'node:path';
+ +import { cleanup, render, screen, within } from '@testing-library/react';
+@@ -143,6 +143,25 @@
+ +const HEAD_SHOWCASE_TAG =
+ +  '<Link\n  to="/store"\n  className="inline-flex items-center gap-2 rounded-full bg-brand px-8 py-4 font-semibold text-background transition-[background-color,transform] duration-200 hover:bg-brand-hover hover:[transform:scale(1.05)] active:[transform:scale(0.98)]"\n>';
+ +
+++const UPGRADE_CASES: Array<[PurchasedVersion, string]> = [
+++  ['universal', 'Standard'],
+++  ['standard', 'Standard'],
+++];
+++const NO_UPGRADE_CASES: Array<[PurchasedVersion, string]> = [
+++  ['premium', 'Standard'],
+++  [null, 'Standard'],
+++  ['standard', 'Premium'],
+++];
+++const NO_SCENE_CASES: Array<[string, number]> = [
+++  ['Standard', 1],
+++  ['Universal', 0],
+++];
+++
+++function requireElement(node: Node | undefined): Element {
+++  if (!(node instanceof Element)) throw new Error('expected an element');
+++  return node;
+++}
+++
+ +function cartWith(variantTitle: string): Cart {
+ +  return {
+ +    id: 1,
+@@ -239,33 +258,30 @@
+ +    expect(buildButtonClassName({ size: 'lg', shape: 'pill' })).toBe(PRIMARY_LG_PILL);
+ +  });
+ +
+-+  it.each([
+-+    ['universal', 'Standard'],
+-+    ['standard', 'Standard'],
+-+  ] as const)('B2B3-1: cart Upgrade is a primary sm 44 px link when the buyer owns %s', (owned, variant) => {
+++  it.each(
+++    UPGRADE_CASES,
+++  )('B2B3-1: cart Upgrade is a primary sm 44 px link when the buyer owns %s', (owned, variant) => {
+ +    state.cart = cartWith(variant);
+ +    state.purchased = [{ handle: 'stub-track', versionType: owned }];
+ +    render(<CartPage />);
+ +    const links = screen.getAllByRole('link', { name: 'Upgrade' });
+ +    expect(links).toHaveLength(1);
+-+    const upgrade = links[0];
+-+    expect(upgrade?.getAttribute('href')).toBe('/products/stub-track?upgrade=premium');
+-+    expect(upgrade?.className).toBe(PRIMARY_SM_UPGRADE);
+-+    expect(classTokens(upgrade as Element)).not.toContain('text-black');
+-+    const nodes = [...(upgrade?.childNodes ?? [])].filter(
+++    const upgrade = requireElement(links[0]);
+++    expect(upgrade.getAttribute('href')).toBe('/products/stub-track?upgrade=premium');
+++    expect(upgrade.className).toBe(PRIMARY_SM_UPGRADE);
+++    expect(classTokens(upgrade)).not.toContain('text-black');
+++    const nodes = [...upgrade.childNodes].filter(
+ +      (node) => node.nodeType !== Node.TEXT_NODE || node.textContent?.trim(),
+ +    );
+ +    expect(nodes).toHaveLength(2);
+ +    expect(nodes[0]?.nodeName.toLowerCase()).toBe('svg');
+-+    expect(classTokens(nodes[0] as Element)).toEqual(expect.arrayContaining(['w-4', 'h-4']));
+++    expect(classTokens(requireElement(nodes[0]))).toEqual(expect.arrayContaining(['w-4', 'h-4']));
+ +    expect(nodes[1]?.textContent?.trim()).toBe('Upgrade');
+ +  });
+ +
+-+  it.each([
+-+    ['premium', 'Standard'],
+-+    [null, 'Standard'],
+-+    ['standard', 'Premium'],
+-+  ] as const)('B2B3-2: cart shows no Upgrade link when the buyer owns %s and buys %s', (owned, variant) => {
+++  it.each(
+++    NO_UPGRADE_CASES,
+++  )('B2B3-2: cart shows no Upgrade link when the buyer owns %s and buys %s', (owned, variant) => {
+ +    state.cart = cartWith(variant);
+ +    state.purchased = [{ handle: 'stub-track', versionType: owned }];
+ +    render(<CartPage />);
+@@ -298,10 +314,9 @@
+ +    expect(scene.children).toHaveLength(0);
+ +  });
+ +
+-+  it.each([
+-+    ['Standard', 1],
+-+    ['Universal', 0],
+-+  ] as const)('B2B3-4: recordings shows no "Create a scene" for a %s catalogue with %i recordings', async (licenseType, count) => {
+++  it.each(
+++    NO_SCENE_CASES,
+++  )('B2B3-4: recordings shows no "Create a scene" for a %s catalogue with %i recordings', async (licenseType, count) => {
+ +    state.catalog = {
+ +      productId: 1,
+ +      productTitle: 'Stub Catalogue',
+@@ -327,7 +342,7 @@
+ +    if (!section) throw new Error('showcase section missing');
+ +    const links = within(section).getAllByRole('link', { name: 'Browse the Collection' });
+ +    expect(links).toHaveLength(1);
+-+    const browse = links[0] as Element;
+++    const browse = requireElement(links[0]);
+ +    expect(browse.getAttribute('href')).toBe('/store');
+ +    expect(browse.className).toBe(PRIMARY_LG_PILL);
+ +    expect(classTokens(browse).filter((token) => token.includes('scale'))).toEqual([]);
+@@ -338,11 +353,11 @@
+ +    expect(children[1]?.tagName.toLowerCase()).toBe('svg');
+ +  });
+ +
+-+  it('B2B3-6: the three stage-2b-3 files keep no hand-rolled solid brass Link, a or button', () => {
+++  it('B2B3-6: the three stage-2b-3 files keep no hand-rolled solid brass Link, a or button and call the builder', () => {
+ +    for (const file of STAGE_2B3_FILES) {
+ +      const source = readFileSync(join(APP_ROOT, file), 'utf8');
+ +      expect(handRolledBrassActions(source), file).toEqual([]);
+-+      expect(source.split('buildButtonClassName(').length - 1, file).toBe(1);
+++      expect(source.split('buildButtonClassName(').length - 1, file).toBeGreaterThanOrEqual(1);
+ +    }
+ +  });
+ +
+@@ -407,10 +422,10 @@
+            Create a scene
+          </Link>
+ diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+-index b087f69..73d5e1a 100644
++index b087f69..605df8b 100644
+ --- a/docs/design/DESIGN_SYSTEM.md
+ +++ b/docs/design/DESIGN_SYSTEM.md
+-@@ -1153,8 +1153,8 @@ Store-ში ღილაკის სამიზნე წყაროა `But
++@@ -1153,10 +1153,10 @@ Store-ში ღილაკის სამიზნე წყაროა `But
+  
+  | Shape | Class | გამოყენება |
+  |-------|-------|------------|
+@@ -419,7 +434,10 @@
+ +| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), შეტყობინების შიგნით მოქმედება (cart-ის „Upgrade“, `sm`, `min-h-11`), Studio |
+ +| `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“, free downloads-ის „Download“, recordings-ის „Create a scene“ (`md`, `min-h-11`), მთავარი გვერდის Studio showcase-ის „Browse the Collection“) |
+  
+- `shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებსა და Store-ის ფორმის submit-ზე 8px.
++-`shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებსა და Store-ის ფორმის submit-ზე 8px.
+++`shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებზე, Store-ის ფორმის submit-ზე და შეტყობინების შიგნით მოქმედებაზე (cart-ის „Upgrade“) 8px.
++ 
++ #### `buildButtonClassName`
+  
+ diff --git a/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md b/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md
+ index 03c9dd0..4c76152 100644
+@@ -436,7 +454,7 @@
+  ## კონტექსტი
+ diff --git a/docs/implementation/2026/quarter-IV/324-dpg-button-cleanup-stage-2b-3.md b/docs/implementation/2026/quarter-IV/324-dpg-button-cleanup-stage-2b-3.md
+ new file mode 100644
+-index 0000000..68b2d09
++index 0000000..7d55a00
+ --- /dev/null
+ +++ b/docs/implementation/2026/quarter-IV/324-dpg-button-cleanup-stage-2b-3.md
+ @@ -0,0 +1,75 @@
+@@ -463,7 +481,7 @@
+ +  - „Browse the Collection“: primary `lg` `pill`, Hero-ს CTA-ის მსგავსად. framer-motion wrapper უცვლელია.
+ +- **ისრის მოძრაობა:** product-designer-ის არჩევითი `group-hover:translate-x-1` არ დაემატა. ის ახალი hover მოძრაობაა და ამ ეტაპის საჭიროება არ არის (PD-R502-SHOWCASE-ARROW-NUDGE).
+ +- **Deviation-ები** (ზომები: `b-round-502/probe/head.out`, `b-round-502/probe/sketch.out`):
+-+  - D1 „Upgrade“: სიმაღლე 32-დან 44px, ტექსტი შავიდან `text-background`-ზე (`rgb(14, 13, 12)`), weight 500-დან 600, radius 4-დან 8px, hover `bg-brand/90`-დან `bg-brand-hover`. ემატება `shadow-sm` და დაჭერისას opacity 0.9. 1440 და 1280 სიგანეზე შეტყობინების ბლოკი 64-დან 70px-მდე იზრდება, 375-ზე სიმაღლე (168px) უცვლელია. contrast: 9 იყო, ახლა 8.32 (hover 10.28).
+++  - D1 „Upgrade“: სიმაღლე 32-დან 44px, ტექსტი შავიდან `text-background`-ზე (`rgb(14, 13, 12)`), weight 500-დან 600, radius 4-დან 8px, hover `bg-brand/90`-დან `bg-brand-hover`. ემატება `shadow-sm` და დაჭერისას opacity 0.9. 1440 და 1280 სიგანეზე შეტყობინების ბლოკი 64-დან 70px-მდე იზრდება, item card-იც 219-დან 225px-მდე; 375-ზე სიმაღლეები (შეტყობინება 168px, card 323px) უცვლელია. contrast: 9 იყო, ახლა 8.32 (hover 10.28).
+ +  - D2 „Create a scene“: radius 12px-დან pill-მდე, padding `0 16px`-დან `10px 16px`-მდე. ზომა 131×44 უცვლელია. ემატება `shadow-sm` და დაჭერისას opacity 0.9.
+ +  - D3 „Browse the Collection“: 257×58-დან 241×48-მდე, padding `16px 32px`-დან `12px 24px`-მდე. hover-ის `scale(1.05)` და დაჭერის `scale(0.98)` აღარ არის, რადგან `<Link>`-ს `<button>`-ის `:active` scale არ აქვს (SIG-R496-LINK-NO-PRESS-SCALE). ეს DPG-INTERACTION-FIX-საც ემსახურება. ემატება `shadow-sm` და დაჭერისას opacity 0.9. showcase სექცია 1440-ზე 1454-დან 1445px-მდე მცირდება, 375-ზე 1713-დან 1703px-მდე.
+ +- **უცვლელი:** ტექსტი, icon-ები, `href`, tab-ის რიგი და keyboard focus ring (`:focus-visible`, solid, offset 2px), როგორც HEAD-ზე.
+@@ -493,7 +511,7 @@
+ +- **Problem:** `buildButtonClassName` class-ებს არ აერთიანებს, ამიტომ `className`-ით radius-ის ან padding-ის გადაფარვა stylesheet-ის რიგზეა დამოკიდებული. → **Solution:** `className` ამატებს მხოლოდ იმას, რასაც builder არ აყენებს (`min-h-11`, `shrink-0`, `mb-6`).
+ +- **Problem:** მთავარ გვერდზე „Browse the Collection“ ორჯერ ჩანს (ProductSection-ის „view all“ ლინკიც ასე ჰქვია). → **Solution:** ტესტი და browser probe ლინკს showcase სექციაში ეძებს („Only at CZABA“).
+ +- **Problem:** cart-ისა და recordings-ის ღილაკი მხოლოდ შესული მომხმარებლისთვის და backend-ის მონაცემით ჩანს, cloud-ში კი backend არ არის. → **Solution:** jsdom-ში hook-ები და API client mock-ით არის ჩანაცვლებული, browser probe კი `page.route`-ით მონაცემს აბრუნებს (client path).
+-+- **Problem:** class string-ის ტესტები შეიძლება builder-ს დაეყრდნოს და ვერაფერი დაიჭიროს. → **Solution:** B2B3-0 ამოწმებს, რომ სამი literal oracle builder-ის output-ს უდრის. B2B3-1…B2B3-5 სამ ადგილს DOM-ში რენდერავს და class-ს, `href`-ს, ტექსტს და icon-ის რიგს ამოწმებს; B2B3-2 და B2B3-4 იმ მდგომარეობებს, სადაც ლინკი არ უნდა ჩანდეს. B2B3-6 სამ ფაილს brace-aware tag scanner-ით კითხულობს, B2B3-7 კი scanner-ს HEAD-ის სამ ფორმაზე ამოწმებს. B-ის mutant-ები `b-round-502/mutants-503.txt`-შია.
+++- **Problem:** class string-ის ტესტები შეიძლება builder-ს დაეყრდნოს და ვერაფერი დაიჭიროს. → **Solution:** B2B3-0 ამოწმებს, რომ სამი literal oracle builder-ის output-ს უდრის. B2B3-1…B2B3-5 სამ ადგილს DOM-ში რენდერავს და class-ს, `href`-ს, ტექსტს და icon-ის რიგს ამოწმებს; B2B3-2 და B2B3-4 იმ მდგომარეობებს, სადაც ლინკი არ უნდა ჩანდეს. B2B3-6 სამ ფაილს brace-aware tag scanner-ით კითხულობს, B2B3-7 კი scanner-ს HEAD-ის სამ ფორმაზე და `onClick={() => …}`-იან tag-ზე ამოწმებს. B-ის mutant-ები `b-round-502/mutants-503.txt`-შია.
+ +
+ +## ტესტირება
+ +
