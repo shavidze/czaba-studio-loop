@@ -695,6 +695,29 @@ Reference: Ableton, Logic Pro, Splice all show their splash for at least 1–2 s
 - Updated `EntranceCover.tsx` — ENTRANCE_MIN_TOTAL_MS: 1450→4000, ENTRANCE_MAX_TOTAL_MS: 1900→5000 (Saba: "4-5 წამზე")
 - Font decision (Saba delegated): **Instrument Sans for everything** (headlines weight 700, body 400). No Playfair Display.
 
+### Third gate result (2026-11-14, post P0+P1)
+- **Design Philosopher:** 6.7/10 (+1.5 from 5.2)
+- **Product Designer:** 5.5/10 (+0.5 from 5.0)
+
+**Trend: 3.5/4.0 → 5.2/5.0 → 6.7/5.5 — improving but not fast enough on product-designer side.**
+
+**Root decisions (2026-11-14):**
+- Font: Instrument Sans everywhere. Remove Playfair Display font files (dead weight). Remove --font-serif alias (maps to same sans-serif).
+- StudioMockup neutral-* classes: KEEP as-is (decorative illustration of a separate "app")
+- Hero CTA pill: add `pill` prop to Button.tsx when migrating
+
+**Third review findings (NEW, add to remaining DPG-FIX):**
+- btn-secondary does not exist — 404 page has unstyled CTA (broken)
+- CookieConsent: bg-white text-black (off-brand), pure black background (never #000000 per design system)
+- --premium-gold in utilities.css ≠ --color-brand — dual gold
+- Shadow tokens hsl(220) cold blue — needs warm base hsl(30)
+- Skeleton shimmer hsl(220) — needs warm tones
+- Playfair Display .woff2 files shipped but never used — remove
+- --font-serif token misleading (maps to sans-serif) — remove alias, replace all font-serif classes
+- DESIGN_SYSTEM.md claims "10/10 Complete" in status table — false
+- PremiumProductCard.tsx and store.tsx have stale Playfair comments
+- VideoUploadZone/DownloadDialog use green-500/red-500 instead of semantic tokens
+
 **New findings from second review (add to DPG-FIX remaining):**
 - StudioTrack.tsx line 155: `progressColor: 'hsl(175, 85%, 46%)'` — ONE teal leak in Studio (frozen file exception needed or fix)
 - Footer.tsx still `<a href>` not `<Link>` — loop says done but code shows otherwise
