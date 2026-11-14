@@ -1,0 +1,234 @@
+diff --git a/app/components/home/SpecialOffersSection.tsx b/app/components/home/SpecialOffersSection.tsx
+index c532727..6c4303e 100644
+--- a/app/components/home/SpecialOffersSection.tsx
++++ b/app/components/home/SpecialOffersSection.tsx
+@@ -1,5 +1,6 @@
+ import { Link } from '@remix-run/react';
+ import { Gift, Percent } from 'lucide-react';
++import { buildButtonClassName } from '~/components/ui';
+ import { PageContainer } from '../layout';
+ 
+ export function SpecialOffersSection() {
+@@ -36,7 +37,11 @@ export function SpecialOffersSection() {
+               </p>
+               <Link
+                 to="/gift-cards"
+-                className="w-fit cursor-pointer rounded-lg border border-outline bg-elevated px-6 py-3 font-medium transition-colors hover:border-outline-hover hover:bg-outline"
++                className={buildButtonClassName({
++                  variant: 'secondary',
++                  size: 'lg',
++                  className: 'w-fit',
++                })}
+               >
+                 Browse Gift Cards
+               </Link>
+@@ -64,7 +69,11 @@ export function SpecialOffersSection() {
+               </p>
+               <Link
+                 to="/store"
+-                className="w-fit cursor-pointer rounded-lg border border-outline bg-elevated px-6 py-3 font-medium transition-colors hover:border-outline-hover hover:bg-outline"
++                className={buildButtonClassName({
++                  variant: 'secondary',
++                  size: 'lg',
++                  className: 'w-fit',
++                })}
+               >
+                 View Collection
+               </Link>
+diff --git a/app/components/marketing/LeadMagnetPopup.tsx b/app/components/marketing/LeadMagnetPopup.tsx
+index cb98901..5a8ba3f 100644
+--- a/app/components/marketing/LeadMagnetPopup.tsx
++++ b/app/components/marketing/LeadMagnetPopup.tsx
+@@ -1,6 +1,6 @@
+ import { X } from 'lucide-react';
+ import { useEffect, useId, useRef, useState } from 'react';
+-import { Button } from '~/components/ui';
++import { Button, IconButton } from '~/components/ui';
+ import { useLeadMagnet, useScrollLock } from '~/hooks';
+ 
+ interface LeadMagnetPopupProps {
+@@ -146,15 +146,17 @@ export function LeadMagnetPopup({ isLoggedIn }: LeadMagnetPopupProps) {
+       className="fixed inset-0 bg-background z-[9999] flex items-center justify-center animate-fade-in"
+     >
+       {/* Close Button */}
+-      <button
++      <IconButton
+         ref={closeButtonRef}
+         type="button"
++        variant="ghost"
++        size="lg"
++        label="Close"
+         onClick={close}
+-        className="absolute top-6 right-6 text-foreground/60 hover:text-foreground transition-colors cursor-pointer"
+-        aria-label="Close"
++        className="absolute top-4 right-4"
+       >
+-        <X size={32} />
+-      </button>
++        <X size={24} />
++      </IconButton>
+ 
+       {/* Content Container */}
+       <div className="w-full px-6 flex flex-col items-center">
+diff --git a/app/lib/__tests__/store-button-cleanup-2e.test.tsx b/app/lib/__tests__/store-button-cleanup-2e.test.tsx
+index dbd39a7..33091f9 100644
+--- a/app/lib/__tests__/store-button-cleanup-2e.test.tsx
++++ b/app/lib/__tests__/store-button-cleanup-2e.test.tsx
+@@ -135,11 +135,12 @@ describe('DPG-BUTTON-CLEANUP-2 stage 2e: LeadMagnet actions on Button (keep-list
+     expect(leadMagnetMock.close).toHaveBeenCalledTimes(1);
+   });
+ 
+-  it('B2E-6: source pins: the Close icon is the only hand-rolled <button>, three <Button> actions, no brass or red fill literal, copy kept', () => {
++  it('B2E-6: source pins: no hand-rolled <button>, one <IconButton> Close, three <Button> actions, no brass or red fill literal, copy kept', () => {
+     const source = readFileSync(join(APP_ROOT, POPUP_PATH), 'utf8');
+-    expect((source.match(/<button\b/g) ?? []).length).toBe(1);
++    expect((source.match(/<button\b/g) ?? []).length).toBe(0);
++    expect((source.match(/<IconButton\b/g) ?? []).length).toBe(1);
+     expect((source.match(/<Button\b/g) ?? []).length).toBe(3);
+-    expect(source).toContain("import { Button } from '~/components/ui';");
++    expect(source).toContain("import { Button, IconButton } from '~/components/ui';");
+     expect(source).not.toMatch(/\bbg-brand\b/);
+     expect(source).not.toMatch(/\bbg-destructive\b/);
+     for (const copy of [
+diff --git a/app/lib/__tests__/store-button-cleanup-n4.test.tsx b/app/lib/__tests__/store-button-cleanup-n4.test.tsx
+new file mode 100644
+index 0000000..1f54f16
+--- /dev/null
++++ b/app/lib/__tests__/store-button-cleanup-n4.test.tsx
+@@ -0,0 +1,136 @@
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { cleanup, fireEvent, render, screen } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { SpecialOffersSection } from '~/components/home/SpecialOffersSection';
++import { LeadMagnetPopup } from '~/components/marketing/LeadMagnetPopup';
++import { buildButtonClassName, IconButton } from '~/components/ui';
++import { APP_ROOT } from './helpers/style-scan';
++
++type LeadMagnetFixtureStep = 'offer' | 'email' | 'success';
++
++const leadMagnetMock = vi.hoisted(() => {
++  const state: {
++    shouldShow: boolean;
++    currentStep: 'offer' | 'email' | 'success';
++    isSubmitting: boolean;
++    error: string | null;
++  } = { shouldShow: true, currentStep: 'offer', isSubmitting: false, error: null };
++  return {
++    state,
++    close: vi.fn(() => undefined),
++    setStep: vi.fn((_step: 'offer' | 'email' | 'success') => undefined),
++    submitEmail: vi.fn(async (_email: string) => undefined),
++  };
++});
++
++vi.mock('~/hooks', async () => {
++  const actual =
++    await vi.importActual<typeof import('~/hooks/useScrollLock')>('~/hooks/useScrollLock');
++  return {
++    useScrollLock: actual.useScrollLock,
++    useLeadMagnet: () => ({
++      ...leadMagnetMock.state,
++      close: leadMagnetMock.close,
++      setStep: leadMagnetMock.setStep,
++      submitEmail: leadMagnetMock.submitEmail,
++    }),
++  };
++});
++
++vi.mock('@remix-run/react', () => ({
++  Link: ({ children, to, className }: { children: ReactNode; to: string; className?: string }) => (
++    <a href={to} className={className}>
++      {children}
++    </a>
++  ),
++}));
++
++const OFFERS_PATH = 'components/home/SpecialOffersSection.tsx';
++const OFFER_LINK_CLASS = buildButtonClassName({
++  variant: 'secondary',
++  size: 'lg',
++  className: 'w-fit',
++});
++const OFFER_LINKS: ReadonlyArray<{ name: string; href: string }> = [
++  { name: 'Browse Gift Cards', href: '/gift-cards' },
++  { name: 'View Collection', href: '/store' },
++];
++
++function referenceCloseClass(): string {
++  const view = render(
++    <IconButton variant="ghost" size="lg" label="Reference" className="absolute top-4 right-4">
++      <span />
++    </IconButton>,
++  );
++  const className = screen.getByRole('button', { name: 'Reference' }).className;
++  view.unmount();
++  return className;
++}
++
++describe('DPG-BUTTON-CLEANUP-2-NONBRAND stage N4: Home special offers and LeadMagnet Close', () => {
++  beforeEach(() => {
++    vi.clearAllMocks();
++    leadMagnetMock.state.shouldShow = true;
++    leadMagnetMock.state.currentStep = 'offer';
++    leadMagnetMock.state.isSubmitting = false;
++    leadMagnetMock.state.error = null;
++    vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
++  });
++
++  afterEach(() => {
++    cleanup();
++    vi.restoreAllMocks();
++  });
++
++  it('N4-1: both special-offer links use the secondary lg Button class with w-fit, keep their text and targets', () => {
++    render(<SpecialOffersSection />);
++    expect(screen.getAllByRole('link')).toHaveLength(OFFER_LINKS.length);
++    for (const { name, href } of OFFER_LINKS) {
++      const link = screen.getByRole('link', { name });
++      expect(link.getAttribute('href')).toBe(href);
++      expect(link.className).toBe(OFFER_LINK_CLASS);
++    }
++  });
++
++  it('N4-2: source pins: two buildButtonClassName calls, no hand-rolled link chrome, keep-list copy kept', () => {
++    const source = readFileSync(join(APP_ROOT, OFFERS_PATH), 'utf8');
++    expect((source.match(/buildButtonClassName\(/g) ?? []).length).toBe(2);
++    expect((source.match(/<Link\b/g) ?? []).length).toBe(2);
++    expect(source).toContain("import { buildButtonClassName } from '~/components/ui';");
++    expect(source).not.toContain('font-medium transition-colors');
++    expect(source).not.toMatch(/<Link\b[^>]*className="/);
++    for (const copy of [
++      'Gift Cards',
++      'Give the Gift of Sound',
++      'Browse Gift Cards',
++      'Exclusive',
++      'The Complete Collection',
++      'View Collection',
++    ]) {
++      expect(source).toContain(copy);
++    }
++  });
++
++  it.each<LeadMagnetFixtureStep>([
++    'offer',
++    'email',
++    'success',
++  ])('N4-3: on the %s step Close is one ghost lg IconButton in the compensated corner and closes the popup', (step) => {
++    const expectedClass = referenceCloseClass();
++    leadMagnetMock.state.currentStep = step;
++    render(<LeadMagnetPopup isLoggedIn={false} />);
++    const closeButtons = screen.getAllByRole('button', { name: 'Close' });
++    expect(closeButtons).toHaveLength(1);
++    const closeButton = closeButtons[0];
++    expect(document.activeElement).toBe(closeButton);
++    expect(closeButton.className).toBe(expectedClass);
++    expect(closeButton.getAttribute('type')).toBe('button');
++    expect(closeButton.getAttribute('title')).toBe('Close');
++    const glyph = closeButton.querySelector('svg');
++    expect(glyph?.getAttribute('width')).toBe('24');
++    fireEvent.click(closeButton);
++    expect(leadMagnetMock.close).toHaveBeenCalledTimes(1);
++  });
++});

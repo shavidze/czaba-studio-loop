@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-14T13:15:15.246Z",
-  "current_task": "Round 514: cookie banner focus return + Close overlap on HEAD 4c85587: git apply b-round-513/sketch-514.patch.txt (focus returns to the element focused before the banner, else header logo, else first header link; keyboard focus(), pointer preventScroll; Close IconButton md 40 px, X 20, text px-10 below sm; rows R514-F1..F8, N3-3 updated); doc 332. C verifies on a GA4-env dev server.",
+  "_generatedUtc": "2026-11-14T14:15:06.480Z",
+  "current_task": "Round 515: cookie banner follow-up on HEAD b7cb61f: git apply b-round-514/sketch-515.patch.txt (pointer dismissal skips keyboard-opening fields -> header logo, preventScroll; select/checkbox/contenteditable=false returnable; onBlur clears the stored element when focus leaves the banner; rows R515-T1..T7, F8 BODY pin); new doc 333. C verifies on a GA4-env dev server.",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6874,7 +6874,10 @@
         "B-R488-SAFARI-MENU-SETTLE-FOCUS"
       ],
       "evidence": "retros/retro-480.md §8",
-      "added": "2026-11-12 B round 479 -> 480 planning (RETRO 480)"
+      "added": "2026-11-12 B round 479 -> 480 planning (RETRO 480)",
+      "confirmedBy": [
+        "round 515 adds the C-R514-01 Safari/iOS half: enter the cookie banner from A, Tab out, click empty space, tap Accept -> focus on the header logo, not A (D-29z1870)"
+      ]
     },
     {
       "id": "HIREUS-EMAIL-CLIENTS",
@@ -6919,7 +6922,10 @@
         "TLM-R468-SABA-SCROLL-DEVICE (closes SABA-B-15)"
       ],
       "note": "members (D-29z1846): TLM-R468-SABA-SCROLL-DEVICE (SABA-B-15), TLM-R485-SR-ROUTE-ANNOUNCE, TLM-R489-SABA-ENTRANCE-FEEL, TLM-R489-TOUCH-SWIPE, TLM-R491-PHONE-NAME-EDITOR; TLM-R492-SR-PASSWORD-DIALOG joins if unanswered at RETRO 525 | TLM-R485-SR-ROUTE-ANNOUNCE, TLM-R489-SABA-ENTRANCE-FEEL, TLM-R489-TO …[see backlog.json]",
-      "evidence": "retros/retro-495.md section 8"
+      "evidence": "retros/retro-495.md section 8",
+      "confirmedBy": [
+        "round 515 adds TLM-R515-PHONE-KEYBOARD: on a real phone, type in the newsletter email field, tap Accept on the cookie banner -> the on-screen keyboard stays closed (D-29z1870)"
+      ]
     },
     {
       "id": "PD-R496-PRIMARY-TEXT-TOKEN",
@@ -7173,7 +7179,7 @@
       "id": "DPG-BUTTON-CLEANUP-2-NONBRAND",
       "severity": "medium",
       "origin": "B spec",
-      "status": "in_progress (D-29z1866): N1 (round 508), N2 PurchaseHeader (rounds 511+512) and N3 cookie banner (C round 513 PASS, browserVerified true, published 4c85587) are C-verified; N4-N9 and the StemsPlayerModal pair remain; round 514 fixes two pre-existing banner Mediums before N4",
+      "status": "in_progress (D-29z1871): N1 (round 508), N2 PurchaseHeader (rounds 511+512) and N3 cookie banner (round 513, published 4c85587) are C-verified; rounds 514-515 fix banner focus bugs; next stage N4 Home (SpecialOffers x2 + LeadMagnet Close X) after REGRESSION 2026-11-16 if due; N5-N9 and the StemsPlay …[see backlog.json]",
       "title": "Hand-rolled controls without a brand fill bypass Button.tsx (Saba DPG item 7): whole-tag scan 58 tags / 29 files at 3021b30 + LeadMagnet Close X + 3 scanner misses; 29 to Button/IconButton, 28 keep, 2 root",
       "evidence": "b-round-506/scan-nonbrand-head.json (58); b-round-506/consult-product-designer.md (rulings, stages); b-round-497/other-handrolled-count.txt (old record 30/18)",
       "added": "2026-11-13 B round 497 -> 498 planning",
@@ -7183,17 +7189,10 @@
       "status_history_d29z1865": "in_progress (D-29z1860, D-29z1862): N1 (round 508, cf89736) and N2 PurchaseHeader (rounds 511+512, C round 512 PASS, browserVerified true, published cbc5709) are C-verified; round 513 = N3 cookie banner; N4-N9 and the StemsPlayerModal pair remain | in_progress (D-29z1856): N2 PurchaseHeader code ver …[see backlog.json]",
       "status_history_d29z1866": [
         "in_progress (D-29z1860, D-29z1862, D-29z1865): N1 (round 508, cf89736) and N2 PurchaseHeader (rounds 511+512, published cbc5709) are C-verified; round 513 = N3 cookie banner; N4-N9 and the StemsPlayerModal pair remain. Old status chain moved to status_history_d29z1865 so the optimizer substring matc …[see backlog.json]"
+      ],
+      "status_history_d29z1871": [
+        "in_progress (D-29z1866): N1 (round 508), N2 PurchaseHeader (rounds 511+512) and N3 cookie banner (C round 513 PASS, browserVerified true, published 4c85587) are C-verified; N4-N9 and the StemsPlayerModal pair remain; round 514 fixes two pre-existing banner Mediums before N4"
       ]
-    },
-    {
-      "id": "B-R512-COOKIE-DISMISS-FOCUS-LOST",
-      "severity": "medium",
-      "origin": "pre-existing",
-      "added": "2026-11-14 B round 512 -> 513 planning",
-      "title": "Cookie banner: after Enter on Decline or Accept (or a tap on Close) the banner unmounts and focus falls to body; the next Tab starts at the page top (CZABA logo link). Pre-existing at HEAD cbc5709, unchanged by N3",
-      "evidence": "b-round-512/probe/head/n3.json and sketch/n3.json actions[*].focusAfter = BODY, firstTabAfter = \"CZABA\" at 1440/1280/375; product-designer consult (Medium, pre-existing)",
-      "repro": "node b-round-512/probe/n3-banner.mjs <GA4-env base> <dir>",
-      "status": "dispatched round 514 (D-29z1868): focus returns to the element focused before the banner (keyboard: focus(), pointer: preventScroll), else header logo, else first header link; product-designer ruling b-round-513/consult-product-designer*.md | open (D-29z1864, D-29z1865): scheduled round 514 together …[see backlog.json]"
     },
     {
       "id": "DPG2-OFF-PALETTE",
@@ -7246,35 +7245,47 @@
       "status": "open (D-29z1863): DPG-FONT-RESOLVE (input D-29z1707); docs grant in that round"
     },
     {
-      "id": "B-R512-COOKIE-CLOSE-OVERLAPS-TEXT",
-      "severity": "medium",
-      "origin": "pre-existing",
-      "added": "2026-11-14 B round 512 -> 513 planning",
-      "title": "Cookie banner at 375 px: the mobile Close X (absolute top-2 right-2) sits on the end of the first text line and covers the \"Privacy\" link glyphs; the X and the link tap targets collide. Same at HEAD (34x34) and on the N3 sketch (32x32)",
-      "evidence": "b-round-512/probe/head/banner-375.png, probe/sketch/banner-375.png; probe/*/n3.json rest 375 (text box right 359, Close x 333/335, y 696/698)",
-      "repro": "node b-round-512/probe/n3-banner.mjs <GA4-env base> <dir>; open banner-375.png",
-      "status": "dispatched round 514 (D-29z1868): Close IconButton md 40 px with X 20, text px-10 below sm; B probe: no overlap at 320/375/639, 1280/1440 boxes equal to HEAD | open (D-29z1865): round 514 with B-R512-COOKIE-DISMISS-FOCUS-LOST (same banner, same file; at most 3 related bugs); product-designer row \"X  …[see backlog.json]",
-      "confirmedBy": [
-        "gates/round-513/review.md finding 1: Close is 32 px, below the 44 px touch guideline; round 514 makes it md 40 px (D-29z1867)"
-      ]
-    },
-    {
       "id": "SABA-Q-513-CLOSE-AS-DECLINE",
       "severity": "info",
       "status": "awaiting_user (D-29z1867): question in user-review/questions",
       "title": "Cookie banner: the mobile Close X (label \"Close\") silently records a decline. Keep, relabel (\"Declin"
+    },
+    {
+      "id": "GATE514-M1-POINTER-FIELD-KEYBOARD",
+      "severity": "medium",
+      "origin": "gate reviewer",
+      "added": "2026-11-14 B round 514 -> 515 planning",
+      "title": "Cookie banner: after a pointer/tap dismissal, focus returns to a previously focused text field, which on iOS/Android reopens the on-screen keyboard although the user only tapped Accept",
+      "evidence": "gates/round-514/review.md finding 1; B browser probe b-round-514/probe/head/r515.json P1 (375 and 1280: activeElement = the newsletter email INPUT after a pointer Accept) and P3 (/hire-us textarea)",
+      "repro": "Home at 375 or 1280 with a GA4 id: tap/click the newsletter email field, then tap/click Accept -> focus is on the email input (HEAD b7cb61f)",
+      "status": "dispatched round 515 (D-29z1871): pointer branch skips keyboard-opening fields (text-type input, textarea, contenteditable) -> header logo with preventScroll; select/checkbox/radio/range stay returnable (product-designer + tech-lead); the on-screen keyboard half is a real-device manual row TLM-R515- …[see backlog.json]"
+    },
+    {
+      "id": "C-R514-01",
+      "severity": "low",
+      "status": "dispatched round 515 (D-29z1871): the round-515 sketch addre",
+      "title": "Cookie banner: stale stored element. Enter the banner from A, Tab out to B, click empty space (BODY)"
+    },
+    {
+      "id": "A-R514-R2-HEADER-BUTTON-ROW",
+      "severity": "low",
+      "status": "dispatched round 515 (D-29z1871): row R515-T5 (mutant M5 red",
+      "title": "No test row for the `header button` focus fallback"
+    },
+    {
+      "id": "A-R514-R3-F8-BODY",
+      "severity": "low",
+      "status": "dispatched round 515 (D-29z1871): R514-F8 now asserts docume",
+      "title": "R514-F8 does not pin activeElement = BODY"
+    },
+    {
+      "id": "A-R514-SPEC-STRENGTHEN-ONLY",
+      "severity": "info",
+      "status": "ruled (D-29z1871): with a byte-pinned sketch, B puts the str",
+      "title": "L11 strengthen-only clause vs a byte-pinned sketch: A could not add rows for R2/R3 because task §2 a"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 505,
-      "task": "current-task.md",
-      "decision": "D-29z1819",
-      "type": "DPG-BUTTON-CLEANUP-2 stage 2d (/support chat: Start Chat, Send message, chat focus)",
-      "status": "C PASS (browserVerified/realVerified true; chat rows -STUBBED, CHAT-REAL-BACKEND blocked in cloud); gate 505 published d6903a7 (both remotes)",
-      "note": "baseline e3e9e49 clean; sketch b-round-504/sketch-505.patch.txt v3 sha 5c0ed195; pre-check b-round-504/precheck-*.log (full 302/4373 rc0, build rc0); mutants M1-M15 OK; probes b-round-504/probe/ (chat rows -STUBBED, focus targets, in-flight guard)",
-      "result_note": "C0-C14 PASS (c-round-505.json); A STOP CR-1 ruled Low after the fact (D-29z1823)"
-    },
     {
       "round": 506,
       "task": "current-task.md",
@@ -7346,8 +7357,16 @@
       "task": "current-task.md",
       "decision": "D-29z1868",
       "type": "Cookie banner bugs: B-R512-COOKIE-DISMISS-FOCUS-LOST + B-R512-COOKIE-CLOSE-OVERLAPS-TEXT (both Medium, same file)",
-      "status": "dispatched",
+      "status": "C PASS (browserVerified true), gate 514 published b7cb61f (D-29z1869)",
       "note": "baseline HEAD 4c85587 clean; sketch b-round-513/sketch-514.patch.txt; pins r514-tree-sha256.txt (1429), r514-pre-sha.txt, r514-post-sketch-sha.txt; claims b-round-513/claims-514.sh; browser via a GA4-env dev server"
+    },
+    {
+      "round": 515,
+      "task": "current-task.md",
+      "decision": "D-29z1871",
+      "type": "Cookie banner follow-up: GATE514-M1-POINTER-FIELD-KEYBOARD (Medium) + C-R514-01 (Low, same code) + A-R514 R2/R3 test rows",
+      "status": "dispatched",
+      "note": "baseline HEAD b7cb61f clean; sketch b-round-514/sketch-515.patch.txt; pins r515-tree-sha256.txt (1430), r515-pre-sha.txt, r515-post-sketch-sha.txt; claims b-round-514/claims-515.sh; new doc 333 (332 untouched)"
     }
   ],
   "other_keys": [
