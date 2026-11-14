@@ -686,6 +686,25 @@ Reference: Ableton, Logic Pro, Splice all show their splash for at least 1–2 s
 - **Design Philosopher:** 3.5/10 — FAIL ("identity crisis")
 - **Product Designer:** 4/10 — NOT READY
 
+### Second gate result (2026-11-14, post P0+partial P1)
+- **Design Philosopher:** 5.2/10 (+1.7)
+- **Product Designer:** 5.0/10 (+1.0)
+
+**Root applied (2026-11-14):**
+- Updated `.claude/primitives/DESIGN_TOKENS.md` — brass #C9A46A, Instrument Sans, Obsidian & Brass philosophy (was teal/orange/Playfair)
+- Updated `EntranceCover.tsx` — ENTRANCE_MIN_TOTAL_MS: 1450→4000, ENTRANCE_MAX_TOTAL_MS: 1900→5000 (Saba: "4-5 წამზე")
+- Font decision (Saba delegated): **Instrument Sans for everything** (headlines weight 700, body 400). No Playfair Display.
+
+**New findings from second review (add to DPG-FIX remaining):**
+- StudioTrack.tsx line 155: `progressColor: 'hsl(175, 85%, 46%)'` — ONE teal leak in Studio (frozen file exception needed or fix)
+- Footer.tsx still `<a href>` not `<Link>` — loop says done but code shows otherwise
+- Off-palette: pink hsl(340) in artist section, blue shimmer hsl(220), green gradient in free-downloads, --premium-gold parallel token
+- 3 parallel button systems still coexist (btn-primary, button-primary, raw styled)
+- Native `<select>` elements — no custom Select component exists
+- DESIGN_SYSTEM.md typography section still references Playfair Display/Inter — needs Instrument Sans update
+- `--color-blue-60/50/30` legacy tokens still in @theme
+- StudioMockup uses bg-neutral-800, text-neutral-400, bg-red-500 — off-palette
+
 **Root cause:** Token-level migration done (brass #c9a46a), but 100+ hardcoded teal values remain in CSS and components. Every hover, glow, animation, shadow is still teal. Two competing identities.
 
 **Saba's decision (2026-11-12):** "დაიწყოს იქამდე სანამ 10/10 არ იქნება ორივე" — iterate until BOTH agents give 10/10.
