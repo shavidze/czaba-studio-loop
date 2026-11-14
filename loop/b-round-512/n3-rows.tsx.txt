@@ -1,0 +1,98 @@
+
+describe('N3: cookie banner controls on the shared Button system', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    analyticsMock.hasDecision = false;
+    analyticsMock.setConsent.mockClear();
+    locationMock.pathname = '/';
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    Reflect.deleteProperty(window, 'fbq');
+  });
+
+  it('N3-1: Decline and Accept are secondary sm pill Buttons with identical classes', () => {
+    renderCookieConsentAt('/');
+    advanceBannerTimer(1500);
+
+    const expected = buildButtonClassName({ variant: 'secondary', size: 'sm', shape: 'pill' });
+    const decline = screen.getByRole('button', { name: 'Decline' });
+    const accept = screen.getByRole('button', { name: 'Accept' });
+
+    expect(decline.className).toBe(expected);
+    expect(accept.className).toBe(expected);
+  });
+
+  it('N3-2: the banner buttons are Decline, Accept, Close in DOM order', () => {
+    const { container } = renderCookieConsentAt('/');
+    advanceBannerTimer(1500);
+
+    const names = Array.from(container.querySelectorAll('button')).map(
+      (button) => button.getAttribute('aria-label') ?? button.textContent?.trim(),
+    );
+
+    expect(names).toEqual(['Decline', 'Accept', 'Close']);
+  });
+
+  it('N3-3: Close is a ghost sm IconButton, hidden from sm up, with a 16 px X', () => {
+    renderCookieConsentAt('/');
+    advanceBannerTimer(1500);
+
+    const close = screen.getByRole('button', { name: 'Close' });
+    const { container: reference } = render(
+      <IconButton variant="ghost" size="sm" label="Close" className="absolute top-2 right-2 sm:hidden">
+        <span />
+      </IconButton>,
+    );
+    const referenceButton = reference.querySelector('button');
+
+    expect(close.getAttribute('title')).toBe('Close');
+    expect(close.className).toBe(referenceButton?.className);
+    expect(close.className.split(' ')).toEqual(
+      expect.arrayContaining(['absolute', 'top-2', 'right-2', 'sm:hidden', 'bg-transparent', 'w-8', 'h-8']),
+    );
+    expect(close.querySelector('svg')?.getAttribute('width')).toBe('16');
+  });
+
+  it('N3-4: Close declines consent once and hides the banner', () => {
+    const { container } = renderCookieConsentAt('/');
+    advanceBannerTimer(1500);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(analyticsMock.setConsent).toHaveBeenCalledTimes(1);
+    expect(analyticsMock.setConsent).toHaveBeenCalledWith(false);
+    expect(container.innerHTML).toBe('');
+  });
+
+  it('N3-5: CookieConsent.tsx has no raw button tag and no hardcoded white, black or neutral classes', () => {
+    const source = readFileSync(resolve(process.cwd(), 'app/components/common/CookieConsent.tsx'), 'utf8');
+
+    expect(source.match(/<button\b/g) ?? []).toEqual([]);
+    expect(source.match(/\b(?:bg-white|text-black|(?:bg|text|border)-neutral-\d+)\b/g) ?? []).toEqual([]);
+  });
+
+  it('N3-6: Accept grants the Facebook Pixel consent and tracks a PageView; Decline and Close do not call fbq', () => {
+    const fbq = vi.fn();
+    Reflect.set(window, 'fbq', fbq);
+
+    renderCookieConsentAt('/');
+    advanceBannerTimer(1500);
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(fbq.mock.calls).toEqual([
+      ['consent', 'grant'],
+      ['track', 'PageView'],
+    ]);
+
+    for (const name of ['Decline', 'Close']) {
+      fbq.mockClear();
+      cleanup();
+      renderCookieConsentAt('/');
+      advanceBannerTimer(1500);
+      fireEvent.click(screen.getByRole('button', { name }));
+      expect(fbq).not.toHaveBeenCalled();
+    }
+  });
+});

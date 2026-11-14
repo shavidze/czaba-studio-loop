@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-14T10:48:11.416Z",
-  "current_task": "Round 511: DPG-BUTTON-CLEANUP-2-NONBRAND stage N2 on PurchaseHeader (Buy Now -> Button buy lg; Open in Studio and Downloads links -> secondary lg builder; CartButton motion.button aligned to rounded-md/px-6/text-base/font-semibold, colours kept as a named exception). Product byte sketch b-round-510/sketch-511-purchaseheader.patch.txt (sha de636ad4); A writes tests N2-1..N2-9 + B2C-7/B2C-8/ST5 rewrites + doc 330 per b-round-510/test-contract-511.md (RC-R510-SKETCH-SCOPE trial). PlayStems out (SIG-R473-STEMS-PLAYER-DEAD, SABA-Q-511-PLAYSTEMS-WIRE-OR-REMOVE); DESIGN_SYSTEM.md l.895/l.1174 corrected.",
+  "_generatedUtc": "2026-11-14T11:23:43.463Z",
+  "current_task": "Round 512: DPG-BUTTON-CLEANUP-2-NONBRAND N2 close-out (docs-only): git apply b-round-511/sketch-512-docs.patch.txt (sha ad47fec4) on the uncommitted round-511 tree (HEAD f5d1b9e) - DESIGN_SYSTEM.md (colour row, variant guide, Buttons sections + new Buy block), docs/design/components/button.md, ui-components.md Button section, doc 330 l.4 -> C round 512; C re-checks docs + default card, anon journey, Added pulse (record), protection + /studio-lab in the browser.",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6940,17 +6940,6 @@
       "title": "Delete dead AssetListingPage? Header Sign In as brass pill or quiet text item?"
     },
     {
-      "id": "DPG-BUTTON-CLEANUP-2-NONBRAND",
-      "severity": "medium",
-      "origin": "B spec",
-      "status": "in_progress (D-29z1852/D-29z1853): round 511 = N2 PurchaseHeader (Buy Now, Open in Studio, Downloads, CartButton shape); widened scanner 54 at HEAD; PlayStems moved out with the StemsPlayerModal pair to SIG-R473-STEMS-PLAYER-DEAD / SABA-Q-511-PLAYSTEMS-WIRE-OR-REMOVE; N3-N9 remain | in_progress (D-2 …[see backlog.json]",
-      "title": "Hand-rolled controls without a brand fill bypass Button.tsx (Saba DPG item 7): whole-tag scan 58 tags / 29 files at 3021b30 + LeadMagnet Close X + 3 scanner misses; 29 to Button/IconButton, 28 keep, 2 root",
-      "evidence": "b-round-506/scan-nonbrand-head.json (58); b-round-506/consult-product-designer.md (rulings, stages); b-round-497/other-handrolled-count.txt (old record 30/18)",
-      "added": "2026-11-13 B round 497 -> 498 planning",
-      "note_d29z1815": "includes the PurchaseHeader in-card siblings (Open in Studio, Downloads, Add to Cart, Buy Now radius) -> 8 px default shape, so the purchase card is one system again (product-designer, round 504 consult)",
-      "note_d29z1824": "includes the LeadMagnet Close X (NONBRAND per round 506); B2E-6 bans any bg-brand literal in LeadMagnetPopup.tsx (pre-ruled Low #2) - a NONBRAND change there updates B2E-6"
-    },
-    {
       "id": "PD-R498-404-SECONDARY-ALIGN",
       "severity": "low",
       "status": "scheduled (D-29z1783): own stage after DPG-BUTTON-CLEANUP-2 ",
@@ -7185,17 +7174,22 @@
       "severity": "info",
       "status": "awaiting_user (D-29z1851, L44): user-review/questions-round-",
       "title": "Round-382 ruling: Play pressed while a just-added sound decodes does not auto-start (user presses ag"
+    },
+    {
+      "id": "C511-DESIGNSYSTEM-STALE-PRIMARY-EXAMPLES",
+      "aliases": [
+        "A-R511-REVIEW-DESIGN-SYSTEM-PRIMARY-EXAMPLES"
+      ],
+      "severity": "medium",
+      "origin": "B spec",
+      "added": "2026-11-14 B round 511 -> 512 planning",
+      "status": "scheduled round 512 (D-29z1856/D-29z1857): doc-only sketch over DESIGN_SYSTEM.md, button.md, ui-components.md",
+      "title": "After N2, Button docs contradict the code: DESIGN_SYSTEM.md Usage Examples/Primary heading still show Add to Cart as variant=primary and <PrimaryButton>Buy Now; no buy block; same claim in docs/design/components/button.md and ui-components.md",
+      "evidence": "c-round-511.json bugs[0]; a-round-511.md STOP; b-round-511/claims-512-planning-output.txt K6, K15",
+      "repro": "grep -n 'variant=\"primary\" size=\"lg\">Add to Cart\\|<PrimaryButton>Buy Now' docs/design/DESIGN_SYSTEM.md"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 502,
-      "task": "current-task.md",
-      "decision": "D-29z1805",
-      "type": "cart layout: three related bugs (mobile items hidden, lg short-screen summary clipped, Lenis wheel on nested columns)",
-      "status": "C PASS (browserVerified/realVerified true, 0 bugs; cart rows -STUBBED, CART-REAL-BACKEND blocked in cloud); gate 502 published 882854e (both remotes)",
-      "note": "baseline 3bb55d4 clean; sketch b-round-501/sketch-502.patch.txt v5 sha 7d14eae2 (code = v3; two doc sentences); pre-check in b-round-501/precheck-*.log; mutants M1-M15; probes b-round-501/probe/"
-    },
     {
       "round": 503,
       "task": "current-task.md",
@@ -7270,8 +7264,16 @@
       "task": "current-task.md",
       "decision": "D-29z1852",
       "type": "NONBRAND N2 PurchaseHeader (feature stage, restyle)",
-      "status": "dispatched",
+      "status": "c_fail_unruled_stop_gate_skipped (D-29z1856): every C row PASS, browserVerified true; FAIL only for A STOP on stale DESIGN_SYSTEM examples; ruled (a) in round 512",
       "note": "baseline HEAD f5d1b9e; grants b-round-510/grants-511.txt (6, incl. DESIGN_SYSTEM.md l.895/l.1174); tree pins b-round-510/r511-tree-sha256.txt (1424); claims b-round-510/claims-511.sh K1-K20"
+    },
+    {
+      "round": 512,
+      "task": "current-task.md",
+      "decision": "D-29z1856",
+      "type": "NONBRAND N2 close-out (docs-only fix-up of round 511)",
+      "status": "dispatched",
+      "note": "baseline HEAD f5d1b9e + uncommitted round-511 tree; grants 4 docs via b-round-511/sketch-512-docs.patch.txt (sha ad47fec4); pins r512-tree-sha256.txt (1425), r512-a511-pin-sha.txt, r512-pre-sha.txt, r512-post-sketch-sha.txt; claims b-round-511/claims-512.sh K1-K17"
     }
   ],
   "other_keys": [

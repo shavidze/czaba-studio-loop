@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-14T10:48:11.416Z)
+# Active loop summary (2026-11-14T11:23:43.463Z)
 
-- backlog.json 3622 KB -> active view 318 KB
-- status: G_ROOT_GATE round 511
-- servers: `{"checkedUtc":"2026-11-14T10:29:04.3589708Z","round":511,"attempt":1,"store":200}`
-- last publication: f5d1b9e87e5cad8880cac874d85ba78086b02d3c (rounds 509-509)
-- last root gate: round 511 skipped - C taskStatus FAIL
+- backlog.json 3622 KB -> active view 317 KB
+- status: G_ROOT_GATE round 512
+- servers: `{"checkedUtc":"2026-11-14T11:11:58.2430415Z","round":512,"attempt":1,"store":200}`
+- last publication: cbc5709d96f4b40d74c1f007fb3854923441a1b0 (rounds 510-512)
+- last root gate: round 512 published - commit cbc5709d96f4b40d74c1f007fb3854923441a1b0 pushed
 
 ## Current items: -
 
@@ -27,7 +27,7 @@
 - **HIREUS-EMAIL-CLIENTS** / medium / open_tech_lead_manual (D-29z1707; does not block): blocked (D-29z1705): needs Brevo and a test send to Gmail/Outlook/Apple Mail (Saba); questions-retro-480.md Q4 / Hire-Us internal e-mail in real clients, opened as a task by L46
 - **B-R492-PASSWORD-CHANGE-NOT-IMPLEMENTED** / high / open_root (D-29z1757): needs a backend authenticated password-change endpoint and a change in protected app/lib/auth.ts (loop may not edit); question ROOT-REQ-PASSWORD-CHANGE-ENDPOINT; does not block loop rounds, blocks final COMPLETE / Account 'Change password' can never succeed: app/lib/auth.ts updatePassword verifies the current password via login, then always throws 'Pas
 - **SABA-DEVICE-CHECKS** / medium / open_tech_lead_manual (D-29z1768; does not block): opened by L46 after two RETROs without an answer (questions-retro-480.md Q1, questions-retro-495.md Q1); blocked on Saba's own device / Saba's-device checks opened as one task by L46
-- **DPG-BUTTON-CLEANUP-2-NONBRAND** / medium / in_progress (D-29z1852/D-29z1853): round 511 = N2 PurchaseHeader (Buy Now, Open in Studio, Downloads, CartButton shape); widened scanner 54 at HEAD; PlayStems moved out with the StemsPlayerModal pair to SIG-R473-STEMS-PLAYER-DEAD / SABA-Q-511-PLAYSTEMS-WIRE-OR-REMOVE; N3-N9 remain | in_progress (D-2 …[see backlog.json] / Hand-rolled controls without a brand fill bypass Button.tsx (Saba DPG item 7): whole-tag scan 58 tags / 29 files at 3021b30 + LeadMagnet Clo
 - **FREE-CHECKOUT-REAL-BACKEND** / medium / blocked_cloud (D-29z1839): backend unavailable in cloud; does not block loop rounds; blocks final COMPLETE together with PURCHASE-REAL-BACKEND / A signed-in 'Get it free' click must complete a real $0 order (Stripe may reject a $0 session; backend may need to skip Stripe) and the prod
 - **B-R509-AUTHMODAL-NOT-A-DIALOG** / medium / open, blocked_root via SYS-R495-SHARED-DIALOG (D-29z1841): AuthModal (root.tsx l.156, app/components/auth/AuthModal.tsx) should move onto the shared dialog primitive; does not block round 509 (its anonymous path matches header Buy Now at HEAD) / Sign-in AuthModal has no role=dialog/aria-modal and does not move or trap focus: after Buy Now -> Enter the trigger behind the modal keeps f
+- **C511-DESIGNSYSTEM-STALE-PRIMARY-EXAMPLES** / medium / scheduled round 512 (D-29z1856/D-29z1857): doc-only sketch over DESIGN_SYSTEM.md, button.md, ui-components.md / After N2, Button docs contradict the code: DESIGN_SYSTEM.md Usage Examples/Primary heading still show Add to Cart as variant=primary and <Pr
 - ... and 1004 Low/info (see backlog.json)
