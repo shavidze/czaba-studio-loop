@@ -1,0 +1,99 @@
+diff --git a/app/components/home/StudioShowcase.tsx b/app/components/home/StudioShowcase.tsx
+index 50387ec..5a5d7a6 100644
+--- a/app/components/home/StudioShowcase.tsx
++++ b/app/components/home/StudioShowcase.tsx
+@@ -8,6 +8,7 @@ import { Link } from '@remix-run/react';
+ import { motion } from 'framer-motion';
+ import { ArrowRight, Download, Layers, Wand2 } from 'lucide-react';
+ import { useEffect, useRef, useState } from 'react';
++import { buildButtonClassName } from '~/components/ui';
+ import { PageContainer } from '../layout';
+ import { StudioMockup } from './StudioMockup';
+ 
+@@ -150,10 +151,7 @@ export function StudioShowcase() {
+           transition={{ ...springConfig, delay: 0.7 }}
+           className="text-center"
+         >
+-          <Link
+-            to="/store"
+-            className="inline-flex items-center gap-2 rounded-full bg-brand px-8 py-4 font-semibold text-background transition-[background-color,transform] duration-200 hover:bg-brand-hover hover:[transform:scale(1.05)] active:[transform:scale(0.98)]"
+-          >
++          <Link to="/store" className={buildButtonClassName({ size: 'lg', shape: 'pill' })}>
+             <span>Browse the Collection</span>
+             <ArrowRight size={18} />
+           </Link>
+diff --git a/app/routes/cart.tsx b/app/routes/cart.tsx
+index 5467e60..1675345 100644
+--- a/app/routes/cart.tsx
++++ b/app/routes/cart.tsx
+@@ -14,7 +14,7 @@ import {
+   X,
+ } from 'lucide-react';
+ import { useMemo, useState } from 'react';
+-import { Button, ConfirmDialog, EmptyState } from '~/components/ui';
++import { Button, buildButtonClassName, ConfirmDialog, EmptyState } from '~/components/ui';
+ import { useAuth, useCart, usePurchases } from '~/hooks';
+ import { formatPrice } from '~/lib/cart-utils';
+ import type { AppliedDiscount, AppliedGiftCard, CartItem } from '~/types/cart';
+@@ -159,7 +159,7 @@ function CartItemRow({
+           </div>
+           <Link
+             to={`/products/${item.productHandle}?upgrade=premium`}
+-            className="px-3 py-1.5 bg-brand text-black text-sm font-medium rounded hover:bg-brand/90 transition-colors flex items-center gap-1.5"
++            className={buildButtonClassName({ size: 'sm', className: 'min-h-11 shrink-0' })}
+           >
+             <ArrowUp className="w-4 h-4" />
+             Upgrade
+diff --git a/app/routes/recordings.$productId.tsx b/app/routes/recordings.$productId.tsx
+index cee7b0b..d1d38b7 100644
+--- a/app/routes/recordings.$productId.tsx
++++ b/app/routes/recordings.$productId.tsx
+@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
+ import { RequireAuth } from '~/components/auth';
+ import { RecordingCatalogRow } from '~/components/recordings/RecordingCatalogRow';
+ import { SfxQuickEdit } from '~/components/recordings/SfxQuickEdit';
+-import { Button, EmptyState } from '~/components/ui';
++import { Button, buildButtonClassName, EmptyState } from '~/components/ui';
+ import { useAudio } from '~/contexts/AudioContext';
+ import { useAuth } from '~/hooks/useAuth';
+ import { type RecordingStreamGrant, useRecordingPlayer } from '~/hooks/useRecordingPlayer';
+@@ -187,7 +187,7 @@ function RecordingCatalogContent() {
+       {catalog.licenseType.toLowerCase() === 'universal' && catalog.recordings.length > 0 && (
+         <Link
+           to={`/scenes/${catalog.productId}`}
+-          className="mb-6 inline-flex min-h-11 items-center rounded-lg bg-brand px-4 text-sm font-semibold text-background hover:bg-brand-hover"
++          className={buildButtonClassName({ shape: 'pill', className: 'mb-6 min-h-11' })}
+         >
+           Create a scene
+         </Link>
+diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+index b087f69..605df8b 100644
+--- a/docs/design/DESIGN_SYSTEM.md
++++ b/docs/design/DESIGN_SYSTEM.md
+@@ -1153,10 +1153,10 @@ Store-ში ღილაკის სამიზნე წყაროა `But
+ 
+ | Shape | Class | გამოყენება |
+ |-------|-------|------------|
+-| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), Studio |
+-| `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“, free downloads-ის „Download“) |
++| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), შეტყობინების შიგნით მოქმედება (cart-ის „Upgrade“, `sm`, `min-h-11`), Studio |
++| `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“, free downloads-ის „Download“, recordings-ის „Create a scene“ (`md`, `min-h-11`), მთავარი გვერდის Studio showcase-ის „Browse the Collection“) |
+ 
+-`shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებსა და Store-ის ფორმის submit-ზე 8px.
++`shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებზე, Store-ის ფორმის submit-ზე და შეტყობინების შიგნით მოქმედებაზე (cart-ის „Upgrade“) 8px.
+ 
+ #### `buildButtonClassName`
+ 
+diff --git a/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md b/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md
+index 03c9dd0..4c76152 100644
+--- a/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md
++++ b/docs/implementation/2026/quarter-IV/323-cart-mobile-items-hidden.md
+@@ -1,7 +1,7 @@
+ # კალათის layout: სია ტელეფონზე, Order Summary დაბალ ეკრანზე და wheel scroll
+ 
+ **თარიღი:** 2026-11-14
+-**სტატუსი:** In Progress (B-R502-CART-MOBILE-ITEMS-HIDDEN, B-R502-CART-LG-SUMMARY-CLIPPED, B-R502-CART-WHEEL-NESTED-SCROLL; C round 502 PASS)
++**სტატუსი:** Completed (C round 502 PASS)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი

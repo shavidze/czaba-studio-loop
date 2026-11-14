@@ -1,0 +1,13 @@
+- step1 done: archived tasks/round-503.md (cmp0), backups in b-round-503/
+- step2: HEAD probes done (probe/head.out, head-journey.out); product-designer ruling received (to be saved consult-product-designer.md)
+- step3: sketch on /home/runner/b503-scratch (PurchaseHeader + 2c test), :5174 pid /home/runner/b503-dev.pid, mock running; probes head/sketch + journeys done; mutants M1-M12 run
+- step4: backlog v501 (D-29z1812, D-29z1813) update-backlog-1.done; sketch v1 ce4b1105, prechecks done; tech-lead review running
+- step5: v2 c776999d APPROVE path; mutants M1-M13 OK; full 301/4363 + build rc0 on v2; covering 6/79; next: claims-504.sh, current-task.md, backlog update-2, feature-status, b-round-503.md, b-next.json, stop :5174 + mock
+- step6: claims-504.sh, sketch-review.md written; current-task.md write pending (first attempt rejected: file unread)
+- step7: current-task.md written; backlog v502 (D-29z1814, D-29z1815) update-backlog-2.done
+- step8: feature-status updated; claims both trees no MISSING; L58 OK
+- step9: b-round-503.md, b-next.json written
+- step10: :5174 and mock stopped; store clean at b806cad; next: advisor closing check
+- step11: v3 84cc9df3 (doc 325 fixes), full/build/covering on v3, backlog v503 D-29z1816; next: text sha updates in task/b-round/b-next/feature-status, review file, claims rerun, screenshots
+- step12: reports updated for v3; claims rerun no MISSING; L58 OK; next: view screenshots
+- step13: screenshots viewed; DONE

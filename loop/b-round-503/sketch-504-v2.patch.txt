@@ -1,0 +1,461 @@
+diff --git a/app/components/product/PurchaseHeader.tsx b/app/components/product/PurchaseHeader.tsx
+index ff9b708..948c7a5 100644
+--- a/app/components/product/PurchaseHeader.tsx
++++ b/app/components/product/PurchaseHeader.tsx
+@@ -11,6 +11,7 @@ import {
+   Zap,
+ } from 'lucide-react';
+ import { useId, useState } from 'react';
++import { Button, buildButtonClassName } from '~/components/ui';
+ import { useAuth } from '~/hooks/useAuth';
+ import { useCart } from '~/hooks/useCart';
+ import { usePurchases } from '~/hooks/usePurchases';
+@@ -188,7 +189,10 @@ export function PurchaseHeader({
+             )}
+             <Link
+               to="/account/downloads"
+-              className="group px-6 py-3 bg-brand text-background font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 min-w-[160px] hover:bg-brand-hover"
++              className={buildButtonClassName({
++                size: 'lg',
++                className: 'min-w-[160px] whitespace-nowrap',
++              })}
+             >
+               <Download size={16} />
+               <span>Go to Downloads</span>
+@@ -225,14 +229,15 @@ export function PurchaseHeader({
+               <span>Downloads</span>
+             </Link>
+             {onSelectPremium && (
+-              <button
++              <Button
+                 type="button"
++                size="lg"
+                 onClick={onSelectPremium}
+-                className="group px-6 py-3 bg-brand text-black font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 min-w-[160px] hover:bg-brand/90"
++                className="min-w-[160px] whitespace-nowrap"
+               >
+                 <ArrowUp size={16} />
+                 <span>Upgrade to Premium</span>
+-              </button>
++              </Button>
+             )}
+           </div>
+         </div>
+@@ -286,11 +291,12 @@ export function PurchaseHeader({
+             />
+ 
+             {/* Upgrade Now - Brand color */}
+-            <button
++            <Button
+               type="button"
++              size="lg"
+               onClick={handleBuyNow}
+               disabled={isDisabled}
+-              className="group px-6 py-3 bg-brand text-background font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[160px] hover:bg-brand-hover"
++              className="min-w-[160px] whitespace-nowrap"
+             >
+               {isBuyingNow ? (
+                 <>
+@@ -303,7 +309,7 @@ export function PurchaseHeader({
+                   <span>Unlock Premium</span>
+                 </>
+               )}
+-            </button>
++            </Button>
+           </div>
+         </div>
+       </div>
+diff --git a/app/lib/__tests__/store-button-cleanup-2c.test.tsx b/app/lib/__tests__/store-button-cleanup-2c.test.tsx
+new file mode 100644
+index 0000000..b28f41d
+--- /dev/null
++++ b/app/lib/__tests__/store-button-cleanup-2c.test.tsx
+@@ -0,0 +1,290 @@
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { cleanup, fireEvent, render, screen } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { afterEach, describe, expect, it, vi } from 'vitest';
++import { buildButtonClassName } from '~/components/ui';
++import { APP_ROOT } from './helpers/style-scan';
++
++type OwnedVersion = 'premium' | 'standard' | 'universal' | null;
++
++const state = vi.hoisted(
++  (): {
++    isAuthenticated: boolean;
++    owned: OwnedVersion;
++    ownsByHandle: boolean;
++    isBuyingNow: boolean;
++    isAddingToCart: boolean;
++  } => ({
++    isAuthenticated: true,
++    owned: null,
++    ownsByHandle: false,
++    isBuyingNow: false,
++    isAddingToCart: false,
++  }),
++);
++
++const spies = vi.hoisted(() => ({
++  openModal: vi.fn(),
++  showToast: vi.fn(),
++  addToCart: vi.fn(),
++  buyNow: vi.fn(),
++  navigate: vi.fn(),
++  selectPremium: vi.fn(),
++}));
++
++vi.mock('@remix-run/react', () => ({
++  useNavigate: () => spies.navigate,
++  Link: ({ children, to, className }: { children: ReactNode; to: string; className?: string }) => (
++    <a href={to} className={className}>
++      {children}
++    </a>
++  ),
++}));
++vi.mock('~/hooks/useAuth', () => ({
++  useAuth: () => ({ isAuthenticated: state.isAuthenticated, openModal: spies.openModal }),
++}));
++vi.mock('~/hooks/useToast', () => ({ useToast: () => ({ showToast: spies.showToast }) }));
++vi.mock('~/hooks/useCart', () => ({
++  useCart: () => ({
++    addToCart: spies.addToCart,
++    buyNow: spies.buyNow,
++    isAddingToCart: state.isAddingToCart,
++    isBuyingNow: state.isBuyingNow,
++    isVariantInCart: () => false,
++  }),
++}));
++vi.mock('~/hooks/usePurchases', () => ({
++  usePurchases: () => ({
++    getProductVersionType: () => state.owned,
++    isProductOwnedByHandle: () => state.ownsByHandle,
++    isLoading: false,
++  }),
++}));
++vi.mock('~/lib/analytics', () => ({ trackAddToCart: vi.fn(), trackBeginCheckout: vi.fn() }));
++vi.mock('~/lib/facebook-pixel', () => ({
++  trackFBAddToCart: vi.fn(),
++  trackFBInitiateCheckout: vi.fn(),
++}));
++
++import { PurchaseHeader } from '~/components/product/PurchaseHeader';
++
++const PRIMARY_LG_CARD_ACTION =
++  'inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-6 py-3 text-base gap-2 min-w-[160px] whitespace-nowrap';
++const PRIMARY_LG_CARD_ACTION_BUSY =
++  'inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-6 py-3 text-base gap-2 opacity-50 cursor-not-allowed pointer-events-none min-w-[160px] whitespace-nowrap';
++const HEAD_BUY_NOW_CLASS =
++  'group px-6 py-3 bg-buy text-brand-foreground font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:cursor-not-allowed! flex items-center justify-center gap-2 min-w-[120px] hover:bg-buy-hover';
++
++const PURCHASE_HEADER_FILE = 'components/product/PurchaseHeader.tsx';
++
++const HEAD_DOWNLOADS_TAG =
++  '<Link\n  to="/account/downloads"\n  className="group px-6 py-3 bg-brand text-background font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 min-w-[160px] hover:bg-brand-hover"\n>';
++const HEAD_UPGRADE_TAG =
++  '<button\n  type="button"\n  onClick={onSelectPremium}\n  className="group px-6 py-3 bg-brand text-black font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 min-w-[160px] hover:bg-brand/90"\n>';
++const HEAD_UNLOCK_TAG =
++  '<button\n  type="button"\n  onClick={handleBuyNow}\n  disabled={isDisabled}\n  className="group px-6 py-3 bg-brand text-background font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[160px] hover:bg-brand-hover"\n>';
++
++type HeaderProps = Parameters<typeof PurchaseHeader>[0];
++
++const BASE_PROPS: HeaderProps = {
++  price: 99,
++  currencyCode: 'USD',
++  productId: 1,
++  productTitle: 'Middle East',
++  productHandle: 'middle-east',
++  selectedVersionName: 'Standard',
++  productVariantId: 12,
++};
++
++function renderHeader(overrides: Partial<HeaderProps> = {}) {
++  return render(<PurchaseHeader {...BASE_PROPS} {...overrides} />);
++}
++
++function requireElement(node: Node | undefined | null): Element {
++  if (!(node instanceof Element)) throw new Error('expected an element');
++  return node;
++}
++
++function contentNodes(element: Element): ChildNode[] {
++  return [...element.childNodes].filter(
++    (node) => node.nodeType !== Node.TEXT_NODE || node.textContent?.trim(),
++  );
++}
++
++function openingTags(source: string, tagName: string): string[] {
++  const tags: string[] = [];
++  const pattern = new RegExp(`<${tagName}(?=[\\s>])`, 'g');
++  for (let match = pattern.exec(source); match; match = pattern.exec(source)) {
++    let depth = 0;
++    let quote = '';
++    let end = match.index + match[0].length;
++    for (; end < source.length; end++) {
++      const char = source[end];
++      if (quote) {
++        if (char === quote) quote = '';
++      } else if (char === '"' || char === "'" || char === '`') {
++        quote = char;
++      } else if (char === '{') {
++        depth++;
++      } else if (char === '}') {
++        depth--;
++      } else if (char === '>' && depth === 0) {
++        break;
++      }
++    }
++    tags.push(source.slice(match.index, end + 1));
++  }
++  return tags;
++}
++
++function hasSolidBrass(tag: string): boolean {
++  return /(?:^|[\s"'`])bg-brand(?:[\s"'`]|$)/.test(tag);
++}
++
++function handRolledBrassActions(source: string): string[] {
++  return ['Link', 'a', 'button', 'motion.button'].flatMap((tagName) =>
++    openingTags(source, tagName).filter(hasSolidBrass),
++  );
++}
++
++afterEach(() => {
++  cleanup();
++  vi.clearAllMocks();
++  state.isAuthenticated = true;
++  state.owned = null;
++  state.ownsByHandle = false;
++  state.isBuyingNow = false;
++  state.isAddingToCart = false;
++});
++
++describe('DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader)', () => {
++  it('B2C-0: the literal oracles equal the builder output, idle and disabled', () => {
++    expect(buildButtonClassName({ size: 'lg', className: 'min-w-[160px] whitespace-nowrap' })).toBe(
++      PRIMARY_LG_CARD_ACTION,
++    );
++    expect(
++      buildButtonClassName({
++        size: 'lg',
++        isDisabled: true,
++        className: 'min-w-[160px] whitespace-nowrap',
++      }),
++    ).toBe(PRIMARY_LG_CARD_ACTION_BUSY);
++  });
++
++  it('B2C-1: a Premium owner gets a primary lg "Go to Downloads" link, icon then label', () => {
++    state.owned = 'premium';
++    renderHeader();
++    const links = screen.getAllByRole('link', { name: 'Go to Downloads' });
++    expect(links).toHaveLength(1);
++    const link = requireElement(links[0]);
++    expect(link.tagName).toBe('A');
++    expect(link.getAttribute('href')).toBe('/account/downloads');
++    expect(link.className).toBe(PRIMARY_LG_CARD_ACTION);
++    const nodes = contentNodes(link);
++    expect(nodes).toHaveLength(2);
++    expect(nodes[0]?.nodeName.toLowerCase()).toBe('svg');
++    expect(nodes[1]?.textContent?.trim()).toBe('Go to Downloads');
++  });
++
++  it('B2C-2: an SFX owner keeps "Open in Studio" first and "Go to Downloads" second', () => {
++    state.ownsByHandle = true;
++    renderHeader({ recordingsHref: '/recordings/6' });
++    const links = screen.getAllByRole('link');
++    expect(links.map((link) => link.textContent?.trim())).toEqual([
++      'Open in Studio',
++      'Go to Downloads',
++    ]);
++    expect(requireElement(links[0]).getAttribute('href')).toBe('/recordings/6');
++    expect(requireElement(links[1]).className).toBe(PRIMARY_LG_CARD_ACTION);
++  });
++
++  it('B2C-3: a Standard owner gets a primary lg "Upgrade to Premium" button that selects Premium once', () => {
++    state.owned = 'standard';
++    renderHeader({ onSelectPremium: spies.selectPremium });
++    const buttons = screen.getAllByRole('button', { name: 'Upgrade to Premium' });
++    expect(buttons).toHaveLength(1);
++    const button = requireElement(buttons[0]);
++    expect(button.getAttribute('type')).toBe('button');
++    expect(button.className).toBe(PRIMARY_LG_CARD_ACTION);
++    expect(button.className.split(/\s+/)).not.toContain('text-black');
++    const nodes = contentNodes(button);
++    expect(nodes[0]?.nodeName.toLowerCase()).toBe('svg');
++    expect(nodes[1]?.textContent?.trim()).toBe('Upgrade to Premium');
++    fireEvent.click(button);
++    expect(spies.selectPremium).toHaveBeenCalledTimes(1);
++    expect(spies.buyNow).not.toHaveBeenCalled();
++  });
++
++  it('B2C-4: "Unlock Premium" is a primary lg button that starts one buy with the variant', () => {
++    state.owned = 'standard';
++    renderHeader({ selectedVersionName: 'Premium', isUpgrade: true, ownedPrice: 29 });
++    const buttons = screen.getAllByRole('button', { name: 'Unlock Premium' });
++    expect(buttons).toHaveLength(1);
++    const button = requireElement(buttons[0]);
++    expect(button.getAttribute('type')).toBe('button');
++    expect(button.hasAttribute('disabled')).toBe(false);
++    expect(button.className).toBe(PRIMARY_LG_CARD_ACTION);
++    fireEvent.click(button);
++    expect(spies.buyNow).toHaveBeenCalledTimes(1);
++    expect(spies.buyNow).toHaveBeenCalledWith(1, 12);
++  });
++
++  it('B2C-5: while buying, "Unlock Premium" shows "Processing..." and is disabled with the builder busy class', () => {
++    state.owned = 'standard';
++    state.isBuyingNow = true;
++    renderHeader({ selectedVersionName: 'Premium', isUpgrade: true, ownedPrice: 29 });
++    expect(screen.queryByText('Unlock Premium', { selector: 'span' })).toBeNull();
++    const busy = requireElement(screen.getByText('Processing...').closest('button'));
++    expect(busy.hasAttribute('disabled')).toBe(true);
++    expect(busy.className).toBe(PRIMARY_LG_CARD_ACTION_BUSY);
++    expect(requireElement(busy.querySelector('svg')).getAttribute('class')).toContain(
++      'animate-spin',
++    );
++    fireEvent.click(busy);
++    expect(spies.buyNow).not.toHaveBeenCalled();
++  });
++
++  it('B2C-6: while adding to cart, "Unlock Premium" is disabled and keeps its label', () => {
++    state.owned = 'standard';
++    state.isAddingToCart = true;
++    renderHeader({ selectedVersionName: 'Premium', isUpgrade: true, ownedPrice: 29 });
++    const button = requireElement(
++      screen.getByText('Unlock Premium', { selector: 'span' }).closest('button'),
++    );
++    expect(button.hasAttribute('disabled')).toBe(true);
++    expect(button.className).toBe(PRIMARY_LG_CARD_ACTION_BUSY);
++  });
++
++  it('B2C-7: anonymous "Buy Now" keeps its HEAD class and asks to sign in without buying', () => {
++    state.isAuthenticated = false;
++    renderHeader();
++    const buyNow = requireElement(screen.getByRole('button', { name: 'Buy Now' }));
++    expect(buyNow.className).toBe(HEAD_BUY_NOW_CLASS);
++    fireEvent.click(buyNow);
++    expect(spies.openModal).toHaveBeenCalledWith('signin');
++    expect(spies.buyNow).not.toHaveBeenCalled();
++  });
++
++  it('B2C-8: PurchaseHeader has no hand-rolled solid brass action, one builder call, two Button elements and one bg-buy button', () => {
++    const source = readFileSync(join(APP_ROOT, PURCHASE_HEADER_FILE), 'utf8');
++    expect(handRolledBrassActions(source)).toEqual([]);
++    expect(source.split('buildButtonClassName(').length - 1).toBe(1);
++    expect(openingTags(source, 'Button')).toHaveLength(2);
++    expect(openingTags(source, 'button').filter((tag) => tag.includes('bg-buy'))).toHaveLength(1);
++  });
++
++  it('B2C-9: the scanner finds each HEAD shape and ignores the builder form', () => {
++    for (const tag of [HEAD_DOWNLOADS_TAG, HEAD_UPGRADE_TAG, HEAD_UNLOCK_TAG]) {
++      expect(handRolledBrassActions(tag)).toEqual([tag]);
++    }
++    expect(
++      handRolledBrassActions(
++        '<Link to="/account/downloads" className={buildButtonClassName({ size: \'lg\' })}>',
++      ),
++    ).toEqual([]);
++    expect(
++      handRolledBrassActions('<button type="button" onClick={() => go()} className="bg-brand">'),
++    ).toHaveLength(1);
++  });
++});
+diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+index 605df8b..8c85102 100644
+--- a/docs/design/DESIGN_SYSTEM.md
++++ b/docs/design/DESIGN_SYSTEM.md
+@@ -1153,10 +1153,10 @@ Store-ში ღილაკის სამიზნე წყაროა `But
+ 
+ | Shape | Class | გამოყენება |
+ |-------|-------|------------|
+-| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), შეტყობინების შიგნით მოქმედება (cart-ის „Upgrade“, `sm`, `min-h-11`), Studio |
++| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), შეტყობინების შიგნით მოქმედება (cart-ის „Upgrade“, `sm`, `min-h-11`), product გვერდის purchase card-ის მოქმედებები (`PurchaseHeader`: „Go to Downloads“, „Upgrade to Premium“, „Unlock Premium“, `lg`, `min-w-[160px]`), Studio |
+ | `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“, free downloads-ის „Download“, recordings-ის „Create a scene“ (`md`, `min-h-11`), მთავარი გვერდის Studio showcase-ის „Browse the Collection“) |
+ 
+-`shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებზე, Store-ის ფორმის submit-ზე და შეტყობინების შიგნით მოქმედებაზე (cart-ის „Upgrade“) 8px.
++`shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებზე, Store-ის ფორმის submit-ზე, შეტყობინების შიგნით მოქმედებაზე (cart-ის „Upgrade“) და purchase card-ის მოქმედებაზე (`PurchaseHeader`) 8px.
+ 
+ #### `buildButtonClassName`
+ 
+diff --git a/docs/implementation/2026/quarter-IV/325-dpg-button-cleanup-stage-2c.md b/docs/implementation/2026/quarter-IV/325-dpg-button-cleanup-stage-2c.md
+new file mode 100644
+index 0000000..4c27ee2
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/325-dpg-button-cleanup-stage-2c.md
+@@ -0,0 +1,75 @@
++# DPG-BUTTON-CLEANUP, ეტაპი 2c: product გვერდის purchase card-ის brass ღილაკები
++
++**თარიღი:** 2026-11-14
++**სტატუსი:** In Progress (stage 2c of DPG-BUTTON-CLEANUP-2; C round 504 PASS)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++Saba-ს DPG-FIX P1 პუნქტი 7: „Use Button.tsx component only.“ ეტაპებმა 2a–2b-3 (docs 320–324) Store-ის brass CTA-ები `Button`-ზე ან `buildButtonClassName`-ზე გადაიყვანა. ეტაპი 2c ხურავს inventory-ის A3 სტრიქონს (`b-round-497/stage2-inventory.md`): product გვერდის `PurchaseHeader`-ის სამ ხელით აწყობილ brass მოქმედებას:
++- „Go to Downloads“ (`<Link>`; ჩანს Premium-ის ან SFX კოლექციის მფლობელისთვის);
++- „Upgrade to Premium“ (`<button>`; Standard-ის მფლობელი, არჩეულია Standard);
++- „Unlock Premium“ (`<button>`; Standard-ის მფლობელი, არჩეულია Premium, upgrade-ის ყიდვა).
++
++ეს ყიდვის გზაა, ამიტომ ყიდვის, კალათის და ავტორიზაციის ლოგიკა არ იცვლება. იცვლება მხოლოდ ღილაკების class-ი და ელემენტი.
++
++## მიდგომა
++
++- **Mapping (product-designer, `b-round-503/consult-product-designer.md`):**
++  - სამივე: primary `lg`, default ფორმა (8px), `className: 'min-w-[160px] whitespace-nowrap'`. card-ის შიგნით მოქმედებაა და არა დამოუკიდებელი CTA, ამიტომ pill არ არის (cart-ის „Upgrade“-ის წესი).
++  - „Go to Downloads“ ნავიგაციაა: `<Link>` რჩება, class-ი `buildButtonClassName`-ით აიგება.
++  - „Upgrade to Premium“ და „Unlock Premium“: `<Button type="button" size="lg">`. „Unlock Premium“-ს `disabled={isDisabled}` რჩება. `isLoading` არ გამოიყენება, რადგან ის ტექსტს „Loading...“-ით ცვლის; „Processing...“ და spinner იგივე რჩება.
++  - „Upgrade to Premium“ brass primary-ა და არა `accent`: Premium-ის ფერი Store-ში brass-ია (SABA-Q-502-UPGRADE-VARIANT-ის default-ის მსგავსად).
++- **უცვლელი:** „Buy Now“ (`bg-buy`), „Add to Cart“, „Open in Studio“, accent „Downloads“, ტექსტი, icon-ები, `href`-ები, handler-ები და keyboard focus ring.
++- **Deviation-ები** (ზომები: `b-round-503/probe/head.out`, `b-round-503/probe/sketch.out`, `b-round-503/probe/compare-504.txt`):
++  - D1 radius 12px-დან 8px-მდე სამივეზე. card-ის მეზობელ ღილაკებს NONBRAND ეტაპამდე 12px რჩებათ (product-designer-მა ეს შეგნებულად მიიღო).
++  - D2 სიმაღლე 50-დან 48px-მდე, სადაც ღილაკი მარტოა ან სვეტში დგას; border-იანი მეზობლის გვერდით 52px რჩება. card ყველაზე მეტი 2px-ით მცირდება.
++  - D3 „Upgrade to Premium“: ტექსტი შავიდან `text-background`-ზე (`rgb(14, 13, 12)`), hover `bg-brand/90`-დან `bg-brand-hover`-ზე. contrast 8.32 (hover 10.28).
++  - D4 სამივეს ემატება `shadow-sm` და დაჭერისას opacity 0.9. `<button>`-ის დაჭერის `scale(0.98)` რჩება.
++  - D5 „Unlock Premium“ ყიდვის დროს (disabled): hover აღარ ფერავს და კურსორი `pointer-events: none`-ით ქრება (2b-2-ის წესი). ფონი rest brass-ია, opacity 0.5.
++
++## არქიტექტურა
++
++```mermaid
++flowchart LR
++  BB[buildButtonClassName] -->|primary lg| DL["Go to Downloads (Link)"]
++  BTN[Button] -->|primary lg| UP["Upgrade to Premium"]
++  BTN -->|primary lg, disabled while busy| UN["Unlock Premium"]
++  UP -->|onSelectPremium| UN
++  UN -->|handleBuyNow, buyNow| CART[CartContext]
++  PDP[ProductDetailPage] --> PH[PurchaseHeader]
++  PH --> DL
++  PH --> UP
++  PH --> UN
++```
++
++## შეცვლილი ფაილები
++
++- `app/components/product/PurchaseHeader.tsx` — სამი brass მოქმედება `buildButtonClassName`-სა და `Button`-ზე. იმპორტი `~/components/ui`-იდან.
++- `app/lib/__tests__/store-button-cleanup-2c.test.tsx` — ახალი ტესტები B2C-0…B2C-9.
++- `docs/design/DESIGN_SYSTEM.md` — `### Buttons`-ის shape ცხრილის default სტრიქონი და ორი ფორმის წინადადება.
++
++## პრობლემები და გადაწყვეტები
++
++- **Problem:** card-ის მეზობელი ღილაკები 12px radius-ით რჩება, ახლები 8px-ია. → **Solution:** `className`-ით `rounded-lg`-ის გადაფარვა არ დაემატა, რადგან `buildButtonClassName` class-ებს არ აერთიანებს და შედეგი stylesheet-ის რიგზე იქნებოდა დამოკიდებული. მეზობლები NONBRAND ეტაპზე გადავა.
++- **Problem:** `Button`-ის `isLoading` ტექსტს „Loading...“-ით ცვლის. → **Solution:** „Unlock Premium“ იყენებს მხოლოდ `disabled`-ს და თავის „Processing...“ children-ს.
++- **Problem:** owner მდგომარეობები backend-ს საჭიროებს, cloud-ში კი backend არ არის. → **Solution:** jsdom-ში hook-ები mock-ით არის ჩანაცვლებული, browser probe კი `page.route`-ით აბრუნებს ownership-ს, კალათას და checkout-ს (client path).
++- **Problem:** class string-ის ტესტი შეიძლება builder-ს დაეყრდნოს და ვერაფერი დაიჭიროს. → **Solution:** B2C-0 ამოწმებს, რომ literal oracle-ები builder-ის output-ს უდრის. B2C-1…B2C-7 რენდერავს ოთხივე მდგომარეობას და ამოწმებს class-ს, `href`-ს, ტექსტის რიგს, click-ის handler-ს (`buyNow` ერთხელ, variant-ით) და busy/disabled მდგომარეობას. B2C-8 და B2C-9 ფაილს brace-aware tag scanner-ით კითხულობს. B-ის mutant-ები `b-round-503/mutants-504.txt`-შია.
++
++## ტესტირება
++
++- **A, რაუნდი 504** (logs `a-round-504/`-ში): frozen check-ები, sketch-ის `git apply`, `npm run typecheck`, `npm run lint`, Biome შეცვლილ ფაილებზე და covering set (`b-round-503/covering-files.txt`).
++- **B, sketch-ის pre-check** (scratch ასლზე, `b-round-503/`):
++  - სრული suite და build (`precheck-full.log`, `precheck-build-sketch.log`);
++  - mutant-ები (`mutants-504.txt`);
++  - browser-ში HEAD და sketch შედარდა (`probe/head.out`, `probe/sketch.out`, `probe/compare-504.txt`): ფერი, radius, ზომა, hover, დაჭერა, keyboard focus და მეზობელი ღილაკები 1440/1280/375-ზე;
++  - journey (`probe/head-journey.out`, `probe/sketch-journey.out`): „Go to Downloads“ `/account/downloads`-ზე მიდის, „Upgrade to Premium“ Premium-ს ირჩევს, „Unlock Premium“ ერთ checkout POST-ს აგზავნის (ორმაგი click-ითაც), ანონიმური „Buy Now“ POST-ს არ აგზავნის.
++- **Browser-ის მიღება:** C round 504, შედეგი `c-round-504.json`-შია.
++
++## TODO / შემდეგი ნაბიჯები
++
++- **2d:** chat.
++- **2e:** LeadMagnet, keep-list-ის მხოლოდ restyle.
++- **DPG-BUTTON-CLEANUP-2-NONBRAND:** card-ის მეზობელი ღილაკები („Add to Cart“, „Open in Studio“, „Downloads“) და „Buy Now“-ის radius.
++- `ButtonLink` wrapper-ისა და საერთო scanner-ის გადაწყვეტა ეტაპი 2-ის დასრულებისას (SIG-R498-BUTTONLINK-WRAPPER, SIG-R501-SHARED-BUTTON-SCANNER).
++- Saba-ს პასუხი „Upgrade“-ის variant-ზე (SABA-Q-502-UPGRADE-VARIANT); თუ `accent` აირჩევს, „Upgrade to Premium“ იმავე რაუნდში მიჰყვება.

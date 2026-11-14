@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-14T02:29:09.808Z",
-  "current_task": "Round 502: cart layout, three related bugs (B-R502-CART-MOBILE-ITEMS-HIDDEN High, B-R502-CART-LG-SUMMARY-CLIPPED Medium, B-R502-CART-WHEEL-NESTED-SCROLL Medium): A applies b-round-501/sketch-502.patch.txt (v5 sha 7d14eae2; code = v3, tech-lead v1 APPROVE, v2 APPROVE with conditions fixed in v3): cart.tsx main min-h + lg-only fixed height/overflow-hidden, grid lg:grid-rows-[minmax(0,1fr)], items column lg-only scroll, summary column lg scroll, data-lenis-prevent-wheel on both columns, dead sticky top-24 removed; new cart-mobile-layout.test.ts CML1-CML4; doc 323. C runs C0-C13 (stubbed cart rows, current-task.md)",
+  "_generatedUtc": "2026-11-14T03:33:24.631Z",
+  "current_task": "Round 503: DPG-BUTTON-CLEANUP-2 stage 2b-3: A applies b-round-502/sketch-503.patch.txt (v2 sha 210ee872, tech-lead v1 APPROVE WITH CONDITIONS fixed, v2 APPROVE): cart.tsx Upgrade -> buildButtonClassName primary sm + min-h-11 shrink-0; recordings.$productId.tsx Create a scene -> primary md pill + mb-6 min-h-11; StudioShowcase Browse the Collection -> primary lg pill (scale removed); new store-button-cleanup-2b3.test.tsx B2B3-0..7; DESIGN_SYSTEM shape rows + two-shapes sentence; doc 323 l.4 -> Completed (C round 502 PASS); doc 324. C runs C0-C14 (current-task.md; cart/recordings rows -STUBBED)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6927,31 +6927,6 @@
       "evidence": "retros/retro-495.md section 8"
     },
     {
-      "id": "DPG-BUTTON-CLEANUP-2",
-      "severity": "medium",
-      "origin": "B spec",
-      "status": "in_progress (D-29z1804, D-29z1805): 2b-3 mapping ruled (b-round-501/consult-product-designer.md), dispatched next as round 503 after the round-502 cart layout bugs; then 2c-2e, NONBRAND | in_progress (D-29z1802): 2b-2 C-verified (C round 501 PASS, published 3bb55d4); next 2b-3 (round 502), then 2c-2 …[see backlog.json]",
-      "title": "Hand-rolled brand buttons outside Button.tsx (Saba DPG item 7 \"Use Button.tsx component only\")",
-      "evidence": "b-round-497/stage2-inventory.md, b-round-497/scan-head.json (supersedes b-round-495/stage2-bg-brand-hits.txt)",
-      "added": "2026-11-13 B round 495 -> 496 planning",
-      "substages_d29z1784": {
-        "2a": "round 498: checkout.cancel 43/50, checkout.success 187/194, faq 169, account.orders 238 -> primary/ghost lg pill (sketch b-round-497/sketch-498-v3.patch.txt)",
-        "2b": "store 355, recordings.$productId 190, cart 162, ErrorBoundary 46, EmptyState 63/70, hire-us 279 (ST5 pin), free-downloads 284, NewsletterSection 84, StudioShowcase 155",
-        "2c": "PurchaseHeader 191/231/293 (purchase path; click-still-works + purchase protection rows)",
-        "2d": "GuestForm 96, ChatInput 82, ChatButton 20 (IconButton candidates)",
-        "2e": "LeadMagnetPopup 187/279 (keep-list: restyle only)",
-        "not_buttons": "selected-state paints (SIG-R498-SELECTED-STATE-PAINTS) and fills/bars/badges: out of item 7",
-        "protected": "ROOT-REQ-DPG-BUTTONS-PROTECTED",
-        "studio": "components/arrangement out of the Store block"
-      },
-      "substages_d29z1789": {
-        "2a": "C round 498 PASS, published 82e118a",
-        "2b-1": "C round 500 PASS (browserVerified true), published 462570e; scanner 109/44",
-        "2b-2": "C round 501 PASS (browserVerified true), published 3bb55d4; scanner 104/41",
-        "2b-3": "recordings.$productId 190, cart 162, StudioShowcase 155"
-      }
-    },
-    {
       "id": "PD-R496-PRIMARY-TEXT-TOKEN",
       "severity": "info",
       "status": "input to DPG-COLOR-CONSOLIDATE (D-29z1774)",
@@ -7039,36 +7014,6 @@
       "title": "Per-stage tests carry copies of a brace-aware tag scanner (openingTags/hasSolidBrass; IL3 in store-i"
     },
     {
-      "id": "B-R502-CART-MOBILE-ITEMS-HIDDEN",
-      "severity": "high",
-      "origin": "B pre-check",
-      "status": "scheduled round 502 (D-29z1805)",
-      "title": "Below 1024 px the /cart items column collapses (cart.tsx main h-[calc(100vh-80px)] overflow-hidden): 47/79 px at 375/390 with one item, 0 px with an ownership warning or coupon + gift card; items invisible and Remove cannot be clicked",
-      "evidence": "b-round-501/probe/head/head-cart.json, head-actions.json, cart375-full.png; compare b-round-501/probe/compare-sketch.txt",
-      "repro": "375x812, stub /api/cart with one item and /api/downloads with the same handle as Universal (b-round-501/probe/cart-states.mjs OWNED-1); open /cart",
-      "added": "2026-11-14 B round 501 -> 502 planning"
-    },
-    {
-      "id": "B-R502-CART-LG-SUMMARY-CLIPPED",
-      "severity": "medium",
-      "origin": "B pre-check",
-      "status": "scheduled round 502 (D-29z1805)",
-      "title": "At lg on short screens (1366x657, 1366x600, 1280x600) a tall Order Summary (coupon + gift card, or ownership warning) puts Checkout below main's clipped bottom; the mouse wheel cannot reach it",
-      "evidence": "b-round-501/probe/head/head-wheel.json (afterWheel.inView false in 10 of 18 states)",
-      "repro": "b-round-501/probe/cart-wheel.mjs EXTRAS at 1280x600",
-      "added": "2026-11-14 B round 501 -> 502 planning"
-    },
-    {
-      "id": "B-R502-CART-WHEEL-NESTED-SCROLL",
-      "severity": "medium",
-      "origin": "B pre-check",
-      "status": "scheduled round 502 (D-29z1805)",
-      "title": "Lenis (useSmoothScroll, no allowNestedScroll) takes wheel events over the /cart items column; the column never wheel-scrolls, so with 5 items item 5 is never visible at 1280x720 (scrollbar drag or keyboard only)",
-      "evidence": "b-round-501/probe/head/head-items-wheel.json (st 0, lastVisible false)",
-      "repro": "b-round-501/probe/items-wheel.mjs",
-      "added": "2026-11-14 B round 501 -> 502 planning"
-    },
-    {
       "id": "CART-REAL-BACKEND",
       "severity": "info",
       "status": "open_backend (D-29z1805): round 502 rows are -STUBBED (clien",
@@ -7103,17 +7048,21 @@
       "severity": "info",
       "status": "signal (D-29z1804): input to DPG-INTERACTION-FIX",
       "title": "product-designer optional: StudioShowcase arrow group-hover:translate-x-1 motion-reduce:transition-n"
+    },
+    {
+      "id": "GATE502-I5-LENIS-RAF-LEAK",
+      "severity": "info",
+      "status": "info (D-29z1808): joins the SIG-R502-LENIS-NESTED-SCROLL-SIT",
+      "title": "useSmoothScroll requestAnimationFrame loop is not cancelled in cleanup; after lenis.destroy() it kee"
+    },
+    {
+      "id": "INFO-C502-CHECKOUT-RING-1PX",
+      "severity": "info",
+      "status": "info (D-29z1808): shared focus-ring style; Chromium paints t",
+      "title": "Cart Checkout focus ring reads outline solid 1px / offset 2px vs SABA-B-4 text 1.5px"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 493,
-      "task": "current-task.md",
-      "decision": "D-29z1758",
-      "type": "re-dispatch B-R488-PASSWORD-MODAL-DIALOG + B-R492-PASSWORD-FIELDS-UNNAMED + B-R492-PASSWORD-ERROR-NOT-ANNOUNCED (Medium x3) with docs-only v5 (C-R492-01)",
-      "status": "c_fail_stopped_routed_to_b (D-29z1761): C round 493 FAIL short route L22 (browserVerified/realVerified false: C5/C7 not run); A STOP on doc 318 l.36 correct (C-R493-01 Low, origin B spec, confirmed in browser c-round-493/f1.json); C1/C2/C3/C8 PASS; gate 493 skipped (C taskStatus FAIL); nothing published",
-      "note": "baseline HEAD e4e1d1c with sketch v3 in the tree (6 paths); delta b-round-492/sketch-493-delta-v3-to-v4.patch.txt (c70366db), full b-round-492/sketch-493.patch.txt (ea441270); claims b-round-492/claims-493.sh; v3/v5 production builds byte-identical (b-round-492/css-compare.txt, build-diff.txt)"
-    },
     {
       "round": 494,
       "task": "current-task.md",
@@ -7187,8 +7136,16 @@
       "task": "current-task.md",
       "decision": "D-29z1805",
       "type": "cart layout: three related bugs (mobile items hidden, lg short-screen summary clipped, Lenis wheel on nested columns)",
-      "status": "dispatched",
+      "status": "C PASS (browserVerified/realVerified true, 0 bugs; cart rows -STUBBED, CART-REAL-BACKEND blocked in cloud); gate 502 published 882854e (both remotes)",
       "note": "baseline 3bb55d4 clean; sketch b-round-501/sketch-502.patch.txt v5 sha 7d14eae2 (code = v3; two doc sentences); pre-check in b-round-501/precheck-*.log; mutants M1-M15; probes b-round-501/probe/"
+    },
+    {
+      "round": 503,
+      "task": "current-task.md",
+      "decision": "D-29z1809",
+      "type": "DPG-BUTTON-CLEANUP-2 stage 2b-3 (cart Upgrade, recordings Create a scene, StudioShowcase Browse the Collection) + doc 323 L28 status line",
+      "status": "dispatched",
+      "note": "baseline 882854e clean; sketch b-round-502/sketch-503.patch.txt v2 sha 210ee872; pre-check b-round-502/precheck-*.log (full 300/4353 rc0, build rc0); mutants M1-M16 OK; probes b-round-502/probe/"
     }
   ],
   "other_keys": [
