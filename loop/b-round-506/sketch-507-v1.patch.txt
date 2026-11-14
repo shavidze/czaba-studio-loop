@@ -1,0 +1,364 @@
+diff --git a/app/components/audio/AudioPlayer.tsx b/app/components/audio/AudioPlayer.tsx
+index 9f0c43e..3bf6120 100644
+--- a/app/components/audio/AudioPlayer.tsx
++++ b/app/components/audio/AudioPlayer.tsx
+@@ -1,6 +1,7 @@
+ import { Link } from '@remix-run/react';
+ import { Loader2, X } from 'lucide-react';
+ import type { KeyboardEvent } from 'react';
++import { IconButton } from '~/components/ui';
+ import { useAudio } from '~/contexts/AudioContext';
+ 
+ const AUDIO_PLAYER_THUMB_PX = 12;
+@@ -67,24 +68,21 @@ export function AudioPlayer() {
+             )}
+           </div>
+           {/* Close Button */}
+-          <button
++          <IconButton
++            variant="ghost"
++            size="sm"
++            label="Close player"
+             onClick={closePlayer}
+-            className="absolute top-1/2 right-0 -translate-y-1/2 bg-transparent border-none text-muted p-2 flex items-center justify-center rounded-full transition-all duration-200 opacity-60 hover:bg-white/10 hover:text-error hover:opacity-100 hover:scale-110 cursor-pointer"
+-            aria-label="Close player"
+-            title="Close player"
++            className="absolute top-1/2 right-0 -translate-y-1/2"
+           >
+-            <X size={18} />
+-          </button>
++            <X size={16} />
++          </IconButton>
+         </div>
+ 
+         {/* Playback Controls */}
+         <div className="flex flex-col items-center gap-4">
+           <div className="flex items-center gap-6">
+-            <button
+-              onClick={skipPrevious}
+-              className="bg-transparent border-none text-foreground p-2 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/10 hover:text-brand cursor-pointer"
+-              aria-label="Previous track"
+-            >
++            <IconButton variant="ghost" size="md" label="Previous track" onClick={skipPrevious}>
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                 <path
+                   strokeLinecap="round"
+@@ -93,7 +91,7 @@ export function AudioPlayer() {
+                   d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                 />
+               </svg>
+-            </button>
++            </IconButton>
+ 
+             <button
+               onClick={togglePlayPause}
+@@ -114,11 +112,7 @@ export function AudioPlayer() {
+               )}
+             </button>
+ 
+-            <button
+-              onClick={skipNext}
+-              className="bg-transparent border-none text-foreground p-2 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/10 hover:text-brand cursor-pointer"
+-              aria-label="Next track"
+-            >
++            <IconButton variant="ghost" size="md" label="Next track" onClick={skipNext}>
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                 <path
+                   strokeLinecap="round"
+@@ -127,7 +121,7 @@ export function AudioPlayer() {
+                   d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                 />
+               </svg>
+-            </button>
++            </IconButton>
+           </div>
+ 
+           {/* Progress Bar */}
+@@ -159,10 +153,11 @@ export function AudioPlayer() {
+ 
+         {/* Volume Control */}
+         <div className="flex items-center gap-4 justify-end">
+-          <button
++          <IconButton
++            variant="ghost"
++            size="md"
++            label={volume === 0 ? 'Unmute' : 'Mute'}
+             onClick={() => setVolume(volume === 0 ? 0.7 : 0)}
+-            className="bg-transparent border-none text-foreground p-2 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/10 hover:text-brand cursor-pointer"
+-            aria-label={volume === 0 ? 'Unmute' : 'Mute'}
+           >
+             {volume === 0 ? (
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+@@ -198,7 +193,7 @@ export function AudioPlayer() {
+                 />
+               </svg>
+             )}
+-          </button>
++          </IconButton>
+           <input
+             type="range"
+             min="0"
+diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+index 8acb687..63a5537 100644
+--- a/docs/design/DESIGN_SYSTEM.md
++++ b/docs/design/DESIGN_SYSTEM.md
+@@ -1213,6 +1213,8 @@ import { X, Play, Settings } from 'lucide-react';
+ 
+ `brand` variant: brass ფონი, `hover:bg-brand-hover`, `shadow-sm`. glow-ი და საკუთარი `active:scale-95` არ აქვს; დაჭერისას მოქმედებს გლობალური `:active` scale 0.98. Store-ში მას იყენებს chat-ის „Send message“ (`md`, 40×40px, textarea-ს სიმაღლე, icon 20px). disabled მდგომარეობა: opacity 0.5 და `pointer-events-none`. `label` ხდება `aria-label`-იც და `title`-იც (tooltip).
+ 
++`ghost` variant: გამჭვირვალე ფონი, ტექსტი `text-muted`, hover-ზე `bg-elevated` და `text-foreground`. Store-ში მას იყენებს გლობალური audio player: „Close player“ (`sm`, 32×32px, icon 16px, title-ის სვეტზე absolute პოზიციით) და „Previous track“, „Next track“, „Mute“/„Unmute“ (`md`, 40×40px, icon 20px). Play ღილაკი (`audio-player-button-play`) IconButton არ არის.
++
+ ---
+ 
+ ### Cards
+diff --git a/app/lib/__tests__/store-button-cleanup-n1.test.tsx b/app/lib/__tests__/store-button-cleanup-n1.test.tsx
+new file mode 100644
+index 0000000..55c2aa8
+--- /dev/null
++++ b/app/lib/__tests__/store-button-cleanup-n1.test.tsx
+@@ -0,0 +1,177 @@
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { cleanup, fireEvent, render, screen } from '@testing-library/react';
++import { MemoryRouter } from 'react-router-dom';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { AudioPlayer } from '~/components/audio/AudioPlayer';
++import type { Track } from '~/contexts/AudioContext';
++import { APP_ROOT } from './helpers/style-scan';
++
++interface PlayerFixtureState {
++  currentTrack: Track | null;
++  isPlaying: boolean;
++  isLoading: boolean;
++  error: string | null;
++  volume: number;
++  currentTime: number;
++  duration: number;
++}
++
++const audioMock = vi.hoisted(() => {
++  const state: PlayerFixtureState = {
++    currentTrack: null,
++    isPlaying: false,
++    isLoading: false,
++    error: null,
++    volume: 0.7,
++    currentTime: 0,
++    duration: 0,
++  };
++  return {
++    state,
++    togglePlayPause: vi.fn(),
++    seek: vi.fn(),
++    setVolume: vi.fn(),
++    skipNext: vi.fn(),
++    skipPrevious: vi.fn(),
++    closePlayer: vi.fn(),
++  };
++});
++
++vi.mock('~/contexts/AudioContext', () => ({
++  useAudio: () => ({ ...audioMock.state, ...audioMock }),
++}));
++
++const playerTrack: Track = {
++  id: 'track-middle-east',
++  title: 'Middle East',
++  artist: 'CZABA',
++  audioUrl: '/audio/middle-east-preview.mp3',
++  imageUrl: '/images/middle-east.jpg',
++  productHandle: 'middle-east',
++};
++
++const ICON_CONTROLS = [
++  { name: 'Close player', size: ['w-8', 'h-8'], icon: '16' },
++  { name: 'Previous track', size: ['w-10', 'h-10'], icon: '20' },
++  { name: 'Next track', size: ['w-10', 'h-10'], icon: '20' },
++  { name: 'Mute', size: ['w-10', 'h-10'], icon: '20' },
++] as const;
++
++const RETIRED_TOKENS = [
++  'hover:bg-white/10',
++  'hover:text-error',
++  'opacity-60',
++  'hover:scale-110',
++  'rounded-full',
++  'border-none',
++  'text-foreground',
++] as const;
++
++function renderPlayer() {
++  return render(
++    <MemoryRouter>
++      <AudioPlayer />
++    </MemoryRouter>,
++  );
++}
++
++function classTokens(element: HTMLElement): string[] {
++  return element.className.split(/\s+/).filter(Boolean);
++}
++
++describe('DPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton', () => {
++  beforeEach(() => {
++    vi.clearAllMocks();
++    audioMock.state.currentTrack = playerTrack;
++    audioMock.state.isPlaying = false;
++    audioMock.state.isLoading = false;
++    audioMock.state.error = null;
++    audioMock.state.volume = 0.7;
++    audioMock.state.currentTime = 10;
++    audioMock.state.duration = 150;
++  });
++
++  afterEach(() => {
++    cleanup();
++  });
++
++  it('N1-1: each icon control is one button whose title equals its accessible name', () => {
++    renderPlayer();
++    for (const control of ICON_CONTROLS) {
++      const matches = screen.getAllByRole('button', { name: control.name });
++      expect(matches).toHaveLength(1);
++      expect(matches[0].tagName).toBe('BUTTON');
++      expect(matches[0].getAttribute('title')).toBe(control.name);
++    }
++  });
++
++  it('N1-2: the controls call their own actions once, and Mute flips to Unmute at volume 0', () => {
++    const view = renderPlayer();
++    fireEvent.click(screen.getByRole('button', { name: 'Close player' }));
++    fireEvent.click(screen.getByRole('button', { name: 'Previous track' }));
++    fireEvent.click(screen.getByRole('button', { name: 'Next track' }));
++    fireEvent.click(screen.getByRole('button', { name: 'Mute' }));
++    expect(audioMock.closePlayer).toHaveBeenCalledTimes(1);
++    expect(audioMock.skipPrevious).toHaveBeenCalledTimes(1);
++    expect(audioMock.skipNext).toHaveBeenCalledTimes(1);
++    expect(audioMock.setVolume).toHaveBeenCalledTimes(1);
++    expect(audioMock.setVolume).toHaveBeenLastCalledWith(0);
++
++    audioMock.state.volume = 0;
++    view.rerender(
++      <MemoryRouter>
++        <AudioPlayer />
++      </MemoryRouter>,
++    );
++    expect(screen.queryByRole('button', { name: 'Mute' })).toBeNull();
++    const unmute = screen.getByRole('button', { name: 'Unmute' });
++    expect(unmute.getAttribute('title')).toBe('Unmute');
++    fireEvent.click(unmute);
++    expect(audioMock.setVolume).toHaveBeenCalledTimes(2);
++    expect(audioMock.setVolume).toHaveBeenLastCalledWith(0.7);
++  });
++
++  it('N1-3: the controls carry the IconButton ghost classes at their sizes, and Close keeps its position', () => {
++    renderPlayer();
++    for (const control of ICON_CONTROLS) {
++      const tokens = classTokens(screen.getByRole('button', { name: control.name }));
++      for (const expected of [
++        'rounded-lg',
++        'bg-transparent',
++        'text-muted',
++        'hover:bg-elevated',
++        'hover:text-foreground',
++        ...control.size,
++      ]) {
++        expect(tokens).toContain(expected);
++      }
++    }
++    const closeTokens = classTokens(screen.getByRole('button', { name: 'Close player' }));
++    for (const expected of ['absolute', 'top-1/2', 'right-0', '-translate-y-1/2']) {
++      expect(closeTokens).toContain(expected);
++    }
++  });
++
++  it('N1-4: no icon control keeps a retired hand-rolled token, and each icon keeps its size', () => {
++    renderPlayer();
++    for (const control of ICON_CONTROLS) {
++      const button = screen.getByRole('button', { name: control.name });
++      const tokens = classTokens(button);
++      for (const retired of RETIRED_TOKENS) {
++        expect(tokens).not.toContain(retired);
++      }
++      const svg = button.querySelector('svg');
++      expect(svg?.getAttribute('width')).toBe(control.icon);
++    }
++  });
++
++  it('N1-5: AudioPlayer.tsx renders the four icon controls through IconButton and only Play stays a native button', () => {
++    const source = readFileSync(join(APP_ROOT, 'components/audio/AudioPlayer.tsx'), 'utf8');
++    expect(source.match(/<button\b/g) ?? []).toHaveLength(1);
++    expect(source.match(/<IconButton\b/g) ?? []).toHaveLength(4);
++    expect(source).toContain("import { IconButton } from '~/components/ui';");
++    expect(source).not.toContain('bg-white/10');
++    expect(source).not.toContain('hover:text-error');
++  });
++});
+diff --git a/docs/implementation/2026/quarter-IV/328-dpg-nonbrand-stage-n1-audio-player.md b/docs/implementation/2026/quarter-IV/328-dpg-nonbrand-stage-n1-audio-player.md
+new file mode 100644
+index 0000000..d005d5d
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/328-dpg-nonbrand-stage-n1-audio-player.md
+@@ -0,0 +1,62 @@
++# DPG-BUTTON-CLEANUP-2-NONBRAND, ეტაპი N1: გლობალური audio player-ის icon ღილაკები
++
++**თარიღი:** 2026-11-14
++**სტატუსი:** In Progress (stage N1 of DPG-BUTTON-CLEANUP-2-NONBRAND; C round 507 PASS)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++Saba-ს DPG-FIX P1 პუნქტი 7: „Use Button.tsx component only.“ ეტაპებმა 2a–2e (docs 320–327) Store-ის brass CTA-ები `Button`-ზე, `buildButtonClassName`-ზე ან `IconButton`-ზე გადაიყვანა. დარჩა ხელით აწყობილი ღილაკები brand ფონის გარეშე: DPG-BUTTON-CLEANUP-2-NONBRAND.
++
++B-ის whole-tag scanner-მა (`b-round-506/scan-nonbrand.py`) HEAD `3021b30`-ზე 58 ასეთი tag იპოვა 29 ფაილში. product-designer-მა (`b-round-506/consult-product-designer.md`) თითოეულს მიანიჭა ერთი გადაწყვეტილება: `Button`, `IconButton` ან hand-rolled რჩება (მენიუს სტრიქონი, tab, არჩევადი ბარათი და სხვ.). ეტაპი N1 არის გლობალური audio player (`AudioPlayer.tsx`), რომელიც Store-ის ყველა გვერდზე ჩანს preview-ის დაკვრისას.
++
++## მიდგომა
++
++ოთხი icon ღილაკი გადავიდა `IconButton`-ის `ghost` variant-ზე:
++
++- „Close player“ → `size="sm"` (32×32px, X icon 16px). title-ის სვეტზე absolute პოზიცია (`absolute top-1/2 right-0 -translate-y-1/2`) `className`-ით რჩება.
++- „Previous track“, „Next track“ და „Mute“/„Unmute“ → `size="md"` (40×40px, icon 20px, ზომა იგივეა).
++
++გადაწყვეტილებები:
++
++- **D1, ფორმა.** წრე (`rounded-full`) იცვლება `IconButton`-ის `rounded-lg`-ით (Chromium-ში 12px). DESIGN_SYSTEM-ში `IconButton` არის „Square buttons for icons only“. ghost-ს ფონი მოსვენებულ მდგომარეობაში არ აქვს, ამიტომ ფორმა მხოლოდ hover-სა და focus-ზე ჩანს. Saba-ს ერთხელ ეკითხება SABA-Q-507-PLAYER-ICON-SHAPE; default არის `rounded-lg`. წრეს `shape` prop დასჭირდება, ანუ საერთო primitive-ის ცვლილება.
++- **D2, ფერი.** მოსვენებული ფერი `text-foreground`-დან ხდება `text-muted`, ასე რომ Play რჩება მთავარ ღილაკად. hover ფონი hardcoded `bg-white/10`-დან ხდება token `bg-elevated`, hover ტექსტი კი `text-brand`/`text-error`-დან ხდება `text-foreground`.
++- **D3, Close.** `opacity-60`, `hover:text-error` და `hover:scale-110` ამოღებულია. დახურვა destructive მოქმედება არ არის, ამიტომ წითელი hover არ სჭირდება. ზომა 34 → 32px.
++- **D4, tooltip.** `IconButton` `label`-ს `title`-ადაც წერს. „Previous track“, „Next track“ და „Mute“/„Unmute“ ახლა tooltip-ს აჩვენებს.
++- **D5, განლაგება.** 1440 და 1280 სიგანეზე player-ის სიმაღლე (90px) და Play-ის ცენტრი არ იცვლება. 375 სიგანეზე Mute ცალკე რიგშია და 36 → 40px-ით იზრდება, ამიტომ player 4px-ით მაღლდება (239.8 → 243.8px).
++
++Play ღილაკი (`audio-player-button-play`) ამ ეტაპში არ შედის.
++
++## არქიტექტურა
++
++state, effect ან ref-ის მფლობელობა არ გადაადგილებულა. `useAudio`-ს action-ები (`closePlayer`, `skipPrevious`, `skipNext`, `setVolume`) იგივეა. `IconButton` იმპორტდება `~/components/ui` barrel-იდან, ისევე როგორც 2a–2e ეტაპებში.
++
++## შეცვლილი ფაილები
++
++- `app/components/audio/AudioPlayer.tsx`
++- `app/lib/__tests__/store-button-cleanup-n1.test.tsx` (ახალი)
++- `docs/design/DESIGN_SYSTEM.md` (IconButton სექცია, `ghost` სტრიქონი)
++- `docs/implementation/2026/quarter-IV/328-dpg-nonbrand-stage-n1-audio-player.md` (ახალი)
++
++## პრობლემები და გადაწყვეტები
++
++- **Problem:** `IconButton`-ს `className`-ის შერწყმა არ აქვს, ამიტომ `rounded-full`-ის დამატება საიმედოდ არ გადაფარავს `rounded-lg`-ს. **Solution:** ფორმა არ გადაიფარება; წრე მხოლოდ ცალკე `shape` prop-ით შეიძლება (Saba-ს კითხვა).
++- **Problem:** Close ღილაკზე ერთად მოქმედებს `-translate-y-1/2` და ghost-ის `active:scale-95`. **Solution:** Tailwind v4-ში `translate` და `scale` ცალკე CSS property-ებია. C ზომავს Close-ის ცენტრს დაჭერისას.
++
++## ტესტირება
++
++`store-button-cleanup-n1.test.tsx`:
++
++- N1-1: ოთხივე ღილაკი ერთია თავისი სახელით, და `title` უდრის სახელს.
++- N1-2: თითო ღილაკი თავის action-ს ერთხელ იძახებს; volume 0-ზე „Mute“ ხდება „Unmute“, ხოლო click-ზე `setVolume(0.7)` გამოიძახება.
++- N1-3: ghost-ის კლასები შესაბამის ზომაზე; Close-ს პოზიცია რჩება.
++- N1-4: ძველი hand-rolled token-ები აღარ არის; icon-ის ზომა 16/20px.
++- N1-5: `AudioPlayer.tsx`-ში ერთი `<button` (Play) და ოთხი `<IconButton`; `bg-white/10` და `hover:text-error` აღარ არის.
++
++mutant-ები M0–M6 (`b-round-506/mutants-507.txt`) თითოეული თავის row-ზე წითელია. ბრაუზერში C ამოწმებს ზომებს, ფერებს, hover-ს, keyboard focus-ის ring-ს და განლაგებას 1440×900, 1280×720 და 375×812 სიგანეებზე.
++
++## TODO / შემდეგი ნაბიჯები
++
++- NONBRAND-ის შემდეგი ეტაპები product-designer-ის რიგით: product გვერდი (PurchaseHeader, PlayStems, Sidebar), cookie banner, მთავარი გვერდი (SpecialOffers, LeadMagnet-ის X), კალათა, auth/account, free downloads და chat header, recordings, hero mute.
++- StemsPlayerModal-ის ორი ღილაკი ელოდება mock fixture-ს, რომელშიც version stems არის, რათა ბრაუზერში შემოწმდეს.
++- SABA-Q-507-PLAYER-ICON-SHAPE: თუ Saba წრეს აირჩევს, `IconButton`-ს ემატება `shape` prop.

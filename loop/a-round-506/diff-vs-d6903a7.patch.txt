@@ -1,0 +1,117 @@
+diff --git a/app/components/marketing/LeadMagnetPopup.tsx b/app/components/marketing/LeadMagnetPopup.tsx
+index 343985d..cb98901 100644
+--- a/app/components/marketing/LeadMagnetPopup.tsx
++++ b/app/components/marketing/LeadMagnetPopup.tsx
+@@ -1,5 +1,6 @@
+ import { X } from 'lucide-react';
+ import { useEffect, useId, useRef, useState } from 'react';
++import { Button } from '~/components/ui';
+ import { useLeadMagnet, useScrollLock } from '~/hooks';
+ 
+ interface LeadMagnetPopupProps {
+@@ -178,21 +179,15 @@ export function LeadMagnetPopup({ isLoggedIn }: LeadMagnetPopupProps) {
+               Tracks, Sound Effects & More
+             </h2>
+ 
+-            <button
++            <Button
+               type="button"
++              size="lg"
++              fullWidth
+               onClick={handleContinueToEmail}
+-              className="
+-                w-full max-w-[320px]
+-                py-4 px-8
+-                bg-brand hover:bg-brand-hover
+-                text-background font-semibold uppercase tracking-wide
+-                rounded-md
+-                transition-colors
+-                cursor-pointer
+-              "
++              className="max-w-[320px] uppercase tracking-wide"
+             >
+               FREE DOWNLOAD
+-            </button>
++            </Button>
+           </div>
+         )}
+ 
+@@ -242,13 +237,15 @@ export function LeadMagnetPopup({ isLoggedIn }: LeadMagnetPopupProps) {
+                 </p>
+               )}
+ 
+-              <button
++              <Button
+                 type="submit"
++                size="lg"
++                fullWidth
+                 disabled={isSubmitting}
+-                className="w-full py-4 px-8 bg-destructive hover:brightness-110 text-brand-foreground font-semibold uppercase tracking-wide rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
++                className="uppercase tracking-wide"
+               >
+                 {isSubmitting ? 'SENDING...' : 'CONTINUE'}
+-              </button>
++              </Button>
+             </form>
+           </div>
+         )}
+@@ -269,22 +266,16 @@ export function LeadMagnetPopup({ isLoggedIn }: LeadMagnetPopupProps) {
+               We've sent your free mystery pack to your email!
+             </h2>
+ 
+-            <button
++            <Button
+               ref={backToSiteButtonRef}
+               type="button"
++              size="lg"
++              fullWidth
+               onClick={handleBackToSite}
+-              className="
+-                w-full max-w-[320px]
+-                py-4 px-8
+-                bg-brand hover:bg-brand-hover
+-                text-background font-semibold uppercase tracking-wide
+-                rounded-md
+-                transition-colors
+-                cursor-pointer
+-              "
++              className="max-w-[320px] uppercase tracking-wide"
+             >
+               BACK TO SITE
+-            </button>
++            </Button>
+           </div>
+         )}
+       </div>
+diff --git a/app/lib/__tests__/store-theme-tokens.test.ts b/app/lib/__tests__/store-theme-tokens.test.ts
+index 7ac09dd..29e68fd 100644
+--- a/app/lib/__tests__/store-theme-tokens.test.ts
++++ b/app/lib/__tests__/store-theme-tokens.test.ts
+@@ -700,12 +700,8 @@ describe('Store @theme colour tokens: Obsidian & Brass (STORE-2a)', () => {
+     expectDarkTextOnFill(buyNow[0] ?? '', 'bg-buy');
+ 
+     const leadMagnetSource = readStoreFile('app/components/marketing/LeadMagnetPopup.tsx');
+-    const leadMagnetSubmit = classAttributesWithTokens(leadMagnetSource, [
+-      'bg-destructive',
+-      'uppercase',
+-    ]);
+-    expect(leadMagnetSubmit).toHaveLength(1);
+-    expectDarkTextOnFill(leadMagnetSubmit[0] ?? '', 'bg-destructive');
++    expect(classAttributesWithTokens(leadMagnetSource, ['bg-destructive'])).toHaveLength(0);
++    expect(classAttributesWithTokens(leadMagnetSource, ['bg-brand'])).toHaveLength(0);
+     expect(leadMagnetSource).toContain("{isSubmitting ? 'SENDING...' : 'CONTINUE'}");
+ 
+     const modalBranches = /variant === 'destructive'\s*\?\s*'([^']*)'\s*:\s*'([^']*)'/.exec(
+diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+index 15320e1..8acb687 100644
+--- a/docs/design/DESIGN_SYSTEM.md
++++ b/docs/design/DESIGN_SYSTEM.md
+@@ -1153,7 +1153,7 @@ Store-ში ღილაკის სამიზნე წყაროა `But
+ 
+ | Shape | Class | გამოყენება |
+ |-------|-------|------------|
+-| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), შეტყობინების შიგნით მოქმედება (cart-ის „Upgrade“, `sm`, `min-h-11`), product გვერდის purchase card-ის მოქმედებები (`PurchaseHeader`: „Go to Downloads“, „Upgrade to Premium“, „Unlock Premium“, `lg`, `min-w-[160px]`), chat-ის guest form-ის „Start Chat“ (`lg`, `fullWidth`), Studio |
++| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), შეტყობინების შიგნით მოქმედება (cart-ის „Upgrade“, `sm`, `min-h-11`), product გვერდის purchase card-ის მოქმედებები (`PurchaseHeader`: „Go to Downloads“, „Upgrade to Premium“, „Unlock Premium“, `lg`, `min-w-[160px]`), chat-ის guest form-ის „Start Chat“ (`lg`, `fullWidth`), LeadMagnet popup-ის სამი მოქმედება „FREE DOWNLOAD“, „CONTINUE“ და „BACK TO SITE“ (`lg`, `fullWidth`, `uppercase tracking-wide`, სიგანე მაქსიმუმ 320px: „FREE DOWNLOAD“-სა და „BACK TO SITE“-ს `max-w-[320px]` აქვს, „CONTINUE“-ს ფორმა ზღუდავს; „CONTINUE“ primary-ა და არა destructive), Studio |
+ | `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“, free downloads-ის „Download“, recordings-ის „Create a scene“ (`md`, `min-h-11`), მთავარი გვერდის Studio showcase-ის „Browse the Collection“) |
+ 
+ `shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებზე, Store-ის ფორმის submit-ზე, შეტყობინების შიგნით მოქმედებაზე (cart-ის „Upgrade“) და purchase card-ის მოქმედებაზე (`PurchaseHeader`) 8px.

@@ -1,0 +1,60 @@
+102c102
+< index 8acb687..63a5537 100644
+---
+> index 8acb687..76785fb 100644
+109c109
+< +`ghost` variant: გამჭვირვალე ფონი, ტექსტი `text-muted`, hover-ზე `bg-elevated` და `text-foreground`. Store-ში მას იყენებს გლობალური audio player: „Close player“ (`sm`, 32×32px, icon 16px, title-ის სვეტზე absolute პოზიციით) და „Previous track“, „Next track“, „Mute“/„Unmute“ (`md`, 40×40px, icon 20px). Play ღილაკი (`audio-player-button-play`) IconButton არ არის.
+---
+> +`ghost` variant: გამჭვირვალე ფონი, ტექსტი `text-muted`, hover-ზე `bg-elevated` და `text-foreground`. Store-ში მას იყენებს გლობალური audio player: „Close player“ (`sm`, 32×32px, icon 16px, player-ის მარჯვენა კიდესთან absolute პოზიციით) და „Previous track“, „Next track“, „Mute“/„Unmute“ (`md`, 40×40px, icon 20px). Play ღილაკი (`audio-player-button-play`) IconButton არ არის.
+116c116
+< index 0000000..55c2aa8
+---
+> index 0000000..6bf04a5
+119c119
+< @@ -0,0 +1,177 @@
+---
+> @@ -0,0 +1,183 @@
+161c161
+< +  useAudio: () => ({ ...audioMock.state, ...audioMock }),
+---
+> +  useAudio: () => audioMock,
+173c173,179
+< +const ICON_CONTROLS = [
+---
+> +interface IconControlRow {
+> +  name: string;
+> +  size: ReadonlyArray<string>;
+> +  icon: string;
+> +}
+> +
+> +const ICON_CONTROLS: ReadonlyArray<IconControlRow> = [
+178c184
+< +] as const;
+---
+> +];
+180c186
+< +const RETIRED_TOKENS = [
+---
+> +const RETIRED_TOKENS: ReadonlyArray<string> = [
+188c194
+< +] as const;
+---
+> +];
+299c305
+< index 0000000..d005d5d
+---
+> index 0000000..3cf264a
+311c317
+< +Saba-ს DPG-FIX P1 პუნქტი 7: „Use Button.tsx component only.“ ეტაპებმა 2a–2e (docs 320–327) Store-ის brass CTA-ები `Button`-ზე, `buildButtonClassName`-ზე ან `IconButton`-ზე გადაიყვანა. დარჩა ხელით აწყობილი ღილაკები brand ფონის გარეშე: DPG-BUTTON-CLEANUP-2-NONBRAND.
+---
+> +Saba-ს DPG-FIX P1 პუნქტი 7: „Use Button.tsx component only.“ ეტაპებმა 2a–2e (docs 320–322 და 324–327) Store-ის brass CTA-ები `Button`-ზე, `buildButtonClassName`-ზე ან `IconButton`-ზე გადაიყვანა. დარჩა ხელით აწყობილი ღილაკები brand ფონის გარეშე: DPG-BUTTON-CLEANUP-2-NONBRAND.
+319,320c325,326
+< +- „Close player“ → `size="sm"` (32×32px, X icon 16px). title-ის სვეტზე absolute პოზიცია (`absolute top-1/2 right-0 -translate-y-1/2`) `className`-ით რჩება.
+< +- „Previous track“, „Next track“ და „Mute“/„Unmute“ → `size="md"` (40×40px, icon 20px, ზომა იგივეა).
+---
+> +- „Close player“ → `size="sm"` (32×32px, X icon 16px). player-ის მარჯვენა კიდესთან absolute პოზიცია (`absolute top-1/2 right-0 -translate-y-1/2`) `className`-ით რჩება.
+> +- „Previous track“, „Next track“ და „Mute“/„Unmute“ → `size="md"` (ღილაკი 36 → 40px, icon-ის ზომა 20px უცვლელია).
+346c352
+< +- **Problem:** Close ღილაკზე ერთად მოქმედებს `-translate-y-1/2` და ghost-ის `active:scale-95`. **Solution:** Tailwind v4-ში `translate` და `scale` ცალკე CSS property-ებია. C ზომავს Close-ის ცენტრს დაჭერისას.
+---
+> +- **Problem:** დაჭერისას Close ღილაკზე ერთად მოქმედებს `-translate-y-1/2`, ghost-ის `active:scale-95` და გლობალური `button:active` scale 0.98 (`app.css`). **Solution:** Tailwind v4-ში `translate` და `scale` ცალკე CSS property-ებია, scale კი ცენტრიდან მოქმედებს, ამიტომ ღილაკი ადგილზე რჩება. C ზომავს Close-ის ცენტრს დაჭერისას.
