@@ -1,0 +1,69 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": false,
+ "realVerified": false,
+ "envStatus": {
+  "checkedUtc": "2026-11-14T07:14:26.8940602Z",
+  "round": 507,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "A-R507-CR-1-N1-2-SWAP-MUTANT",
+   "severity": "medium",
+   "steps": [
+    "Read app/lib/__tests__/store-button-cleanup-n1.test.tsx N1-2 (l.117-125)",
+    "Four fireEvent.click calls run first, then each mock is asserted only with toHaveBeenCalledTimes(1)",
+    "Swap Previous/Next handlers: counts stay 1/1, test stays green (A's a-round-507/mutant-swap.log)"
+   ],
+   "expected": "N1-2 fails when two controls' handlers are swapped",
+   "actual": "A swap mutant survives; A STOPPED the round (fix outside grants, check 4 pins the bytes). Nothing was delivered for C to verify in the browser",
+   "evidence": "a-round-507.md; a-round-507/proposed-n1-2-fix.diff.txt (untested); C re-read the test source and confirmed the logic. Not ruled Low by B (pre-ruled #2 covers N1-1/3/4 only). Return to B: rule severity or issue sketch v3 with per-click assertions + mutant M7.",
+   "origin": "B pre-check (mutant matrix lacked a pure-swap mutant; found by A code-reviewer)"
+  }
+ ],
+ "passed": [
+  "C0-SOURCE-SCOPE: 2 modified + 2 untracked exactly the granted paths; frozen checks 1,2,4 rc 0",
+  "C11-PROTECTION: /studio/1 and /account/downloads show 'Sign in required', no download link (fresh no-credential context, 1440 and 1280)",
+  "C11-STUDIO-LAB: /studio-lab opens demo without sign-in at 1440 and 1280, 9 clips, 0 page errors",
+  "C12-CLAIMS: claims-507.sh 0 MISSING; only K1/K2 differ (HEAD, dirty worktree)"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "biome",
+  "npm run verify"
+ ],
+ "blocked": [
+  "C1-C6, C8-C10 not run: A STOPped before delivery of a verified change (L22); mock API :5199 also not running (not needed for run rows)"
+ ],
+ "notRun": [
+  "C1 REST",
+  "C2 HOVER/PRESS",
+  "C3 KEYBOARD FOCUS",
+  "C4 CONTRAST",
+  "C5 LAYOUT",
+  "C6 REAL AUDIO BEHAVIOUR",
+  "C7 GREP",
+  "C8 covering tests",
+  "C9 mutants",
+  "C10 DOCS"
+ ],
+ "nulls": {
+  "C1-C10": "not run per L22 after A STOP; these browser rows CAN run here, hence browserVerified=false"
+ },
+ "manifestPaths": null,
+ "missingPaths": null,
+ "countMismatches": null,
+ "claimCheckMinutes": null,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": null,
+ "gateChecksNamed": null,
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null,
+ "nullReasons": "All L57 fields null: C ran only C0/C11/C12 after A STOP (L22); no sketch checks were run by C."
+}

@@ -1,0 +1,24 @@
+app/components/audio/AudioPlayer.tsx:96:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+     94 │             </IconButton>
+     95 │ 
+   > 96 │             <button
+        │             ^^^^^^^
+   > 97 │               onClick={togglePlayPause}
+   > 98 │               className="audio-player-button-play flex items-center justify-center rounded-full cursor-pointer"
+   > 99 │               aria-busy={isLoading}
+  > 100 │               aria-label={isLoading ? 'Cancel loading preview' : isPlaying ? 'Pause' : 'Play'}
+  > 101 │             >
+        │             ^
+    102 │               {isLoading ? (
+    103 │                 <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+Checked 2 files in 9ms. No fixes applied.
+Found 1 warning.

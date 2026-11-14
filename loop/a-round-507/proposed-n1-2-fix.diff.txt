@@ -1,0 +1,37 @@
+PROPOSED, NOT APPLIED, UNTESTED (not run through vitest, typecheck or Biome; M7 turning red under it is expected, not observed). For B's sketch v3 (A-R507-CR-1-N1-2-SWAP-MUTANT). Replaces test l.115-125 opening of N1-2.
+
+--- a/app/lib/__tests__/store-button-cleanup-n1.test.tsx
++++ b/app/lib/__tests__/store-button-cleanup-n1.test.tsx
+@@
+   it('N1-2: the controls call their own actions once, and Mute flips to Unmute at volume 0', () => {
+     const view = renderPlayer();
+-    fireEvent.click(screen.getByRole('button', { name: 'Close player' }));
+-    fireEvent.click(screen.getByRole('button', { name: 'Previous track' }));
+-    fireEvent.click(screen.getByRole('button', { name: 'Next track' }));
+-    fireEvent.click(screen.getByRole('button', { name: 'Mute' }));
+-    expect(audioMock.closePlayer).toHaveBeenCalledTimes(1);
+-    expect(audioMock.skipPrevious).toHaveBeenCalledTimes(1);
+-    expect(audioMock.skipNext).toHaveBeenCalledTimes(1);
+-    expect(audioMock.setVolume).toHaveBeenCalledTimes(1);
+-    expect(audioMock.setVolume).toHaveBeenLastCalledWith(0);
++    const actions = [audioMock.closePlayer, audioMock.skipPrevious, audioMock.skipNext, audioMock.setVolume];
++    const steps = [
++      { name: 'Close player', action: audioMock.closePlayer },
++      { name: 'Previous track', action: audioMock.skipPrevious },
++      { name: 'Next track', action: audioMock.skipNext },
++      { name: 'Mute', action: audioMock.setVolume },
++    ];
++    for (const step of steps) {
++      vi.clearAllMocks();
++      fireEvent.click(screen.getByRole('button', { name: step.name }));
++      for (const action of actions) {
++        expect(action).toHaveBeenCalledTimes(action === step.action ? 1 : 0);
++      }
++    }
++    expect(audioMock.setVolume).toHaveBeenLastCalledWith(0);
+
+Mutant matrix addition (mutants-507.txt):
+M7-prev-next-swap: AudioPlayer.tsx Previous onClick={skipNext}, Next onClick={skipPrevious}; expected red=N1-2.
+Current sketch v2 result for M7: rc 0, 5/5 green (a-round-507/mutant-swap.log) = survives.
+Optionally M8-close-calls-next for the Close/skip swap.
+Note: vi.clearAllMocks() inside the loop is safe here because the rerender part of N1-2 below runs after the loop; B should confirm that the per-step reset does not break the later setVolume(0.7) assertion (it calls clearAllMocks only before each click).

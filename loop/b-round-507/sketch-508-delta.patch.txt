@@ -1,0 +1,186 @@
+diff --git a/app/lib/__tests__/store-button-cleanup-n1.test.tsx b/app/lib/__tests__/store-button-cleanup-n1.test.tsx
+index 6bf04a5..36685a9 100644
+--- a/app/lib/__tests__/store-button-cleanup-n1.test.tsx
++++ b/app/lib/__tests__/store-button-cleanup-n1.test.tsx
+@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+ import { MemoryRouter } from 'react-router-dom';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { AudioPlayer } from '~/components/audio/AudioPlayer';
++import { IconButton } from '~/components/ui';
+ import type { Track } from '~/contexts/AudioContext';
+ import { APP_ROOT } from './helpers/style-scan';
+ 
+@@ -54,14 +55,22 @@ const playerTrack: Track = {
+ interface IconControlRow {
+   name: string;
+   size: ReadonlyArray<string>;
++  iconButtonSize: 'sm' | 'md';
++  extra: ReadonlyArray<string>;
+   icon: string;
+ }
+ 
+ const ICON_CONTROLS: ReadonlyArray<IconControlRow> = [
+-  { name: 'Close player', size: ['w-8', 'h-8'], icon: '16' },
+-  { name: 'Previous track', size: ['w-10', 'h-10'], icon: '20' },
+-  { name: 'Next track', size: ['w-10', 'h-10'], icon: '20' },
+-  { name: 'Mute', size: ['w-10', 'h-10'], icon: '20' },
++  {
++    name: 'Close player',
++    size: ['w-8', 'h-8'],
++    iconButtonSize: 'sm',
++    extra: ['absolute', 'top-1/2', 'right-0', '-translate-y-1/2'],
++    icon: '16',
++  },
++  { name: 'Previous track', size: ['w-10', 'h-10'], iconButtonSize: 'md', extra: [], icon: '20' },
++  { name: 'Next track', size: ['w-10', 'h-10'], iconButtonSize: 'md', extra: [], icon: '20' },
++  { name: 'Mute', size: ['w-10', 'h-10'], iconButtonSize: 'md', extra: [], icon: '20' },
+ ];
+ 
+ const RETIRED_TOKENS: ReadonlyArray<string> = [
+@@ -86,6 +95,17 @@ function classTokens(element: HTMLElement): string[] {
+   return element.className.split(/\s+/).filter(Boolean);
+ }
+ 
++function ghostReferenceTokens(size: 'sm' | 'md'): string[] {
++  const reference = render(
++    <IconButton variant="ghost" size={size} label="Reference">
++      <svg />
++    </IconButton>,
++  );
++  const tokens = classTokens(screen.getByRole('button', { name: 'Reference' }));
++  reference.unmount();
++  return tokens;
++}
++
+ describe('DPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon controls on IconButton', () => {
+   beforeEach(() => {
+     vi.clearAllMocks();
+@@ -112,16 +132,29 @@ describe('DPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon contro
+     }
+   });
+ 
+-  it('N1-2: the controls call their own actions once, and Mute flips to Unmute at volume 0', () => {
++  it('N1-2: each control calls only its own action, and Mute flips to Unmute at volume 0', () => {
+     const view = renderPlayer();
+-    fireEvent.click(screen.getByRole('button', { name: 'Close player' }));
+-    fireEvent.click(screen.getByRole('button', { name: 'Previous track' }));
+-    fireEvent.click(screen.getByRole('button', { name: 'Next track' }));
+-    fireEvent.click(screen.getByRole('button', { name: 'Mute' }));
+-    expect(audioMock.closePlayer).toHaveBeenCalledTimes(1);
+-    expect(audioMock.skipPrevious).toHaveBeenCalledTimes(1);
+-    expect(audioMock.skipNext).toHaveBeenCalledTimes(1);
+-    expect(audioMock.setVolume).toHaveBeenCalledTimes(1);
++    const actions = [
++      audioMock.closePlayer,
++      audioMock.skipPrevious,
++      audioMock.skipNext,
++      audioMock.setVolume,
++      audioMock.togglePlayPause,
++      audioMock.seek,
++    ];
++    const steps = [
++      { name: 'Close player', action: audioMock.closePlayer },
++      { name: 'Previous track', action: audioMock.skipPrevious },
++      { name: 'Next track', action: audioMock.skipNext },
++      { name: 'Mute', action: audioMock.setVolume },
++    ];
++    for (const step of steps) {
++      vi.clearAllMocks();
++      fireEvent.click(screen.getByRole('button', { name: step.name }));
++      for (const action of actions) {
++        expect(action).toHaveBeenCalledTimes(action === step.action ? 1 : 0);
++      }
++    }
+     expect(audioMock.setVolume).toHaveBeenLastCalledWith(0);
+ 
+     audioMock.state.volume = 0;
+@@ -133,8 +166,11 @@ describe('DPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon contro
+     expect(screen.queryByRole('button', { name: 'Mute' })).toBeNull();
+     const unmute = screen.getByRole('button', { name: 'Unmute' });
+     expect(unmute.getAttribute('title')).toBe('Unmute');
++    vi.clearAllMocks();
+     fireEvent.click(unmute);
+-    expect(audioMock.setVolume).toHaveBeenCalledTimes(2);
++    for (const action of actions) {
++      expect(action).toHaveBeenCalledTimes(action === audioMock.setVolume ? 1 : 0);
++    }
+     expect(audioMock.setVolume).toHaveBeenLastCalledWith(0.7);
+   });
+ 
+@@ -159,6 +195,15 @@ describe('DPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon contro
+     }
+   });
+ 
++  it('N1-7: each control has exactly the ghost IconButton classes plus only its own position classes', () => {
++    renderPlayer();
++    for (const control of ICON_CONTROLS) {
++      const tokens = classTokens(screen.getByRole('button', { name: control.name }));
++      const expected = [...ghostReferenceTokens(control.iconButtonSize), ...control.extra];
++      expect([...tokens].sort()).toEqual([...expected].sort());
++    }
++  });
++
+   it('N1-4: no icon control keeps a retired hand-rolled token, and each icon keeps its size', () => {
+     renderPlayer();
+     for (const control of ICON_CONTROLS) {
+@@ -169,6 +214,21 @@ describe('DPG-BUTTON-CLEANUP-2-NONBRAND stage N1: global AudioPlayer icon contro
+       }
+       const svg = button.querySelector('svg');
+       expect(svg?.getAttribute('width')).toBe(control.icon);
++      expect(svg?.getAttribute('height')).toBe(control.icon);
++    }
++  });
++
++  it('N1-6: the volume icon keeps 20px at volume 0 (Unmute) and at 0.01, which is still labelled Mute', () => {
++    for (const level of [
++      { volume: 0, name: 'Unmute' },
++      { volume: 0.01, name: 'Mute' },
++    ]) {
++      audioMock.state.volume = level.volume;
++      renderPlayer();
++      const svg = screen.getByRole('button', { name: level.name }).querySelector('svg');
++      expect(svg?.getAttribute('width')).toBe('20');
++      expect(svg?.getAttribute('height')).toBe('20');
++      cleanup();
+     }
+   });
+ 
+diff --git a/docs/implementation/2026/quarter-IV/328-dpg-nonbrand-stage-n1-audio-player.md b/docs/implementation/2026/quarter-IV/328-dpg-nonbrand-stage-n1-audio-player.md
+index 3cf264a..5220422 100644
+--- a/docs/implementation/2026/quarter-IV/328-dpg-nonbrand-stage-n1-audio-player.md
++++ b/docs/implementation/2026/quarter-IV/328-dpg-nonbrand-stage-n1-audio-player.md
+@@ -1,7 +1,7 @@
+ # DPG-BUTTON-CLEANUP-2-NONBRAND, ეტაპი N1: გლობალური audio player-ის icon ღილაკები
+ 
+ **თარიღი:** 2026-11-14
+-**სტატუსი:** In Progress (stage N1 of DPG-BUTTON-CLEANUP-2-NONBRAND; C round 507 PASS)
++**სტატუსი:** In Progress (stage N1 of DPG-BUTTON-CLEANUP-2-NONBRAND; C round 508 PASS)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -41,19 +41,21 @@ state, effect ან ref-ის მფლობელობა არ გად
+ ## პრობლემები და გადაწყვეტები
+ 
+ - **Problem:** `IconButton`-ს `className`-ის შერწყმა არ აქვს, ამიტომ `rounded-full`-ის დამატება საიმედოდ არ გადაფარავს `rounded-lg`-ს. **Solution:** ფორმა არ გადაიფარება; წრე მხოლოდ ცალკე `shape` prop-ით შეიძლება (Saba-ს კითხვა).
+-- **Problem:** დაჭერისას Close ღილაკზე ერთად მოქმედებს `-translate-y-1/2`, ghost-ის `active:scale-95` და გლობალური `button:active` scale 0.98 (`app.css`). **Solution:** Tailwind v4-ში `translate` და `scale` ცალკე CSS property-ებია, scale კი ცენტრიდან მოქმედებს, ამიტომ ღილაკი ადგილზე რჩება. C ზომავს Close-ის ცენტრს დაჭერისას.
++- **Problem:** დაჭერისას Close ღილაკზე ერთად მოქმედებს `-translate-y-1/2`, ghost-ის `active:scale-95` და გლობალური `button:active` scale 0.98 (`app/styles/app.css` და `app/styles/base/utilities.css`). **Solution:** Tailwind v4-ში `translate` და `scale` ცალკე CSS property-ებია, scale კი ცენტრიდან მოქმედებს, ამიტომ ღილაკი ადგილზე რჩება. C ზომავს Close-ის ცენტრს დაჭერისას.
+ 
+ ## ტესტირება
+ 
+ `store-button-cleanup-n1.test.tsx`:
+ 
+ - N1-1: ოთხივე ღილაკი ერთია თავისი სახელით, და `title` უდრის სახელს.
+-- N1-2: თითო ღილაკი თავის action-ს ერთხელ იძახებს; volume 0-ზე „Mute“ ხდება „Unmute“, ხოლო click-ზე `setVolume(0.7)` გამოიძახება.
++- N1-2: თითო click-ის შემდეგ მხოლოდ ამ ღილაკის action არის გამოძახებული ერთხელ, დანარჩენი ხუთი (Play-სა და seek-ის ჩათვლით) — არცერთხელ; volume 0-ზე „Mute“ ხდება „Unmute“, ხოლო click-ზე მხოლოდ `setVolume(0.7)` გამოიძახება.
+ - N1-3: ghost-ის კლასები შესაბამის ზომაზე; Close-ს პოზიცია რჩება.
+-- N1-4: ძველი hand-rolled token-ები აღარ არის; icon-ის ზომა 16/20px.
++- N1-4: ძველი hand-rolled token-ები აღარ არის; icon-ის width და height 16/20px.
++- N1-6: volume-ის icon 20px რჩება volume 0-ზე (Unmute) და 0.01-ზე, სადაც ღილაკი ისევ „Mute“-ია.
++- N1-7: თითო ღილაკის class-ების სიმრავლე ზუსტად უდრის ghost `IconButton`-ის class-ებს (შესაბამისი ზომით) და მხოლოდ Close-ის ოთხ პოზიციის class-ს.
+ - N1-5: `AudioPlayer.tsx`-ში ერთი `<button` (Play) და ოთხი `<IconButton`; `bg-white/10` და `hover:text-error` აღარ არის.
+ 
+-mutant-ები M0–M6 (`b-round-506/mutants-507.txt`) თითოეული თავის row-ზე წითელია. ბრაუზერში C ამოწმებს ზომებს, ფერებს, hover-ს, keyboard focus-ის ring-ს და განლაგებას 1440×900, 1280×720 და 375×812 სიგანეებზე.
++mutant-ები M0–M14 (`b-round-507/mutants-508.txt`) თითოეული თავის row-ზე წითელია. ბრაუზერში C ამოწმებს ზომებს, ფერებს, hover-ს, keyboard focus-ის ring-ს და განლაგებას 1440×900, 1280×720 და 375×812 სიგანეებზე.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
