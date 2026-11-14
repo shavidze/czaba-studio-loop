@@ -1,0 +1,14 @@
+# B round 500 -> 501 checkpoint
+- step 1 done: archived tasks/round-500.md (cmp rc0), backups of backlog/b-next/feature-status/current-task in b-round-500/.
+- gate 500 published 462570e; baseline HEAD 462570e, tree clean.
+- next: inputs (gates/round-500, user-review answers, protected list), then 2b-2 sketch.
+- step 2 done: backlog v494 (D-29z1797/1798) closes round 500 ids
+- step 3: HEAD probe b-round-500/probe/head (measure-501.mjs); frozen lists r501-tree-sha256.txt (1406 files; grants FD, HU, NL, store-theme-tokens.test.ts, DESIGN_SYSTEM.md + new test + doc 322) and r501-pre-sha.txt; scratch /home/runner/b501-scratch (git base 13d94d7 = HEAD 462570e copy); draft test app/lib/__tests__/store-button-cleanup-2b2.test.tsx in scratch.
+- waiting: product-designer consult (background) -> b-round-500/consult-product-designer.md
+- step 4: PD consult saved (consult-product-designer.md)
+- step 5: sketch applied in scratch; tsc/lint(179)/biome/full 298/4336/build done
+- step 6: mutants M1-M19 all RED (mutants-501.txt); covering 15/178; next doc 322 + patch + tech-lead
+- step 7: TL CHANGES-REQUIRED fixed (B2B2-6 brace scanner, B2B2-7, RemixState type, icon order/identity, FD form null, doc 322 deltas); v2 patch frozen; full 298/4337, build rc0, covering 15/179, mutants 24 RED. next: TL delta re-review, doc-ledger, claims, task
+- step 8: v3 sha 13624731 APPROVE (sketch-review.md); next: task file, claims, backlog part 2, feature-status, b-round-500.md, b-next.json
+- step 9: task, backlog v495, feature-status, b-round-500.md, b-next.json written; :5174 and B's mock stopped; root :5173 untouched
+- step 10: closing-check fix v4 acb11d51 (D5 measured shadow, DS sentence, M31); tech-lead APPROVE; claims re-run no MISSING; L58 OK. B phase complete.

@@ -1,0 +1,512 @@
+diff --git a/app/components/home/NewsletterSection.tsx b/app/components/home/NewsletterSection.tsx
+index cbf91f8..833a5f1 100644
+--- a/app/components/home/NewsletterSection.tsx
++++ b/app/components/home/NewsletterSection.tsx
+@@ -2,6 +2,7 @@ import { useFetcher } from '@remix-run/react';
+ import { motion } from 'framer-motion';
+ import { AlertCircle, Loader2, Mail, Sparkles, Star, Users } from 'lucide-react';
+ import { useEffect, useRef } from 'react';
++import { Button } from '~/components/ui';
+ import { PageContainer } from '../layout';
+ 
+ const PERKS = [{ label: 'Early Access' }, { label: 'Secret Tracks' }, { label: 'Exclusive Drops' }];
+@@ -78,20 +79,16 @@ export function NewsletterSection() {
+                 className="h-14 w-full rounded-lg border-2 border-outline-strong bg-surface pl-12 pr-4 text-foreground transition-all placeholder:text-muted disabled:opacity-50"
+               />
+             </div>
+-            <button
+-              type="submit"
+-              disabled={isSubmitting}
+-              className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand px-8 font-semibold text-background transition-all hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-70"
+-            >
++            <Button type="submit" size="lg" disabled={isSubmitting} className="h-14">
+               {isSubmitting ? (
+                 <>
+-                  <Loader2 size={18} className="animate-spin" />
++                  <Loader2 size={18} className="animate-spin motion-reduce:animate-none" />
+                   <span>Subscribing...</span>
+                 </>
+               ) : (
+                 'Subscribe'
+               )}
+-            </button>
++            </Button>
+           </fetcher.Form>
+ 
+           {/* Success Message */}
+diff --git a/app/lib/__tests__/store-button-cleanup-2b2.test.tsx b/app/lib/__tests__/store-button-cleanup-2b2.test.tsx
+new file mode 100644
+index 0000000..36cd917
+--- /dev/null
++++ b/app/lib/__tests__/store-button-cleanup-2b2.test.tsx
+@@ -0,0 +1,266 @@
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { cleanup, fireEvent, render, screen } from '@testing-library/react';
++import { forwardRef, type ReactNode } from 'react';
++import { afterEach, describe, expect, it, vi } from 'vitest';
++import { buildButtonClassName } from '~/components/ui';
++import { APP_ROOT } from './helpers/style-scan';
++
++type RemixState = { navigation: string; fetcher: string; loader: unknown };
++
++const remixState = vi.hoisted(
++  (): RemixState => ({ navigation: 'idle', fetcher: 'idle', loader: undefined }),
++);
++
++vi.mock('@remix-run/react', () => {
++  const FetcherForm = forwardRef<HTMLFormElement, { children: ReactNode; className?: string }>(
++    ({ children, className }, ref) => (
++      <form ref={ref} className={className}>
++        {children}
++      </form>
++    ),
++  );
++  return {
++    Form: ({ children, className }: { children: ReactNode; className?: string }) => (
++      <form className={className}>{children}</form>
++    ),
++    Link: ({
++      children,
++      to,
++      className,
++    }: {
++      children: ReactNode;
++      to: string;
++      className?: string;
++    }) => (
++      <a href={to} className={className}>
++        {children}
++      </a>
++    ),
++    useActionData: () => undefined,
++    useLoaderData: () => remixState.loader,
++    useNavigation: () => ({ state: remixState.navigation, location: undefined }),
++    useFetcher: () => ({ state: remixState.fetcher, data: undefined, Form: FetcherForm }),
++  };
++});
++
++import { NewsletterSection } from '~/components/home/NewsletterSection';
++import FreeDownloadsPage, { loader as freeDownloadsLoader } from '~/routes/free-downloads';
++import HireUsPage from '~/routes/hire-us';
++
++const PRIMARY_LG_PILL =
++  'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-6 py-3 text-base gap-2';
++const PRIMARY_LG_H14 =
++  'inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-6 py-3 text-base gap-2 h-14';
++const PRIMARY_LG_H14_DISABLED =
++  'inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-6 py-3 text-base gap-2 opacity-50 cursor-not-allowed pointer-events-none h-14';
++const PRIMARY_LG_FULL =
++  'inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-6 py-3 text-base gap-2 w-full';
++const PRIMARY_LG_FULL_DISABLED =
++  'inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm px-6 py-3 text-base gap-2 w-full opacity-50 cursor-not-allowed pointer-events-none';
++const SPINNER_TOKENS = ['animate-spin', 'motion-reduce:animate-none'];
++
++const FREE_ITEM_TITLES = ['Lo-Fi Essentials Starter', 'Cinematic Impacts', 'Ambient Textures'];
++
++async function loadFreeItems(): Promise<unknown> {
++  const response = await freeDownloadsLoader();
++  return response.json();
++}
++
++function isBefore(first: Element, second: Element): boolean {
++  return (first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
++}
++
++function openingTags(source: string, tagName: string): string[] {
++  const tags: string[] = [];
++  const pattern = new RegExp(`<${tagName}(?=[\\s>])`, 'g');
++  for (let match = pattern.exec(source); match; match = pattern.exec(source)) {
++    let depth = 0;
++    let quote = '';
++    let end = match.index + match[0].length;
++    for (; end < source.length; end++) {
++      const char = source[end];
++      if (quote) {
++        if (char === quote) quote = '';
++      } else if (char === '"' || char === "'" || char === '`') {
++        quote = char;
++      } else if (char === '{') {
++        depth++;
++      } else if (char === '}') {
++        depth--;
++      } else if (char === '>' && depth === 0) {
++        break;
++      }
++    }
++    tags.push(source.slice(match.index, end + 1));
++  }
++  return tags;
++}
++
++function hasSolidBrass(tag: string): boolean {
++  return /(?:^|[\s"'`])bg-brand(?:[\s"'`]|$)/.test(tag);
++}
++
++function expectIconThenLabel(button: Element, iconClass: string, label: string): void {
++  const children = [...button.children];
++  expect(children).toHaveLength(2);
++  expect(children[0]?.tagName.toLowerCase()).toBe('svg');
++  expect((children[0]?.getAttribute('class') ?? '').split(/\s+/)).toContain(iconClass);
++  expect(children[1]?.tagName).toBe('SPAN');
++  expect(children[1]?.textContent).toBe(label);
++}
++
++function svgClassTokens(element: Element): string[] {
++  const icons = [...element.querySelectorAll('svg')];
++  expect(icons).toHaveLength(1);
++  return (icons[0]?.getAttribute('class') ?? '').split(/\s+/);
++}
++
++afterEach(() => {
++  cleanup();
++  remixState.navigation = 'idle';
++  remixState.fetcher = 'idle';
++  remixState.loader = undefined;
++});
++
++describe('DPG-BUTTON-CLEANUP-2 stage 2b-2', () => {
++  it('B2B2-0: the literal oracles equal the builder output for the three sites', () => {
++    expect(buildButtonClassName({ size: 'lg', shape: 'pill' })).toBe(PRIMARY_LG_PILL);
++    expect(buildButtonClassName({ size: 'lg', className: 'h-14' })).toBe(PRIMARY_LG_H14);
++    expect(buildButtonClassName({ size: 'lg', className: 'h-14', isDisabled: true })).toBe(
++      PRIMARY_LG_H14_DISABLED,
++    );
++    expect(buildButtonClassName({ size: 'lg', fullWidth: true })).toBe(PRIMARY_LG_FULL);
++    expect(buildButtonClassName({ size: 'lg', fullWidth: true, isDisabled: true })).toBe(
++      PRIMARY_LG_FULL_DISABLED,
++    );
++  });
++
++  it('B2B2-1: free-downloads Download is a primary lg pill toggle button on every card', async () => {
++    remixState.loader = await loadFreeItems();
++    render(<FreeDownloadsPage />);
++    const buttons = screen.getAllByRole('button', { name: 'Download' });
++    expect(buttons).toHaveLength(FREE_ITEM_TITLES.length);
++    for (const button of buttons) {
++      expect(button.tagName).toBe('BUTTON');
++      expect(button.getAttribute('type')).toBe('button');
++      expect(button.className).toBe(PRIMARY_LG_PILL);
++      expect(button.getAttribute('aria-expanded')).toBe('false');
++      expect(button.hasAttribute('disabled')).toBe(false);
++      expect(button.textContent).toBe('Download');
++      expectIconThenLabel(button, 'lucide-download', 'Download');
++      expect(button.closest('form')).toBeNull();
++    }
++    expect(screen.queryAllByRole('button', { name: 'Send Download Link' })).toHaveLength(0);
++  });
++
++  it('B2B2-2: Download opens and closes only its own email form and reports aria-expanded', async () => {
++    remixState.loader = await loadFreeItems();
++    render(<FreeDownloadsPage />);
++    const [first, second, third] = screen.getAllByRole('button', { name: 'Download' });
++    if (!first || !second || !third) throw new Error('three Download buttons expected');
++    fireEvent.click(first);
++    expect(first.getAttribute('aria-expanded')).toBe('true');
++    expect(second.getAttribute('aria-expanded')).toBe('false');
++    expect(third.getAttribute('aria-expanded')).toBe('false');
++    const submits = screen.getAllByRole('button', { name: 'Send Download Link' });
++    expect(submits).toHaveLength(1);
++    expect(submits[0]?.getAttribute('type')).toBe('submit');
++    expect(first.className).toBe(PRIMARY_LG_PILL);
++    fireEvent.click(first);
++    expect(first.getAttribute('aria-expanded')).toBe('false');
++    expect(screen.queryAllByRole('button', { name: 'Send Download Link' })).toHaveLength(0);
++  });
++
++  it('B2B2-3: Download stays enabled while another form submits', async () => {
++    remixState.loader = await loadFreeItems();
++    remixState.navigation = 'submitting';
++    render(<FreeDownloadsPage />);
++    const buttons = screen.getAllByRole('button', { name: 'Download' });
++    expect(buttons).toHaveLength(FREE_ITEM_TITLES.length);
++    for (const button of buttons) {
++      expect(button.hasAttribute('disabled')).toBe(false);
++      expect(button.className).toBe(PRIMARY_LG_PILL);
++    }
++  });
++
++  it('B2B2-4: newsletter Subscribe is a primary lg 56 px submit after the email field, idle then busy', () => {
++    const ui = () => <NewsletterSection />;
++    const { rerender } = render(ui());
++    const field = screen.getByPlaceholderText('Enter your email');
++    const idle = screen.getByRole('button', { name: 'Subscribe' });
++    expect(idle.getAttribute('type')).toBe('submit');
++    expect(idle.className).toBe(PRIMARY_LG_H14);
++    expect(idle.hasAttribute('disabled')).toBe(false);
++    expect(idle.querySelectorAll('svg')).toHaveLength(0);
++    expect(idle.closest('form')).not.toBeNull();
++    expect(idle.closest('form')).toBe(field.closest('form'));
++    expect(isBefore(field, idle)).toBe(true);
++
++    remixState.fetcher = 'submitting';
++    rerender(ui());
++    expect(screen.queryAllByRole('button', { name: 'Subscribe' })).toHaveLength(0);
++    const busy = screen.getByRole('button', { name: 'Subscribing...' });
++    expect(busy.getAttribute('type')).toBe('submit');
++    expect(busy.hasAttribute('disabled')).toBe(true);
++    expect(busy.className).toBe(PRIMARY_LG_H14_DISABLED);
++    expect(busy.textContent).toBe('Subscribing...');
++    const spinner = svgClassTokens(busy);
++    for (const token of SPINNER_TOKENS) expect(spinner).toContain(token);
++    expectIconThenLabel(busy, 'lucide-loader-circle', 'Subscribing...');
++    expect(screen.getByPlaceholderText('Enter your email').hasAttribute('disabled')).toBe(true);
++  });
++
++  it('B2B2-5: hire-us Send Message is a full-width primary lg submit, idle then busy with a token spinner', () => {
++    const ui = () => <HireUsPage />;
++    const { rerender, container } = render(ui());
++    const message = container.querySelector('#message');
++    const idle = screen.getByRole('button', { name: 'Send Message' });
++    expect(idle.getAttribute('type')).toBe('submit');
++    expect(idle.className).toBe(PRIMARY_LG_FULL);
++    expect(idle.hasAttribute('disabled')).toBe(false);
++    expect(idle.textContent).toBe('Send Message');
++    expectIconThenLabel(idle, 'lucide-send', 'Send Message');
++    expect(message).not.toBeNull();
++    expect(message ? isBefore(message, idle) : false).toBe(true);
++    expect(idle.closest('form')).toBe(message?.closest('form'));
++
++    remixState.navigation = 'submitting';
++    rerender(ui());
++    expect(screen.queryAllByRole('button', { name: 'Send Message' })).toHaveLength(0);
++    const busy = screen.getByRole('button', { name: 'Sending...' });
++    expect(busy.getAttribute('type')).toBe('submit');
++    expect(busy.hasAttribute('disabled')).toBe(true);
++    expect(busy.className).toBe(PRIMARY_LG_FULL_DISABLED);
++    expect(busy.textContent).toBe('Sending...');
++    const spinner = svgClassTokens(busy);
++    for (const token of SPINNER_TOKENS) expect(spinner).toContain(token);
++    expectIconThenLabel(busy, 'lucide-loader-circle', 'Sending...');
++    expect(container.querySelectorAll('[class*="border-white"]')).toHaveLength(0);
++  });
++
++  it('B2B2-6: the three stage-2b-2 files import Button from the ui barrel, render one Button and keep no raw brass button', () => {
++    for (const file of [
++      'routes/free-downloads.tsx',
++      'routes/hire-us.tsx',
++      'components/home/NewsletterSection.tsx',
++    ]) {
++      const source = readFileSync(join(APP_ROOT, file), 'utf8');
++      expect(source, file).toContain("import { Button } from '~/components/ui';");
++      expect(openingTags(source, 'button').filter(hasSolidBrass), file).toEqual([]);
++      expect(openingTags(source, 'Button'), file).toHaveLength(1);
++    }
++  });
++
++  it('B2B2-7: the tag scanner reads a raw brass button whose arrow handler comes before its class', () => {
++    const headShape =
++      '<button\n  onClick={() => setIsExpanded(!isExpanded)}\n  className="px-6 py-3 bg-brand rounded-full"\n>\n  <span>Download</span>\n</button>';
++    expect(openingTags(headShape, 'button').filter(hasSolidBrass)).toHaveLength(1);
++    expect(
++      openingTags('<button className="bg-brand/10 text-brand">x</button>', 'button').filter(
++        hasSolidBrass,
++      ),
++    ).toHaveLength(0);
++    expect(openingTags('<Button size="lg">x</Button>', 'button')).toHaveLength(0);
++  });
++});
+diff --git a/app/lib/__tests__/store-theme-tokens.test.ts b/app/lib/__tests__/store-theme-tokens.test.ts
+index 693aa1c..7ac09dd 100644
+--- a/app/lib/__tests__/store-theme-tokens.test.ts
++++ b/app/lib/__tests__/store-theme-tokens.test.ts
+@@ -673,13 +673,11 @@ describe('Store @theme colour tokens: Obsidian & Brass (STORE-2a)', () => {
+       expect(buttonSource).toContain(block);
+     }
+ 
+-    const hireUsSubmit = classAttributesWithTokens(readStoreFile('app/routes/hire-us.tsx'), [
+-      'bg-brand',
+-      'w-full',
+-      'rounded-xl',
+-    ]);
+-    expect(hireUsSubmit).toHaveLength(1);
+-    expectDarkTextOnFill(hireUsSubmit[0] ?? '', 'bg-brand');
++    const hireUsSource = readStoreFile('app/routes/hire-us.tsx');
++    expect(classAttributesWithTokens(hireUsSource, ['bg-brand'])).toHaveLength(0);
++    expect(hireUsSource).toContain(
++      '<Button type="submit" size="lg" fullWidth disabled={isSubmitting}>',
++    );
+ 
+     const ordersSource = readStoreFile('app/routes/account.orders.tsx');
+     expect(classAttributesWithTokens(ordersSource, ['bg-brand'])).toHaveLength(0);
+diff --git a/app/routes/free-downloads.tsx b/app/routes/free-downloads.tsx
+index f544881..3303dfd 100644
+--- a/app/routes/free-downloads.tsx
++++ b/app/routes/free-downloads.tsx
+@@ -32,6 +32,7 @@ export const meta: MetaFunction = () => {
+ 
+ import { Form, useActionData, useLoaderData, useNavigation } from '@remix-run/react';
+ import { Check, Download, Mail, Mic, Music, Sliders } from 'lucide-react';
++import { Button } from '~/components/ui';
+ import { debug } from '~/lib/debug';
+ import { backupLeadToFirebase, type FirebaseLeadBackup } from '~/lib/firebase.server';
+ 
+@@ -279,13 +280,16 @@ function FreeItemCard({ item }: { item: FreeItem }) {
+                 <span className="text-sm">On its way to your inbox</span>
+               </div>
+             ) : (
+-              <button
++              <Button
++                type="button"
++                size="lg"
++                shape="pill"
++                aria-expanded={isExpanded}
+                 onClick={() => setIsExpanded(!isExpanded)}
+-                className="px-6 py-3 bg-brand hover:bg-brand/90 text-background font-medium rounded-full transition-colors flex items-center gap-2 cursor-pointer"
+               >
+                 <Download size={18} />
+                 <span>Download</span>
+-              </button>
++              </Button>
+             )}
+           </div>
+         </div>
+diff --git a/app/routes/hire-us.tsx b/app/routes/hire-us.tsx
+index 9308a4c..3ec0691 100644
+--- a/app/routes/hire-us.tsx
++++ b/app/routes/hire-us.tsx
+@@ -35,7 +35,8 @@ export const meta: MetaFunction = () => {
+ };
+ 
+ import { Form, useActionData, useNavigation } from '@remix-run/react';
+-import { Check, Film, Gamepad2, Mic, Music, Send } from 'lucide-react';
++import { Check, Film, Gamepad2, Loader2, Mic, Music, Send } from 'lucide-react';
++import { Button } from '~/components/ui';
+ import { debug } from '~/lib/debug';
+ 
+ const PROJECT_TYPES = [
+@@ -273,14 +274,10 @@ export default function HireUsPage() {
+             )}
+ 
+             {/* Submit Button */}
+-            <button
+-              type="submit"
+-              disabled={isSubmitting}
+-              className="w-full py-4 bg-brand hover:bg-brand/90 text-brand-foreground font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+-            >
++            <Button type="submit" size="lg" fullWidth disabled={isSubmitting}>
+               {isSubmitting ? (
+                 <>
+-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
++                  <Loader2 size={18} className="animate-spin motion-reduce:animate-none" />
+                   <span>Sending...</span>
+                 </>
+               ) : (
+@@ -289,7 +286,7 @@ export default function HireUsPage() {
+                   <span>Send Message</span>
+                 </>
+               )}
+-            </button>
++            </Button>
+ 
+             <p className="text-center text-dim text-sm">We typically respond within 24 hours.</p>
+           </Form>
+diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+index 18f2018..b087f69 100644
+--- a/docs/design/DESIGN_SYSTEM.md
++++ b/docs/design/DESIGN_SYSTEM.md
+@@ -1153,10 +1153,10 @@ Store-ში ღილაკის სამიზნე წყაროა `But
+ 
+ | Shape | Class | გამოყენება |
+ |-------|-------|------------|
+-| `default` | `rounded-md` (8px) | dialog-ები, ფორმები, Studio |
+-| `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“) |
++| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), Studio |
++| `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“, free downloads-ის „Download“) |
+ 
+-`shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდებზე brand-ის pill (direction A, „a brass pill“), dialog-ებში 8px.
++`shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებსა და Store-ის ფორმის submit-ზე 8px.
+ 
+ #### `buildButtonClassName`
+ 
+diff --git a/docs/implementation/2026/quarter-IV/322-dpg-button-cleanup-stage-2b-2.md b/docs/implementation/2026/quarter-IV/322-dpg-button-cleanup-stage-2b-2.md
+new file mode 100644
+index 0000000..18f8c2f
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/322-dpg-button-cleanup-stage-2b-2.md
+@@ -0,0 +1,85 @@
++# DPG-BUTTON-CLEANUP, ეტაპი 2b-2: free downloads, newsletter და Hire Us ღილაკები
++
++**თარიღი:** 2026-11-14
++**სტატუსი:** In Progress (stage 2b-2 of DPG-BUTTON-CLEANUP-2; C round 501 PASS)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++Saba-ს DPG-FIX P1 პუნქტი 7: „Use Button.tsx component only.“ ეტაპებმა 2a-მ (doc 320) და 2b-1-მა (doc 321) CTA link-ები და ცარიელი/შეცდომის მდგომარეობები `buildButtonClassName`-ზე გადაიყვანა. ეტაპი 2b-2 მოიცავს სამ ხელით აწყობილ `<button>`-ს brass ფონით:
++- free downloads-ის ბარათის „Download“ (გვერდზე სამი ბარათია; ღილაკი email ფორმას ხსნის და ხურავს);
++- მთავარი გვერდის newsletter-ის „Subscribe“ submit;
++- Hire Us ფორმის „Send Message“ submit.
++
++B-ის scanner-ით HEAD-ზე 109 hit იყო, მათგან 44 solid. sketch-ზე 104 hit დარჩა, მათგან 41 solid (`b-round-500/scan-sketch.txt`).
++
++## მიდგომა
++
++- **Mapping (product-designer, `b-round-500/consult-product-designer.md`):** დამოუკიდებელი CTA pill-ია, ფორმის submit კი default ფორმისაა (`rounded-md`).
++  - „Download“: `Button` primary `lg` `pill`, `type="button"` და `aria-expanded`.
++  - „Subscribe“: `Button` primary `lg`, `type="submit"`, `disabled` გაგზავნისას და `className="h-14"`, რომ ღილაკი email ველის სიმაღლეს (56px) დაემთხვეს.
++  - „Send Message“: `Button` primary `lg` `fullWidth`, `type="submit"` და `disabled` გაგზავნისას.
++- **ტექსტი უცვლელია.** `isLoading` არ გამოიყენება, რადგან ის ტექსტს „Loading...“-ით ცვლის. გაგზავნისას რჩება „Subscribing...“ და „Sending...“.
++- **Spinner:** Hire Us-ის ხელით დახატული თეთრი spinner შეიცვალა `Loader2`-ით. ის ტექსტის მუქ ფერს იღებს, ისევე როგორც newsletter-ში. ორივე spinner-ს აქვს `motion-reduce:animate-none`.
++- **Deviation-ები (ზომები: `b-round-500/probe/head.out`, `b-round-500/probe/sketch.out`):**
++  - D1: „Download“-ის სიმაღლე 50-დან ხდება 48, weight 500-დან 600, hover `bg-brand/90`-დან `bg-brand-hover`, სიგანე 1440-ზე 150-დან 152. მიზეზი: ეტაპი 1-ის `lg` pill.
++  - D2: „Subscribe“-ის radius 12px-დან ხდება 8px, ჰორიზონტალური padding 32px-დან 24px. სიმაღლე რჩება 56. 1440-ზე ღილაკის სიგანე 140-დან ხდება 124, email ველის კი 424-დან 440. გაგზავნისას opacity 0.7-დან ხდება 0.5 და hover ფერი აღარ ჩანს (`pointer-events-none`).
++  - D3: „Send Message“-ის სიმაღლე 58-დან ხდება 48, radius 16px-დან 8px, padding 16/0-დან 12/24, hover `bg-brand/90`-დან `bg-brand-hover`. გაგზავნისას hover ფერი აღარ ჩანს (`pointer-events-none`).
++  - D5: სამივე ღილაკზე დაჭერისას opacity 1-დან ხდება 0.9 (`active:opacity-90`, browser-ში გაზომილი). სამივე იღებს primary variant-ის `shadow-sm`-ს: `box-shadow` HEAD-ზე `none`-ია, sketch-ზე `rgba(4, 5, 6, 0.3) 0px 1px 2px 0px` (`b-round-500/probe/head/head.json` და `probe/sketch/sketch.json`, `rest.boxShadow`).
++  - D4: free downloads-ის „Send Download Link“ (თეთრი pill) ამ ეტაპში არ იცვლება. ის NONBRAND ეტაპს ეკუთვნის.
++- **Saba-სთვის კითხვები** (product-designer): newsletter-ისა და Hire Us-ის ველები `rounded-md`-ზე უნდა გადავიდეს? „Send Download Link“ `secondary` უნდა გახდეს? ორივეზე default „კი“, მომავალ ეტაპში.
++
++## არქიტექტურა
++
++```mermaid
++flowchart LR
++  BT[Button] -->|primary lg pill, type button, aria-expanded| FD["free-downloads.tsx: Download x3"]
++  BT -->|primary lg, h-14, type submit| NL["NewsletterSection.tsx: Subscribe"]
++  BT -->|primary lg fullWidth, type submit| HU["hire-us.tsx: Send Message"]
++  NL --> HOME["_index.tsx (home)"]
++```
++
++## შეცვლილი ფაილები
++
++- `app/routes/free-downloads.tsx` — „Download“ ხდება `Button` (primary `lg` `pill`, `type="button"`, `aria-expanded`). `Button`-ის იმპორტი `~/components/ui`-იდან.
++- `app/components/home/NewsletterSection.tsx` — „Subscribe“ ხდება `Button` (primary `lg`, `type="submit"`, `h-14`). spinner-ს ემატება `motion-reduce:animate-none`.
++- `app/routes/hire-us.tsx` — „Send Message“ ხდება `Button` (primary `lg` `fullWidth`, `type="submit"`). თეთრი spinner ჩანაცვლდა `Loader2`-ით.
++- `app/lib/__tests__/store-button-cleanup-2b2.test.tsx` — ახალი ტესტები B2B2-0…B2B2-7.
++- `app/lib/__tests__/store-theme-tokens.test.ts` — ST5-ის Hire Us pin: ხელით აწყობილი class-ის ნაცვლად ამოწმებს `Button`-ის სტრიქონს და იმას, რომ `bg-brand` class აღარ არის.
++- `docs/design/DESIGN_SYSTEM.md` — `### Buttons`-ის shape ცხრილი: default-ის და pill-ის გამოყენების სტრიქონები და ორი ფორმის წესის წინადადება.
++
++## პრობლემები და გადაწყვეტები
++
++- **Problem:** `Button` class-ებს არ აერთიანებს, ამიტომ `className`-ით `rounded-lg` ან `px-8` გადაფარვა stylesheet-ის რიგზეა დამოკიდებული. → **Solution:** `className` ამატებს მხოლოდ იმას, რასაც builder არ აყენებს (`h-14`). radius და padding builder-ისაა.
++- **Problem:** `Button`-ის `isLoading` ტექსტს „Loading...“-ით ცვლის. → **Solution:** გამოიყენება `disabled={isSubmitting}` და საკუთარი children, ტექსტი უცვლელია.
++- **Problem:** ST5 ამოწმებდა Hire Us-ის ხელით აწყობილ class-ს (`toHaveLength(1)`), რომელიც აღარ არსებობს. → **Solution:** ST5 ახლა ამოწმებს, რომ `bg-brand` class-ის მქონე ატრიბუტი 0-ია და `Button`-ის სტრიქონი არსებობს. მუქი ტექსტი brass-ზე უკვე მოწმდება primary variant-ის assert-ით იმავე row-ში.
++- **Problem:** submit-ის გაგზავნის მდგომარეობა browser-ში მოკლეა. → **Solution:** B-ის probe (`b-round-500/probe/measure-501.mjs`) POST-ს `page.route`-ით აჩერებს, სანამ გაზომვა არ დასრულდება.
++- **Problem:** class string-ის ტესტები შეიძლება builder-ს დაეყრდნოს და ვერაფერი დაიჭიროს. → **Solution:** B2B2-0 ამოწმებს, რომ ხუთი literal oracle builder-ის output-ს უდრის. B2B2-1…B2B2-5 სამ ადგილს DOM-ში რენდერავს და class-ს, `type`-ს, ტექსტს, `disabled`-ს, icon-ს და მის რიგს label-თან ამოწმებს; newsletter-სა და Hire Us-ში ღილაკის რიგს ველთან მიმართებითაც. გაგზავნის მდგომარეობა ახალი element-ით rerender-დება. B2B2-6 ფაილებს brace-aware tag scanner-ით კითხულობს, B2B2-7 კი ამ scanner-ს HEAD-ის ფორმის ღილაკზე ამოწმებს. B-ის mutant-ები M1–M20, M26–M28, M30 და M31 ყველა წითელია (`b-round-500/mutants-501.txt`).
++
++## ტესტირება
++
++- **A, რაუნდი 501** (logs `a-round-501/`-ში):
++  - frozen check-ები rc 0, sketch-ის (`b-round-500/sketch-501.patch.txt`) `git apply --check` და `git apply` rc 0;
++  - `npm run typecheck` rc 0 (`typecheck.log`);
++  - `npm run lint` rc 0, 179 warning (`lint.log`; B: `b-round-500/precheck-lint.log`);
++  - Biome შეცვლილ 5 code/test ფაილზე: rc 0, 1 warning (`biome-scoped.log`; B: `b-round-500/precheck-biome.log`);
++  - covering set (`b-round-500/covering-files.txt`): 15 ფაილი, 179 ტესტი, ყველა PASS (`covering.log`; B: `b-round-500/precheck-covering.log`).
++- **B, sketch-ის pre-check** (scratch ასლზე, `b-round-500/`):
++  - სრული suite: 298 ფაილი / 4,337 ტესტი, rc 0 (`precheck-full.log`);
++  - build rc 0, `✓ built` (`precheck-build-sketch.log`);
++  - mutant-ები M1–M20, M26–M28, M30 და M31 ყველა წითელია (`mutants-501.txt`, `mutants-501-failing-rows.txt`);
++  - browser-ში HEAD და sketch შედარდა (`b-round-500/probe/head.out`, `b-round-500/probe/sketch.out`): ფერი, radius, სიმაღლე და hover 1440/1280/375-ზე; keyboard focus ring და mouse press 1440/1280-ზე; გაგზავნის მდგომარეობა 1440-ზე. journey (`b-round-500/probe/head-journey.out`, `sketch-journey.out`): მთავარი → free downloads → Hire Us;
++  - contrast: rest 8.32, hover 10.28 (`b-round-500/probe/sketch.out`).
++
++  A-ს browser row-ები არ გაუშვია.
++- **Browser-ის მიღება** (rest, hover, focus, press, busy, stack, journey, protection): C round 501, შედეგი `c-round-501.json`-შია.
++
++## TODO / შემდეგი ნაბიჯები
++
++- **2b-3:** recordings „Create a scene“, cart და StudioShowcase. ამავე ეტაპზე `ButtonLink` wrapper-ის საკითხი (SIG-R498-BUTTONLINK-WRAPPER).
++- **2c:** purchase path (PurchaseHeader).
++- **2d:** chat.
++- **2e:** LeadMagnet, keep-list-ის მხოლოდ restyle.
++- **DPG-BUTTON-CLEANUP-2-NONBRAND:** ხელით აწყობილი ღილაკები `bg-brand`-ის გარეშე, მათ შორის „Send Download Link“.
++- Saba-ს პასუხი ველების radius-სა და „Send Download Link“-ის variant-ზე.
++- DP gate-ის ხელახალი გაშვება root-თან, ყველა ქვე-ეტაპის შემდეგ.

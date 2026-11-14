@@ -1,41 +1,40 @@
-# Round 500: DPG-BUTTON-CLEANUP-2 stage 2b-1, re-dispatch. Pin the `/store` error "Try again" link, then run the full verification
+# Round 501: DPG-BUTTON-CLEANUP-2 stage 2b-2. Move the free-downloads "Download", newsletter "Subscribe" and Hire Us "Send Message" buttons onto `Button`
 
-**Planned by:** B, at the round 499 → 500 planning on 2026-11-13 (`b-round-499.md`).
+**Planned by:** B, at the round 500 → 501 planning on 2026-11-13/14 (`b-round-500.md`).
 - **Advisor:** available; consulted after orientation and at the closing check.
-- **Archive:** the round-499 task is archived as `tasks/round-499.md`, a byte-identical copy (`cmp` rc 0).
+- **Archive:** the round-500 task is archived as `tasks/round-500.md`, a byte-identical copy (`cmp` rc 0).
 
-## Decisions (`backlog.json` v493, `decisions_log_b`)
-- **D-29z1792: round 499 is not accepted.**
-  - C failed on the L22 short route, with `browserVerified` and `realVerified` false. Gate 499 is `skipped` ("C taskStatus FAIL") [K15].
-  - The baseline stays `82e118a` [K1]. A's round-499 tree is kept, not reverted: 5 modified and 2 untracked paths [K2]. This round applies a **delta** sketch on top of it.
-  - Stage 2b-1 is **not** done. No backlog item changes to done.
-- **D-29z1793: ruling on A-R499-CR-STORE-TRY-UNPINNED (Medium, origin `B spec`; C confirmed it in round 499, recorded as `confirmedBy`).**
-  - **Option (a) is chosen.** A DOM row now pins the link. Option (b), "C's browser rows cover it", is rejected because the gate does not run browser rows, so a later regression would ship.
-  - New row **SE1** in `product-price-cards.test.tsx`:
-    - it renders `StorePage` through the real `loader`, with `getProducts` rejected, so the code takes the error branch;
-    - that file's Remix `Link` mock passes `className` and `to` [K6];
-    - it asserts one `role="alert"` block, one link, text "Try again", `href="/store"` and the exact primary lg pill class string.
-  - Mutants N10 (ghost), N11 (`md`), N12 (`to="/"`), N13 (a `bg-brand` array join) and N17 (copy) turn SE1 red.
-  - This is a **planning FAIL** under L58: an unruled Medium that A's reviewer found on B's sketch. It is counted for RETRO 510.
-  - Cause: the round-499 matrix pinned the other two sites by DOM rows and this site by a source substring only. tech-lead had rated the gap Info. The fix is the site × attribute matrix in `b-round-499/sketch-review.md`; every cell has a row and a mutant, or a ruling.
-- **D-29z1794: A's round-499 reviewer Lows are fixed in this delta, inside files already granted.** Each closes with C round 500 PASS.
-  - A-R499-CR-PAIR-ORDER: `isBefore` in B2B-1, B2B-2 and B2B-3. Mutants N16 (EmptyState pair swapped) and N18 (error pair swapped).
-  - A-R499-CR-TRYAGAIN-TYPE: `ErrorDisplay` "Try Again" gets `type="button"`, asserted in B2B-3 and B2B-4. Mutant N15.
-  - A-R499-CR-DS-SAME-RULE: DESIGN_SYSTEM l.1193 now reads „Store-ის CTA წყვილის წესი (`ghost` `lg` `pill`) ეხება …“ [K12].
-  - A-R499-CR-DOC321-WORDING: the doc 321 l.30 D1 height, the build line and the l.83 coverage sentence (A's round-499 tree; l.85 after the delta) [K23]. The heights are checked against `b-round-498/measure/summary.txt`: REC-DENIED-PRIMARY is 52 at 1280 and 1440 through row stretch, and 50 at 375. The build question ("v1 or v2") is settled by re-running the build on this delta: rc 0 and `✓ built` (`b-round-499/precheck-build-sketch.log`).
-  - Plus the advisor's cell: the "Try Again" reload handler is pinned by B2B-5 (`pins`), and mutant N14 deletes it.
-- **D-29z1795: consults.**
-  - tech-lead reviewed the frozen delta adversarially and returned **APPROVE**, with no Medium. Its site × attribute matrix and B's rulings are in `b-round-499/sketch-review.md`, which names the sha. Its Lows are pre-ruled #9–#12.
-  - product-designer is not consulted: there is no UX change. The delta adds a `type` attribute and tests only, and the §1 reference is carried from round 499.
-  - **No architecture checkpoint.** The change is small and has one owner. A's round-499 Architecture note ("no signal") is recorded as `confirmedBy` on SIG-R498-BUTTONLINK-WRAPPER, which stays a signal.
-- **D-29z1796: corrections from the closing check.**
-  - Every pre-check was re-run on the final sketch tree, docs included (L56).
-  - The C1 `type` exception, the C9 verbose reporter and the C11 token and `pending` evidence are written in.
-  - A's log names are listed, the D1 correction is added, and ruling #8 is reworded from the probe.
-  - The mutant script now creates its log directory.
+## Decisions (`backlog.json` v495, `decisions_log_b`)
+- **D-29z1797: round 500 is accepted, from C's evidence only.**
+  - `c-round-500.json` is PASS with `browserVerified` and `realVerified` true and 0 bugs. Gate 500 is `published` at `462570e` [K19].
+  - Stage 2b-1 is verified.
+  - Six ids close: B-R498-DOC320-L28, A-R499-CR-STORE-TRY-UNPINNED, A-R499-CR-PAIR-ORDER, A-R499-CR-TRYAGAIN-TYPE, A-R499-CR-DS-SAME-RULE and A-R499-CR-DOC321-WORDING.
+  - C passed C11 in its core form only: the doc-ledger trace was not redone line by line. That is recorded as INFO-C500-DOC321-LEDGER-TRACE. This round's C11 does the full trace.
+- **D-29z1798: gate 500's three review Lows map to existing ids** (L7):
+  - `confirmedBy` on PD-R499-GHOST-HOVER-FAINT;
+  - A-R500-CR-B2B5-COMMENT-ANCHOR, a new deferred Low from A's reviewer;
+  - `confirmedBy` on B-R499-ROOT-ERRORBOUNDARY-NESTED-HTML;
+  - the architecture note goes as `confirmedBy` on SIG-R498-BUTTONLINK-WRAPPER.
+- **D-29z1799: stage 2b-2 scope and mapping.**
+  - **Scope:** the three inventory sites (`b-round-497/stage2-inventory.md` row A2): free-downloads "Download", the NewsletterSection submit and the hire-us submit, plus the ST5 pin.
+  - **Mapping:** product-designer, `b-round-500/consult-product-designer.md`. Standalone CTAs are pills; form submits use the default shape.
+  - **Not in scope:** "Send Download Link" (a white pill, not a brand fill) stays in NONBRAND.
+- **D-29z1800: consults (L58).**
+  - product-designer ruled the mapping.
+  - tech-lead reviewed three versions of the sketch:
+    - v1 (`b489d495…`): **CHANGES-REQUIRED**. One Medium: the B2B2-6 regex could not see the HEAD button shape. Three Lows. All four are fixed.
+    - v2 (`baa0445a…`): **CHANGES-REQUIRED**, for doc 322 D1/D5 wording only.
+    - v3 (`13624731…`): **APPROVE**. B's closing check then found that its D5 doc line was false, because the shadow is measured in the probe JSONs.
+    - v4 (`acb11d51…`), the dispatched sketch: a doc-only fix (D5, the DESIGN_SYSTEM two-shapes sentence, mutant M31). **APPROVE**.
+  - All three reviews are in `b-round-500/sketch-review.md`.
+  - TL-R501-FD-ARIA-CONTROLS goes to `deferred_low_polish`.
+  - **No architecture checkpoint:** small change, one owner. SIG-R498-BUTTONLINK-WRAPPER is re-evaluated at 2b-3.
+- **D-29z1801: two product-designer questions go to Saba** (`user-review/questions-round-501.md`), both `awaiting_user` and neither blocking:
+  - should the newsletter and Hire Us inputs move to `rounded-md`?
+  - should NONBRAND's "Send Download Link" become `secondary`?
 
 ## Rules
-- **Read `lessons.md` first.** Applied here: L4, L7, L10, L11, L22, L23, L26, L28, L31, L56, L57 and L58.
+- **Read `lessons.md` first.** Applied here: L1, L4, L7, L10, L11, L12, L22, L23, L26, L28, L31, L47, L52, L54, L56, L57 and L58.
 - **STOP threshold (L10):** A writes STOP and changes nothing more on any of these:
   - a Medium-or-higher finding whose fix is outside the grants;
   - a failing covering test;
@@ -43,142 +42,157 @@
   - a sketch that does not apply cleanly;
   - a granted file that would need a change beyond the sketch;
   - one of A's numbers differing from B's expected value in §3.
-- **The sketch writes every granted byte, doc 321 included.** A writes no prose this round. Doc 321 l.89–94 state A's expected results [K21]; if A's logs differ, that is a STOP, not an edit.
-- **Ruling lines (L4), carried from round 499:**
-  - Error-page emphasis: the product-designer ruling (Try Again primary, Go Home ghost) wins over HEAD's secondary Try Again. No position moves.
-  - `EmptyState`'s secondary becomes ghost. The DESIGN_SYSTEM ghost rule wins over the old bordered look.
-  - The 404 "Browse Store" stays a text link (PD-R498-404-SECONDARY-ALIGN).
-  - `account.downloads.tsx` is protected and is not edited. Its href stays `/music`.
+- **The sketch writes every granted byte, doc 322 included.** A writes no prose this round.
+- **Ruling lines (L4):**
+  - NL height: `className="h-14"` wins over `lg`'s 48 px. The builder sets no `h-*`, and the button must equal the 56 px email field [K5].
+  - NL and HU shape: the product-designer form-submit rule (default `rounded-md`) wins over the DESIGN_SYSTEM "Store CTA = pill" row. DESIGN_SYSTEM's default row now names these two submits.
+  - Busy hover: `Button`'s disabled `pointer-events-none` [K9] wins over HEAD's busy hover colour. The busy fill is rest brass.
+  - FD `type="button"`: the Download button is not inside a form [K3], so the attribute does not change behaviour.
+  - Copy: the busy texts "Subscribing..." and "Sending..." win over `Button`'s `isLoading` "Loading..." [K7, K9]. `isLoading` is not used.
 - **Pre-ruled Lows:** a re-raise is listed "For B" and is not a STOP.
-  - #1 links have no `:active` scale (SIG-R496-LINK-NO-PRESS-SCALE).
-  - #2 there is no `ButtonLink` wrapper yet (SIG-R498-BUTTONLINK-WRAPPER).
-  - #3 the literal oracles are duplicated on purpose. SE1's `STORE_ERROR_TRY_AGAIN_CLASS` is a third copy of the primary lg pill; it is byte-equal to the 2b-1 file's `PRIMARY_LG_PILL` [K24], and B2B-0 proves that one equals the builder.
-  - #4 `EmptyState`'s `<button>` branches have no caller (B-R499-EMPTYSTATE-ONACTION-UNUSED).
-  - #5 the ghost hover fill is faint (PD-R499-GHOST-HOVER-FAINT).
-  - #6 after a Remix client navigation `document.activeElement` is BODY (C6 oracle).
-  - #7 SE1 lives in `product-price-cards.test.tsx`, not in the 2b-1 test file. That file already mocks Remix for `StorePage` [K6]; mocking `@remix-run/react` in the 2b-1 file would break `RootErrorBoundary`'s `useRouteError` [K20].
-  - #8 the reload handler is pinned by source text (B2B-5 `pins`, mutant N14), not by a click. B's probe (`b-round-499/reload-spy-probe.txt`) shows `vi.spyOn(window.location, 'reload')` throws "Cannot redefine property: reload". Replacing `window.location` with `Object.defineProperty` does work, but it is not adopted: the handler is byte-unchanged since HEAD except for the new `type`, and C6 checks the reload in the browser.
-  - #9 SE1's console spy is restored inline and leaks only when its own assert fails (TL-R500-SE1-SPY-FINALLY).
-  - #10 the `Link` mock forwards only `to`, `className` and `children` [K20], so an added `reloadDocument`, `replace` or `prefetch` prop passes (TL-R500-LINK-MOCK-DROPS-PROPS). C6 covers client navigation versus a full load.
-  - #11 the error-page icons are counted, not identified (`confirmedBy` on A-R498-CR-ICON-ASSERT).
-  - #12 the doc 321 D1 phrase „denied წყვილში 52-დან“ could name the element (TL-R500-DOC321-D1-WORDING).
+  - #1 there is no `aria-controls` on FD (TL-R501-FD-ARIA-CONTROLS).
+  - #2 the spinner pixel size is not pinned in jsdom; C's busy rows read the box. The reviewer agreed.
+  - #3 the five literal oracles duplicate the builder on purpose. B2B2-0 proves they are equal.
+  - #4 the brace-aware `openingTags` is a copy of the IL3 scanner in `store-internal-links.test.ts`. Sharing it is a later helper extraction, not this stage.
+  - #5 the success, error and `loading` branches of the three forms are unchanged code and are not part of the button contract.
+  - #6 doc 322 lists D5 before D4.
+  - #7 the disabled builder output keeps both `cursor-pointer` and `cursor-not-allowed` (pre-existing in the builder; `pointer-events-none` removes the cursor anyway).
+  - #8 the inline `style`, the JSX comments and the Biome label warning in `hire-us.tsx` are pre-existing and untouched.
 - **Paths:** loop `/home/runner/czaba-project/tmp/studio-real-loop`, store `/home/runner/czaba-project/store`.
 - **Out of scope:** Studio (`/studio-lab`) and the Ableton check. This is a Store round.
-- **Persistent screen text (L39):** nothing is added.
+- **Persistent screen text (L39):** nothing is added. Labels are unchanged; `aria-expanded` is not visible.
 - **Purchase protection:** no auth, cart, checkout or download logic changes. Check 2 stays rc 0, and C keeps the anonymous "Sign in required" row.
 
 ## Baseline
-HEAD is `82e118a` [K1] (gate 498 `commit`). The worktree holds A's round-499 change: 5 modified and 2 untracked paths [K2]. Frozen-file checks, all run from `store/`, all rc 0 at planning:
-1. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-499/r500-tree-sha256.txt`: every tracked file outside the six granted tracked paths (1,403 files [K22]).
+HEAD is `462570e` [K1] (gate 500 `commit`). The worktree is clean [K2]. Frozen-file checks, all run from `store/`, all rc 0 at planning:
+1. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-500/r501-tree-sha256.txt`: every tracked file outside the five granted tracked paths (1,406 files [K21]).
 2. `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-318/protected-sha256.txt`: the protected files.
-3. Before applying: `b-round-499/r500-pre-sha.txt`. It covers the 8 granted paths in A's round-499 form: `ErrorBoundary.tsx`, `EmptyState.tsx`, `store.tsx`, DESIGN_SYSTEM.md, doc 320, the 2b-1 test, doc 321 and `product-price-cards.test.tsx`.
-4. After applying: `b-round-499/r500-post-sketch-sha.txt`, the same 8 paths with the delta applied, doc 321 included.
+3. Before applying: `b-round-500/r501-pre-sha.txt` (the five granted tracked paths at HEAD).
+4. After applying: `b-round-500/r501-post-sketch-sha.txt`, which covers the seven paths, doc 322 and the new test included.
 
-B checked that applying the patch to a copy of A's tree reproduces checks 4 and 1 byte for byte.
+B checked that applying the patch to a `git archive` copy of HEAD reproduces check 4 and keeps check 1 rc 0.
 
 ## 0. Why this round
-- The round-499 change itself is unchanged and was correct in C's protection rows. What failed was the test net: one of the three sites had no row that a plausible regression would turn red.
-- This round closes that gap and four reviewer Lows. Then C runs the **full** C0–C14 in the browser, which was not run in round 499.
-- **REGRESSION is not due.** The last one was 2026-11-13; the next is due on or after 2026-11-16. The next RETRO is round 510.
+- Saba's DPG item 7 says "Use Button.tsx component only". Stages 1, 2a and 2b-1 are done. Stage 2b-2 moves the three `<button>` sites with a solid brass fill. Each site keeps its label, position and behaviour, and takes the shared `Button`.
+- **REGRESSION is not due:** the last one was 2026-11-13, and the next is due on or after 2026-11-16. The next RETRO is round 510.
 
-## 1. Reference
-Carried unchanged from `tasks/round-499.md` §1: direction A, "a brass pill", plus the Artlist and Epidemic pill CTAs, with deviations D1–D4. **One correction to D1:** HEAD's 52 px heights are the recordings-denied pair. The ghost is 52 because of its border, and the primary is 52 at 1280 and 1440 through flex row stretch (50 at 375). All other targets were 50 (`b-round-498/measure/summary.txt`). This round adds no behaviour or visual change. The delta's only product change, `type="button"` on a button that is not inside a form, renders and acts the same.
+## 1. Reference: how premium stores style form submits and CTAs
+Carried from `tasks/round-499.md` §1:
+- direction A, "a brass pill";
+- the Artlist and Epidemic pill CTAs;
+- `docs/technical/store-redesign/direction-decision.md`.
 
-## 2. What changes: delta sketch `b-round-499/sketch-500.patch.txt`
-sha256 `79835ecda0c3636fff487ac3562a891d9a4e3ccc794da2b259bbc2dd38f012ea`, the line in `b-round-499/sketch-sha.txt`.
+This round adds one source and one deviation.
+- **Source:** DESIGN_SYSTEM's radius token comment, `--radius-md` 8px "Buttons (dialogs, Studio), inputs; Store CTAs use pill" [K26]. The existing account primary `lg` `fullWidth` submit uses the default shape [K10].
+- **Store rule:** standalone CTAs are pills, and form submits share the inputs' family of shape (product-designer).
+
+| Point | Reference / rule | CZABA after this round | Deviation (reason) |
+|---|---|---|---|
+| Standalone CTA (FD "Download") | brass pill (direction A) | primary `lg` pill | D1: 50 → 48 px, weight 500 → 600, width 150 → 152 (the shared `lg` pill) |
+| Form submit beside a field (NL) | same height as the field, same shape family | primary `lg`, `h-14`, 8 px radius | D2: the radius is 8 px against the field's 12 px. There is no class merge, and the field radius is a Saba question (D-29z1801) |
+| Full-width form submit (HU) | full width under the fields | primary `lg` `fullWidth`, 8 px | D3: 58 → 48 px, 16 → 8 px radius |
+| Busy | copy unchanged, the control disabled | disabled, opacity 0.5, a dark `Loader2` | D2/D3: no hover while busy |
+| Press / shadow | — | `active:opacity-90`, `shadow-sm` | D5: new on all three |
+| Keyboard focus | the shared ring (SABA-B-4) | unchanged ring, `:focus-visible` only | none |
+
+## 2. What changes: sketch `b-round-500/sketch-501.patch.txt`
+sha256 `acb11d513566038107f566557df86d92de04d66b2219c3da4c8670ee1e730c58` (`b-round-500/sketch-sha.txt`). v1–v3 are superseded; see `sketch-sha-history.txt`.
 
 | File | Change |
 |---|---|
-| `app/components/errors/ErrorBoundary.tsx` | `ErrorDisplay` "Try Again": `<Button size="lg" shape="pill" …>` → `<Button type="button" size="lg" shape="pill" …>` [K3] |
-| `app/lib/__tests__/product-price-cards.test.tsx` | new `STORE_ERROR_TRY_AGAIN_CLASS` literal + row **SE1** in `describe('/store card price')`. `console.error` is spied, its single loader log is asserted, and the spy is restored. The loader's error value is `'Failed to load products'` and the route has one `role="alert"` block [K5]. The `Link` line under test is [K4] |
-| `app/lib/__tests__/store-button-cleanup-2b.test.tsx` | `isBefore` helper. Pair order in B2B-1, B2B-2 and B2B-3. `type="button"` asserted in B2B-3 and B2B-4. `STAGE_2B1_SITES` gains `pins`, and the ErrorBoundary block must contain `onClick={() => window.location.reload()}` [K7] |
-| `docs/design/DESIGN_SYSTEM.md` | the Ghost "Use for" sentence: „იგივე წესი ეხება“ → „Store-ის CTA წყვილის წესი (`ghost` `lg` `pill`) ეხება“ [K12] |
-| `docs/implementation/2026/quarter-IV/321-dpg-button-cleanup-stage-2b-1.md` | l.4 → `In Progress (stage 2b-1 of DPG-BUTTON-CLEANUP-2; C round 500 PASS)` (L28 re-dispatch) [K11]. D1 wording, the changed-files list, a round-499 STOP problem bullet, the coverage sentence and the whole `## ტესტირება` section, rewritten for round 500. Ledger: `b-round-499/doc-ledger.md` |
+| `app/routes/free-downloads.tsx` | "Download" [K3]: raw `<button>` → `<Button type="button" size="lg" shape="pill" aria-expanded={isExpanded} onClick=…>`. Children unchanged. `import { Button } from '~/components/ui';` |
+| `app/components/home/NewsletterSection.tsx` | Submit [K4]: → `<Button type="submit" size="lg" disabled={isSubmitting} className="h-14">`. The busy `Loader2` gains `motion-reduce:animate-none`. Barrel import |
+| `app/routes/hire-us.tsx` | Submit [K6]: → `<Button type="submit" size="lg" fullWidth disabled={isSubmitting}>`. The white `div` spinner becomes `<Loader2 size={18} className="animate-spin motion-reduce:animate-none" />`. `Loader2` import, barrel import |
+| `app/lib/__tests__/store-theme-tokens.test.ts` | ST5 hire-us pin [K8]: `toHaveLength(1)` on the `bg-brand w-full rounded-xl` attribute → 0 `bg-brand` attributes in the file, plus `toContain` on the exact `<Button …>` line. No assertion is lost; the dark text is already asserted by the primary-variant tokens in the same row |
+| `app/lib/__tests__/store-button-cleanup-2b2.test.tsx` (new) | B2B2-0 to B2B2-7: five literal oracles = builder; FD three cards (class, type, `aria-expanded`, icon then label, not in a form); FD open/close per card; FD enabled while another form submits; NL idle → busy (fresh element, L52); HU idle → busy; brace-aware per-file scan (0 raw brass `<button>`, 1 `<Button`); a scanner self-test on the HEAD shape [K14] |
+| `docs/design/DESIGN_SYSTEM.md` | shape table: the default row names the two Store form submits, and the pill row adds free downloads' "Download" [K16]. The two-shapes sentence below the table now names the form submits at 8 px [K27] |
+| `docs/implementation/2026/quarter-IV/322-dpg-button-cleanup-stage-2b-2.md` (new) | l.4 `In Progress (stage 2b-2 of DPG-BUTTON-CLEANUP-2; C round 501 PASS)` [K15]; 7 TEMPLATE headings; ledger `b-round-500/doc-ledger.md` |
 
-Unchanged: `EmptyState.tsx`, `store.tsx` and doc 320. Their round-499 bytes are pinned by checks 3 and 4. The builder calls stay 2, 1 and 1 [K8]. The scanner stays at 109 hits, 44 solid [K9] (`b-round-499/scan-sketch.txt`). The CSS bundle is the same as at gate 498.
+**Sweep (L23)** [K12]:
+- The labels, removed tokens and module paths hit 8 test-root files. Each one runs green on the sketch, either in the covering set or in the full suite.
+- The e2e locators find `button[type="submit"]` with the text Subscribe [K13], and `type="submit"` is kept.
+- The scanner goes from 109/44 to 104/41 [K11] (`b-round-500/scan-sketch.txt`).
 
-**Sweep (L23)** [K10]: the accessible names and module paths hit the same 4 unit and 4 e2e files as round 499. No new class, testid or label is added. `type="button"` is an attribute, and no test pins its absence.
+**L31 timeout headroom** [K18]: no covering test is above 50 % of its timeout.
+- BC1b: 1,853 ms at gate 500, 1,891 ms in B's covering run, against the 5 s default.
+- HE5:
+  - 1,551 ms in B's covering run against the 5 s default (31 %);
+  - its file takes 1,466 ms in B's full-suite run (`precheck-full.log`);
+  - alone it takes 218 ms at HEAD and 565 ms on the sketch (`b-round-500/he5-alone.log`). The barrel import adds load time.
 
-**L31 timeout headroom** [K14]:
-- In the files gaining rows, `product-price-cards` takes 44 ms and the 2b-1 file 164–467 ms. Both have the 5 s default.
-- In the covering set:
-  - UT2 is 2,933 ms at gate 498 against its describe timeout of 30 s;
-  - BC1b is 2,024 ms at gate 498 against the 5 s default (40 %).
-
-  Neither is a STOP.
+  A's HE5 time above 2,500 ms is a STOP.
 
 ## 3. A: what to implement
 1. From `store/`:
    - run frozen checks 1, 2 and 3 (rc 0);
-   - run `git apply --check /home/runner/czaba-project/tmp/studio-real-loop/b-round-499/sketch-500.patch.txt`, then `git apply` on the same path;
+   - run `git apply --check /home/runner/czaba-project/tmp/studio-real-loop/b-round-500/sketch-501.patch.txt`, then `git apply` on the same path;
    - run check 4 and check 1 again (rc 0).
-2. **Grants:** the 5 files in the §2 table, exactly as the sketch writes them. Nothing else changes.
-3. **Run** (logs under `a-round-500/`). Each expected value is B's sketch output, and a difference is a STOP:
-   - Save the logs under the names doc 321 cites (A cannot edit the doc): `a-round-500/typecheck.log`, `lint.log`, `biome-scoped.log` and `covering.log`.
-   - `npm run typecheck`: rc 0 (`b-round-499/precheck-tsc.log`);
-   - `npm run lint`: rc 0, "Found 180 warnings." (`precheck-lint.log`);
-   - `npx biome check app/components/errors/ErrorBoundary.tsx app/components/ui/EmptyState.tsx app/routes/store.tsx app/lib/__tests__/product-price-cards.test.tsx app/lib/__tests__/store-button-cleanup-2b.test.tsx`: rc 0, 6 warnings (`precheck-biome.log`);
-   - `npx vitest run $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-499/covering-files.txt)`: 14 files, 138/138 (`precheck-covering.log`);
-   - the code-reviewer on the whole round-499 + 500 change against `82e118a`. The 3+ file rule applies; give it `git diff 82e118a` and the two untracked files.
-   - Not run by A: the full suite and the build. B ran them on the sketch (`precheck-full.log`, `precheck-build-sketch.log`).
-4. Write `a-round-500.md` with the code-reviewer's Architecture note for B.
+2. **Grants:** the 7 files in the §2 table, exactly as the sketch writes them. Nothing else changes.
+3. **Run.** Save the logs under `a-round-501/` with the names doc 322 cites. Each expected value is B's sketch output, and a difference is a STOP:
+   - `npm run typecheck`: rc 0 (`typecheck.log`; B: `b-round-500/precheck-tsc.log`).
+   - `npm run lint`: rc 0, "Found 179 warnings." (`lint.log`; B: `precheck-lint.log`).
+   - `npx biome check app/routes/free-downloads.tsx app/routes/hire-us.tsx app/components/home/NewsletterSection.tsx app/lib/__tests__/store-theme-tokens.test.ts app/lib/__tests__/store-button-cleanup-2b2.test.tsx`: rc 0, 1 warning (`biome-scoped.log`; B: `precheck-biome.log`).
+   - `npx vitest run --reporter=verbose $(cat /home/runner/czaba-project/tmp/studio-real-loop/b-round-500/covering-files.txt)`: 15 files, 179/179 (`covering.log`; B: `precheck-covering.log`). HE5 must stay ≤ 2,500 ms.
+   - The code-reviewer on the whole change against `462570e`. The 3+ file rule applies; give it `git diff 462570e` and the two untracked files.
+   - Not run by A: the full suite and the build. B ran them on the sketch (`precheck-full.log`: 298 files / 4,337 tests rc 0; `precheck-build-sketch.log`: rc 0).
+4. Write `a-round-501.md` with the code-reviewer's Architecture note for B.
 
-## 4. C: what to verify (the full table; round 499 ran only C0, C12, C13 and C14)
-C writes `c-round-500.md`, `c-round-500.json` and `c-round-500/progress.json` as it goes, with the heaviest browser rows first (L59).
+## 4. C: what to verify
+C writes `c-round-501.md`, `c-round-501.json` and `c-round-501/progress.json` as it goes, with the heaviest rows first (L59).
 
-**Environment and harness (as in round 499):**
-- **Mock API:** start it with `node mock-api/server.mjs` from the loop folder for `MOCK=on`.
-- **Stopping the mock:** stop it **by exact PID** for `MOCK=off`, using `ps -eo pid,args | awk '$2=="node" && $3=="mock-api/server.mjs"{print $1}'`. If that finds nothing, use the port: `ss -ltnp 'sport = :5199'`. Confirm with `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5199/__mock/health`, which prints `000`. Never `pkill -f`.
-- **Stubs:** use the L36 stubs and the malformed-catalog recipe for the root error page (`b-round-498/probe/reach.mjs`). Warm each page once.
-- **Harness:** `MOCK=on BASE=http://127.0.0.1:5173 node /home/runner/czaba-project/tmp/studio-real-loop/b-round-498/measure/measure-499.mjs <c-round-500/after> after`, then `MOCK=off` with the same arguments.
-- **Oracles:** `b-round-498/measure/sketch/sketch-{on,off}.json`. The delta changes no class, so the round-499 sketch oracles hold.
+**Environment:**
+- **Mock API:** `node mock-api/server.mjs` from the loop folder (the home page needs it). Stop it by exact PID with `ps -eo pid,args | awk '$2=="node" && $3=="mock-api/server.mjs"{print $1}'`, never `pkill -f`.
+- **Harness:** `BASE=http://127.0.0.1:5173 node /home/runner/czaba-project/tmp/studio-real-loop/b-round-500/probe/measure-501.mjs <c-round-501/after> after`. Warm each page once in a browser first (L38).
+- **Journey:** `BASE=http://127.0.0.1:5173 node …/b-round-500/probe/nav-501.mjs <c-round-501/after> after`.
+- **Oracles:** `b-round-500/probe/sketch/sketch.json` and `sketch.out`, and `b-round-500/probe/sketch-journey.out`. The HEAD values are in `head.out` and `head-journey.out`.
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| C0 | SOURCE-SCOPE (start) | `git status --short --untracked-files=all`; frozen checks 1, 2 and 4 | 6 modified (`ErrorBoundary.tsx`, `EmptyState.tsx`, `store.tsx`, DESIGN_SYSTEM.md, doc 320, `product-price-cards.test.tsx`) and 2 untracked (the 2b-1 test, doc 321). Checks 1, 2 and 4 rc 0 |
-| C1 | REST (browser, 1440×900, 1280×720, 375×812) | The 10 targets in `measure-499.mjs` | As round 499 C1. Exception: `rest.type` is `"button"` on ROOT-ERR-TRY and ROUTE-ERR-TRY, where the oracle has `null`; the delta adds that attribute. Every other field equals the oracle. Primary: bg `rgb(201, 164, 106)`, text `rgb(14, 13, 12)`. Ghost: bg `rgba(0, 0, 0, 0)`, text `rgb(163, 155, 142)`. All: radius `9999px`, height 48, 16px / 600, padding 12px 24px. Boxes equal `sketch-{on,off}.json` ±1 px |
-| C2 | HOVER | Hover each target | Primary bg `rgb(217, 184, 127)`. Ghost bg `rgb(29, 26, 23)`, text `rgb(236, 230, 218)` |
-| C3 | FOCUS (1440 + 1280) | Keyboard Tab to each target; mouse press | Keyboard: `:focus-visible` true, outline solid 1px, offset 2px, and a ring visible in at least 4 viewed crops. Press: `:focus-visible` false, outline `none` |
-| C4 | STACK (375×812) | The recordings-denied pair and the root-error pair | Denied: both 179×48, stacked, same width. Root error: both 343×48, stacked. Labels on one line; nothing clipped |
-| C5 | CONTRAST | `restContrast` / `hoverContrast` | Primary rest 8.32, ghost rest 7.06, all hover ≥ 10.28. A failure is a Medium |
-| C6 | NAV (1440) | `MOCK=on` then `MOCK=off` with `…/b-round-498/measure/nav-499.mjs <c-round-500/after> after` | `finalPath` and `fullDocumentLoad` equal `b-round-498/measure/head/head-nav-{on,off}.json`. Root "Try Again" and route "Try Again" reload the page; "Go Home" goes to `/` with a full load; `/store` "Try again" goes to `/store` |
-| C7 | JOURNEY (L54, 1440) | `/cart` (empty) → "Discover the Collection" → `/store` → back | Paths `/cart`, `/store`, `/cart`; one screenshot per step; no console error in the journey |
-| C8 | GREP | `python3 -I b-round-497/scan-brand.py . /tmp/s.json` from `store/`; `grep -c 'buildButtonClassName('` on the 3 code files | `109 hits; 44 solid`; calls 2, 1, 1 |
-| C9 | TESTS | `npx vitest run --reporter=verbose $(cat …/b-round-499/covering-files.txt)` | 14 files, 138/138 pass; the SE1 line is present (B: `b-round-499/precheck-covering.log`) |
-| C10 | MUTANTS | Copy `store/`'s working tree (excluding `node_modules` and `.git`) to a folder outside `store/`, `git init`, commit, symlink `node_modules`. Run `bash b-round-498/mutants-499.sh <copy>`, then `python3 -I b-round-499/mutants-500.py <copy> <c-round-500/mutant-logs>` | mutants-499: N1–N4 and N6–N9 RED, and N5 `APPLY-FAILED` (its anchor gained `type="button"`; replaced by N5b). mutants-500: N5b, N10–N18 all RED, each on the rows in `b-round-499/mutants-500-failing-rows.txt` |
-| C11 | DOCS | `git diff 82e118a -- docs/design/DESIGN_SYSTEM.md docs/implementation/2026/quarter-IV/320-dpg-button-cleanup-stage-2a.md`; doc 321 | DESIGN_SYSTEM: hunks only in the pill row and the Ghost "Use for" line. Doc 320: only l.4, `In Progress (stage 2a of DPG-BUTTON-CLEANUP-2; C round 498 PASS)`. Doc 321: the 7 headings (L26 subsequence), and l.4 byte-equal to `In Progress (stage 2b-1 of DPG-BUTTON-CLEANUP-2; C round 500 PASS)`. Every number traces to the log or row in `b-round-499/doc-ledger.md`. Every backtick-quoted class token is found by `git grep -F <token> 82e118a -- app docs`; B's run on the sketch has 65 hits and only non-class misses (paths, env names, labels) (`b-round-499/doc321-tokens.txt`). `grep -rn 'C round [0-9]* pending' docs/implementation` finds 0 (B: `pending-grep.txt`) |
-| C12 | CLAIMS | `bash b-round-499/claims-500.sh` (default tree), compared with `b-round-499/claims-500-sketch-output.txt` | No `MISSING`. Output identical, except K1 (HEAD may move to the loop-state commit), K2 (the sketch scratch reads the store's status line), and K18 locations (archive moves) |
+| C0 | SOURCE-SCOPE (start) | `git status --short --untracked-files=all`; frozen checks 1, 2 and 4 | 5 modified (`free-downloads.tsx`, `hire-us.tsx`, `NewsletterSection.tsx`, `store-theme-tokens.test.ts`, DESIGN_SYSTEM.md) and 2 untracked (the 2b-2 test, doc 322). Checks 1, 2 and 4 rc 0 |
+| C1 | REST (1440×900, 1280×720, 375×812) | the 3 targets in `measure-501.mjs` | Each field equals `sketch.json`, with boxes ±1 px. All: bg `rgb(201, 164, 106)`, text `rgb(14, 13, 12)`, 16px / 600, padding 12px 24px, `boxShadow` not `none` and ending `rgba(4, 5, 6, 0.3) 0px 1px 2px 0px` (HEAD: `none`). FD: 3 buttons, 152×48, radius `9999px`, `type` `button`. NL: 124×56 at 1440 and 1280, radius `8px`, `type` `submit`, height = field height (56). HU: 832×48 at 1440 and 1280, 311×48 at 375, radius `8px`, `type` `submit` |
+| C2 | HOVER | Hover each target | bg `rgb(217, 184, 127)` on all three (HEAD FD and HU: `bg-brand/90`) |
+| C3 | FOCUS + PRESS (1440, 1280) | Keyboard Tab to each target, then a mouse press after a blur | Keyboard: `:focus-visible` true, outline solid, offset 2px, ring seen in at least 3 viewed crops (`after-*-focus-*.png`). Press: `:focus-visible` false, outline `none`, opacity about 0.9 |
+| C4 | BUSY (1440, POST held) | `measure-501.mjs` busy rows | NL: "Subscribing...", disabled, opacity 0.5, `pointer-events` none, bg `rgb(201, 164, 106)`, height 56, svg colour `rgb(14, 13, 12)` with `animate-spin motion-reduce:animate-none`. HU: "Sending...", the same values, 832×48, and 0 `border-white` elements in the form. One screenshot each |
+| C5 | STACK (375×812) | rest rows, plus C's own read of the 2nd and 3rd FD buttons (the harness measures only the first) | NL button 343×56, top 68 px below the field's top (field 280, button 348 in `sketch.out`); FD 152×48 on all 3 cards; HU 311×48; labels on one line |
+| C6 | CONTRAST | `restContrast` / `hoverContrast` | rest 8.32 and hover 10.28 on all three. A failure is a Medium |
+| C7 | JOURNEY (L54, 1440) | `nav-501.mjs` | 6 steps with no `error` and the paths `/`, `/free-downloads` ×3, `/hire-us` ×2. NL busy "Subscribing..." with opacity 0.5. Free Samples link → `/free-downloads` with 3 Download buttons. Keyboard Enter on Download: `aria-expanded` "true", "Send Download Link" ×1, focus stays on Download. Send-link busy: "Sending...", the Download buttons not disabled. HU busy "Sending...". `errors` `[]` (env errors filtered). One screenshot per step |
+| C8 | GREP | `python3 -I b-round-497/scan-brand.py . /tmp/s.json` from `store/`; `grep -c '<Button' <3 files>` | `104 hits; 41 solid`; 1, 1, 1 |
+| C9 | TESTS | `npx vitest run --reporter=verbose $(cat …/b-round-500/covering-files.txt)` | 15 files, 179/179; the B2B2-0…B2B2-7 lines present; HE5 ≤ 2,500 ms |
+| C10 | MUTANTS | Copy `store/`'s working tree (excluding `node_modules`, `.git` and `build`) to a folder outside `store/`, symlink `node_modules`, then run `python3 -I b-round-500/mutants-501.py <copy> <c-round-501/mutant-logs>` | M1–M20, M26–M28, M30 and M31 all RED, each on the rows in `b-round-500/mutants-501-failing-rows.txt` (M31 on ST5 only) |
+| C11 | DOCS | `git diff 462570e -- docs/design/DESIGN_SYSTEM.md`; doc 322 | DESIGN_SYSTEM: exactly 3 changed lines: the default and pill rows of the shape table, and the two-shapes sentence. Doc 322: the 7 headings (L26 subsequence) and l.4 byte-equal to `In Progress (stage 2b-2 of DPG-BUTTON-CLEANUP-2; C round 501 PASS)`. **Full trace:** every row of `b-round-500/doc-ledger.md` checked against its source (INFO-C500). `grep -rn 'C round [0-9]* pending' docs/implementation` finds 0 |
+| C12 | CLAIMS | `bash b-round-500/claims-501.sh` (default tree), compared with `b-round-500/claims-501-sketch-output.txt` | No `MISSING`. Output identical except K1 (HEAD may move to the loop-state commit), K2 (the sketch scratch reads the store's status line) and K23 locations (archive moves) |
 | C13 | PROTECTION + STUDIO | Fresh no-credential context: `/studio/1`, `/account/downloads`, `/studio-lab` | `/studio/1` and `/account/downloads` show "Sign in required" and no download link; `/studio-lab` opens the demo at 1440 and 1280 (one screenshot each); check 2 rc 0 |
-| C14 | SOURCE-SCOPE (end) + L57 | As C0, then `python3 -I tools/l57-check.py c-round-500.json c-round-500/l57-check.txt` | As C0; rc 0. The JSON carries every L57 field. `mutantRedOnSketch` names `b-round-499/mutants-500.txt` |
+| C14 | SOURCE-SCOPE (end) + L57 | As C0, then `python3 -I tools/l57-check.py c-round-501.json c-round-501/l57-check.txt` | As C0; rc 0. The JSON carries all L57 fields. `mutantRedOnSketch` names `b-round-500/mutants-501.txt` |
 
 - **Gate rows** (`gate` in the JSON, never `passed`): the full vitest run, the build, Biome and `npm run verify`.
-- **Neighbours that could break:** the stage-1 and 2a sites (frozen, checked by C0); the cart e2e smoke (C1, C6); the protected downloads empty state (C1); the route error page (C1, C6); the other `/store` rows in `product-price-cards.test.tsx` (C9: VC1–VC5, PC1, PC2 and SC1 stay green).
+- **Neighbours that could break:**
+  - the e2e Subscribe locators (C1 `type`, K13);
+  - the free-downloads email form and its "Send Download Link" (C7);
+  - the hire-us success message (unchanged code);
+  - the home page sections around the newsletter (C1 boxes);
+  - ST5's other fills (C9).
 - **L22:** if A STOPs, C runs C0, C12 and C14 only.
-- **Closing:** with C PASS and `browserVerified` true:
-  - DPG-BUTTON-CLEANUP-2 stage 2b-1 is verified;
-  - B-R498-DOC320-L28, A-R499-CR-STORE-TRY-UNPINNED, A-R499-CR-PAIR-ORDER, A-R499-CR-TRYAGAIN-TYPE, A-R499-CR-DS-SAME-RULE and A-R499-CR-DOC321-WORDING close.
+- **Closing:** with C PASS and `browserVerified` true, DPG-BUTTON-CLEANUP-2 stage 2b-2 is verified.
 
-## 5. B's pre-check (on a scratch copy of A's round-499 tree plus the delta, outside `store/`)
+## 5. B's pre-check (on a scratch copy of HEAD plus the sketch, outside `store/`)
 | Check | Result | Log |
 |---|---|---|
-| tsc / Biome on 5 code and test files | rc 0 / rc 0, 6 warnings | `precheck-tsc.log`, `precheck-biome.log` |
-| lint (`biome lint ./app`) | rc 0, 180 warnings, 1 info | `precheck-lint.log` |
-| Covering tests | 14 files, 138/138 | `precheck-covering.log` |
-| Full suite on the final sketch tree (docs included) | 297 files / 4,329 tests, rc 0 (round 499: 4,328, +1 SE1) | `precheck-full.log` |
-| Build on the final sketch tree | rc 0; CSS bundle `app-P1AqvFE3.css`, the same as gate 498 | `precheck-build-sketch.log` |
-| Doc 321 tokens / `pending` grep / reload-spy probe | 65 hits, only non-class misses / 0 / spyOn throws, defineProperty works | `doc321-tokens.txt`, `pending-grep.txt`, `reload-spy-probe.txt` |
-| Mutants | N5b and N10–N18 RED on their named rows; the old N1–N9 re-run on this tree are RED except N5 (anchor moved) | `mutants-500.txt`, `mutants-500-failing-rows.txt`, `mutants-499-on-500-tree.txt`, `mutant-logs/` |
-| Scanner, builder calls | 109/44; 2, 1, 1 | `scan-sketch.txt`, `builder-calls-sketch.txt` |
-| Patch reproduces the tree | `git apply` on a copy of A's tree: checks 4 and 1 rc 0 | (this table) |
-| Sketch review | tech-lead **APPROVE** on the frozen sha `79835ecd…`: no Medium; Lows pre-ruled #9–#12 | `sketch-review.md` |
-| Claims (A's tree and the sketch) | rc 0, no MISSING | `claims-500-planning-output.txt`, `claims-500-sketch-output.txt` |
+| tsc / lint / Biome on 5 code and test files | rc 0 / rc 0, 179 warnings / rc 0, 1 warning | `precheck-tsc.log`, `precheck-lint.log`, `precheck-biome.log` |
+| Covering tests | 15 files, 179/179 | `precheck-covering.log` |
+| Full suite on the sketch tree (code and tests equal to v4) | 298 files / 4,337 tests, rc 0 | `precheck-full.log` |
+| Build on the final v4 tree (docs included) | rc 0; CSS `app-B4X5hQCC.css` | `precheck-build-sketch.log` |
+| Browser, HEAD vs sketch (a second dev server on :5174 with its own `cacheDir`) | as §1 and C1–C7 | `probe/head.out`, `probe/sketch.out`, `probe/*-journey.out`, screenshots in `probe/head/`, `probe/sketch/` |
+| Mutants | M1–M20, M26–M28, M30 and M31 all RED | `mutants-501.txt`, `mutants-501-failing-rows.txt`, `mutant-logs/` |
+| Scanner | 104/41 | `scan-sketch.txt` |
+| Patch reproduces the tree | `git apply` on a `git archive` copy of HEAD: check 4 equal to the scratch, check 1 rc 0 | (this table) |
+| Sketch review | tech-lead v1 and v2 CHANGES-REQUIRED, fixed; v3 APPROVE, superseded by a doc fix; **v4 APPROVE** on the dispatched sha | `sketch-review.md` |
+| Claims | HEAD and sketch outputs, no MISSING | `claims-501-planning-output.txt`, `claims-501-sketch-output.txt` |
 
 ## 6. After this round
 1. **REGRESSION** comes first if planning happens on or after 2026-11-16.
-2. **DPG-BUTTON-CLEANUP-2 stage 2b-2**, the `<button>` and submit sites: free-downloads "Download", the NewsletterSection submit, and the hire-us submit (ST5 pin granted).
-3. **2b-3:** recordings "Create a scene", cart and StudioShowcase. Re-evaluate SIG-R498-BUTTONLINK-WRAPPER at about 15 call sites.
-4. **2c:** PurchaseHeader. **2d:** chat. **2e:** LeadMagnet (keep-list restyle). Then **NONBRAND** and **PD-R498-404-SECONDARY-ALIGN**.
-5. **Then the rest of DPG P1** (CSS-DEDUP, COLOR-CONSOLIDATE, FONT-RESOLVE), the DP-gate re-run with root, and P2. The next RETRO is round 510.
+2. **2b-3:** recordings "Create a scene", cart and StudioShowcase. Re-evaluate SIG-R498-BUTTONLINK-WRAPPER there. Fix A-R500-CR-B2B5-COMMENT-ANCHOR there if that test file is touched.
+3. **2c:** PurchaseHeader. **2d:** chat. **2e:** LeadMagnet (keep-list restyle). Then **NONBRAND** (including "Send Download Link") and **PD-R498-404-SECONDARY-ALIGN**.
+4. **Then the rest of DPG P1** (CSS-DEDUP, COLOR-CONSOLIDATE, FONT-RESOLVE), the DP-gate re-run with root, and P2. The next RETRO is round 510.
 
-## Claims (`b-round-499/claims-500.sh`; planning output `claims-500-planning-output.txt` on A's tree, sketch output `claims-500-sketch-output.txt` on the scratch)
-K1 HEAD · K2 worktree counts · K3 Try Again type · K4 `/store` Link line · K5 loader error value + alert count · K6 `Link` mock + SE1 count · K7 `isBefore`, pins, type asserts · K8 builder calls · K9 scanner · K10 sweep · K11 doc 321 l.4 + headings · K12 DESIGN_SYSTEM phrase · K13 doc 320 l.4 · K14 L31 timings · K15 gate 499 status · K16 c-round-499 L57 · K17 artifacts · K18 ids · K19 l58 · K20 `useRouteError` + `Link` mock props · K21 doc 321 l.89/l.103 · K22 frozen list sizes · K23 doc 321 line numbers · K24 SE1 literal = `PRIMARY_LG_PILL`.
+## Claims (`b-round-500/claims-501.sh`; planning output `claims-501-planning-output.txt` on HEAD, sketch output `claims-501-sketch-output.txt` on the scratch)
+K1 HEAD · K2 worktree counts · K3 FD Download class / aria-expanded · K4 NL submit class / Button line · K5 NL field h-14 · K6 HU submit class / white spinner / Button line · K7 busy copy · K8 ST5 pin old/new · K9 Button lg / default shape / Loading... / disabled classes · K10 account.tsx precedent · K11 scanner · K12 SWEEP · K13 e2e locators · K14 new rows + barrel imports · K15 doc 322 l.4 + headings · K16 DESIGN_SYSTEM phrases · K17 pending grep · K18 L31 timings · K19 gate 500 · K20 c-round-500 L57 · K21 frozen list sizes · K22 artifacts · K23 ids · K24 l58 · K25 FD items + Send Download Link class · K26 DESIGN_SYSTEM radius-md comment · K27 DESIGN_SYSTEM two-shapes sentence.

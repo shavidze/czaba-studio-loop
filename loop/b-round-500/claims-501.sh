@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# usage: bash claims-501.sh [store-tree]   (default /home/runner/czaba-project/store). Run from anywhere.
+# HEAD-tree output: claims-501-planning-output.txt; sketch-tree output (/home/runner/b501-scratch): claims-501-sketch-output.txt
+S="${1:-/home/runner/czaba-project/store}"; L=/home/runner/czaba-project/tmp/studio-real-loop; B=$L/b-round-500
+cd "$S" || exit 2
+FD=app/routes/free-downloads.tsx; NL=app/components/home/NewsletterSection.tsx; HU=app/routes/hire-us.tsx
+TT=app/lib/__tests__/store-theme-tokens.test.ts; T2=app/lib/__tests__/store-button-cleanup-2b2.test.tsx
+D322=docs/implementation/2026/quarter-IV/322-dpg-button-cleanup-stage-2b-2.md
+echo "K1 store HEAD $(git -C /home/runner/czaba-project/store rev-parse --short HEAD 2>/dev/null)"
+echo "K2 store worktree vs HEAD (modified/untracked): $(git -C /home/runner/czaba-project/store status --short --untracked-files=all | grep -c '^ M') $(git -C /home/runner/czaba-project/store status --short --untracked-files=all | grep -c '^??')"
+echo "K3 FD hand-rolled Download class / Button form: $(grep -c 'className="px-6 py-3 bg-brand hover:bg-brand/90 text-background font-medium rounded-full transition-colors flex items-center gap-2 cursor-pointer"' $FD) $(grep -c 'aria-expanded={isExpanded}' $FD)"
+echo "K4 NL hand-rolled Subscribe class / Button line: $(grep -c 'className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand px-8 font-semibold text-background transition-all hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-70"' $NL) $(grep -c '<Button type="submit" size="lg" disabled={isSubmitting} className="h-14">' $NL)"
+echo "K5 NL email input h-14 rounded-lg: $(grep -c 'className="h-14 w-full rounded-lg border-2 border-outline-strong' $NL)"
+echo "K6 HU hand-rolled submit class / white spinner / Button line: $(grep -c 'className="w-full py-4 bg-brand hover:bg-brand/90 text-brand-foreground font-semibold rounded-xl' $HU) $(grep -c 'border-white/30 border-t-white' $HU) $(grep -c '<Button type="submit" size="lg" fullWidth disabled={isSubmitting}>' $HU)"
+echo "K7 busy copy (Subscribing... / Sending... in FD,HU): $(grep -c 'Subscribing\.\.\.' $NL) $(grep -c 'Sending\.\.\.' $HU) $(grep -c "'Sending...'" $FD)"
+echo "K8 ST5 hire-us pin old (rounded-xl triple) / new (Button line): $(grep -c "'rounded-xl'," $TT) $(grep -c '<Button type="submit" size="lg" fullWidth disabled={isSubmitting}>' $TT)"
+echo "K9 Button: lg size / default shape / isLoading copy / disabled classes: $(grep -c "lg: 'px-6 py-3 text-base gap-2'" app/components/ui/Button.tsx) $(grep -c "default: 'rounded-md'" app/components/ui/Button.tsx) $(grep -c '<span>Loading...</span>' app/components/ui/Button.tsx) $(grep -c "isDisabled && 'opacity-50 cursor-not-allowed pointer-events-none'" app/components/ui/Button.tsx)"
+echo "K10 PD precedent account.tsx primary lg fullWidth default-shape submit (multi-line, no shape prop): $(python3 -I -c "import re;s=open('app/routes/account.tsx').read();print(len(re.findall(r'<Button\\s+type=\"submit\"\\s+variant=\"primary\"\\s+size=\"lg\"\\s+fullWidth', s)))")"
+echo "K11 scanner (any/solid): $(python3 -I $L/b-round-497/scan-brand.py . /tmp/claims-501-scan.json)"
+echo "K12 SWEEP labels/tokens/module paths in test roots (app/**/__tests__, perf/**, e2e/**):"
+grep -rlE "Subscribe|Subscribing|Send Message|Sending\.\.\.|Send Download Link|>Download<|'Download'|NewsletterSection|routes/hire-us|routes/free-downloads|hire-us\.tsx|free-downloads\.tsx|border-t-white|rounded-xl'" app perf e2e --include=*.ts --include=*.tsx 2>/dev/null | grep -E '__tests__|^perf/|^e2e/|\.spec\.' | sort | sed 's/^/  /'
+echo "K13 e2e Subscribe locators keyed on button[type=submit]: $(grep -c "locator('button\[type=\"submit\"\]').filter({ hasText: /Subscribe/ })" e2e/homepage.spec.ts) $(grep -c "locator('button\[type=\"submit\"\]').filter({ hasText: /Subscribe/ })" e2e/edge-cases.spec.ts)"
+echo "K14 new test rows (B2B2-0..7) / barrel imports in 3 files: $(grep -cE "it\('B2B2-[0-7]:" $T2 2>/dev/null || echo 0) $(grep -c "import { Button } from '~/components/ui';" $FD $NL $HU | paste -sd' ')"
+echo "K15 doc 322 l.4 / '## ' headings: $(sed -n 4p $D322 2>/dev/null) | $(grep -c '^## ' $D322 2>/dev/null || echo 0)"
+echo "K16 DESIGN_SYSTEM default-row / pill-row 2b-2 phrases: $(grep -c 'Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“' docs/design/DESIGN_SYSTEM.md) $(grep -c 'free downloads-ის „Download“) |' docs/design/DESIGN_SYSTEM.md)"
+echo "K17 pending grep in docs/implementation: $(grep -rn 'C round [0-9]* pending' docs/implementation | wc -l)"
+echo "K18 L31 timings at gate 500 (5 s default): $(sed 's/\x1b\[[0-9;]*m//g' $L/gates/round-500/verify.log | grep -E '✓ BC1b:' | grep -oE '[0-9]+ms$') BC1b; hire-us-inquiry-email file $(sed 's/\x1b\[[0-9;]*m//g' $L/gates/round-500/verify.log | grep -E 'hire-us-inquiry-email.test.ts \(' | grep -oE '[0-9]+ms$'); timeouts in hire-us-inquiry-email.test.ts: $(grep -c 'timeout' app/lib/__tests__/hire-us-inquiry-email.test.ts)"
+echo "K19 gate 500 status/commit: $(python3 -I -c "import json;g=json.load(open('$L/gates/gate-round-500.json'));print(g['status'], g.get('commit','')[:7])")"
+echo "K20 c-round-500 L57: $(tail -1 $L/c-round-500/l57-check.txt)"
+echo "K21 frozen list sizes (r501 tree, protected): $(wc -l < $B/r501-tree-sha256.txt) $(wc -l < $L/b-round-318/protected-sha256.txt)"
+echo "K22 artifacts:"; for f in consult-product-designer.md probe/measure-501.mjs probe/nav-501.mjs probe/head.out probe/sketch.out probe/head-journey.out probe/sketch-journey.out sketch-sha-history.txt claims-501-planning-output.txt claims-501-sketch-output.txt he5-alone.log ../user-review/questions-round-501.md mutant-logs/mutant-M31.log probe/head/head.json probe/sketch/sketch.json sketch-501.patch.txt sketch-sha.txt sketch-review.md r501-tree-sha256.txt r501-pre-sha.txt r501-post-sketch-sha.txt mutants-501.py mutants-501.txt mutants-501-failing-rows.txt mutant-logs/mutant-M1.log mutant-logs/mutant-M11.log mutant-logs/mutant-M16.log mutant-logs/mutant-M19.log precheck-full.log precheck-covering.log precheck-tsc.log precheck-biome.log precheck-lint.log precheck-build-sketch.log covering-files.txt scan-sketch.txt doc-ledger.md ../a-round-500.md ../c-round-500.json; do test -f $B/$f && echo "  ok $f" || echo "  MISSING $f"; done
+echo "K23 ids: "; (cd $L && python3 -I tools/find-ids.py . DPG-BUTTON-CLEANUP-2 A-R500-CR-B2B5-COMMENT-ANCHOR PD-R499-GHOST-HOVER-FAINT SIG-R498-BUTTONLINK-WRAPPER INFO-C500-DOC321-LEDGER-TRACE | cut -d' ' -f1-2 | sed 's/^/  /')
+echo "K24 l58: $(cd $L && python3 -I tools/l58-check.py current-task.md | tail -1)"
+echo "K25 FD Download count in loader (items) / Send Download Link raw button: $(grep -c "      id: '[0-9]'," $FD) $(grep -c 'className="px-8 py-3 bg-foreground text-background font-medium rounded-full' $FD)"
+echo "K26 DESIGN_SYSTEM radius-md comment: $(grep -c '/\* Buttons (dialogs, Studio), inputs; Store CTAs use pill \*/' docs/design/DESIGN_SYSTEM.md)"
+echo "K27 DESIGN_SYSTEM two-shapes sentence (old / new): $(grep -c 'Store-ის გვერდებზე brand-ის pill (direction A, „a brass pill“), dialog-ებში 8px.' docs/design/DESIGN_SYSTEM.md) $(grep -c 'dialog-ებსა და Store-ის ფორმის submit-ზე 8px.' docs/design/DESIGN_SYSTEM.md)"
