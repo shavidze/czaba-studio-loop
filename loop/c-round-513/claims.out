@@ -1,0 +1,164 @@
+== K1 HEAD
+cbc5709d96f4b40d74c1f007fb3854923441a1b0
+== K2 changed paths
+ M app/components/common/CookieConsent.tsx
+ M app/components/common/__tests__/CookieConsent.test.tsx
+?? docs/implementation/2026/quarter-IV/331-dpg-nonbrand-stage-n3-cookie-banner.md
+== K3 gate 512
+published cbc5709d96f4b40d74c1f007fb3854923441a1b0
+== K4 c-round-512
+PASS True True [] 9
+== K5 cookie banner sites at HEAD cbc5709
+73:          <button
+74:            onClick={handleDecline}
+79:          <button
+80:            onClick={handleAccept}
+81:            className="px-5 py-2 text-sm font-medium bg-white text-black rounded-full hover:bg-neutral-100 transition-colors"
+88:        <button
+89:          onClick={handleDecline}
+90:          className="absolute top-2 right-2 sm:hidden p-2 text-dim hover:text-foreground transition-colors"
+91:          aria-label="Close"
+93:          <X size={18} />
+== K6 Button secondary/sm/pill and IconButton ghost/sm
+25:  secondary: [
+26:    'bg-elevated text-foreground',
+27:    'border border-outline',
+28:    'hover:bg-outline hover:border-outline-hover',
+60:  sm: 'px-3 py-1.5 text-sm gap-1.5',
+67:  pill: 'rounded-full',
+29:  ghost: [
+30:    'bg-transparent text-muted',
+39:  sm: { button: 'w-8 h-8', icon: 16 },
+53:        aria-label={label}
+54:        title={label}
+58:          'rounded-lg',
+== K7 banner renders only with a GA4 id
+9:export const GA4_MEASUREMENT_ID = import.meta.env.VITE_GA4_MEASUREMENT_ID || '';
+20:    if (!GA4_MEASUREMENT_ID) return;
+== K8 NONBRAND widened scanner (HEAD 51, sketch 50)
+head 51 ['app/components/common/CookieConsent.tsx:79']
+sketch 50 []
+== K9 lint warnings (HEAD 174, sketch 171)
+Found 174 warnings.
+Found 171 warnings.
+== K10 tests that name CookieConsent or components/common
+app/components/common/__tests__/CookieConsent.test.tsx
+app/lib/__tests__/store-gradient-text.test.ts
+app/lib/__tests__/store-internal-links.test.ts
+== K11 covering set at HEAD and on the sketch
+app/components/common/__tests__/CookieConsent.test.tsx
+app/lib/__tests__/store-internal-links.test.ts
+app/lib/__tests__/store-gradient-text.test.ts
+app/lib/__tests__/store-focus-ring.test.ts
+app/lib/__tests__/store-theme-tokens.test.ts
+app/lib/__tests__/studio-naming.test.tsx
+ Test Files  6 passed (6)
+      Tests  82 passed (82)
+ Test Files  6 passed (6)
+      Tests  88 passed (88)
+== K12 sketch sha, applies at HEAD in a temp copy, equals the post-sketch pin
+cd99584499de805a5b7c554b0b6308de458ebff94f5056e4dde9ce87a7ef81d8
+temp copy == post-sketch pin rc 0
+L58 OK
+LEDGER OK
+== K13 full suite on the product sketch (before the N3 rows)
+ Test Files  306 passed (306)
+      Tests  4405 passed (4405)
+rc 0
+rc 0
+dispatched sketch tsc: rc 0
+== K14 mutants (each red on its named row)
+M1-accept-primary 1 ['N3-1']
+M2-decline-default-shape 1 ['N3-1']
+M3-accept-md 1 ['N3-1']
+M4-order-swap 1 ['N3-2']
+M5-close-accepts 1 ['N3-4', 'N3-6']
+M6-close-label 1 ['N3-2', 'N3-3', 'N3-4', 'N3-6']
+M7-close-no-smhidden 1 ['N3-3']
+M8-close-icon-18 1 ['N3-3']
+M9-handlers-swap 1 ['Decline denies consent once and hides the banner', 'N3-6']
+M10-hand-rolled-accept 1 ['N3-1', 'N3-5']
+M11-no-pageview 1 ['N3-6']
+M12-close-variant-default 1 ['N3-3']
+M13-decline-calls-fbq 1 ['N3-6']
+== K15 N3 rows against the HEAD product file
+ × app/components/common/__tests__/CookieConsent.test.tsx > N3: cookie banner controls on the shared Button system > N3-1: Decline and Accept are secondary sm pill Buttons with identical classes
+ ✓ app/components/common/__tests__/CookieConsent.test.tsx > N3: cookie banner controls on the shared Button system > N3-2: the banner buttons are Decline, Accept, Close in DOM order
+ × app/components/common/__tests__/CookieConsent.test.tsx > N3: cookie banner controls on the shared Button system > N3-3: Close is a ghost sm IconButton, hidden from sm up, with a 16 px X
+ ✓ app/components/common/__tests__/CookieConsent.test.tsx > N3: cookie banner controls on the shared Button system > N3-4: Close declines consent once and hides the banner
+ × app/components/common/__tests__/CookieConsent.test.tsx > N3: cookie banner controls on the shared Button system > N3-5: CookieConsent.tsx has no raw button tag and no hardcoded white, black or neutral classes
+ ✓ app/components/common/__tests__/CookieConsent.test.tsx > N3: cookie banner controls on the shared Button system > N3-6: Accept grants the Facebook Pixel consent and tracks a PageView; Decline and Close do not call fbq
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  3 failed | 12 passed (15)
+== K16 frozen pins
+tree rc 0 (1428 entries)
+protected rc 0
+app/components/common/CookieConsent.tsx: FAILED
+app/components/common/__tests__/CookieConsent.test.tsx: FAILED
+sha256sum: WARNING: 2 computed checksums did NOT match
+== K17 browser probe HEAD vs sketch (GA4 env servers)
+head 1440x900 D (80, 36, 'block', 'rgba(0, 0, 0, 0)', 'rgb(163, 155, 142)', '0px', '400') A (88, 36, 'block', 'rgb(255, 255, 255)', 'rgb(0, 0, 0)', '9999px', '500') X (0, 0, 'none', 'rgba(0, 0, 0, 0)', 'rgb(146, 138, 125)', '0px', '400') order ['Decline', 'Accept', 'Close'] actions {'Decline': ('denied', 'BODY', 'CZABA'), 'Accept': ('granted', 'BODY', 'CZABA')} errors 0
+head 1280x720 D (80, 36, 'block', 'rgba(0, 0, 0, 0)', 'rgb(163, 155, 142)', '0px', '400') A (88, 36, 'block', 'rgb(255, 255, 255)', 'rgb(0, 0, 0)', '9999px', '500') X (0, 0, 'none', 'rgba(0, 0, 0, 0)', 'rgb(146, 138, 125)', '0px', '400') order ['Decline', 'Accept', 'Close'] actions {'Decline': ('denied', 'BODY', 'CZABA'), 'Accept': ('granted', 'BODY', 'CZABA')} errors 0
+head 375x812 D (80, 36, 'block', 'rgba(0, 0, 0, 0)', 'rgb(163, 155, 142)', '0px', '400') A (88, 36, 'block', 'rgb(255, 255, 255)', 'rgb(0, 0, 0)', '9999px', '500') X (34, 34, 'block', 'rgba(0, 0, 0, 0)', 'rgb(146, 138, 125)', '0px', '400') order ['Decline', 'Accept', 'Close'] actions {'Decline': ('denied', 'BODY', 'CZABA'), 'Accept': ('granted', 'BODY', 'CZABA'), 'Close': ('denied', 'BODY', 'CZABA')} errors 0
+head studio [('1440x900', '/studio-lab', 0), ('1440x900', '/studio/middle-east', 0), ('1280x720', '/studio-lab', 0), ('1280x720', '/studio/middle-east', 0)]
+sketch 1440x900 D (78, 34, 'flex', 'rgb(29, 26, 23)', 'rgb(236, 230, 218)', '9999px', '600') A (75, 34, 'flex', 'rgb(29, 26, 23)', 'rgb(236, 230, 218)', '9999px', '600') X (0, 0, 'none', 'rgba(0, 0, 0, 0)', 'rgb(163, 155, 142)', '12px', '400') order ['Decline', 'Accept', 'Close'] actions {'Decline': ('denied', 'BODY', 'CZABA'), 'Accept': ('granted', 'BODY', 'CZABA')} errors 0
+sketch 1280x720 D (78, 34, 'flex', 'rgb(29, 26, 23)', 'rgb(236, 230, 218)', '9999px', '600') A (75, 34, 'flex', 'rgb(29, 26, 23)', 'rgb(236, 230, 218)', '9999px', '600') X (0, 0, 'none', 'rgba(0, 0, 0, 0)', 'rgb(163, 155, 142)', '12px', '400') order ['Decline', 'Accept', 'Close'] actions {'Decline': ('denied', 'BODY', 'CZABA'), 'Accept': ('granted', 'BODY', 'CZABA')} errors 0
+sketch 375x812 D (78, 34, 'flex', 'rgb(29, 26, 23)', 'rgb(236, 230, 218)', '9999px', '600') A (75, 34, 'flex', 'rgb(29, 26, 23)', 'rgb(236, 230, 218)', '9999px', '600') X (32, 32, 'flex', 'rgba(0, 0, 0, 0)', 'rgb(163, 155, 142)', '12px', '400') order ['Decline', 'Accept', 'Close'] actions {'Decline': ('denied', 'BODY', 'CZABA'), 'Accept': ('granted', 'BODY', 'CZABA'), 'Close': ('denied', 'BODY', 'CZABA')} errors 0
+sketch studio [('1440x900', '/studio-lab', 0), ('1440x900', '/studio/middle-east', 0), ('1280x720', '/studio-lab', 0), ('1280x720', '/studio/middle-east', 0)]
+== K18 open CookieConsent findings
+A-R183-COOKIE-BUTTON-TYPE backlog:deferred_low_polish low scheduled round 513 (D-29z1864): closes on C round 513 PASS 
+A-R183-REVIEW-FBQ-BRANCH backlog:deferred_low_polish low scheduled round 513 (D-29z1864): closes on C round 513 PASS 
+A-R183-COOKIE-INLINE-GRADIENT backlog:deferred_low_polish low deferred_low_polish
+C-R183-N-CLOSE-0X0 backlog:deferred_low_polish low deferred_low_polish
+SABA-Q-507-COOKIE-WEIGHT backlog:open_findings info awaiting_user (D-29z1862): no answer in user-review/ at roun
+B-R512-COOKIE-DISMISS-FOCUS-LOST backlog:open_findings medium open (D-29z1864, D-29z1865): scheduled round 514 together wi
+B-R512-COOKIE-PILL-LOW-SEPARATION backlog:deferred_low_polish low deferred_low_polish (D-29z1864); joins the banner-root stage
+B-R512-COOKIE-CLOSE-OVERLAPS-TEXT backlog:open_findings medium open (D-29z1865): round 514 with B-R512-COOKIE-DISMISS-FOCUS
+DPG-BUTTON-CLEANUP-2-NONBRAND backlog:open_findings medium in_progress (D-29z1860, D-29z1862, D-29z1865): N1 (round 508
+== K19 docs naming cookie-banner button styles outside docs/implementation (expect only the genesis prompt module)
+none
+205:              onClick={handleAccept}
+== K20 c-round-512 L57 check
+L57 OK
+== K21 regression due date
+2026-11-13
+== K22 IL4 pins the banner Privacy Link
+57:it('IL4 the persistent CookieConsent banner link keeps focus (no release handler)', () => {
+== K23 second design gate claims at HEAD
+0
+155:        progressColor: 'hsl(175, 85%, 46%)',
+659:  background: hsl(340, 85%, 55%);
+101:  --premium-gold: hsl(43, 74%, 49%);
+98:  --color-blue-60: #006AFF;
+7
+4:export const ENTRANCE_MIN_TOTAL_MS = 3500;
+9:| `brand` | #13D9CC (Teal) | Primary actions, links |
+== K24 artifacts
+ok b-round-512/sketch-513.patch.txt
+ok b-round-512/sketch-review.md
+ok b-round-512/consult-product-designer.md
+ok b-round-512/probe/n3-banner.mjs
+ok b-round-512/probe/head/n3.json
+ok b-round-512/probe/sketch/n3.json
+ok b-round-512/mutants-513.py
+ok b-round-512/mut-logs/mutants-summary.json
+ok b-round-512/n3-rows-on-head.log
+ok b-round-512/r513-tree-sha256.txt
+ok b-round-512/r513-pre-sha.txt
+ok b-round-512/r513-post-sketch-sha.txt
+ok b-round-512/grants-tracked.txt
+ok b-round-512/covering-files.txt
+ok b-round-512/precheck-full.log
+ok b-round-512/doc-ledger-template.md
+ok b-round-512/precheck-tsc-dispatched.log
+ok b-round-512/claims-513-sketch-output.txt
+ok b-round-512/claims-513-allowed-delta.txt
+ok b-round-512/probe/head/banner-375.png
+ok b-round-512/probe/sketch/banner-375.png
+ok c-round-511/prot.mjs
+ok b-round-510/scan-nonbrand-motion.py
+ok b-round-512/mutants-513.py
+== K25 journey on the sketch (consent, banner buttons per step)
+1440x900 {'consent': 'denied', 'buttons': 0} 0 0 0
+1280x720 {'consent': 'denied', 'buttons': 0} 0 0 0
+ok probe/n3-journey.mjs

@@ -1,0 +1,351 @@
+diff --git a/app/components/common/CookieConsent.tsx b/app/components/common/CookieConsent.tsx
+index 01be8eb..9548bb6 100644
+--- a/app/components/common/CookieConsent.tsx
++++ b/app/components/common/CookieConsent.tsx
+@@ -7,12 +7,47 @@
+ 
+ import { Link, useLocation } from '@remix-run/react';
+ import { X } from 'lucide-react';
+-import { useEffect, useState } from 'react';
++import {
++  type FocusEvent as ReactFocusEvent,
++  type MouseEvent as ReactMouseEvent,
++  useEffect,
++  useRef,
++  useState,
++} from 'react';
+ import { Button, IconButton } from '~/components/ui';
+ import { GA4_MEASUREMENT_ID, hasConsentDecision, setAnalyticsConsent } from '~/lib/analytics';
+ 
++const COOKIE_CONSENT_FOCUS_FALLBACK_SELECTORS = [
++  'header a[href="/"]',
++  'header a[href], header button',
++];
++
++function focusAfterCookieDismiss(
++  banner: HTMLElement | null,
++  previous: HTMLElement | null,
++  fromKeyboard: boolean,
++) {
++  const active = document.activeElement;
++  if (active && active !== document.body && !banner?.contains(active)) return;
++  const candidates = [
++    previous,
++    ...COOKIE_CONSENT_FOCUS_FALLBACK_SELECTORS.map((selector) => document.querySelector(selector)),
++  ];
++  for (const candidate of candidates) {
++    if (!(candidate instanceof HTMLElement)) continue;
++    if (fromKeyboard) {
++      candidate.focus();
++    } else {
++      candidate.focus({ preventScroll: true });
++    }
++    if (document.activeElement === candidate) return;
++  }
++}
++
+ export function CookieConsent() {
+   const [isVisible, setIsVisible] = useState(false);
++  const bannerRef = useRef<HTMLDivElement>(null);
++  const focusBeforeBannerRef = useRef<HTMLElement | null>(null);
+   const { pathname } = useLocation();
+   const isStudioRoute = pathname.startsWith('/studio');
+ 
+@@ -31,8 +66,15 @@ export function CookieConsent() {
+     return () => clearTimeout(timer);
+   }, []);
+ 
+-  const handleAccept = () => {
++  const handleBannerFocus = (event: ReactFocusEvent<HTMLDivElement>) => {
++    const from = event.relatedTarget;
++    if (from instanceof Node && event.currentTarget.contains(from)) return;
++    focusBeforeBannerRef.current = from instanceof HTMLElement ? from : null;
++  };
++
++  const handleAccept = (event: ReactMouseEvent<HTMLButtonElement>) => {
+     setAnalyticsConsent(true);
++    focusAfterCookieDismiss(bannerRef.current, focusBeforeBannerRef.current, event.detail === 0);
+     setIsVisible(false);
+ 
+     // Facebook Pixel consent grant + PageView
+@@ -42,8 +84,9 @@ export function CookieConsent() {
+     }
+   };
+ 
+-  const handleDecline = () => {
++  const handleDecline = (event: ReactMouseEvent<HTMLButtonElement>) => {
+     setAnalyticsConsent(false);
++    focusAfterCookieDismiss(bannerRef.current, focusBeforeBannerRef.current, event.detail === 0);
+     setIsVisible(false);
+   };
+ 
+@@ -51,7 +94,9 @@ export function CookieConsent() {
+ 
+   return (
+     <div
++      ref={bannerRef}
+       className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-slide-up"
++      onFocus={handleBannerFocus}
+       style={{
+         background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.9) 100%)',
+         backdropFilter: 'blur(12px)',
+@@ -59,7 +104,7 @@ export function CookieConsent() {
+     >
+       <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+         {/* Text */}
+-        <p className="text-sm text-muted text-center sm:text-left">
++        <p className="px-10 text-sm text-muted text-center sm:px-0 sm:text-left">
+           We use cookies to enhance your experience.{' '}
+           <Link
+             to="/privacy"
+@@ -82,12 +127,12 @@ export function CookieConsent() {
+         {/* Close button (acts as decline) */}
+         <IconButton
+           variant="ghost"
+-          size="sm"
++          size="md"
+           label="Close"
+           onClick={handleDecline}
+           className="absolute top-2 right-2 sm:hidden"
+         >
+-          <X size={16} />
++          <X size={20} />
+         </IconButton>
+       </div>
+     </div>
+diff --git a/app/components/common/__tests__/CookieConsent.test.tsx b/app/components/common/__tests__/CookieConsent.test.tsx
+index d74a7aa..dc6f4de 100644
+--- a/app/components/common/__tests__/CookieConsent.test.tsx
++++ b/app/components/common/__tests__/CookieConsent.test.tsx
+@@ -206,7 +206,7 @@ describe('N3: cookie banner controls on the shared Button system', () => {
+     expect(names).toEqual(['Decline', 'Accept', 'Close']);
+   });
+ 
+-  it('N3-3: Close is a ghost sm IconButton, hidden from sm up, with a 16 px X', () => {
++  it('N3-3: Close is a ghost md IconButton (40 px, R514), hidden from sm up, with a 20 px X', () => {
+     renderCookieConsentAt('/');
+     advanceBannerTimer(1500);
+ 
+@@ -214,7 +214,7 @@ describe('N3: cookie banner controls on the shared Button system', () => {
+     const { container: reference } = render(
+       <IconButton
+         variant="ghost"
+-        size="sm"
++        size="md"
+         label="Close"
+         className="absolute top-2 right-2 sm:hidden"
+       >
+@@ -232,11 +232,11 @@ describe('N3: cookie banner controls on the shared Button system', () => {
+         'right-2',
+         'sm:hidden',
+         'bg-transparent',
+-        'w-8',
+-        'h-8',
++        'w-10',
++        'h-10',
+       ]),
+     );
+-    expect(close.querySelector('svg')?.getAttribute('width')).toBe('16');
++    expect(close.querySelector('svg')?.getAttribute('width')).toBe('20');
+   });
+ 
+   it('N3-4: Close declines consent once and hides the banner', () => {
+@@ -285,3 +285,198 @@ describe('N3: cookie banner controls on the shared Button system', () => {
+     }
+   });
+ });
++
++function renderCookieConsentWithPage(header: 'logo' | 'no-logo' | 'none') {
++  locationMock.pathname = '/';
++  return render(
++    <>
++      {header === 'logo' && (
++        <header>
++          <a href="/store">Collections</a>
++          <a href="/">CZABA</a>
++        </header>
++      )}
++      {header === 'no-logo' && (
++        <header>
++          <a href="/store">Collections</a>
++        </header>
++      )}
++      <button type="button">Page before</button>
++      <button type="button">Page other</button>
++      <CookieConsent />
++    </>,
++    { wrapper: MemoryRouter },
++  );
++}
++
++function enterBannerFrom(outside: HTMLElement | null, controlName: string) {
++  if (outside) {
++    outside.focus();
++  } else if (document.activeElement instanceof HTMLElement) {
++    document.activeElement.blur();
++  }
++  const control = screen.getByRole('button', { name: controlName });
++  control.focus();
++  expect(document.activeElement).toBe(control);
++  return control;
++}
++
++const KEYBOARD_CLICK = { detail: 0 };
++const POINTER_CLICK = { detail: 1 };
++
++describe('R514: focus after the cookie banner is dismissed (B-R512-COOKIE-DISMISS-FOCUS-LOST)', () => {
++  beforeEach(() => {
++    vi.useFakeTimers();
++    analyticsMock.hasDecision = false;
++    analyticsMock.setConsent.mockClear();
++    locationMock.pathname = '/';
++  });
++
++  afterEach(() => {
++    vi.useRealTimers();
++  });
++
++  for (const name of ['Decline', 'Accept', 'Close']) {
++    it(`R514-F1: keyboard ${name} returns focus to the element focused before the banner and unmounts it`, () => {
++      renderCookieConsentWithPage('logo');
++      advanceBannerTimer(1500);
++      const before = screen.getByRole('button', { name: 'Page before' });
++      const control = enterBannerFrom(before, name);
++
++      fireEvent.click(control, KEYBOARD_CLICK);
++
++      expect(document.activeElement).toBe(before);
++      expect(screen.queryByRole('button', { name: 'Accept' })).toBeNull();
++      expect(analyticsMock.setConsent).toHaveBeenCalledWith(name === 'Accept');
++    });
++  }
++
++  it('R514-F2: keyboard dismissal with nothing focused before goes to the header logo, scrolling it into view', () => {
++    renderCookieConsentWithPage('logo');
++    advanceBannerTimer(1500);
++    const logo = screen.getByRole('link', { name: 'CZABA' });
++    const focusSpy = vi.spyOn(logo, 'focus');
++    const control = enterBannerFrom(null, 'Decline');
++
++    fireEvent.click(control, KEYBOARD_CLICK);
++
++    expect(document.activeElement).toBe(logo);
++    expect(focusSpy.mock.calls).toEqual([[]]);
++  });
++
++  it('R514-F3: pointer dismissal moves focus with preventScroll, to the previous element or else the logo', () => {
++    renderCookieConsentWithPage('logo');
++    advanceBannerTimer(1500);
++    const logo = screen.getByRole('link', { name: 'CZABA' });
++    const logoSpy = vi.spyOn(logo, 'focus');
++
++    fireEvent.click(screen.getByRole('button', { name: 'Accept' }), POINTER_CLICK);
++
++    expect(document.activeElement).toBe(logo);
++    expect(logoSpy.mock.calls).toEqual([[{ preventScroll: true }]]);
++
++    cleanup();
++    renderCookieConsentWithPage('logo');
++    advanceBannerTimer(1500);
++    const before = screen.getByRole('button', { name: 'Page before' });
++    const beforeSpy = vi.spyOn(before, 'focus');
++    const control = enterBannerFrom(before, 'Decline');
++    beforeSpy.mockClear();
++
++    fireEvent.click(control, POINTER_CLICK);
++
++    expect(document.activeElement).toBe(before);
++    expect(beforeSpy.mock.calls).toEqual([[{ preventScroll: true }]]);
++  });
++
++  it('R514-F4: a previous element removed from the page falls back to the header logo', () => {
++    renderCookieConsentWithPage('logo');
++    advanceBannerTimer(1500);
++    const before = document.createElement('button');
++    before.textContent = 'Route link';
++    document.body.append(before);
++    const control = enterBannerFrom(before, 'Decline');
++    before.remove();
++
++    fireEvent.click(control, KEYBOARD_CLICK);
++
++    expect(document.activeElement).toBe(screen.getByRole('link', { name: 'CZABA' }));
++  });
++
++  it('R514-F5: a previous element that cannot take focus falls back to the header logo', () => {
++    renderCookieConsentWithPage('logo');
++    advanceBannerTimer(1500);
++    const before = screen.getByRole('button', { name: 'Page before' });
++    const control = enterBannerFrom(before, 'Accept');
++    before.setAttribute('disabled', '');
++
++    fireEvent.click(control, KEYBOARD_CLICK);
++
++    expect(document.activeElement).toBe(screen.getByRole('link', { name: 'CZABA' }));
++  });
++
++  it('R514-F6: each entry from outside replaces the stored element; moves inside the banner do not', () => {
++    renderCookieConsentWithPage('logo');
++    advanceBannerTimer(1500);
++    const first = screen.getByRole('button', { name: 'Page before' });
++    const second = screen.getByRole('button', { name: 'Page other' });
++    enterBannerFrom(first, 'Decline');
++    enterBannerFrom(second, 'Decline');
++    const accept = screen.getByRole('button', { name: 'Accept' });
++    accept.focus();
++
++    fireEvent.click(accept, KEYBOARD_CLICK);
++
++    expect(document.activeElement).toBe(second);
++
++    cleanup();
++    renderCookieConsentWithPage('logo');
++    advanceBannerTimer(1500);
++    enterBannerFrom(screen.getByRole('button', { name: 'Page before' }), 'Decline');
++    const control = enterBannerFrom(null, 'Accept');
++
++    fireEvent.click(control, KEYBOARD_CLICK);
++
++    expect(document.activeElement).toBe(screen.getByRole('link', { name: 'CZABA' }));
++  });
++
++  it('R514-F9: a pointer dismissal leaves focus on an outside element that already has it (browsers that do not focus a clicked button)', () => {
++    renderCookieConsentWithPage('logo');
++    advanceBannerTimer(1500);
++    enterBannerFrom(screen.getByRole('button', { name: 'Page before' }), 'Decline');
++    const other = screen.getByRole('button', { name: 'Page other' });
++    other.focus();
++    const logo = screen.getByRole('link', { name: 'CZABA' });
++    const logoSpy = vi.spyOn(logo, 'focus');
++
++    fireEvent.click(screen.getByRole('button', { name: 'Decline' }), POINTER_CLICK);
++
++    expect(document.activeElement).toBe(other);
++    expect(logoSpy).not.toHaveBeenCalled();
++    expect(screen.queryByRole('button', { name: 'Decline' })).toBeNull();
++    expect(analyticsMock.setConsent).toHaveBeenCalledWith(false);
++  });
++
++  it('R514-F7: without a logo link, focus goes to the first header link', () => {
++    renderCookieConsentWithPage('no-logo');
++    advanceBannerTimer(1500);
++    const control = enterBannerFrom(null, 'Accept');
++
++    fireEvent.click(control, KEYBOARD_CLICK);
++
++    expect(document.activeElement).toBe(screen.getByRole('link', { name: 'Collections' }));
++  });
++
++  it('R514-F8: without any header or previous element the decision is still stored and the banner unmounts', () => {
++    const { container } = renderCookieConsentWithPage('none');
++    advanceBannerTimer(1500);
++    const control = enterBannerFrom(null, 'Decline');
++
++    fireEvent.click(control, KEYBOARD_CLICK);
++
++    expect(analyticsMock.setConsent).toHaveBeenCalledTimes(1);
++    expect(analyticsMock.setConsent).toHaveBeenCalledWith(false);
++    expect(screen.queryByRole('button', { name: 'Decline' })).toBeNull();
++    expect(container.querySelector('p')).toBeNull();
++  });
++});

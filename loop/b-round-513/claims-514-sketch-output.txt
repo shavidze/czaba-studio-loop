@@ -1,0 +1,200 @@
+== K1 HEAD
+4c8558777f0898da3b1e093ac07a9011fe3270c6
+== K2 changed paths
+ M app/components/common/CookieConsent.tsx
+ M app/components/common/__tests__/CookieConsent.test.tsx
+?? docs/implementation/2026/quarter-IV/332-cookie-banner-focus-return-close-overlap.md
+== K3 gate 513
+published 4c8558777f0898da3b1e093ac07a9011fe3270c6
+== K4 c-round-513
+PASS True True [] 11
+== K5 banner sites at HEAD 4c85587
+34:  const handleAccept = () => {
+36:    setIsVisible(false);
+45:  const handleDecline = () => {
+47:    setIsVisible(false);
+54:      className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-slide-up"
+62:        <p className="text-sm text-muted text-center sm:text-left">
+74:          <Button variant="secondary" size="sm" shape="pill" onClick={handleDecline}>
+77:          <Button variant="secondary" size="sm" shape="pill" onClick={handleAccept}>
+85:          size="sm"
+88:          className="absolute top-2 right-2 sm:hidden"
+90:          <X size={16} />
+== K6 site header and banner mount order, header sticky class, logo link
+143:      {!isStudioPage && <Header cartCount={cartCount} />}
+147:        <Outlet />
+158:      <CookieConsent />
+69:    <header className="sticky top-0 z-50 border-b border-outline bg-background/95 backdrop-blur-lg">
+71:        <Link to="/" className="no-underline cursor-pointer">
+== K7 IconButton sizes; global focus ring and pointer suppression
+39:  sm: { button: 'w-8 h-8', icon: 16 },
+40:  md: { button: 'w-10 h-10', icon: 20 },
+236::focus-visible {
+241:html[data-focus-source="pointer"] :focus-visible {
+96:  doc.addEventListener('pointerdown', handlePointerDown, true);
+97:  doc.addEventListener('keydown', handleKeyDown, true);
+== K8 banner renders only with a GA4 id
+9:export const GA4_MEASUREMENT_ID = import.meta.env.VITE_GA4_MEASUREMENT_ID || '';
+21:    if (!GA4_MEASUREMENT_ID) return;
+== K9 browser layout HEAD vs sketch (320/375/639/1280/1440)
+head 320 overlap True gap 0 bannerH 122 close (32, 32, 'flex')
+head 375 overlap True gap 0 bannerH 122 close (32, 32, 'flex')
+head 639 overlap False gap 95.5 bannerH 102 close (32, 32, 'flex')
+head 1280 overlap False gap None bannerH 66 close (0, 0, 'none')
+head 1440 overlap False gap None bannerH 66 close (0, 0, 'none')
+sketch 320 overlap False gap 10.5 bannerH 122 close (40, 40, 'flex')
+sketch 375 overlap False gap 38 bannerH 122 close (40, 40, 'flex')
+sketch 639 overlap False gap 87.5 bannerH 102 close (40, 40, 'flex')
+sketch 1280 overlap False gap None bannerH 66 close (0, 0, 'none')
+sketch 1440 overlap False gap None bannerH 66 close (0, 0, 'none')
+eqHEAD 1280 []
+eqHEAD 1440 []
+== K10 browser focus after dismissal HEAD vs sketch
+head errors 4
+head 1280 Decline shift-tab-from-top Enter BODY CZABACollectionsStud fv False inVp False sy 0 0 gone True ['denied'] prev None
+head 1280 Decline tab-from-before-banner Enter BODY CZABACollectionsStud fv False inVp False sy 4043 4043 gone True ['denied'] prev Cookie Policy
+head 1280 Decline pointer-mid-page  BODY CZABACollectionsStud fv False inVp False sy 1611 1611 gone True ['denied'] prev None
+head 1280 Decline privacy-nav-then-keyboard Enter BODY CZABACollectionsStud fv False inVp False sy 0 0 gone True ['denied'] prev Cookie Policy
+head 1280 Decline shift-tab-mid-page-never-focused Enter BODY CZABACollectionsStud fv False inVp False sy 2416 2416 gone True ['denied'] prev None
+head 1280 Accept shift-tab-from-top Enter BODY CZABACollectionsStud fv False inVp False sy 0 0 gone True ['granted'] prev None
+head 1280 Accept tab-from-before-banner Enter BODY CZABACollectionsStud fv False inVp False sy 4043 4043 gone True ['granted'] prev Cookie Policy
+head 1280 Accept pointer-mid-page  BODY CZABACollectionsStud fv False inVp False sy 1611 1611 gone True ['granted'] prev None
+head 1280 Accept shift-tab-from-top Space BODY CZABACollectionsStud fv False inVp False sy 0 0 gone True ['granted'] prev None
+head 375 Decline shift-tab-from-top Enter BODY CZABACollectionsStud fv False inVp False sy 0 0 gone True ['denied'] prev None
+head 375 Decline tab-from-before-banner Enter BODY CZABACollectionsStud fv False inVp False sy 4831 4831 gone True ['denied'] prev Cookie Policy
+head 375 Decline pointer-mid-page  BODY CZABACollectionsStud fv False inVp False sy 1889 1889 gone True ['denied'] prev None
+head 375 Decline privacy-nav-then-keyboard Enter BODY CZABACollectionsStud fv False inVp False sy 0 0 gone True ['denied'] prev Cookie Policy
+head 375 Decline shift-tab-mid-page-never-focused Enter BODY CZABACollectionsStud fv False inVp False sy 2833 2833 gone True ['denied'] prev None
+head 375 Accept shift-tab-from-top Enter BODY CZABACollectionsStud fv False inVp False sy 0 0 gone True ['granted'] prev None
+head 375 Accept tab-from-before-banner Enter BODY CZABACollectionsStud fv False inVp False sy 4831 4831 gone True ['granted'] prev Cookie Policy
+head 375 Accept pointer-mid-page  BODY CZABACollectionsStud fv False inVp False sy 1889 1889 gone True ['granted'] prev None
+head 375 Close shift-tab-from-top Enter BODY CZABACollectionsStud fv False inVp False sy 0 0 gone True ['denied'] prev None
+head 375 Close tab-from-before-banner Enter BODY CZABACollectionsStud fv False inVp False sy 4831 4831 gone True ['denied'] prev Cookie Policy
+head 375 Close pointer-mid-page  BODY CZABACollectionsStud fv False inVp False sy 1889 1889 gone True ['denied'] prev None
+head 375 Accept shift-tab-from-top Space BODY CZABACollectionsStud fv False inVp False sy 0 0 gone True ['granted'] prev None
+head None None fresh-first-visit-record  BODY CZABACollectionsStud fv False inVp False sy None 0 gone True [] prev None
+sketch errors 4
+sketch 1280 Decline shift-tab-from-top Enter A CZABA fv True inVp True sy 0 0 gone True ['denied'] prev None
+sketch 1280 Decline tab-from-before-banner Enter A Cookie Policy fv True inVp True sy 4043 4043 gone True ['denied'] prev Cookie Policy
+sketch 1280 Decline pointer-mid-page  A CZABA fv False inVp False sy 1611 1611 gone True ['denied'] prev None
+sketch 1280 Decline privacy-nav-then-keyboard Enter A CZABA fv True inVp True sy 0 0 gone True ['denied'] prev Cookie Policy
+sketch 1280 Decline shift-tab-mid-page-never-focused Enter A CZABA fv True inVp True sy 2416 0 gone True ['denied'] prev None
+sketch 1280 Accept shift-tab-from-top Enter A CZABA fv True inVp True sy 0 0 gone True ['granted'] prev None
+sketch 1280 Accept tab-from-before-banner Enter A Cookie Policy fv True inVp True sy 4043 4043 gone True ['granted'] prev Cookie Policy
+sketch 1280 Accept pointer-mid-page  A CZABA fv False inVp False sy 1611 1611 gone True ['granted'] prev None
+sketch 1280 Accept shift-tab-from-top Space A CZABA fv True inVp True sy 0 0 gone True ['granted'] prev None
+sketch 375 Decline shift-tab-from-top Enter A CZABA fv True inVp True sy 0 0 gone True ['denied'] prev None
+sketch 375 Decline tab-from-before-banner Enter A Cookie Policy fv True inVp True sy 4831 4831 gone True ['denied'] prev Cookie Policy
+sketch 375 Decline pointer-mid-page  A CZABA fv False inVp False sy 1889 1889 gone True ['denied'] prev None
+sketch 375 Decline privacy-nav-then-keyboard Enter A CZABA fv True inVp True sy 0 0 gone True ['denied'] prev Cookie Policy
+sketch 375 Decline shift-tab-mid-page-never-focused Enter A CZABA fv True inVp True sy 2833 0 gone True ['denied'] prev None
+sketch 375 Accept shift-tab-from-top Enter A CZABA fv True inVp True sy 0 0 gone True ['granted'] prev None
+sketch 375 Accept tab-from-before-banner Enter A Cookie Policy fv True inVp True sy 4831 4831 gone True ['granted'] prev Cookie Policy
+sketch 375 Accept pointer-mid-page  A CZABA fv False inVp False sy 1889 1889 gone True ['granted'] prev None
+sketch 375 Close shift-tab-from-top Enter A CZABA fv True inVp True sy 0 0 gone True ['denied'] prev None
+sketch 375 Close tab-from-before-banner Enter A Cookie Policy fv True inVp True sy 4831 4831 gone True ['denied'] prev Cookie Policy
+sketch 375 Close pointer-mid-page  A CZABA fv False inVp False sy 1889 1889 gone True ['denied'] prev None
+sketch 375 Accept shift-tab-from-top Space A CZABA fv True inVp True sy 0 0 gone True ['granted'] prev None
+sketch None None fresh-first-visit-record  A CZABA fv True inVp True sy None 0 gone True [] prev None
+head studio {'bannerButtons': 0, 'title': 'CZABA Studio — Demo collection', 'workspaceText': True} errors 0
+sketch studio {'bannerButtons': 0, 'title': 'CZABA Studio — Demo collection', 'workspaceText': True} errors 0
+== K11 header not effectively sticky (C-R205-02 cause)
+html,
+body {
+  overflow-x: hidden;
+}
+probe/sticky.mjs present (HEAD: top -1500 at scrollY 1500)
+== K12 sketch sha, applies at HEAD in a temp copy, equals the post-sketch pin; L58 + ledger
+e6e5f1dc8e1b1e540855dfe84d968987b28eb3356568df2d3d30446cdf075fc8
+temp copy == post-sketch pin rc 0
+L58 OK
+LEDGER OK
+== K13 sketch tsc and scoped biome
+tsc log lines: 0
+Checked 2 files in 12ms. No fixes applied.
+== K14 mutants (each red on its named rows)
+M1-decline-no-focus 1 ['R514-F1', 'R514-F1', 'R514-F2', 'R514-F3', 'R514-F4']
+M2-accept-no-focus 1 ['R514-F1', 'R514-F3', 'R514-F5', 'R514-F6', 'R514-F7']
+M3-pointer-no-preventScroll 1 ['R514-F3']
+M4-keyboard-preventScroll 1 ['R514-F2']
+M5-no-previous-tracking 1 ['R514-F1', 'R514-F1', 'R514-F1', 'R514-F3', 'R514-F6']
+M6-no-overwrite-with-null 1 ['R514-F6']
+M7-inside-moves-overwrite 1 ['R514-F6']
+M9-no-element-skip 1 ['N3-4', 'N3-6', 'R514-F3', 'R514-F6', 'R514-F7', 'R514-F8']
+M15-no-outside-active-guard 1 ['R514-F9']
+M8-no-landed-check 1 ['R514-F2', 'R514-F4', 'R514-F5', 'R514-F7']
+M10-no-logo-selector 1 ['R514-F2', 'R514-F3', 'R514-F4', 'R514-F5', 'R514-F6']
+M11-no-generic-fallback 1 ['R514-F7']
+M12-detail-ignored 1 ['R514-F3']
+M13-close-sm 1 ['N3-3']
+M14-x-16 1 ['N3-3']
+== K15 new rows against the HEAD product file
+N3-3: Close is a ghost md IconButton (40 px, R514), hidden f
+R514-F1: keyboard Decline returns focus to the element focus
+R514-F1: keyboard Accept returns focus to the element focuse
+R514-F1: keyboard Close returns focus to the element focused
+R514-F2: keyboard dismissal with nothing focused before goes
+R514-F3: pointer dismissal moves focus with preventScroll, t
+R514-F4: a previous element removed from the page falls back
+R514-F5: a previous element that cannot take focus falls bac
+R514-F6: each entry from outside replaces the stored element
+R514-F9: a pointer dismissal leaves focus on an outside elem
+R514-F7: without a logo link, focus goes to the first header
+R514-F8: without any header or previous element the decision
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  10 failed | 16 passed (26)
+== K16 frozen pins
+tree rc 0 (1429 entries)
+protected rc 0
+app/components/common/CookieConsent.tsx: FAILED
+app/components/common/__tests__/CookieConsent.test.tsx: FAILED
+== K17 covering set on the sketch
+app/components/common/__tests__/CookieConsent.test.tsx
+app/lib/__tests__/store-internal-links.test.ts
+app/lib/__tests__/store-gradient-text.test.ts
+app/lib/__tests__/store-focus-ring.test.ts
+app/lib/__tests__/store-theme-tokens.test.ts
+app/lib/__tests__/studio-naming.test.tsx
+ Test Files  6 passed (6)
+      Tests  99 passed (99)
+slowest: 183ms
+== K18 lint and scanner on the sketch (HEAD 171 / 50)
+Found 171 warnings.
+scanner 50 cookie 0
+== K19 journey on the sketch
+1440x900 {'consent': 'denied', 'buttons': 0} 0 0 0
+1280x720 {'consent': 'denied', 'buttons': 0} 0 0 0
+== K20 findings and decisions in backlog v520
+version 520
+open_findings B-R512-COOKIE-DISMISS-FOCUS-LOST dispatched round 514 (D-29z1868): focus returns to the eleme
+open_findings B-R512-COOKIE-CLOSE-OVERLAPS-TEXT dispatched round 514 (D-29z1868): Close IconButton md 40 px 
+open_findings SABA-Q-513-CLOSE-AS-DECLINE awaiting_user (D-29z1867): question in user-review/questions
+deferred_low_polish A-R183-COOKIE-BUTTON-TYPE closed (D-29z1866): C round 513 C8 lint 171 (the three useBu
+deferred_low_polish A-R183-REVIEW-FBQ-BRANCH closed (D-29z1866): C round 513 C7 row N3-6 green, mutants M
+deferred_low_polish C-R205-02 deferred_low_polish (candidate for STORE-2b/STORE-3 owner)
+['D-29z1866', 'D-29z1867', 'D-29z1868']
+== K21 regression date
+2026-11-13 484
+== K22 artifacts
+ok consult-product-designer.md
+ok sketch-review.md
+ok doc-ledger-template.md
+ok mutants-514.py
+ok covering-files.txt
+ok probe/r514-banner.mjs
+ok probe/n3-journey.mjs
+ok probe/sticky.mjs
+ok probe/head/r514.json
+ok probe/sketch/r514.json
+ok probe/head/r514-studio.json
+ok probe/sketch/r514-studio.json
+ok probe/sketch/banner-375.png
+ok probe/sketch/banner-320.png
+ok probe/head/banner-375.png
+ok probe/sketch-journey/journey.json
+ok r514-tree-sha256.txt
+ok r514-pre-sha.txt
+ok r514-post-sketch-sha.txt
+ok grants-tracked.txt
+ok c-round-511/prot.mjs
+ok questions-round-513.md

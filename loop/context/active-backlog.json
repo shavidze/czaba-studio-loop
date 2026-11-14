@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-14T11:23:43.463Z",
-  "current_task": "Round 512: DPG-BUTTON-CLEANUP-2-NONBRAND N2 close-out (docs-only): git apply b-round-511/sketch-512-docs.patch.txt (sha ad47fec4) on the uncommitted round-511 tree (HEAD f5d1b9e) - DESIGN_SYSTEM.md (colour row, variant guide, Buttons sections + new Buy block), docs/design/components/button.md, ui-components.md Button section, doc 330 l.4 -> C round 512; C re-checks docs + default card, anon journey, Added pulse (record), protection + /studio-lab in the browser.",
+  "_generatedUtc": "2026-11-14T12:10:14.187Z",
+  "current_task": "Round 513: DPG-BUTTON-CLEANUP-2-NONBRAND N3 cookie banner on HEAD cbc5709: git apply b-round-512/sketch-513.patch.txt (sha cd995844) - CookieConsent Decline/Accept -> Button secondary sm pill (equal weight, SABA-Q-507 default), Close -> IconButton ghost sm; rows N3-1..N3-6; doc 331. C verifies on a second dev server with VITE_GA4_MEASUREMENT_ID set (own Vite cacheDir): 1440/1280/375 rest/hover/keyboard/press/actions/consent storage, /studio-lab no banner, protection.",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6823,12 +6823,6 @@
       "title": "Should the Store show pending-navigation feedback (the never-visible 2 px .nav-loading-bar)?"
     },
     {
-      "id": "SABA-Q-DPG-LOGO-FONT-SERIF",
-      "severity": "info",
-      "status": "awaiting_user (D-29z1685): user-review/questions-round-475.m",
-      "title": "DPG-LOGO asks for font-serif, but --font-serif is Instrument Sans (= --font-sans), so it changes not"
-    },
-    {
       "id": "B-R478-DEAD-LICENSE-LINK",
       "severity": "medium",
       "origin": "B pre-check",
@@ -7098,7 +7092,7 @@
     {
       "id": "SABA-Q-507-COOKIE-WEIGHT",
       "severity": "info",
-      "status": "awaiting_user (D-29z1831): user-review/questions-round-507.m",
+      "status": "awaiting_user (D-29z1862): no answer in user-review/ at roun",
       "title": "Cookie banner: Accept and Decline equal weight (both secondary sm pill, product-designer default) or"
     },
     {
@@ -7176,29 +7170,90 @@
       "title": "Round-382 ruling: Play pressed while a just-added sound decodes does not auto-start (user presses ag"
     },
     {
-      "id": "C511-DESIGNSYSTEM-STALE-PRIMARY-EXAMPLES",
-      "aliases": [
-        "A-R511-REVIEW-DESIGN-SYSTEM-PRIMARY-EXAMPLES"
-      ],
+      "id": "DPG-BUTTON-CLEANUP-2-NONBRAND",
       "severity": "medium",
       "origin": "B spec",
-      "added": "2026-11-14 B round 511 -> 512 planning",
-      "status": "scheduled round 512 (D-29z1856/D-29z1857): doc-only sketch over DESIGN_SYSTEM.md, button.md, ui-components.md",
-      "title": "After N2, Button docs contradict the code: DESIGN_SYSTEM.md Usage Examples/Primary heading still show Add to Cart as variant=primary and <PrimaryButton>Buy Now; no buy block; same claim in docs/design/components/button.md and ui-components.md",
-      "evidence": "c-round-511.json bugs[0]; a-round-511.md STOP; b-round-511/claims-512-planning-output.txt K6, K15",
-      "repro": "grep -n 'variant=\"primary\" size=\"lg\">Add to Cart\\|<PrimaryButton>Buy Now' docs/design/DESIGN_SYSTEM.md"
+      "status": "in_progress (D-29z1860, D-29z1862, D-29z1865): N1 (round 508, cf89736) and N2 PurchaseHeader (rounds 511+512, published cbc5709) are C-verified; round 513 = N3 cookie banner; N4-N9 and the StemsPlayerModal pair remain. Old status chain moved to status_history_d29z1865 so the optimizer substring matc …[see backlog.json]",
+      "title": "Hand-rolled controls without a brand fill bypass Button.tsx (Saba DPG item 7): whole-tag scan 58 tags / 29 files at 3021b30 + LeadMagnet Close X + 3 scanner misses; 29 to Button/IconButton, 28 keep, 2 root",
+      "evidence": "b-round-506/scan-nonbrand-head.json (58); b-round-506/consult-product-designer.md (rulings, stages); b-round-497/other-handrolled-count.txt (old record 30/18)",
+      "added": "2026-11-13 B round 497 -> 498 planning",
+      "note_d29z1815": "includes the PurchaseHeader in-card siblings (Open in Studio, Downloads, Add to Cart, Buy Now radius) -> 8 px default shape, so the purchase card is one system again (product-designer, round 504 consult)",
+      "note_d29z1824": "includes the LeadMagnet Close X (NONBRAND per round 506); B2E-6 bans any bg-brand literal in LeadMagnetPopup.tsx (pre-ruled Low #2) - a NONBRAND change there updates B2E-6",
+      "restored_d29z1860": "restored from archive/findings-archived.json: cloud/optimize-backlog.py archived it while in_progress (status text contained a closed-like word); same class as ROOT-REQ-OPTIMIZER-ARCHIVES-OPEN",
+      "status_history_d29z1865": "in_progress (D-29z1860, D-29z1862): N1 (round 508, cf89736) and N2 PurchaseHeader (rounds 511+512, C round 512 PASS, browserVerified true, published cbc5709) are C-verified; round 513 = N3 cookie banner; N4-N9 and the StemsPlayerModal pair remain | in_progress (D-29z1856): N2 PurchaseHeader code ver …[see backlog.json]"
+    },
+    {
+      "id": "B-R512-COOKIE-DISMISS-FOCUS-LOST",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "added": "2026-11-14 B round 512 -> 513 planning",
+      "title": "Cookie banner: after Enter on Decline or Accept (or a tap on Close) the banner unmounts and focus falls to body; the next Tab starts at the page top (CZABA logo link). Pre-existing at HEAD cbc5709, unchanged by N3",
+      "evidence": "b-round-512/probe/head/n3.json and sketch/n3.json actions[*].focusAfter = BODY, firstTabAfter = \"CZABA\" at 1440/1280/375; product-designer consult (Medium, pre-existing)",
+      "repro": "node b-round-512/probe/n3-banner.mjs <GA4-env base> <dir>",
+      "status": "open (D-29z1864, D-29z1865): scheduled round 514 together with B-R512-COOKIE-CLOSE-OVERLAPS-TEXT (same banner); task names the focus target (L47) with product-designer"
+    },
+    {
+      "id": "DPG2-OFF-PALETTE",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "added": "2026-11-14 B round 512 -> 513 planning",
+      "source": "design gate 2 (root, 2026-11-14): design-philosopher 5.2/10, product-designer 5.0/10",
+      "title": "Off-palette colours: pink hsl(340,85%,55%) app.css (artist section), blue hsl(220,…) shimmer app.css and free-downloads.tsx gradient with green hsla(140,…), parallel --premium-gold token in base/utilities.css",
+      "evidence": "K23 claims-513; policy \"Second gate result (2026-11-14)\"",
+      "status": "open (D-29z1863): DPG-COLOR-CONSOLIDATE / DPG-DECORATIVE-PURGE scope (P1/P2); app/styles/** needs a root grant (global_forbidden_files)"
+    },
+    {
+      "id": "DPG2-LEGACY-BLUE-TOKENS",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "added": "2026-11-14 B round 512 -> 513 planning",
+      "source": "design gate 2 (root, 2026-11-14): design-philosopher 5.2/10, product-designer 5.0/10",
+      "title": "--color-blue-60/50/30 legacy tokens still in @theme (app.css)",
+      "evidence": "K23",
+      "status": "open (D-29z1863): DPG-DECORATIVE-PURGE; app/styles/** root grant"
+    },
+    {
+      "id": "DPG2-STUDIOMOCKUP-OFF-PALETTE",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "added": "2026-11-14 B round 512 -> 513 planning",
+      "source": "design gate 2 (root, 2026-11-14): design-philosopher 5.2/10, product-designer 5.0/10",
+      "title": "Home StudioMockup.tsx uses bg-neutral-800, text-neutral-400, bg-red-500, bg-yellow-500 (off-palette)",
+      "evidence": "K23 claims-513: 7 lines match bg-neutral-800|bg-red-500|bg-yellow-500 in app/components/home/StudioMockup.tsx",
+      "status": "open (D-29z1863): DPG-COLOR-CONSOLIDATE; also STORE-3 (F5 real crop)"
+    },
+    {
+      "id": "DPG2-NATIVE-SELECT-STORE",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "added": "2026-11-14 B round 512 -> 513 planning",
+      "source": "design gate 2 (root, 2026-11-14): design-philosopher 5.2/10, product-designer 5.0/10",
+      "title": "Native <select> without a custom Select component in Store routes/components (hire-us, FilterBar, recordings SfxSceneBuilder/SfxSoundLibrary)",
+      "evidence": "grep -rln \"<select\" app --include=*.tsx (B planning 512)",
+      "status": "open (D-29z1863): DPG P1 after NONBRAND; Studio half stays SABA-B-12 stage 4"
+    },
+    {
+      "id": "DPG2-DOCS-TYPOGRAPHY-STALE",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "added": "2026-11-14 B round 512 -> 513 planning",
+      "source": "design gate 2 (root, 2026-11-14): design-philosopher 5.2/10, product-designer 5.0/10",
+      "title": "DESIGN_SYSTEM.md typography still names Playfair Display/Inter; Saba decision 2026-11-14: Instrument Sans for everything",
+      "evidence": "policy second gate list",
+      "status": "open (D-29z1863): DPG-FONT-RESOLVE (input D-29z1707); docs grant in that round"
+    },
+    {
+      "id": "B-R512-COOKIE-CLOSE-OVERLAPS-TEXT",
+      "severity": "medium",
+      "origin": "pre-existing",
+      "added": "2026-11-14 B round 512 -> 513 planning",
+      "title": "Cookie banner at 375 px: the mobile Close X (absolute top-2 right-2) sits on the end of the first text line and covers the \"Privacy\" link glyphs; the X and the link tap targets collide. Same at HEAD (34x34) and on the N3 sketch (32x32)",
+      "evidence": "b-round-512/probe/head/banner-375.png, probe/sketch/banner-375.png; probe/*/n3.json rest 375 (text box right 359, Close x 333/335, y 696/698)",
+      "repro": "node b-round-512/probe/n3-banner.mjs <GA4-env base> <dir>; open banner-375.png",
+      "status": "open (D-29z1865): round 514 with B-R512-COOKIE-DISMISS-FOCUS-LOST (same banner, same file; at most 3 related bugs); product-designer row \"X must not cover the text\" is ruled pre-existing for round 513 (C1 records, equal to HEAD)"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 503,
-      "task": "current-task.md",
-      "decision": "D-29z1809",
-      "type": "DPG-BUTTON-CLEANUP-2 stage 2b-3 (cart Upgrade, recordings Create a scene, StudioShowcase Browse the Collection) + doc 323 L28 status line",
-      "status": "C PASS (browserVerified/realVerified true, 0 bugs; cart and recordings rows -STUBBED, CART-REAL-BACKEND blocked in cloud); gate 503 published b806cad (both remotes)",
-      "note": "baseline 882854e clean; sketch b-round-502/sketch-503.patch.txt v2 sha 210ee872; pre-check b-round-502/precheck-*.log (full 300/4353 rc0, build rc0); mutants M1-M16 OK; probes b-round-502/probe/",
-      "result_note": "C0-C14 PASS (c-round-503.json); review COMMIT OK 9/10; D-29z1812/D-29z1813"
-    },
     {
       "round": 504,
       "task": "current-task.md",
@@ -7272,8 +7327,16 @@
       "task": "current-task.md",
       "decision": "D-29z1856",
       "type": "NONBRAND N2 close-out (docs-only fix-up of round 511)",
-      "status": "dispatched",
+      "status": "C PASS (browserVerified true), gate 512 published cbc5709 (D-29z1860)",
       "note": "baseline HEAD f5d1b9e + uncommitted round-511 tree; grants 4 docs via b-round-511/sketch-512-docs.patch.txt (sha ad47fec4); pins r512-tree-sha256.txt (1425), r512-a511-pin-sha.txt, r512-pre-sha.txt, r512-post-sketch-sha.txt; claims b-round-511/claims-512.sh K1-K17"
+    },
+    {
+      "round": 513,
+      "task": "current-task.md",
+      "decision": "D-29z1862",
+      "type": "NONBRAND N3 cookie banner (Accept/Decline Button secondary sm pill, Close IconButton ghost sm)",
+      "status": "dispatched",
+      "note": "baseline HEAD cbc5709 clean; sketch b-round-512/sketch-513.patch.txt (sha cd995844); pins r513-tree-sha256.txt (1428), r513-pre-sha.txt, r513-post-sketch-sha.txt; claims b-round-512/claims-513.sh K1-K24; browser via a GA4-env dev server"
     }
   ],
   "other_keys": [
