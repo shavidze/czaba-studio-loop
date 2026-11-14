@@ -1,0 +1,10 @@
+step0: tasks/round-509.md archived (cmp OK); before-copies saved. C509 PASS browserVerified true 0 bugs; gate 509 published f5d1b9e (baseline). Plan: round 510 = RETRO 510 (window 495-509) per retro_policy.next_due and task 509 timing.
+step1: acceptance backlog v514 (D-29z1842/1843) done
+step2: retro input frozen (backlog-retro-input.json v514, archive snapshot); scripts copied+repointed (495->510, 494->509, 480->495; stage map, D-range 1772..1841 by hand); data in b-round-509/data; screens captured b-round-509/screens (counts equal to 495: 138/168/118/144). next: consult-inputs.md, tech-lead + product-designer consults
+step3: consult-inputs.md written; tech-lead + product-designer launched (background); r510-tree-sha256.txt 1428 rc0, protected rc0 (11x1); primitive-staleness.txt; questions-retro-510.md drafted (Q6 placeholder). next: wait consults -> retro-510.md, screen-review-510.md, lessons edit, backlog retro update, feature-status, current-task 510, b-round-509.md, b-next.json, regression-last untouched
+step4: both consults saved (consult-tech-lead.md, consult-product-designer.md); retro-510.md drafted with placeholders TL/LESSONS/SYSTEMIC/SABA/NEXT. next: lessons edit, tools/ledger-check.py, screen-review-510.md, backlog retro update
+step5: lessons edited (57435 B, 59 lines; .done x2); tools/ledger-check.py; screen-review-510.md; backlog v515 retro update .done (D-29z1844..1848). next: retro placeholders, questions Q6, feature-status, claims-510.sh, current-task 510, b-round-509.md, b-next.json, advisor
+step6: retro filled, questions Q6, feature-status .done, claims-510.sh run (err 0), current-task 510, b-next.json written. next: b-round-509.md, advisor closing
+step7: b-round-509.md written; store clean; next advisor closing check
+step8: advisor closing fixes applied (D-29z1849, backlog v516, lessons E7 57494 B, retro/task/b-round/b-next/feature-status corrected, B dry runs K26/K27); claims re-run
+step9 DONE: L58 OK on task after rewording row 10; claims re-run err 0; hand-off ready

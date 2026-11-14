@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-14T08:00:46.211Z",
-  "current_task": "Round 508: DPG-BUTTON-CLEANUP-2-NONBRAND stage N1 re-dispatch. Store tree already has v2; A applies only b-round-507/sketch-508-delta.patch.txt (sha 405384eb): n1 test N1-2 per-click asserts, N1-4 height, N1-6, N1-7 exact class set; doc 328. C runs C0-C12 at 1440/1280/375 with real preview audio (C9 = mutants M0-M14)",
+  "_generatedUtc": "2026-11-14T08:46:52.118Z",
+  "current_task": "Round 509: B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD. ProductSidebar 'Complimentary Download' (dead button) -> 'Get it free' Button primary lg fullWidth type=button running the Buy Now handler extracted into app/hooks/useBuyNowAction.ts; shown only when the selected version price is 0, sellable, valid id, not owned. C: browser rows with the _data free stub (b-round-508/probe/free-stub.cjs) at 1440/1280/375, signed-in/owned STUBBED (journey-504), real $0 order BLOCKED.",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6943,7 +6943,7 @@
       "id": "DPG-BUTTON-CLEANUP-2-NONBRAND",
       "severity": "medium",
       "origin": "B spec",
-      "status": "in_progress (D-29z1833/D-29z1834): round 507 N1 C FAIL (test-strength STOP, browser rows not run); round 508 = N1 re-dispatch with sketch v3 delta | in_progress (D-29z1829/D-29z1830): round 507 = stage N1 AudioPlayer; stages N2-N9 per b-round-506/consult-product-designer.md | scheduled (D-29z1784):  …[see backlog.json]",
+      "status": "in_progress (D-29z1837/D-29z1839): stage N1 verified (C round 508 PASS, published cf89736); round 509 migrates scanner hit ProductSidebar l.75 onto Button primary lg fullWidth together with the B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD fix; N2-N9 (consult order, sidebar removed from stage 2) and the StemsPl …[see backlog.json]",
       "title": "Hand-rolled controls without a brand fill bypass Button.tsx (Saba DPG item 7): whole-tag scan 58 tags / 29 files at 3021b30 + LeadMagnet Close X + 3 scanner misses; 29 to Button/IconButton, 28 keep, 2 root",
       "evidence": "b-round-506/scan-nonbrand-head.json (58); b-round-506/consult-product-designer.md (rulings, stages); b-round-497/other-handrolled-count.txt (old record 30/18)",
       "added": "2026-11-13 B round 497 -> 498 planning",
@@ -7116,10 +7116,14 @@
       "id": "B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD",
       "severity": "medium",
       "origin": "product-designer",
-      "status": "scheduled (D-29z1835): round 509 bug-first (moved from 508; N1 must close first) | scheduled (D-29z1831): round 508 bug-first; needs a target ruling (product-designer at 508 planning) and a free mock product (ROOT-REQ-MOCK-STEMS-AND-FREE-FIXTURE); jsdom half reproducible now",
+      "status": "dispatched round 509 (D-29z1839): product-designer ruling (a) \"Get it free\" = Buy Now handler shared via app/hooks/useBuyNowAction.ts, visibility from the selected version price; browser repro b-round-508/probe/free-stub.json (client-nav _data stub, click: URL unchanged, 0 dialogs) | scheduled (D-29 …[see backlog.json]",
       "title": "Product page sidebar 'Complimentary Download' (isFree products) is a button with no onClick or link: it does nothing",
       "evidence": "app/components/product/ProductSidebar.tsx l.74-79 at 3021b30; b-round-506/consult-product-designer.md section 1",
-      "added": "2026-11-14 B round 506 -> 507 planning"
+      "added": "2026-11-14 B round 506 -> 507 planning",
+      "confirmedBy": [
+        "b-round-508/probe/free-stub.json (1440/1280): button tag BUTTON, no href/type, click changes nothing",
+        "product-designer (b-round-508/consult-product-designer.md): second defect, sidebar uses Standard price (resolveCatalogPrice) while header uses the selected version price"
+      ]
     },
     {
       "id": "SABA-Q-507-PLAYER-ICON-SHAPE",
@@ -7140,37 +7144,50 @@
       "title": "Brass/accent outline buttons (PurchaseHeader Open in Studio / Downloads, RecordingCatalogRow): map t"
     },
     {
-      "id": "A-R507-CR-1-N1-2-SWAP-MUTANT",
+      "id": "SABA-Q-509-FREE-DELIVERY",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1840): user-review/questions-round-509.m",
+      "title": "How free ($0) catalogue products are delivered"
+    },
+    {
+      "id": "SABA-Q-509-BUYNOW-FREE-LABEL",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1840): user-review/questions-round-509.m",
+      "title": "Header Buy Now label on a $0 product"
+    },
+    {
+      "id": "FREE-CHECKOUT-REAL-BACKEND",
       "severity": "medium",
-      "origin": "B pre-check (mutant matrix lacked a pure-swap mutant); found by A code-reviewer, confirmed by C round 507",
-      "status": "scheduled (D-29z1834): round 508 sketch v3 delta (N1-2 per-click asserts; mutants M7/M8 red on B scratch)",
-      "title": "store-button-cleanup-n1.test.tsx N1-2 passes when two controls swap handlers (count-only asserts after all clicks)",
-      "evidence": "a-round-507.md; a-round-507/mutant-swap.log; c-round-507.json bugs[0]; b-round-507/mutants-508.txt",
-      "added": "2026-11-14 B round 507 -> 508 planning"
+      "origin": "B round 509 planning",
+      "status": "blocked_cloud (D-29z1839): backend unavailable in cloud; does not block loop rounds; blocks final COMPLETE together with PURCHASE-REAL-BACKEND",
+      "title": "A signed-in 'Get it free' click must complete a real $0 order (Stripe may reject a $0 session; backend may need to skip Stripe) and the product must appear in /account/downloads",
+      "evidence": "round 509 C row C9-BLOCKED",
+      "added": "2026-11-14 B round 508 -> 509 planning"
     },
     {
-      "id": "A-R507-CR-2-N1-4-ICON-STATES",
-      "severity": "low",
-      "status": "scheduled (D-29z1834): round 508 N1-6 (owned file, cheap)",
-      "title": "N1-4 checks the volume icon size only at volume 0.7; Unmute (0) and low-volume (<0.5) icons unchecke"
+      "id": "INFO-C508-HERO-MEDIA-TEAL",
+      "severity": "info",
+      "status": "info (D-29z1838): HeroSection.tsx has no teal CSS (app-wide ",
+      "title": "Home hero background still reads teal"
     },
     {
-      "id": "A-R507-CR-4-DOC328-CSS-PATH",
-      "severity": "low",
-      "status": "scheduled (D-29z1834): round 508 doc 328 l.44",
-      "title": "doc 328 cites `app.css`; the global button:active rule is in app/styles/app.css:230 and app/styles/b"
+      "id": "SABA-Q-509-FREE-LABEL-WORDING",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1840): user-review/questions-round-509.m",
+      "title": "Button wording vs the store's 'Complimentary' vocabulary"
+    },
+    {
+      "id": "B-R509-AUTHMODAL-NOT-A-DIALOG",
+      "severity": "medium",
+      "origin": "pre-existing (B probe at round 509 planning)",
+      "status": "open, blocked_root via SYS-R495-SHARED-DIALOG (D-29z1841): AuthModal (root.tsx l.156, app/components/auth/AuthModal.tsx) should move onto the shared dialog primitive; does not block round 509 (its anonymous path matches header Buy Now at HEAD)",
+      "title": "Sign-in AuthModal has no role=dialog/aria-modal and does not move or trap focus: after Buy Now -> Enter the trigger behind the modal keeps focus",
+      "evidence": "b-round-508/probe/focus-head.json (role=dialog 0, email field 1, Close 1; activeElement Buy Now fv true at 1440/1280)",
+      "repro": "anonymous /products/middle-east, focus Buy Now, Enter, read [role=dialog] count and document.activeElement",
+      "added": "2026-11-14 B round 508 -> 509 planning"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 499,
-      "task": "current-task.md",
-      "decision": "D-29z1789",
-      "type": "DPG-BUTTON-CLEANUP-2 stage 2b-1 (EmptyState, ErrorDisplay, /store error CTA -> Button/buildButtonClassName)",
-      "status": "C FAIL (short route L22; browserVerified false); gate 499 skipped",
-      "note": "baseline 82e118a clean; sketch b-round-498/sketch-499.patch.txt sha 9fceab80",
-      "result_note": "A STOP on reviewer Medium A-R499-CR-STORE-TRY-UNPINNED (origin B spec); C confirmed; C0/C12/C13/C14 PASS; A tree kept for round 500 (D-29z1792)"
-    },
     {
       "round": 500,
       "task": "current-task.md",
@@ -7247,8 +7264,16 @@
       "task": "current-task.md",
       "decision": "D-29z1834/D-29z1836",
       "type": "DPG-BUTTON-CLEANUP-2-NONBRAND stage N1 re-dispatch (sketch v3 delta: N1-2 per-click asserts, N1-6, doc 328)",
-      "status": "dispatched",
+      "status": "C PASS (browserVerified/realVerified true, 0 bugs); gate 508 published cf89736 (both remotes)",
       "note": "baseline HEAD 3021b30 with v2 applied in the worktree; delta v2 b-round-507/sketch-508-delta.patch.txt sha 405384eb (v1 9fb27de4 superseded after sketch review); pre-check b-round-507/precheck-*.log; mutants M0-M14 b-round-507/mutants-508.txt; browser oracles b-round-506/probe/sketch (AudioPlayer unchanged)"
+    },
+    {
+      "round": 509,
+      "task": "current-task.md",
+      "decision": "D-29z1839",
+      "type": "B-R507-SIDEBAR-FREE-DOWNLOAD-DEAD fix: sidebar 'Get it free' shares the Buy Now handler (new useBuyNowAction hook), follows the selected version price, Button primary lg fullWidth (NONBRAND scanner hit l.75)",
+      "status": "dispatched",
+      "note": "baseline HEAD cf89736; grants b-round-508/grants-509.txt (7); tree pins b-round-508/r509-tree-sha256.txt; HEAD covering 8 files/112 b-round-508/head-covering.log; browser stub b-round-508/probe/free-stub.cjs; signed-in stub b-round-503/probe/journey-504.mjs"
     }
   ],
   "other_keys": [
