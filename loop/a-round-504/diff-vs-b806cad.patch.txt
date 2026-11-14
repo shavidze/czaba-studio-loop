@@ -1,0 +1,84 @@
+diff --git a/app/components/product/PurchaseHeader.tsx b/app/components/product/PurchaseHeader.tsx
+index ff9b708..948c7a5 100644
+--- a/app/components/product/PurchaseHeader.tsx
++++ b/app/components/product/PurchaseHeader.tsx
+@@ -11,6 +11,7 @@ import {
+   Zap,
+ } from 'lucide-react';
+ import { useId, useState } from 'react';
++import { Button, buildButtonClassName } from '~/components/ui';
+ import { useAuth } from '~/hooks/useAuth';
+ import { useCart } from '~/hooks/useCart';
+ import { usePurchases } from '~/hooks/usePurchases';
+@@ -188,7 +189,10 @@ export function PurchaseHeader({
+             )}
+             <Link
+               to="/account/downloads"
+-              className="group px-6 py-3 bg-brand text-background font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 min-w-[160px] hover:bg-brand-hover"
++              className={buildButtonClassName({
++                size: 'lg',
++                className: 'min-w-[160px] whitespace-nowrap',
++              })}
+             >
+               <Download size={16} />
+               <span>Go to Downloads</span>
+@@ -225,14 +229,15 @@ export function PurchaseHeader({
+               <span>Downloads</span>
+             </Link>
+             {onSelectPremium && (
+-              <button
++              <Button
+                 type="button"
++                size="lg"
+                 onClick={onSelectPremium}
+-                className="group px-6 py-3 bg-brand text-black font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 min-w-[160px] hover:bg-brand/90"
++                className="min-w-[160px] whitespace-nowrap"
+               >
+                 <ArrowUp size={16} />
+                 <span>Upgrade to Premium</span>
+-              </button>
++              </Button>
+             )}
+           </div>
+         </div>
+@@ -286,11 +291,12 @@ export function PurchaseHeader({
+             />
+ 
+             {/* Upgrade Now - Brand color */}
+-            <button
++            <Button
+               type="button"
++              size="lg"
+               onClick={handleBuyNow}
+               disabled={isDisabled}
+-              className="group px-6 py-3 bg-brand text-background font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[160px] hover:bg-brand-hover"
++              className="min-w-[160px] whitespace-nowrap"
+             >
+               {isBuyingNow ? (
+                 <>
+@@ -303,7 +309,7 @@ export function PurchaseHeader({
+                   <span>Unlock Premium</span>
+                 </>
+               )}
+-            </button>
++            </Button>
+           </div>
+         </div>
+       </div>
+diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+index 605df8b..8c85102 100644
+--- a/docs/design/DESIGN_SYSTEM.md
++++ b/docs/design/DESIGN_SYSTEM.md
+@@ -1153,10 +1153,10 @@ Store-ში ღილაკის სამიზნე წყაროა `But
+ 
+ | Shape | Class | გამოყენება |
+ |-------|-------|------------|
+-| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), შეტყობინების შიგნით მოქმედება (cart-ის „Upgrade“, `sm`, `min-h-11`), Studio |
++| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), შეტყობინების შიგნით მოქმედება (cart-ის „Upgrade“, `sm`, `min-h-11`), product გვერდის purchase card-ის მოქმედებები (`PurchaseHeader`: „Go to Downloads“, „Upgrade to Premium“, „Unlock Premium“, `lg`, `min-w-[160px]`), Studio |
+ | `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“, free downloads-ის „Download“, recordings-ის „Create a scene“ (`md`, `min-h-11`), მთავარი გვერდის Studio showcase-ის „Browse the Collection“) |
+ 
+-`shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებზე, Store-ის ფორმის submit-ზე და შეტყობინების შიგნით მოქმედებაზე (cart-ის „Upgrade“) 8px.
++`shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებზე, Store-ის ფორმის submit-ზე, შეტყობინების შიგნით მოქმედებაზე (cart-ის „Upgrade“) და purchase card-ის მოქმედებაზე (`PurchaseHeader`) 8px.
+ 
+ #### `buildButtonClassName`
+ 

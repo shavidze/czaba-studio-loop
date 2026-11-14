@@ -1,0 +1,15 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const BASE = process.env.BASE || 'http://127.0.0.1:5173';
+const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+await ctx.addInitScript(() => { localStorage.setItem('czaba_lead_magnet', JSON.stringify({ viewCount: 0, lastResetDate: new Date().toISOString().split('T')[0], dismissed: true, submitted: true })); sessionStorage.setItem('czaba_entrance_seen', '1'); });
+const p = await ctx.newPage(); await p.goto(BASE + '/support', { waitUntil: 'load' }); await p.waitForTimeout(1200);
+await p.locator('button').filter({ hasText: 'Live Chat' }).click(); await p.waitForTimeout(600);
+await p.fill('#guest-name', 'Test'); await p.fill('#guest-email', 'bad');
+let invalidFired = 0; await p.exposeFunction('__inv', () => { invalidFired += 1; });
+await p.evaluate(() => document.querySelector('#guest-email').addEventListener('invalid', () => window.__inv()));
+await p.locator('button').filter({ hasText: /^\s*Start Chat\s*$/ }).click(); await p.waitForTimeout(400);
+const r = await p.evaluate(() => { const e = document.querySelector('#guest-email'); const f = e.closest('form'); return { valid: e.validity.valid, msg: e.validationMessage, noValidate: f.noValidate, errors: [...document.querySelectorAll('p.text-destructive')].map((x) => x.innerText) }; });
+console.log(JSON.stringify({ ...r, invalidFired }));
+await b.close();

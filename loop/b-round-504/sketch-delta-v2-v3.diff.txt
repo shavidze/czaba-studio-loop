@@ -1,0 +1,54 @@
+2c2
+< index 26c91a4..3b1cde2 100644
+---
+> index 26c91a4..e3bd032 100644
+27c27
+< +      if (focusOnMount) {
+---
+> +      if (focusOnMount && document.activeElement === document.body) {
+157c157
+< index 0000000..bac1c1a
+---
+> index 0000000..fa078ae
+160c160
+< @@ -0,0 +1,203 @@
+---
+> @@ -0,0 +1,218 @@
+346a347,361
+> +  it('B2D-9: when focus moved elsewhere while the session was starting, the chat does not take it back', () => {
+> +    const withOutside = (isGuestFormVisible: boolean) => (
+> +      <>
+> +        <button type="button">Outside</button>
+> +        {renderChatWindow(isGuestFormVisible)}
+> +      </>
+> +    );
+> +    const view = render(withOutside(true));
+> +    const outside = screen.getByRole('button', { name: 'Outside' });
+> +    outside.focus();
+> +    view.rerender(withOutside(false));
+> +    expect(getTextarea()).toBeTruthy();
+> +    expect(document.activeElement).toBe(outside);
+> +  });
+> +
+435c450
+< index 0000000..4f46350
+---
+> index 0000000..e349a47
+438c453
+< @@ -0,0 +1,78 @@
+---
+> @@ -0,0 +1,79 @@
+461a477
+> +  - session-ის დაწყება ასინქრონულია. თუ ამ დროს მომხმარებელმა focus სხვაგან გადაიტანა, ველი მას უკან არ იღებს: focus გადადის მხოლოდ მაშინ, როცა ის BODY-ზეა.
+486c502
+< +- `app/components/chat/ChatInput.tsx` — „Send message“ `IconButton`-ზე; textarea-ს ref, `focusOnMount` prop და focus გაგზავნის შემდეგ.
+---
+> +- `app/components/chat/ChatInput.tsx` — „Send message“ `IconButton`-ზე; textarea-ს ref, `focusOnMount` prop (მხოლოდ BODY-დან) და focus გაგზავნის შემდეგ.
+489c505
+< +- `app/lib/__tests__/store-button-cleanup-2d.test.tsx` — ახალი ტესტები B2D-0…B2D-8.
+---
+> +- `app/lib/__tests__/store-button-cleanup-2d.test.tsx` — ახალი ტესტები B2D-0…B2D-9.
+507c523
+< +  - browser-ში HEAD და sketch შედარდა `/support`-ზე 1440/1280/375-ზე (`probe/head.out`, `probe/sketch.out`): ზომა, ფერი, radius, hover, დაჭერა, keyboard focus, validation, POST-ების რაოდენობა და focus-ის ადგილი.
+---
+> +  - browser-ში HEAD და sketch შედარდა `/support`-ზე 1440/1280/375-ზე (`probe/head.out`, `probe/sketch.out`): ზომა, ფერი, radius, hover, დაჭერა, keyboard focus, validation, POST-ების რაოდენობა და focus-ის ადგილი, მათ შორის focus-ის გადატანა session-ის მოთხოვნის დროს.

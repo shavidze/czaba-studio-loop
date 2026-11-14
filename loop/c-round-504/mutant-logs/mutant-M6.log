@@ -1,0 +1,62 @@
+
+ RUN  v4.0.16 /tmp/c504-copy
+
+ ✓ app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-0: the literal oracles equal the builder output, idle and disabled 1ms
+ ✓ app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-1: a Premium owner gets a primary lg "Go to Downloads" link, icon then label 147ms
+ ✓ app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-2: an SFX owner keeps "Open in Studio" first and "Go to Downloads" second 18ms
+ ✓ app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-3: a Standard owner gets a primary lg "Upgrade to Premium" button that selects Premium once 25ms
+ ✓ app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-4: "Unlock Premium" is a primary lg button that starts one buy with the variant 31ms
+ × app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-5: while buying, "Unlock Premium" shows "Processing..." and is disabled with the builder busy class 11ms
+   → expected false to be true // Object.is equality
+ × app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-6: while adding to cart, "Unlock Premium" is disabled and keeps its label 4ms
+   → expected false to be true // Object.is equality
+ ✓ app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-7: anonymous "Buy Now" keeps its HEAD class and asks to sign in without buying 18ms
+ ✓ app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-8: PurchaseHeader has no hand-rolled solid brass action, one builder call, two Button elements and one bg-buy button 1ms
+ ✓ app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-9: the scanner finds each HEAD shape and ignores the builder form 1ms
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 8 passed (10)
+   Start at  04:37:46
+   Duration  1.46s (transform 376ms, setup 0ms, import 681ms, tests 259ms, environment 386ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-5: while buying, "Unlock Premium" shows "Processing..." and is disabled with the builder busy class
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ app/lib/__tests__/store-button-cleanup-2c.test.tsx:239:43
+    237|     expect(screen.queryByText('Unlock Premium', { selector: 'span' }))…
+    238|     const busy = requireElement(screen.getByText('Processing...').clos…
+    239|     expect(busy.hasAttribute('disabled')).toBe(true);
+       |                                           ^
+    240|     expect(busy.className).toBe(PRIMARY_LG_CARD_ACTION_BUSY);
+    241|     expect(requireElement(busy.querySelector('svg')).getAttribute('cla…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  app/lib/__tests__/store-button-cleanup-2c.test.tsx > DPG-BUTTON-CLEANUP-2 stage 2c (PurchaseHeader) > B2C-6: while adding to cart, "Unlock Premium" is disabled and keeps its label
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ app/lib/__tests__/store-button-cleanup-2c.test.tsx:255:45
+    253|       screen.getByText('Unlock Premium', { selector: 'span' }).closest…
+    254|     );
+    255|     expect(button.hasAttribute('disabled')).toBe(true);
+       |                                             ^
+    256|     expect(button.className).toBe(PRIMARY_LG_CARD_ACTION_BUSY);
+    257|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

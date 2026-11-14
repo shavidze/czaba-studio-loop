@@ -1,0 +1,532 @@
+diff --git a/app/components/chat/ChatInput.tsx b/app/components/chat/ChatInput.tsx
+index 26c91a4..e3bd032 100644
+--- a/app/components/chat/ChatInput.tsx
++++ b/app/components/chat/ChatInput.tsx
+@@ -1,5 +1,6 @@
+ import { Send } from 'lucide-react';
+-import { forwardRef, useCallback, useState } from 'react';
++import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
++import { IconButton } from '~/components/ui';
+ import { cn } from '~/lib/utils';
+ 
+ interface ChatInputProps {
+@@ -7,11 +8,19 @@ interface ChatInputProps {
+   onTypingStart?: () => void;
+   onTypingStop?: () => void;
+   disabled?: boolean;
++  focusOnMount?: boolean;
+ }
+ 
+ export const ChatInput = forwardRef<HTMLDivElement, ChatInputProps>(
+-  ({ onSend, onTypingStart, onTypingStop, disabled = false }, ref) => {
++  ({ onSend, onTypingStart, onTypingStop, disabled = false, focusOnMount = false }, ref) => {
+     const [value, setValue] = useState('');
++    const textareaRef = useRef<HTMLTextAreaElement>(null);
++
++    useEffect(() => {
++      if (focusOnMount && document.activeElement === document.body) {
++        textareaRef.current?.focus();
++      }
++    }, [focusOnMount]);
+ 
+     const handleSubmit = useCallback(
+       (e: React.FormEvent) => {
+@@ -21,6 +30,7 @@ export const ChatInput = forwardRef<HTMLDivElement, ChatInputProps>(
+           onSend(trimmed);
+           setValue('');
+           onTypingStop?.();
++          textareaRef.current?.focus();
+         }
+       },
+       [value, onSend, disabled, onTypingStop],
+@@ -59,6 +69,7 @@ export const ChatInput = forwardRef<HTMLDivElement, ChatInputProps>(
+       <div ref={ref} className="p-3 bg-surface border-t border-outline">
+         <form onSubmit={handleSubmit} className="flex items-end gap-2">
+           <textarea
++            ref={textareaRef}
+             value={value}
+             onChange={handleChange}
+             onKeyDown={handleKeyDown}
+@@ -74,21 +85,15 @@ export const ChatInput = forwardRef<HTMLDivElement, ChatInputProps>(
+               disabled && 'opacity-50 cursor-not-allowed',
+             )}
+           />
+-          <button
++          <IconButton
+             type="submit"
++            variant="brand"
++            size="md"
++            label="Send message"
+             disabled={disabled || !value.trim()}
+-            className={cn(
+-              'p-2.5 rounded-lg',
+-              'bg-brand text-background',
+-              'transition-all duration-150',
+-              'hover:bg-brand-hover',
+-              'cursor-pointer',
+-              (disabled || !value.trim()) && 'opacity-50 cursor-not-allowed',
+-            )}
+-            aria-label="Send message"
+           >
+-            <Send className="w-4 h-4" />
+-          </button>
++            <Send className="w-5 h-5" />
++          </IconButton>
+         </form>
+       </div>
+     );
+diff --git a/app/components/chat/ChatWindow.tsx b/app/components/chat/ChatWindow.tsx
+index 39afeb2..6e08b58 100644
+--- a/app/components/chat/ChatWindow.tsx
++++ b/app/components/chat/ChatWindow.tsx
+@@ -1,4 +1,4 @@
+-import { forwardRef, useEffect, useRef } from 'react';
++import { forwardRef, useEffect, useRef, useState } from 'react';
+ import { cn } from '~/lib/utils';
+ import { ChatHeader } from './ChatHeader';
+ import { ChatInput } from './ChatInput';
+@@ -35,6 +35,7 @@ export const ChatWindow = forwardRef<HTMLDivElement, ChatWindowProps>(
+     ref,
+   ) => {
+     const messagesEndRef = useRef<HTMLDivElement>(null);
++    const [isOpenedWithGuestForm] = useState(isGuestFormVisible);
+ 
+     useEffect(() => {
+       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+@@ -72,7 +73,7 @@ export const ChatWindow = forwardRef<HTMLDivElement, ChatWindowProps>(
+               <div ref={messagesEndRef} />
+             </div>
+ 
+-            <ChatInput onSend={onSendMessage} />
++            <ChatInput onSend={onSendMessage} focusOnMount={isOpenedWithGuestForm} />
+           </>
+         )}
+       </div>
+diff --git a/app/components/chat/GuestForm.tsx b/app/components/chat/GuestForm.tsx
+index c7e667c..02acd31 100644
+--- a/app/components/chat/GuestForm.tsx
++++ b/app/components/chat/GuestForm.tsx
+@@ -1,4 +1,5 @@
+ import { forwardRef, useCallback, useState } from 'react';
++import { Button } from '~/components/ui';
+ import { cn } from '~/lib/utils';
+ import type { GuestInfo } from './types';
+ 
+@@ -89,19 +90,9 @@ export const GuestForm = forwardRef<HTMLDivElement, GuestFormProps>(({ onSubmit
+         </div>
+ 
+         <div className="mt-auto pt-4">
+-          <button
+-            type="submit"
+-            className={cn(
+-              'w-full px-4 py-3',
+-              'bg-brand text-background font-semibold',
+-              'rounded-lg',
+-              'transition-all duration-150',
+-              'hover:bg-brand-hover',
+-              'cursor-pointer',
+-            )}
+-          >
++          <Button type="submit" size="lg" fullWidth>
+             Start Chat
+-          </button>
++          </Button>
+         </div>
+       </form>
+     </div>
+diff --git a/app/components/ui/IconButton.tsx b/app/components/ui/IconButton.tsx
+index 04984e7..031b209 100644
+--- a/app/components/ui/IconButton.tsx
++++ b/app/components/ui/IconButton.tsx
+@@ -32,12 +32,7 @@ const variantStyles: Record<IconButtonVariant, string> = {
+     'active:scale-95',
+   ].join(' '),
+ 
+-  brand: [
+-    'bg-brand text-background',
+-    'hover:bg-brand-hover',
+-    'active:scale-95',
+-    'shadow-sm hover:shadow-glow',
+-  ].join(' '),
++  brand: ['bg-brand text-background', 'hover:bg-brand-hover', 'shadow-sm'].join(' '),
+ };
+ 
+ const sizeStyles: Record<IconButtonSize, { button: string; icon: number }> = {
+diff --git a/app/lib/__tests__/store-button-cleanup-2d.test.tsx b/app/lib/__tests__/store-button-cleanup-2d.test.tsx
+new file mode 100644
+index 0000000..fa078ae
+--- /dev/null
++++ b/app/lib/__tests__/store-button-cleanup-2d.test.tsx
+@@ -0,0 +1,218 @@
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { cleanup, fireEvent, render, screen } from '@testing-library/react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { ChatInput } from '~/components/chat/ChatInput';
++import { ChatWindow } from '~/components/chat/ChatWindow';
++import { GuestForm } from '~/components/chat/GuestForm';
++import { buildButtonClassName, IconButton } from '~/components/ui';
++import { APP_ROOT } from './helpers/style-scan';
++
++const GUEST_FORM_PATH = 'components/chat/GuestForm.tsx';
++const CHAT_INPUT_PATH = 'components/chat/ChatInput.tsx';
++const ICON_BUTTON_PATH = 'components/ui/IconButton.tsx';
++
++const SEND_CLASSES: ReadonlyArray<string> = [
++  'bg-brand',
++  'text-background',
++  'hover:bg-brand-hover',
++  'shadow-sm',
++  'w-10',
++  'h-10',
++  'rounded-lg',
++];
++
++function readApp(path: string): string {
++  return readFileSync(join(APP_ROOT, path), 'utf8');
++}
++
++function countOf(source: string, pattern: RegExp): number {
++  return (source.match(pattern) ?? []).length;
++}
++
++function noop(): void {}
++
++function getTextarea(): HTMLTextAreaElement {
++  const element = screen.getByPlaceholderText('Type a message...');
++  if (!(element instanceof HTMLTextAreaElement)) {
++    throw new Error('message field is not a textarea');
++  }
++  return element;
++}
++
++function getSendButton(): HTMLButtonElement {
++  const element = screen.getByRole('button', { name: 'Send message' });
++  if (!(element instanceof HTMLButtonElement)) {
++    throw new Error('Send message is not a button');
++  }
++  return element;
++}
++
++function renderChatWindow(isGuestFormVisible: boolean) {
++  return (
++    <ChatWindow
++      messages={[]}
++      isTyping={false}
++      isGuestFormVisible={isGuestFormVisible}
++      embedded={true}
++      onSendMessage={noop}
++      onGuestSubmit={noop}
++      onMinimize={noop}
++      onClose={noop}
++    />
++  );
++}
++
++beforeEach(() => {
++  window.HTMLElement.prototype.scrollIntoView = vi.fn();
++});
++
++afterEach(() => {
++  cleanup();
++});
++
++describe('DPG-BUTTON-CLEANUP-2 stage 2d: chat actions on /support use Button and IconButton', () => {
++  it('B2D-0: the IconButton brand variant drops the retired glow and the extra press scale; the other variants keep theirs', () => {
++    render(
++      <>
++        <IconButton variant="brand" label="Brand">
++          x
++        </IconButton>
++        <IconButton variant="ghost" label="Ghost">
++          y
++        </IconButton>
++      </>,
++    );
++    const brand = screen.getByRole('button', { name: 'Brand' }).className.split(' ');
++    for (const token of ['bg-brand', 'text-background', 'hover:bg-brand-hover', 'shadow-sm']) {
++      expect(brand).toContain(token);
++    }
++    expect(brand).not.toContain('hover:shadow-glow');
++    expect(brand).not.toContain('active:scale-95');
++    expect(screen.getByRole('button', { name: 'Ghost' }).className.split(' ')).toContain(
++      'active:scale-95',
++    );
++  });
++
++  it('B2D-1: "Start Chat" is a submit Button, lg and full width, with the default shape', () => {
++    render(<GuestForm onSubmit={noop} />);
++    const start = screen.getByRole('button', { name: 'Start Chat' });
++    expect(start.getAttribute('type')).toBe('submit');
++    expect(start.className).toBe(buildButtonClassName({ size: 'lg', fullWidth: true }));
++    expect(start.className.split(' ')).toContain('rounded-md');
++  });
++
++  it('B2D-2: "Start Chat" still validates: an empty submit shows both errors and does not start; a valid one starts once with trimmed values', () => {
++    const onSubmit = vi.fn();
++    render(<GuestForm onSubmit={onSubmit} />);
++    fireEvent.click(screen.getByRole('button', { name: 'Start Chat' }));
++    expect(screen.getByText('Name is required')).toBeTruthy();
++    expect(screen.getByText('Email is required')).toBeTruthy();
++    expect(onSubmit).not.toHaveBeenCalled();
++    fireEvent.change(screen.getByLabelText('Name'), { target: { value: '  Ana  ' } });
++    fireEvent.change(screen.getByLabelText('Email'), { target: { value: ' ana@example.com ' } });
++    fireEvent.click(screen.getByRole('button', { name: 'Start Chat' }));
++    expect(onSubmit).toHaveBeenCalledTimes(1);
++    expect(onSubmit).toHaveBeenCalledWith({ name: 'Ana', email: 'ana@example.com' });
++  });
++
++  it('B2D-3: Send is a 40 px brand IconButton with its name as a tooltip, inert while the field is empty', () => {
++    render(<ChatInput onSend={noop} />);
++    const send = getSendButton();
++    expect(send.getAttribute('type')).toBe('submit');
++    expect(send.getAttribute('title')).toBe('Send message');
++    const tokens = send.className.split(' ');
++    for (const token of SEND_CLASSES) {
++      expect(tokens).toContain(token);
++    }
++    expect(send.className).not.toMatch(/shadow-glow|active:scale-95|p-2\.5/);
++    expect(send.disabled).toBe(true);
++    expect(tokens).toContain('pointer-events-none');
++    expect(send.querySelector('svg')?.getAttribute('class')).toContain('w-5 h-5');
++  });
++
++  it('B2D-4: a click on Send sends the trimmed text once, clears the field and puts focus back in the field', () => {
++    const onSend = vi.fn();
++    render(<ChatInput onSend={onSend} />);
++    const textarea = getTextarea();
++    fireEvent.change(textarea, { target: { value: '  hi  ' } });
++    const send = getSendButton();
++    expect(send.disabled).toBe(false);
++    expect(send.className.split(' ')).not.toContain('pointer-events-none');
++    send.focus();
++    fireEvent.click(send);
++    expect(onSend).toHaveBeenCalledTimes(1);
++    expect(onSend).toHaveBeenCalledWith('hi');
++    expect(textarea.value).toBe('');
++    expect(document.activeElement).toBe(textarea);
++    expect(getSendButton().disabled).toBe(true);
++  });
++
++  it('B2D-5: Enter in the field sends once with focus unchanged; Shift+Enter and a blank field send nothing', () => {
++    const onSend = vi.fn();
++    render(<ChatInput onSend={onSend} />);
++    const textarea = getTextarea();
++    textarea.focus();
++    fireEvent.change(textarea, { target: { value: 'line' } });
++    fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: true });
++    expect(onSend).not.toHaveBeenCalled();
++    fireEvent.keyDown(textarea, { key: 'Enter' });
++    expect(onSend).toHaveBeenCalledTimes(1);
++    expect(onSend).toHaveBeenCalledWith('line');
++    expect(document.activeElement).toBe(textarea);
++    fireEvent.change(textarea, { target: { value: '   ' } });
++    fireEvent.click(getSendButton());
++    fireEvent.keyDown(textarea, { key: 'Enter' });
++    expect(onSend).toHaveBeenCalledTimes(1);
++  });
++
++  it('B2D-6: focusOnMount focuses the field on mount; without it focus stays where it was', () => {
++    const first = render(<ChatInput onSend={noop} />);
++    expect(document.activeElement).toBe(document.body);
++    first.unmount();
++    render(<ChatInput onSend={noop} focusOnMount={true} />);
++    expect(document.activeElement).toBe(getTextarea());
++  });
++
++  it('B2D-7: ChatWindow moves focus to the message field only when the guest form gives way to the chat', () => {
++    const guest = render(renderChatWindow(true));
++    expect(screen.queryByPlaceholderText('Type a message...')).toBeNull();
++    guest.rerender(renderChatWindow(false));
++    expect(document.activeElement).toBe(getTextarea());
++    guest.unmount();
++    render(renderChatWindow(false));
++    expect(document.activeElement).toBe(document.body);
++  });
++
++  it('B2D-9: when focus moved elsewhere while the session was starting, the chat does not take it back', () => {
++    const withOutside = (isGuestFormVisible: boolean) => (
++      <>
++        <button type="button">Outside</button>
++        {renderChatWindow(isGuestFormVisible)}
++      </>
++    );
++    const view = render(withOutside(true));
++    const outside = screen.getByRole('button', { name: 'Outside' });
++    outside.focus();
++    view.rerender(withOutside(false));
++    expect(getTextarea()).toBeTruthy();
++    expect(document.activeElement).toBe(outside);
++  });
++
++  it('B2D-8: the chat sources hold no hand-rolled button, IconButton.tsx has no glow, and its brand variant has no scale-95', () => {
++    const guestForm = readApp(GUEST_FORM_PATH);
++    const chatInput = readApp(CHAT_INPUT_PATH);
++    expect(countOf(guestForm, /<button\b/g)).toBe(0);
++    expect(countOf(chatInput, /<button\b/g)).toBe(0);
++    expect(countOf(guestForm, /<Button\b/g)).toBe(1);
++    expect(countOf(chatInput, /<IconButton\b/g)).toBe(1);
++    expect(countOf(guestForm, /\bbg-brand\b/g)).toBe(0);
++    expect(countOf(chatInput, /\bbg-brand\b/g)).toBe(0);
++    const iconButton = readApp(ICON_BUTTON_PATH);
++    expect(countOf(iconButton, /shadow-glow/g)).toBe(0);
++    const brandVariant = iconButton.match(/brand: \[([^\]]*)\]/)?.[1] ?? '';
++    expect(brandVariant).toContain('bg-brand text-background');
++    expect(brandVariant).toContain('shadow-sm');
++    expect(brandVariant).not.toMatch(/shadow-glow|active:scale-95/);
++  });
++});
+diff --git a/app/lib/__tests__/store-glow-shadow.test.ts b/app/lib/__tests__/store-glow-shadow.test.ts
+index ef025e3..d9973e9 100644
+--- a/app/lib/__tests__/store-glow-shadow.test.ts
++++ b/app/lib/__tests__/store-glow-shadow.test.ts
+@@ -22,6 +22,7 @@ const RETIRED_UTILITY_PATTERN = /(?<![\w-])shadow-glow(?:-accent)?(?![\w-])/g;
+ 
+ const GRANTED_GLOW_FREE_SCRIPTS: ReadonlyArray<string> = [
+   'components/ui/Button.tsx',
++  'components/ui/IconButton.tsx',
+   'components/chat/ChatInput.tsx',
+   'components/chat/GuestForm.tsx',
+   'components/product/PurchaseHeader.tsx',
+@@ -42,10 +43,6 @@ const RETIRED_UTILITY_ALLOW_LIST: StyleScanAllowList = {
+     hits: 1,
+     reason: 'LEGACY-DEAD-STORE-COMPONENTS (ChatWidget is mounted by no route)',
+   },
+-  'components/ui/IconButton.tsx': {
+-    hits: 1,
+-    reason: 'LEGACY-DEAD-STORE-COMPONENTS (0 importers outside the ui barrel)',
+-  },
+ };
+ 
+ const BUTTON_SHAPES: ReadonlyArray<ButtonShape> = ['default', 'pill'];
+diff --git a/app/lib/__tests__/store-undefined-tokens.test.ts b/app/lib/__tests__/store-undefined-tokens.test.ts
+index 63176ab..07ca77c 100644
+--- a/app/lib/__tests__/store-undefined-tokens.test.ts
++++ b/app/lib/__tests__/store-undefined-tokens.test.ts
+@@ -53,10 +53,6 @@ const NON_EMITTING_ALLOW_LIST: Readonly<
+     tokens: ['text-glow'],
+     reason: 'dead: text-glow kept by the round 449 ruling',
+   },
+-  'components/ui/IconButton.tsx': {
+-    tokens: ['hover:shadow-glow'],
+-    reason: 'dead: shadow-glow kept by the round 453 ruling',
+-  },
+   [FROZEN_LEGACY_STUDIO]: { tokens: ['shadow-glow'], reason: 'frozen legacy Studio' },
+   [TRANSITION_PROPERTY_FILE]: {
+     tokens: ['border-color'],
+@@ -134,7 +130,7 @@ describe('Store undefined tokens (DPG-P0-2)', { timeout: 30_000 }, () => {
+     const dead = Object.keys(NON_EMITTING_ALLOW_LIST).filter(
+       (file) => file !== FROZEN_LEGACY_STUDIO && file !== TRANSITION_PROPERTY_FILE,
+     );
+-    expect(dead).toHaveLength(5);
++    expect(dead).toHaveLength(4);
+     expect(dead.filter((file) => reachable.has(file))).toEqual([]);
+     expect(reachable.has('components/product/ProductCard.tsx')).toBe(true);
+   });
+diff --git a/docs/design/DESIGN_SYSTEM.md b/docs/design/DESIGN_SYSTEM.md
+index 8c85102..15320e1 100644
+--- a/docs/design/DESIGN_SYSTEM.md
++++ b/docs/design/DESIGN_SYSTEM.md
+@@ -1153,7 +1153,7 @@ Store-ში ღილაკის სამიზნე წყაროა `But
+ 
+ | Shape | Class | გამოყენება |
+ |-------|-------|------------|
+-| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), შეტყობინების შიგნით მოქმედება (cart-ის „Upgrade“, `sm`, `min-h-11`), product გვერდის purchase card-ის მოქმედებები (`PurchaseHeader`: „Go to Downloads“, „Upgrade to Premium“, „Unlock Premium“, `lg`, `min-w-[160px]`), Studio |
++| `default` | `rounded-md` (8px) | dialog-ები, ფორმები (მათ შორის Store-ის ფორმის submit: newsletter-ის „Subscribe“, Hire Us-ის „Send Message“), შეტყობინების შიგნით მოქმედება (cart-ის „Upgrade“, `sm`, `min-h-11`), product გვერდის purchase card-ის მოქმედებები (`PurchaseHeader`: „Go to Downloads“, „Upgrade to Premium“, „Unlock Premium“, `lg`, `min-w-[160px]`), chat-ის guest form-ის „Start Chat“ (`lg`, `fullWidth`), Studio |
+ | `pill` | `rounded-full` | Store-ის გვერდების CTA (Hero, 404, Header Sign In, "Back to Home", checkout cancel/success, FAQ "Contact Us", orders "Browse Music", `EmptyState`-ის მოქმედებები, შეცდომის გვერდის „Try Again“, `/store`-ის „Try again“, free downloads-ის „Download“, recordings-ის „Create a scene“ (`md`, `min-h-11`), მთავარი გვერდის Studio showcase-ის „Browse the Collection“) |
+ 
+ `shape` opt-in-ია და default `default`-ია. `pill` ცვლის მხოლოდ radius-ს, დანარჩენი class-ები უცვლელია. ორი ფორმა შეგნებულია: Store-ის გვერდების დამოუკიდებელ CTA-ზე brand-ის pill (direction A, „a brass pill“), dialog-ებზე, Store-ის ფორმის submit-ზე, შეტყობინების შიგნით მოქმედებაზე (cart-ის „Upgrade“) და purchase card-ის მოქმედებაზე (`PurchaseHeader`) 8px.
+@@ -1211,6 +1211,8 @@ import { X, Play, Settings } from 'lucide-react';
+ | `md` | 40x40px | 20px |
+ | `lg` | 48x48px | 24px |
+ 
++`brand` variant: brass ფონი, `hover:bg-brand-hover`, `shadow-sm`. glow-ი და საკუთარი `active:scale-95` არ აქვს; დაჭერისას მოქმედებს გლობალური `:active` scale 0.98. Store-ში მას იყენებს chat-ის „Send message“ (`md`, 40×40px, textarea-ს სიმაღლე, icon 20px). disabled მდგომარეობა: opacity 0.5 და `pointer-events-none`. `label` ხდება `aria-label`-იც და `title`-იც (tooltip).
++
+ ---
+ 
+ ### Cards
+diff --git a/docs/implementation/2026/quarter-IV/326-dpg-button-cleanup-stage-2d.md b/docs/implementation/2026/quarter-IV/326-dpg-button-cleanup-stage-2d.md
+new file mode 100644
+index 0000000..e349a47
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/326-dpg-button-cleanup-stage-2d.md
+@@ -0,0 +1,79 @@
++# DPG-BUTTON-CLEANUP, ეტაპი 2d: support chat-ის ღილაკები
++
++**თარიღი:** 2026-11-14
++**სტატუსი:** In Progress (stage 2d of DPG-BUTTON-CLEANUP-2; C round 505 PASS)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++Saba-ს DPG-FIX P1 პუნქტი 7: „Use Button.tsx component only.“ ეტაპებმა 2a–2c (docs 320–322, 324 და 325) Store-ის brass CTA-ები `Button`-ზე ან `buildButtonClassName`-ზე გადაიყვანა. ეტაპი 2d ეხება inventory-ის A4 სტრიქონს (`b-round-497/stage2-inventory.md`), chat-ს. chat ცოცხალია მხოლოდ `/support` გვერდზე: „Live Chat“ ბარათი ხსნის ჩაშენებულ `ChatWindow`-ს. ანონიმური მომხმარებელი ჯერ `GuestForm`-ს ხედავს („Start Chat“), session-ის შემდეგ კი `ChatInput`-ს (textarea და icon-იანი „Send message“).
++
++`ChatButton` (მცურავი 56px ღილაკი) მხოლოდ `ChatWidget`-ს იყენებს, `ChatWidget`-ს კი არცერთი route არ ამაგრებს. ამიტომ ის ამ ეტაპში არ გადადის და legacy cleanup-ს ელოდება (LEGACY-DEAD-STORE-COMPONENTS).
++
++## მიდგომა
++
++- **Mapping (product-designer, `b-round-504/consult-product-designer.md`):**
++  - „Start Chat“: `<Button type="submit" size="lg" fullWidth>`, default ფორმა (8px). ეს ფორმის submit-ია, ამიტომ pill არ არის.
++  - „Send message“: `<IconButton type="submit" variant="brand" size="md" label="Send message">`, icon 20px. DESIGN_SYSTEM-ის წესით icon-only მოქმედება `IconButton`-ია. 40×40px textarea-ს 40px სიმაღლეს ემთხვევა.
++  - `IconButton`-ის `brand` variant-ს მოეხსნა retired `hover:shadow-glow` და საკუთარი `active:scale-95`. დაჭერისას მოქმედებს გლობალური 0.98 scale.
++- **Focus (WCAG 2.4.3):**
++  - HEAD-ზე „Send message“-ზე click-ის შემდეგ ველი იცლება, ღილაკი disabled ხდება და Chromium focus-ს BODY-ზე აგდებს.
++  - „Start Chat“-ის წარმატების შემდეგ ფორმა ქრება და focus ისევ BODY-ზეა.
++  - ახლა ორივე შემთხვევაში focus შეტყობინების ველზე გადადის. textarea-ში Enter-ით გაგზავნა focus-ს ისედაც ველზე ტოვებს.
++  - `ChatWindow` ველს მხოლოდ მაშინ აფოკუსებს, როცა ის guest form-ით გაიხსნა. თუ ფანჯარა უკვე არსებული session-ით იხსნება, focus არ იცვლება.
++  - session-ის დაწყება ასინქრონულია. თუ ამ დროს მომხმარებელმა focus სხვაგან გადაიტანა, ველი მას უკან არ იღებს: focus გადადის მხოლოდ მაშინ, როცა ის BODY-ზეა.
++- **უცვლელი:** validation-ის ტექსტები, session-ის და შეტყობინების API გამოძახებები, `support.tsx`-ის ბარათები და „Back to support options“ (NONBRAND), `ChatHeader`-ის ღილაკები.
++- **Deviation-ები** (ზომები: `b-round-504/probe/head.out`, `b-round-504/probe/sketch.out`):
++  - D1 „Start Chat“: radius 12-დან 8px-მდე, სიმაღლე 50-დან 48px-მდე, padding `12px 16px`-დან `12px 24px`-მდე, ემატება `shadow-sm` და დაჭერისას opacity 0.9.
++  - D2 „Send message“: 36×36-დან 40×40px-მდე (textarea-ს სიმაღლე), icon 16-დან 20px-მდე, ემატება `shadow-sm` და `title` tooltip. radius 12px რჩება (`rounded-lg`, textarea-ს მსგავსად). დაჭერისას opacity არ იცვლება, მოქმედებს მხოლოდ გლობალური 0.98 scale.
++  - D3 ცარიელი ველისას „Send message“ `pointer-events: none`-ით inert-ია: hover აღარ ფერავს. HEAD-ზე hover ფერავდა და კურსორი pointer იყო.
++  - D4 focus გაგზავნის და session-ის დაწყების შემდეგ ველზე გადადის (ზემოთ). შესული მომხმარებლისთვის, რომლის ფანჯარაც guest form-ის გარეშე იხსნება, focus არ იცვლება.
++
++## არქიტექტურა
++
++```mermaid
++flowchart LR
++  S["/support"] -->|Live Chat| CW[ChatWindow]
++  CW -->|guest form visible| GF[GuestForm]
++  GF -->|"Start Chat (Button lg fullWidth)"| SS[startSession]
++  CW -->|session| CI[ChatInput]
++  CW -->|opened with guest form| FM[focusOnMount]
++  FM --> CI
++  CI -->|"Send message (IconButton brand md)"| SM[sendMessage]
++  CI -->|after send| TA[textarea focus]
++```
++
++## შეცვლილი ფაილები
++
++- `app/components/chat/GuestForm.tsx` — „Start Chat“ `Button`-ზე.
++- `app/components/chat/ChatInput.tsx` — „Send message“ `IconButton`-ზე; textarea-ს ref, `focusOnMount` prop (მხოლოდ BODY-დან) და focus გაგზავნის შემდეგ.
++- `app/components/chat/ChatWindow.tsx` — `focusOnMount` მხოლოდ guest form-ით გახსნილ ფანჯარაში.
++- `app/components/ui/IconButton.tsx` — `brand` variant glow-ისა და `active:scale-95`-ის გარეშე.
++- `app/lib/__tests__/store-button-cleanup-2d.test.tsx` — ახალი ტესტები B2D-0…B2D-9.
++- `app/lib/__tests__/store-glow-shadow.test.ts` — `IconButton.tsx` allow-list-იდან glow-free სიაში.
++- `app/lib/__tests__/store-undefined-tokens.test.ts` — `IconButton.tsx` dead allow-list-იდან ამოღებულია (ცოცხალია და glow აღარ აქვს).
++- `docs/design/DESIGN_SYSTEM.md` — shape ცხრილის default სტრიქონი და `IconButton`-ის `brand` variant-ის აღწერა.
++
++## პრობლემები და გადაწყვეტები
++
++- **Problem:** `Button`-ს `twMerge` არ აქვს, ამიტომ კვადრატული icon ღილაკი `className`-ით ვერ მიიღება. → **Solution:** icon-only მოქმედება `IconButton`-ზე გადავიდა, როგორც DESIGN_SYSTEM ითხოვს.
++- **Problem:** `IconButton`-ის `brand` variant-ს retired `hover:shadow-glow` ჰქონდა, ხოლო ორი token test მას „dead“ ფაილად უშვებდა. → **Solution:** glow ამოიღო და ორივე test-ის allow-list განახლდა; `IconButton.tsx` glow-free სიაშია.
++- **Problem:** disabled ღილაკზე focus იკარგებოდა. → **Solution:** `handleSubmit` focus-ს textarea-ზე აბრუნებს, `ChatWindow` კი ახლად გამოჩენილ ველს აფოკუსებს.
++- **Problem:** chat-ის session backend-ს საჭიროებს, cloud-ში კი backend არ არის. → **Solution:** browser probe `page.route`-ით პასუხობს `POST /api/chat/sessions`-სა და `POST /api/chat/sessions/{id}/messages`-ს, SignalR hub-ს კი წყვეტს (client path).
++
++## ტესტირება
++
++- **A, რაუნდი 505** (logs `a-round-505/`-ში): frozen check-ები, sketch-ის `git apply`, `npm run typecheck`, `npm run lint`, Biome შეცვლილ ფაილებზე და covering set (`b-round-504/covering-files.txt`).
++- **B, sketch-ის pre-check** (scratch ასლზე, `b-round-504/`):
++  - სრული suite და build (`precheck-full.log`, `precheck-build-sketch.log`);
++  - mutant-ები (`mutants-505.txt`);
++  - browser-ში HEAD და sketch შედარდა `/support`-ზე 1440/1280/375-ზე (`probe/head.out`, `probe/sketch.out`): ზომა, ფერი, radius, hover, დაჭერა, keyboard focus, validation, POST-ების რაოდენობა და focus-ის ადგილი, მათ შორის focus-ის გადატანა session-ის მოთხოვნის დროს.
++- **Browser-ის მიღება:** C round 505, შედეგი `c-round-505.json`-შია.
++
++## TODO / შემდეგი ნაბიჯები
++
++- **2e:** LeadMagnet, keep-list-ის მხოლოდ restyle.
++- **DPG-BUTTON-CLEANUP-2-NONBRAND:** `support.tsx`-ის ბარათები და „Back to support options“.
++- `ChatButton` და `ChatWidget`: legacy cleanup (LEGACY-DEAD-STORE-COMPONENTS).
++- GuestForm-ის form accessibility: `noValidate`, `aria-invalid`, `aria-describedby` და focus პირველ შეცდომაზე (B-R505-GUESTFORM-NATIVE-VALIDATION).
++- შეტყობინების ველის accessible name (B-R505-CHAT-TEXTAREA-NO-LABEL) და „Live Chat“-ის გახსნისას focus (B-R505-LIVECHAT-OPEN-FOCUS).

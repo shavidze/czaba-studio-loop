@@ -1,0 +1,13 @@
+# B round 504 checkpoint
+- step1 housekeeping done: tasks/round-504.md archived (cmp 0), before-505 copies saved.
+- step2 backlog v504: round 504 accepted (D-29z1817/1818)
+- step3 HEAD probe b-round-504/probe/support-505.mjs -> head.out (3 vp): Start Chat 398x50 r12; Send 36x36 r12, disabled op .5 pointer-events auto; focus -> BODY after Start Chat and after Send click; clicks/Enter/dbl = 1 POST each. native-validity-head.out: native email bubble blocks styled error.
+- scan HEAD 96/35 (scan-head.json). scratch /home/runner/b504-verify = git archive e3e9e49 + node_modules symlink.
+- step4 product-designer consult launched (waiting) -> b-round-504/consult-product-designer.md
+- step5 product-designer ruled (consult-product-designer.md): Start Chat Button lg fullWidth; Send IconButton brand md (IconButton brand drops glow+scale-95); focus->textarea after send and after guest->chat; noValidate deferred.
+- step6 sketch v1 841657ad (sketch-505.patch.txt; 7 tracked + 2 new); scratch /home/runner/b504-verify (:5174 pid /home/runner/b504-dev.pid), patchgen /home/runner/b504-patchgen, mutant copy /home/runner/b504-mut. precheck: tsc 0, lint 179, biome clean, covering 6/79, full 302/4372 rc0, build rc0, mutants M1-M12 OK. probe head.out/sketch.out (+kbd, signed-in). frozen lists r505-*.txt.
+- step7 tech-lead sketch review launched -> sketch-review.md. next: claims-505.sh, current-task.md, backlog update-2, feature-status, b-round-504.md, b-next.json, stop :5174.
+- step8 tech-lead v1 APPROVE WITH CONDITIONS (sketch-review.md); v2 f2e389b9 (test Lows 4-5); delta review + full suite on v2 running; update-backlog-2.py written (run with review text arg); task draft b-round-504/current-task-draft.md
+- step9 current-task.md installed (L58 OK), backlog v505, feature-status, b-next.json, b-round-504.md written; :5174 stopped; store clean. next: advisor closing check
+- step10 v3 5c0ed195 (L47 guard), review 4 APPROVE, full 302/4373 + build rc0 clean, mutants 15/15, claims K1-K40, doc-ledger, backlog v506 (D-29z1822), feature-status/b-round-504.md/b-next updated; :5174 stopped; store clean. next: advisor final check
+- step11 final: fresh-archive apply check4 rc0; native-validity sketch=head (K42); claims K1-K42 no MISSING; L58 OK; task synced; :5174 stopped; store clean at e3e9e49. DONE.

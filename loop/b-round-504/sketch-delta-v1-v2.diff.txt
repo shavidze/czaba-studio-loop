@@ -1,0 +1,22 @@
+157c157
+< index 0000000..dc8a943
+---
+> index 0000000..bac1c1a
+311c311
+< +  it('B2D-5: Enter in the field sends once and keeps focus there; Shift+Enter and a blank field send nothing', () => {
+---
+> +  it('B2D-5: Enter in the field sends once with focus unchanged; Shift+Enter and a blank field send nothing', () => {
+347c347
+< +  it('B2D-8: the chat sources hold no hand-rolled button and IconButton.tsx names neither the glow nor scale-95 on brand', () => {
+---
+> +  it('B2D-8: the chat sources hold no hand-rolled button, IconButton.tsx has no glow, and its brand variant has no scale-95', () => {
+358,361c358,361
+< +    const brandLine = iconButton.split('\n').find((line) => line.includes('brand: ['));
+< +    expect(brandLine).toBe(
+< +      "  brand: ['bg-brand text-background', 'hover:bg-brand-hover', 'shadow-sm'].join(' '),",
+< +    );
+---
+> +    const brandVariant = iconButton.match(/brand: \[([^\]]*)\]/)?.[1] ?? '';
+> +    expect(brandVariant).toContain('bg-brand text-background');
+> +    expect(brandVariant).toContain('shadow-sm');
+> +    expect(brandVariant).not.toMatch(/shadow-glow|active:scale-95/);
